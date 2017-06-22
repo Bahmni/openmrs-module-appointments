@@ -1,4 +1,4 @@
-openmrs-module-BahmniAppointmentScheduling
+openmrs-module-appointments
 ==========================
 
 

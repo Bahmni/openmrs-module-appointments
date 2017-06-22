@@ -3,8 +3,8 @@
 	<modelVersion>4.0.0</modelVersion>
 
 	<groupId>org.openmrs.module</groupId>
-	<artifactId>BahmniAppointmentScheduling</artifactId>
-	<version>0.1-SNAPSHOT</version>
+	<artifactId>appointments</artifactId>
+	<version>1.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Bahmni Appointment Scheduling</name>
 	<description>OpenMRS Module Scheduling and managing Appointments.</description>
@@ -15,7 +15,6 @@
 	</modules>
 
 	<properties>
-		<openmrs.platform.version>2.1.0</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.12</junitVersion>
 		<powerMockVersion>1.6.5</powerMockVersion>

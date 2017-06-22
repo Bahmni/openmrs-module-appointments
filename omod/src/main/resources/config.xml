@@ -12,7 +12,7 @@
 			${project.parent.description}
 	</description>
 
-	<activator>${MODULE_PACKAGE}.BahmniAppointmentSchedulingActivator</activator>
+	<activator>${MODULE_PACKAGE}.AppointmentsActivator</activator>
 	
 	<!-- <updateURL>https://modules.openmrs.org/modules/download/@MODULE_ID@/update.rdf</updateURL> -->
 	<!-- /Base Module Properties -->
