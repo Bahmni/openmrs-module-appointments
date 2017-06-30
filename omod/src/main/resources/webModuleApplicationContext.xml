@@ -27,6 +27,7 @@
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 	
 	<context:component-scan base-package="org.openmrs.module.appointments.web.controller" />
- 
+	<context:component-scan base-package="org.openmrs.module.appointments" />
+
 		
 </beans>
