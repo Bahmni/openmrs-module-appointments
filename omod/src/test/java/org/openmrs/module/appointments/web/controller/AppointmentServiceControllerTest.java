@@ -38,7 +38,7 @@ public class AppointmentServiceControllerTest {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
         BindingResult result = mock(BindingResult.class);
         when(result.hasErrors()).thenReturn(false);
-        appointmentServiceController.createAppointmentService(appointmentServicePayload, result );
+        appointmentServiceController.createAppointmentService(appointmentServicePayload);
         verify(appointmentServiceMapper, times(1)).getAppointmentServiceFromPayload(appointmentServicePayload);
         verify(appointmentServiceService, times(1)).save(any(AppointmentService.class));
     }

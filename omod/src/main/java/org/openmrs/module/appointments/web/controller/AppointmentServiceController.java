@@ -51,15 +51,7 @@ public class AppointmentServiceController {
 
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
-    public void createAppointmentService(@Valid @ModelAttribute AppointmentServicePayload appointmentServicePayload, BindingResult result ) throws IOException {
-        if (result.hasErrors()){
-            String errorMsg = result.getAllErrors()
-                    .stream()
-                    .map(x -> x.getDefaultMessage())
-                    .collect(Collectors.joining(","));
-
-            throw new RuntimeException(errorMsg);
-        }
+    public void createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
         AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
         appointmentServiceService.save(appointmentService);
     }

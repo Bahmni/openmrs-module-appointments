@@ -4,13 +4,15 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.sql.Time;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentServicePayload {
 
     private Integer appointmentServiceId;
-    @NotNull
+
+    @Size(min = 1)
     private String name;
     private String specialityUuid;
     private Time startTime;

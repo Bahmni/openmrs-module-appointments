@@ -4,37 +4,66 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
- 
-    <!--
-    	See http://wiki.openmrs.org/display/docs/Module+liquibase+File for 
-    	documentation on this file.
-    
-        See http://www.liquibase.org/manual/home#available_database_refactorings
-        for a list of supported elements and attributes
-    -->
- 
- 	<!-- Uncomment this and edit the values below to use this file
- 	
-	<changeSet id="mymoduleid-2010-05-25-15:50" author="bwolfe">
-		<preConditions onFail="MARK_RAN">
-			<not><tableExists tableName="mymoduleid_myobject"/></not>
-		</preConditions>
-		<comment>
-			Creating the mymoduleid_myobject table
-		</comment>
-		<createTable tableName="mymoduleid_myobject">
-			<column name="mymoduleid_myobject_id" type="int">
-				<constraints primaryKey="true" nullable="false"/>
-			</column>
-			<column name="firstname" type="varchar(255)"/>
-			<column name="lastname" type="varchar(255)"/>
-			<column name="username" type="varchar(255)">
-				<constraints unique="true" nullable="false"/>
-			</column>
-			<column name="testid" type="int" />
-		</createTable>
+
+    <changeSet id="create-appointment_speciality_table-201706291130" author="Shruthi,Pushpa">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_speciality" />
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE  TABLE IF NOT EXISTS appointment_speciality (
+            speciality_id INT NOT NULL AUTO_INCREMENT ,
+            name VARCHAR(50) NOT NULL ,
+            date_created DATETIME NOT NULL ,
+            creator INT NOT NULL ,
+            date_changed DATETIME NULL ,
+            changed_by INT NULL ,
+            uuid  VARCHAR(38) NOT NULL UNIQUE,
+            voided TINYINT NULL ,
+            PRIMARY KEY (speciality_id) ,
+            UNIQUE INDEX name_UNIQUE (name ASC) )
+
+        </sql>
     </changeSet>
-    
-    -->
- 
+
+    <changeSet id="create-appointment_service_table-201706291130" author="Shruthi,Pushpa">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_service" />
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE  TABLE IF NOT EXISTS appointment_service (
+            appointment_service_id INT NOT NULL AUTO_INCREMENT ,
+            name VARCHAR(50) NOT NULL ,
+            description TEXT NULL,
+            start_time TIME NULL ,
+            end_time TIME NULL ,
+            location_id INT NULL ,
+            speciality_id INT NULL ,
+            max_appointments_limit INT NULL ,
+            duration_mins INT NULL ,
+            date_created DATETIME NOT NULL ,
+            creator INT NOT NULL ,
+            date_changed DATETIME NULL ,
+            changed_by INT NULL ,
+            voided TINYINT NULL ,
+            uuid  VARCHAR(38) NOT NULL UNIQUE,
+            PRIMARY KEY (appointment_service_id) ,
+            INDEX fk_appointment_service_speciality_idx (speciality_id ASC) ,
+            INDEX fk_appointment_service_location_idx (location_id ASC) ,
+            UNIQUE INDEX name_UNIQUE (name ASC) ,
+            CONSTRAINT fk_appointment_service_speciality
+            FOREIGN KEY (speciality_id )
+            REFERENCES speciality (speciality_id )
+            ON DELETE NO ACTION
+            ON UPDATE NO ACTION,
+            CONSTRAINT fk_appointment_service_location
+            FOREIGN KEY (location_id )
+            REFERENCES location (location_id ))
+        </sql>
+    </changeSet>
 </databaseChangeLog>

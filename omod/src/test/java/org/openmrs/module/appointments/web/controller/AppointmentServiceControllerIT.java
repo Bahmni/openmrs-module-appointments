@@ -56,8 +56,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(asResponse.getMaxAppointmentsLimit().intValue(), 30);
     }
 
-    @Test
+    @Test(expected = RuntimeException.class)
     public void should_notCreateAppointmentServiceWhenNameIsNull() throws Exception {
+
         String dataJson = "{}";
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
     }

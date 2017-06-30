@@ -7,22 +7,20 @@
 	<name>${project.parent.name}</name>
 	<version>${project.parent.version}</version>
 	<package>${MODULE_PACKAGE}</package>
-	<author>Ben Wolfe</author>
-	<description>
-			${project.parent.description}
-	</description>
+	<description>${project.parent.description}</description>
 
 	<activator>${MODULE_PACKAGE}.AppointmentsActivator</activator>
 	
 	<require_version>${openmrs.platform.version}</require_version>
-	<mappingFiles>Speciality.hbm.xml</mappingFiles>
-	<mappingFiles>AppointmentService.hbm.xml</mappingFiles>
 
-	<!-- Extensions -->
-	<extension>
-		<point>org.openmrs.admin.list</point>
-		<class>${MODULE_PACKAGE}.extension.html.AdminList</class>
-	</extension>
+	<require_modules>
+		<require_module>org.openmrs.module.webservices.rest</require_module>
+	</require_modules>
+
+	<mappingFiles>
+		Speciality.hbm.xml
+		AppointmentService.hbm.xml
+	</mappingFiles>
 
 	<!-- Internationalization -->
 	<!-- All message codes should start with @MODULE_ID@.* -->
