@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.mapper;
 
+import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -26,6 +27,9 @@ public class AppointmentServiceMapper {
 
     public AppointmentService getAppointmentServiceFromPayload(AppointmentServicePayload appointmentServicePayload) {
         AppointmentService appointmentService = new AppointmentService();
+        if (!StringUtils.isBlank(appointmentServicePayload.getUuid())) {
+            appointmentService.setUuid(appointmentServicePayload.getUuid());
+        }
         appointmentService.setName(appointmentServicePayload.getName());
         appointmentService.setDurationMins(appointmentServicePayload.getDurationMins());
         appointmentService.setStartTime(appointmentServicePayload.getStartTime());
