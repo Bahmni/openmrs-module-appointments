@@ -66,4 +66,22 @@
             REFERENCES location (location_id ))
         </sql>
     </changeSet>
+
+    <changeSet id="appointments_-201707031031" author="Shruthi P">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM location_tag where name='Appointment Location';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add Appointment Location Tag if not already added.</comment>
+        <sql>
+
+            INSERT INTO location_tag (name, description, creator, date_created, uuid) VALUES
+            ('Appointment Location',
+            'When a user user creates a appointment service and chooses a location, they may only choose one with this tag',
+            1,
+            now(),
+            uuid());
+        </sql>
+    </changeSet>
 </databaseChangeLog>
