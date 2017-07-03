@@ -26,7 +26,5 @@
 	<!-- Annotation based controllers -->
 	<bean class="org.springframework.web.servlet.mvc.annotation.DefaultAnnotationHandlerMapping"/>
 	<context:component-scan base-package="org.openmrs.module.appointments" />
-	<bean id="validator" class="org.springframework.validation.beanvalidation.LocalValidatorFactoryBean"/>
-	<bean class="org.springframework.validation.beanvalidation.MethodValidationPostProcessor"/>
-		
+
 </beans>

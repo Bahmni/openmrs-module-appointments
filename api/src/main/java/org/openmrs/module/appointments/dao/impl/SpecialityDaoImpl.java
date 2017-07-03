@@ -24,4 +24,9 @@ public class SpecialityDaoImpl implements SpecialityDao{
         List list = criteria.list();
         return list.size() > 0? (Speciality) list.get(0) : null;
     }
+
+    public List<Speciality> getAllSpecialities() {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Speciality.class, "Speciality");
+        return criteria.list();
+    }
 }

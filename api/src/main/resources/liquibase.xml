@@ -58,7 +58,7 @@
             UNIQUE INDEX name_UNIQUE (name ASC) ,
             CONSTRAINT fk_appointment_service_speciality
             FOREIGN KEY (speciality_id )
-            REFERENCES speciality (speciality_id )
+            REFERENCES appointment_speciality (speciality_id )
             ON DELETE NO ACTION
             ON UPDATE NO ACTION,
             CONSTRAINT fk_appointment_service_location

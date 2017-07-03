@@ -28,6 +28,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentServiceService appointmentServiceService;
+
     @Before
     public void setUp() throws Exception {
         executeDataSet("appointmentServicesTestData.xml");

@@ -29,8 +29,14 @@ public class AppointmentServiceServiceImplTest{
     }
 
     @Test
-    public void shouldGetAllAppointmentServices() throws Exception {
+    public void testGetAllAppointmentServices() throws Exception {
         appointmentServiceService.getAllAppointmentServices();
         Mockito.verify(appointmentServiceDao, times(1)).getAllAppointmentServices();
+    }
+
+    @Test
+    public void testGetAppointmentsByUuid() throws Exception {
+        appointmentServiceService.getAppointmentServiceByUuid("uuid");
+        Mockito.verify(appointmentServiceDao, times(1)).getAppointmentServiceByUuid("uuid");
     }
 }
