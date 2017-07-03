@@ -35,7 +35,6 @@ public class AppointmentServiceMapper {
         appointmentService.setStartTime(appointmentServicePayload.getStartTime());
         appointmentService.setEndTime(appointmentServicePayload.getEndTime());
         appointmentService.setMaxAppointmentsLimit(appointmentServicePayload.getMaxAppointmentsLimit());
-        appointmentService.setUuid(appointmentServicePayload.getUuid());
 
         String locationUuid = appointmentServicePayload.getLocationUuid();
         Location location = locationService.getLocationByUuid(locationUuid);
