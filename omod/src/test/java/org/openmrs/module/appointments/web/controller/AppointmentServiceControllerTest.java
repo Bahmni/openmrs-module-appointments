@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.internal.runners.statements.ExpectException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -36,11 +37,16 @@ public class AppointmentServiceControllerTest {
     @Test
     public void shouldCreateAppointmentService() throws Exception {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
-        BindingResult result = mock(BindingResult.class);
-        when(result.hasErrors()).thenReturn(false);
+        appointmentServicePayload.setName("Cardio");
         appointmentServiceController.createAppointmentService(appointmentServicePayload);
         verify(appointmentServiceMapper, times(1)).getAppointmentServiceFromPayload(appointmentServicePayload);
         verify(appointmentServiceService, times(1)).save(any(AppointmentService.class));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenCreateAppointmentService() throws Exception {
+        AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
+        appointmentServiceController.createAppointmentService(appointmentServicePayload);
     }
 
     @Test

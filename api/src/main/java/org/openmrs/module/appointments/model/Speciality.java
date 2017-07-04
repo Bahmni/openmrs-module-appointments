@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.model;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.User;
 
-public class Speciality extends BaseOpenmrsData{
+public class Speciality extends BaseOpenmrsData {
     private Integer specialityId;
     private String name;
 

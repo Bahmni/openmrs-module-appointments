@@ -22,7 +22,7 @@ public class SpecialityController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
-    public List<Speciality> getAllSpecialities()  {
+    public List getAllSpecialities()  {
         List<Speciality> allSpecialities = specialityService.getAllSpecialities();
         List specialities = new ArrayList();
         for(Speciality speciality: allSpecialities){

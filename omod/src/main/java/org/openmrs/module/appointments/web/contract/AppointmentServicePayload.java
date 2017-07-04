@@ -9,11 +9,9 @@ import java.sql.Time;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentServicePayload {
-
-    private Integer appointmentServiceId;
-
     @Size(min = 1)
     private String name;
+    private String description;
     private String specialityUuid;
     private Time startTime;
     private Time endTime;
@@ -21,14 +19,6 @@ public class AppointmentServicePayload {
     private Integer durationMins;
     private String locationUuid;
     private String uuid;
-
-    public Integer getAppointmentServiceId() {
-        return appointmentServiceId;
-    }
-
-    public void setAppointmentServiceId(Integer appointmentServiceId) {
-        this.appointmentServiceId = appointmentServiceId;
-    }
 
     public String getName() {
         return name;
@@ -92,5 +82,13 @@ public class AppointmentServicePayload {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

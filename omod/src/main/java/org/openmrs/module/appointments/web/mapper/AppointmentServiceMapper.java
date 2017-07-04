@@ -31,6 +31,7 @@ public class AppointmentServiceMapper {
             appointmentService.setUuid(appointmentServicePayload.getUuid());
         }
         appointmentService.setName(appointmentServicePayload.getName());
+        appointmentService.setDescription(appointmentServicePayload.getDescription());
         appointmentService.setDurationMins(appointmentServicePayload.getDurationMins());
         appointmentService.setStartTime(appointmentServicePayload.getStartTime());
         appointmentService.setEndTime(appointmentServicePayload.getEndTime());

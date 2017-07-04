@@ -11,9 +11,9 @@
         </id>
         <property name="name" type="java.lang.String" column="name"/>
         <property name="dateCreated" type="java.util.Date" column="date_created"/>
-        <property name="creator" type="org.openmrs.User" column="creator"/>
         <property name="dateChanged" type="java.util.Date" column="date_changed"/>
-        <property name="changedBy" type="org.openmrs.User" column="changed_by"/>
         <property name="uuid" type="java.lang.String" column="uuid"/>
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
     </class>
 </hibernate-mapping>
