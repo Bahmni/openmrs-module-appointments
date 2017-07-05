@@ -13,4 +13,7 @@
     <appointment_speciality speciality_id="1" name="Ortho" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1"/>
     <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615a1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" />
+
+    <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
+                         speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="1"/>
 </dataset>

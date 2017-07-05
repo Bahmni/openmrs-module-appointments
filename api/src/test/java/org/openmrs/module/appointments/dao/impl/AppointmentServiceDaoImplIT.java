@@ -2,8 +2,6 @@ package org.openmrs.module.appointments.dao.impl;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -25,19 +23,26 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldGetAllAppointmentServices() throws Exception {
-        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices();
+    public void shouldGetAllNonVoidedAppointmentServices() throws Exception {
+        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(false);
         assertEquals(1, allAppointmentServices.size());
+    }
+
+
+    @Test
+    public void shouldGetAllAppointmentServices() throws Exception {
+        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(true);
+        assertEquals(2, allAppointmentServices.size());
     }
 
     @Test
     public void shouldSaveAppointmentService() throws Exception {
-        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices();
+        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(false);
         assertEquals(1, allAppointmentServices.size());
         AppointmentService appointmentService = new AppointmentService();
         appointmentService.setName("Cardiology OPD");
         appointmentServiceDao.save(appointmentService);
-        allAppointmentServices = appointmentServiceDao.getAllAppointmentServices();
+        allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(false);
         assertEquals(2, allAppointmentServices.size());
     }
 

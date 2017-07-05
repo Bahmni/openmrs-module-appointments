@@ -52,6 +52,6 @@ public class AppointmentServiceControllerTest {
     @Test
     public void shouldGetAllAppointmentServices() throws Exception {
         appointmentServiceController.getAllAppointmentServices();
-        verify(appointmentServiceService, times(1)).getAllAppointmentServices();
+        verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
     }
 }

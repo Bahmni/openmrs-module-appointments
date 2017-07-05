@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface AppointmentServiceDao {
 
-    List<AppointmentService> getAllAppointmentServices();
+    List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
 
     void save(AppointmentService appointmentService);
 

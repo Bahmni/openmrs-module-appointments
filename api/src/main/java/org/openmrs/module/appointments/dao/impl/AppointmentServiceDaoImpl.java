@@ -19,8 +19,11 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     private SessionFactory sessionFactory;
 
     @Override
-    public List<AppointmentService> getAllAppointmentServices() {
+    public List<AppointmentService> getAllAppointmentServices(boolean includeVoided) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
+        if(!includeVoided) {
+            criteria.add(Restrictions.eq("voided", includeVoided));
+        }
         return criteria.list();
     }
 

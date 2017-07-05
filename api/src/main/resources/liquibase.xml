@@ -5,7 +5,7 @@
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
 
-    <changeSet id="create-appointment_speciality_table-201706291130" author="Shruthi,Pushpa">
+    <changeSet id="create-appointment_speciality_table-201707031130" author="Shruthi,Pushpa">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="appointment_speciality" />
@@ -28,7 +28,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-appointment_service_table-201706291130" author="Shruthi,Pushpa">
+    <changeSet id="create-appointment_service_table-201707031130" author="Shruthi,Pushpa">
         <preConditions onFail="MARK_RAN">
             <not>
                 <tableExists tableName="appointment_service" />
@@ -51,6 +51,9 @@
             date_changed DATETIME NULL ,
             changed_by INT NULL ,
             voided TINYINT NULL ,
+            voided_by INT,
+            date_voided DATETIME,
+            void_reason VARCHAR(255),
             uuid  VARCHAR(38) NOT NULL UNIQUE,
             PRIMARY KEY (appointment_service_id) ,
             INDEX fk_appointment_service_speciality_idx (speciality_id ASC) ,

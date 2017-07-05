@@ -56,8 +56,8 @@ public class AppointmentServiceMapper {
         AppointmentServiceResponse asResponse = new AppointmentServiceResponse();
         asResponse.setUuid(as.getUuid());
         asResponse.setName(as.getName());
-        asResponse.setStartTime(as.getStartTime().toString());
-        asResponse.setEndTime(as.getEndTime().toString());
+        asResponse.setStartTime(convertTimeToString(as.getStartTime()));
+        asResponse.setEndTime(convertTimeToString(as.getEndTime()));
         asResponse.setDescription(as.getDescription());
         asResponse.setDurationMins(as.getDurationMins());
         asResponse.setMaxAppointmentsLimit(as.getMaxAppointmentsLimit());
@@ -79,6 +79,13 @@ public class AppointmentServiceMapper {
         asResponse.setLocation(locationMap);
 
         return asResponse;
+    }
+
+    private String convertTimeToString(Time t) {
+        if(t == null){
+            return new String();
+        }
+        return t.toString();
     }
 
 }

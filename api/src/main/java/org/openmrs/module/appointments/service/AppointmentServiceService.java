@@ -9,7 +9,7 @@ public interface AppointmentServiceService {
 
     AppointmentService save(AppointmentService appointmentService);
 
-    List<AppointmentService> getAllAppointmentServices();
+    List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
 
     AppointmentService getAppointmentServiceByUuid(String uuid);
 }

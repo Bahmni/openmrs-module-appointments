@@ -34,7 +34,6 @@ public class AppointmentServiceMapperTest {
         appointmentServicePayload.setName("Cardiology-OPD");
         appointmentServicePayload.setDurationMins(20);
         appointmentServicePayload.setStartTime(Time.valueOf("09:00:00"));
-        appointmentServicePayload.setEndTime(Time.valueOf("17:00:00"));
         appointmentServicePayload.setMaxAppointmentsLimit(30);
         appointmentServicePayload.setLocationUuid("locUuid");
         appointmentServicePayload.setSpecialityUuid("specUuid");
@@ -53,7 +52,6 @@ public class AppointmentServiceMapperTest {
         appointmentService.setName("Cardiology-OPD");
         appointmentService.setDurationMins(20);
         appointmentService.setStartTime(Time.valueOf("09:00:00"));
-        appointmentService.setEndTime(Time.valueOf("17:00:00"));
         appointmentService.setMaxAppointmentsLimit(30);
         Location location = new Location();
         location.setName("Room1");
@@ -67,7 +65,7 @@ public class AppointmentServiceMapperTest {
         assertEquals(appointmentServiceResponse.getName(),appointmentService.getName());
         assertEquals(appointmentServiceResponse.getDurationMins(),appointmentService.getDurationMins());
         assertEquals(appointmentServiceResponse.getStartTime(),appointmentService.getStartTime().toString());
-        assertEquals(appointmentServiceResponse.getEndTime(),appointmentService.getEndTime().toString());
+        assertEquals(appointmentServiceResponse.getEndTime(),new String());
         assertEquals(appointmentServiceResponse.getMaxAppointmentsLimit(),appointmentService.getMaxAppointmentsLimit());
         assertEquals(appointmentServiceResponse.getLocation().get("name"), "Room1");
         assertEquals(appointmentServiceResponse.getSpeciality().get("name"), "cardio");

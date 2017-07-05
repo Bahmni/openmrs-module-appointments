@@ -32,7 +32,7 @@ public class AppointmentServiceController {
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
     public List<AppointmentServiceResponse> getAllAppointmentServices()  {
-        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices();
+        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
         List<AppointmentServiceResponse> response = appointmentServiceMapper.constructResponse(appointmentServices);
         return response;
     }
