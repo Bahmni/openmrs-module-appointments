@@ -20,6 +20,7 @@
 	<mappingFiles>
 		Speciality.hbm.xml
 		AppointmentService.hbm.xml
+		ServiceWeeklyAvailability.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->

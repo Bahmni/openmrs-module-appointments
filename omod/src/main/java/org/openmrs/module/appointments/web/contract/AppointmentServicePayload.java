@@ -1,11 +1,9 @@
 package org.openmrs.module.appointments.web.contract;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.hibernate.validator.constraints.NotEmpty;
-
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
 import java.sql.Time;
+import java.util.List;
+import javax.validation.constraints.Size;
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentServicePayload {
@@ -19,6 +17,7 @@ public class AppointmentServicePayload {
     private Integer durationMins;
     private String locationUuid;
     private String uuid;
+    private List<ServiceWeeklyAvailabilityPayload> weeklyAvailability;
 
     public String getName() {
         return name;
@@ -90,5 +89,13 @@ public class AppointmentServicePayload {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List<ServiceWeeklyAvailabilityPayload> getWeeklyAvailability() {
+        return weeklyAvailability;
+    }
+
+    public void setWeeklyAvailability(List<ServiceWeeklyAvailabilityPayload> weeklyAvailability) {
+        this.weeklyAvailability = weeklyAvailability;
     }
 }

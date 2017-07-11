@@ -1,17 +1,12 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.junit.Assert;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
-import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Speciality;
 import org.springframework.beans.factory.annotation.Autowired;
-
-import javax.security.auth.x500.X500Principal;
-import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class SpecialityDaoImplIT  extends BaseIntegrationTest {
 

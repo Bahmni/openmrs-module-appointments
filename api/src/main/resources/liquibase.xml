@@ -87,4 +87,36 @@
             uuid());
         </sql>
     </changeSet>
+
+    <changeSet id="create-weekly_service_availability_table-201707071130" author="Shruthi,Pushpa">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_service_weekly_availability" />
+            </not>
+        </preConditions>
+
+        <sql>
+            CREATE  TABLE IF NOT EXISTS appointment_service_weekly_availability (
+            service_weekly_availability_id INT NOT NULL AUTO_INCREMENT ,
+            service_id INT NOT NULL ,
+            day_of_week VARCHAR(45) NOT NULL ,
+            start_time TIME NULL ,
+            end_time TIME NULL ,
+            max_appointments_limit INT NULL ,
+            uuid  VARCHAR(38) NOT NULL UNIQUE,
+            voided TINYINT NULL ,
+            voided_by INT,
+            date_voided DATETIME,
+            void_reason VARCHAR(255),
+            date_created DATETIME NOT NULL ,
+            creator INT NOT NULL ,
+            date_changed DATETIME NULL ,
+            changed_by INT NULL ,
+            PRIMARY KEY (service_weekly_availability_id) ,
+            INDEX fk_weekly_availability_appointment_service_idx (service_id ASC) ,
+            CONSTRAINT appointment_service FOREIGN KEY (service_id ) REFERENCES appointment_service (appointment_service_id) ,
+            CONSTRAINT service_enterer FOREIGN KEY (creator) REFERENCES users (user_id),
+            CONSTRAINT user_who_deleted_service FOREIGN KEY (voided_by) REFERENCES users (user_id));
+        </sql>
+    </changeSet>
 </databaseChangeLog>

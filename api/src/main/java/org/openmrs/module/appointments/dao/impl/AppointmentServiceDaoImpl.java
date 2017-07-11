@@ -1,16 +1,14 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.Speciality;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 @Component
 public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
@@ -37,8 +35,7 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     public AppointmentService getAppointmentServiceByUuid(String uuid) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
         criteria.add(Restrictions.eq("uuid", uuid));
-        List list = criteria.list();
-        return list.size() > 0? (AppointmentService) list.get(0) : null;
+        return (AppointmentService) criteria.uniqueResult();
     }
 
 

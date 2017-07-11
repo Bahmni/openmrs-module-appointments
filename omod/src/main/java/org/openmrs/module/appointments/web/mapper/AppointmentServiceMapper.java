@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
@@ -11,10 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Time;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
@@ -45,15 +43,42 @@ public class AppointmentServiceMapper {
         Speciality speciality = specialityService.getSpecialityByUuid(specialityUuid);
         appointmentService.setSpeciality(speciality);
 
+        List<ServiceWeeklyAvailabilityPayload> availabilityPayload = appointmentServicePayload.getWeeklyAvailability();
+
+        if(availabilityPayload != null) {
+            Set<ServiceWeeklyAvailability> availabilityList = availabilityPayload.stream()
+                    .map(avb -> constructServiceWeeklyAvailability(avb, appointmentService)).collect(Collectors.toSet());
+            appointmentService.setWeeklyAvailability(availabilityList);
+        }
         return appointmentService;
     }
 
-    public List<AppointmentServiceResponse> constructResponse(List<AppointmentService> appointmentServices) {
-        return appointmentServices.stream().map(as -> this.constructResponse(as)).collect(Collectors.toList());
+    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {
+        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        availability.setDayOfWeek(avb.getDayOfWeek());
+        availability.setStartTime(avb.getStartTime());
+        availability.setEndTime(avb.getEndTime());
+        availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
+        availability.setService(appointmentService);
+
+        return availability;
     }
 
-    public AppointmentServiceResponse constructResponse(AppointmentService as) {
-        AppointmentServiceResponse asResponse = new AppointmentServiceResponse();
+    public List<AppointmentServiceDefaultResponse> constructResponse(List<AppointmentService> appointmentServices) {
+        return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
+    }
+
+    public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
+        AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
+        mapToDefaultResponse(service, response);
+        Set<ServiceWeeklyAvailability> serviceWeeklyAvailability = service.getWeeklyAvailability();
+        if(serviceWeeklyAvailability != null) {
+            response.setWeeklyAvailability(serviceWeeklyAvailability.stream().map(availability -> this.constructAvailabilityResponse(availability)).collect(Collectors.toList()));
+        }
+        return response;
+    }
+    
+    private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentService as, AppointmentServiceDefaultResponse asResponse) {
         asResponse.setUuid(as.getUuid());
         asResponse.setName(as.getName());
         asResponse.setStartTime(convertTimeToString(as.getStartTime()));
@@ -81,11 +106,18 @@ public class AppointmentServiceMapper {
         return asResponse;
     }
 
-    private String convertTimeToString(Time t) {
-        if(t == null){
-            return new String();
-        }
-        return t.toString();
+    private Map constructAvailabilityResponse(ServiceWeeklyAvailability availability) {
+        Map availabilityMap = new HashMap();
+        availabilityMap.put("dayOfWeek",availability.getDayOfWeek());
+        availabilityMap.put("startTime", convertTimeToString(availability.getStartTime()));
+        availabilityMap.put("endTime", convertTimeToString(availability.getEndTime()));
+        availabilityMap.put("maxAppointmentsLimit", availability.getMaxAppointmentsLimit());
+        availabilityMap.put("uuid", availability.getUuid());
+        return availabilityMap;
+    }
+
+    private String convertTimeToString(Time time) {
+       return time != null ? time.toString() : new String();
     }
 
 }

@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 
 public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
-
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
 
@@ -31,6 +30,12 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllAppointmentServices() throws Exception {
+        List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(true);
+        assertEquals(2, allAppointmentServices.size());
+    }
+
+    @Test
+    public void shouldGetAppointmentServiceByUuid() throws Exception {
         List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(true);
         assertEquals(2, allAppointmentServices.size());
     }
