@@ -2,23 +2,18 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
-import org.openmrs.module.webservices.rest.SimpleObject;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.validation.BindingResult;
-import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentService")
@@ -31,22 +26,22 @@ public class AppointmentServiceController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
-    public List<AppointmentServiceResponse> getAllAppointmentServices()  {
+    public List<AppointmentServiceDefaultResponse> getAllAppointmentServices()  {
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        List<AppointmentServiceResponse> response = appointmentServiceMapper.constructResponse(appointmentServices);
+        List<AppointmentServiceDefaultResponse> response = appointmentServiceMapper.constructResponse(appointmentServices);
         return response;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public AppointmentServiceResponse getAppointmentServiceByUuid(@RequestParam("uuid") String uuid)  {
+    public AppointmentServiceFullResponse getAppointmentServiceByUuid(@RequestParam("uuid") String uuid)  {
         AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(uuid);
         if(appointmentService == null){
             throw new RuntimeException("Appointment Service does not exist");
         }
-        AppointmentServiceResponse appointmentServiceResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
 
-        return appointmentServiceResponse;
+        return appointmentServiceFullResponse;
     }
 
     @RequestMapping( method = RequestMethod.POST)

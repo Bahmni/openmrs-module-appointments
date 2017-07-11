@@ -6,6 +6,7 @@ import org.hibernate.validator.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.sql.Time;
+import java.util.List;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentServicePayload {
@@ -19,6 +20,7 @@ public class AppointmentServicePayload {
     private Integer durationMins;
     private String locationUuid;
     private String uuid;
+    private List weeklyAvailability;
 
     public String getName() {
         return name;
@@ -90,5 +92,13 @@ public class AppointmentServicePayload {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public List getWeeklyAvailability() {
+        return weeklyAvailability;
+    }
+
+    public void setWeeklyAvailability(List weeklyAvailability) {
+        this.weeklyAvailability = weeklyAvailability;
     }
 }

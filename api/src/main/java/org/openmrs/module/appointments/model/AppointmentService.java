@@ -5,8 +5,10 @@ import org.openmrs.Location;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.*;
 
 public class AppointmentService extends BaseOpenmrsData implements Serializable {
+
     private Integer appointmentServiceId;
     private String name;
     private String description;
@@ -16,6 +18,7 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     private Integer maxAppointmentsLimit;
     private Integer durationMins;
     private Location location;
+    private Set<ServiceWeeklyAvailability> weeklyAvailability = new HashSet<>();
 
     public Location getLocation() {
         return location;
@@ -97,5 +100,29 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public Set<ServiceWeeklyAvailability> getWeeklyAvailability(boolean includeVoided) {
+        if(includeVoided || weeklyAvailability ==null)
+            return weeklyAvailability;
+
+        Set<ServiceWeeklyAvailability> nonVoided = new LinkedHashSet<>(weeklyAvailability);
+        Iterator<ServiceWeeklyAvailability> i = nonVoided.iterator();
+        while (i.hasNext()) {
+            ServiceWeeklyAvailability availability = i.next();
+            if (availability.getVoided()) {
+                i.remove();
+            }
+        }
+        return nonVoided;
+    }
+
+    public Set<ServiceWeeklyAvailability> getWeeklyAvailability() {
+        return getWeeklyAvailability(false);
+    }
+
+    public void setWeeklyAvailability(
+            Set<ServiceWeeklyAvailability> weeklyAvailability) {
+        this.weeklyAvailability = weeklyAvailability;
     }
 }

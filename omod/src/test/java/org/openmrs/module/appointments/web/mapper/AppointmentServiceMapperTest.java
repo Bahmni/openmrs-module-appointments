@@ -7,13 +7,16 @@ import org.mockito.Mock;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
+import java.time.DayOfWeek;
+import java.util.HashSet;
 
 import static org.junit.Assert.*;
 
@@ -61,13 +64,21 @@ public class AppointmentServiceMapperTest {
         speciality.setName("cardio");
         speciality.setUuid("specUuid");
         appointmentService.setSpeciality(speciality);
-        AppointmentServiceResponse appointmentServiceResponse = appointmentServiceMapper.constructResponse(appointmentService);
-        assertEquals(appointmentServiceResponse.getName(),appointmentService.getName());
-        assertEquals(appointmentServiceResponse.getDurationMins(),appointmentService.getDurationMins());
-        assertEquals(appointmentServiceResponse.getStartTime(),appointmentService.getStartTime().toString());
-        assertEquals(appointmentServiceResponse.getEndTime(),new String());
-        assertEquals(appointmentServiceResponse.getMaxAppointmentsLimit(),appointmentService.getMaxAppointmentsLimit());
-        assertEquals(appointmentServiceResponse.getLocation().get("name"), "Room1");
-        assertEquals(appointmentServiceResponse.getSpeciality().get("name"), "cardio");
+
+        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        availability.setDayOfWeek(DayOfWeek.MONDAY);
+        HashSet<ServiceWeeklyAvailability> availabilityList = new HashSet<>();
+        availabilityList.add(availability);
+        appointmentService.setWeeklyAvailability(availabilityList);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        assertEquals(appointmentServiceFullResponse.getName(),appointmentService.getName());
+        assertEquals(appointmentServiceFullResponse.getDurationMins(),appointmentService.getDurationMins());
+        assertEquals(appointmentServiceFullResponse.getStartTime(),appointmentService.getStartTime().toString());
+        assertEquals(appointmentServiceFullResponse.getEndTime(),new String());
+        assertEquals(appointmentServiceFullResponse.getMaxAppointmentsLimit(),appointmentService.getMaxAppointmentsLimit());
+        assertEquals(appointmentServiceFullResponse.getLocation().get("name"), "Room1");
+        assertEquals(appointmentServiceFullResponse.getSpeciality().get("name"), "cardio");
+        assertNotNull(appointmentServiceFullResponse.getWeeklyAvailability());
+        assertEquals(1, appointmentServiceFullResponse.getWeeklyAvailability().size());
     }
 }
