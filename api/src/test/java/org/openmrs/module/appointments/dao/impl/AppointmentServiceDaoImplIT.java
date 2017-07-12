@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
 
 public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
-
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
 

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -31,7 +32,6 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_createAppointmentService() throws Exception {
-
         AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
         assertNull(appointmentService);
         String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
@@ -64,9 +64,16 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_GetAllAppointmentServices() throws Exception {
-        List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
+        List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
         assertEquals(1,asResponses.size());
-
+        assertEquals("Consultation", asResponses.get(0).getName());
+        assertEquals("Consultation", asResponses.get(0).getDescription());
+        assertEquals("09:00:00", asResponses.get(0).getStartTime());
+        assertEquals("17:00:00", asResponses.get(0).getEndTime());
+        assertEquals(30, asResponses.get(0).getDurationMins().intValue());
+        assertEquals(4, asResponses.get(0).getMaxAppointmentsLimit().intValue());
+        assertEquals("Ortho", asResponses.get(0).getSpeciality().get("name"));
+        assertEquals("Room1", asResponses.get(0).getLocation().get("name"));
     }
 
     @Test

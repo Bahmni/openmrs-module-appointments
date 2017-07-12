@@ -1,11 +1,14 @@
 package org.openmrs.module.appointments.model;
 
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 
 import java.io.Serializable;
 import java.sql.Time;
-import java.util.*;
 
 public class AppointmentService extends BaseOpenmrsData implements Serializable {
 
@@ -103,10 +106,10 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     }
 
     public Set<ServiceWeeklyAvailability> getWeeklyAvailability(boolean includeVoided) {
-        if(includeVoided || weeklyAvailability ==null)
-            return weeklyAvailability;
+        if(includeVoided || this.weeklyAvailability == null)
+            return this.weeklyAvailability;
 
-        Set<ServiceWeeklyAvailability> nonVoided = new LinkedHashSet<>(weeklyAvailability);
+        Set<ServiceWeeklyAvailability> nonVoided = new LinkedHashSet<>(this.weeklyAvailability);
         Iterator<ServiceWeeklyAvailability> i = nonVoided.iterator();
         while (i.hasNext()) {
             ServiceWeeklyAvailability availability = i.next();

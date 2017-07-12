@@ -1,18 +1,17 @@
 package org.openmrs.module.appointments.web.controller;
 
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.internal.runners.statements.ExpectException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
-import org.springframework.validation.BindingResult;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -51,7 +50,31 @@ public class AppointmentServiceControllerTest {
 
     @Test
     public void shouldGetAllAppointmentServices() throws Exception {
+        AppointmentService appointmentService = new AppointmentService();
+        List<AppointmentService> appointmentServiceList = new ArrayList<>();
+        appointmentServiceList.add(appointmentService);
+        when(appointmentServiceService.getAllAppointmentServices(false)).thenReturn(appointmentServiceList);
+        
         appointmentServiceController.getAllAppointmentServices();
         verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceList);
+    }
+    
+    @Test
+    public void shouldGetAppointmentServiceByUUID() throws Exception {
+        String uuid = "c36006d4-9fbb-4f20-866b-0ece245615b1";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(uuid);
+        when(appointmentServiceService.getAppointmentServiceByUuid(uuid)).thenReturn(appointmentService);
+        
+        appointmentServiceController.getAppointmentServiceByUuid(uuid);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(uuid);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
+    }
+    
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionIfServiceNotFound() throws Exception {
+        appointmentServiceController.getAppointmentServiceByUuid("random");
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid("random");
     }
 }

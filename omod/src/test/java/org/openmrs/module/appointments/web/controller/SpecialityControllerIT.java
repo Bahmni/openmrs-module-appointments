@@ -1,16 +1,14 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
-
-import static org.junit.Assert.*;
 
 public class SpecialityControllerIT extends BaseIntegrationTest{
     @Autowired

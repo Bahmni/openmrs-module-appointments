@@ -50,6 +50,16 @@ public class AppointmentServiceMapper {
         return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
     }
 
+    public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
+        AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
+        mapToDefaultResponse(service, response);
+        Set<ServiceWeeklyAvailability> serviceWeeklyAvailability = service.getWeeklyAvailability();
+        if(serviceWeeklyAvailability != null) {
+            response.setWeeklyAvailability(serviceWeeklyAvailability.stream().map(availability -> this.constructAvailabilityResponse(availability)).collect(Collectors.toList()));
+        }
+        return response;
+    }
+    
     private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentService as, AppointmentServiceDefaultResponse asResponse) {
         asResponse.setUuid(as.getUuid());
         asResponse.setName(as.getName());
@@ -76,16 +86,6 @@ public class AppointmentServiceMapper {
         asResponse.setLocation(locationMap);
 
         return asResponse;
-    }
-
-    public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
-        AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
-        mapToDefaultResponse(service, response);
-        Set<ServiceWeeklyAvailability> serviceWeeklyAvailability = service.getWeeklyAvailability();
-        if(serviceWeeklyAvailability != null) {
-           response.setWeeklyAvailability(serviceWeeklyAvailability.stream().map(availability -> this.constructAvailabilityResponse(availability)).collect(Collectors.toList()));
-        }
-        return response;
     }
 
     private Map constructAvailabilityResponse(ServiceWeeklyAvailability availability) {
