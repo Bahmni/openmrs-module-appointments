@@ -105,8 +105,8 @@ public class AppointmentServiceMapperTest {
         appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
         assertEquals(appointmentService.getName(), appointmentServiceFullResponse.getName());
         assertEquals(appointmentService.getDurationMins(), appointmentServiceFullResponse.getDurationMins());
-        assertEquals(appointmentService.getStartTime().getTime(), appointmentServiceFullResponse.getStartTime());
-        assertNull(appointmentServiceFullResponse.getEndTime());
+        assertEquals(appointmentService.getStartTime().toString(), appointmentServiceFullResponse.getStartTime());
+        assertEquals(new String(), appointmentServiceFullResponse.getEndTime());
         assertEquals(appointmentService.getMaxAppointmentsLimit(), appointmentServiceFullResponse.getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServiceFullResponse.getLocation().get("name"));
         assertEquals(speciality.getName(), appointmentServiceFullResponse.getSpeciality().get("name"));
@@ -139,16 +139,16 @@ public class AppointmentServiceMapperTest {
         List<AppointmentServiceDefaultResponse> appointmentServicesResponse = appointmentServiceMapper.constructResponse(appointmentServices);
         assertEquals(cardiologyService.getName(), appointmentServicesResponse.get(0).getName());
         assertEquals(cardiologyService.getDurationMins(), appointmentServicesResponse.get(0).getDurationMins());
-        assertEquals(cardiologyService.getStartTime().getTime(), appointmentServicesResponse.get(0).getStartTime());
-        assertNull(appointmentServicesResponse.get(0).getEndTime());
+        assertEquals(cardiologyService.getStartTime().toString(), appointmentServicesResponse.get(0).getStartTime());
+        assertEquals(new String(), appointmentServicesResponse.get(0).getEndTime());
         assertEquals(cardiologyService.getMaxAppointmentsLimit(),
                 appointmentServicesResponse.get(0).getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServicesResponse.get(0).getLocation().get("name"));
         assertEquals(speciality.getName(), appointmentServicesResponse.get(0).getSpeciality().get("name"));
         assertEquals(chemoTherapyService.getName(), appointmentServicesResponse.get(1).getName());
         assertEquals(chemoTherapyService.getDurationMins(), appointmentServicesResponse.get(1).getDurationMins());
-        assertEquals(chemoTherapyService.getStartTime().getTime(), appointmentServicesResponse.get(1).getStartTime());
-        assertEquals(chemoTherapyService.getEndTime().getTime(), appointmentServicesResponse.get(1).getEndTime());
+        assertEquals(chemoTherapyService.getStartTime().toString(), appointmentServicesResponse.get(1).getStartTime());
+        assertEquals(chemoTherapyService.getEndTime().toString(), appointmentServicesResponse.get(1).getEndTime());
         assertEquals(chemoTherapyService.getMaxAppointmentsLimit(),
                 appointmentServicesResponse.get(1).getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServicesResponse.get(1).getLocation().get("name"));

@@ -47,18 +47,19 @@ public class AppointmentServiceMapper {
 
         if(availabilityPayload != null) {
             Set<ServiceWeeklyAvailability> availabilityList = availabilityPayload.stream()
-                    .map(avb -> constructServiceWeeklyAvailability(avb)).collect(Collectors.toSet());
+                    .map(avb -> constructServiceWeeklyAvailability(avb, appointmentService)).collect(Collectors.toSet());
             appointmentService.setWeeklyAvailability(availabilityList);
         }
         return appointmentService;
     }
 
-    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb) {
+    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {
         ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(avb.getDayOfWeek());
         availability.setStartTime(avb.getStartTime());
         availability.setEndTime(avb.getEndTime());
         availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
+        availability.setService(appointmentService);
 
         return availability;
     }
