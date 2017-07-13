@@ -10,13 +10,14 @@ import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultRes
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.sql.Time;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
 
 public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -40,8 +41,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"maxAppointmentsLimit\":\"30\"," +
-                "\"weeklyAvailabilities\": [{ \"dayOfWeek\": \"Monday\", \"startTime\":\"09:00:00\", \"endTime\":\"17:30:00\"}]" +
+                "\"maxAppointmentsLimit\":\"30\"" +
                 "}";
 
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
@@ -52,12 +52,63 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(asResponse.getEndTime(), "17:30:00");
         assertEquals(asResponse.getDurationMins().intValue(), 30);
         assertEquals(asResponse.getMaxAppointmentsLimit().intValue(), 30);
-//        assertNotNull(asResponse.getWeeklyAvailability());
+        assertNull(asResponse.getWeeklyAvailability());
+    }
+
+    @Test
+    public void should_createAppointmentServiceOnlyWithName() throws Exception {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
+        assertNull(appointmentService);
+        String dataJson = "{\"name\":\"Cardiology Consultation\", \"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a2"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        assertNotNull(asResponse);
+        assertEquals(asResponse.getName(), "Cardiology Consultation");
+        assertEquals(new String(),asResponse.getStartTime());
+        assertNull(asResponse.getDurationMins());
+        assertNull(asResponse.getMaxAppointmentsLimit());
+        assertNull(asResponse.getWeeklyAvailability());
+    }
+
+    @Test
+    public void should_createAppointmentServiceWithServiceAvailability() throws Exception {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
+        assertNull(appointmentService);
+        String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:30:00\"," +
+                "\"durationMins\":\"30\"," +
+                "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"maxAppointmentsLimit\":\"30\"," +
+                "\"weeklyAvailability\": [{ \"dayOfWeek\": \"MONDAY\", \"startTime\":\"09:00:00\", \"endTime\":\"17:30:00\", \"maxAppointmentsLimit\":\"10\" }]" +
+                "}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a2"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        assertNotNull(asResponse);
+        assertEquals(asResponse.getName(), "Cardiology Consultation");
+        Time startTime = Time.valueOf("09:00:00");
+        Time endTime = Time.valueOf("17:30:00");
+        assertEquals(asResponse.getStartTime(), startTime.getTime());
+        assertEquals(asResponse.getEndTime(), endTime.getTime());
+        assertEquals(asResponse.getDurationMins().intValue(), 30);
+        assertEquals(asResponse.getMaxAppointmentsLimit().intValue(), 30);
+        assertNotNull(asResponse.getWeeklyAvailability());
+        assertEquals(1, asResponse.getWeeklyAvailability().size());
+
+        List<Map> availabilityList = new ArrayList<>(asResponse.getWeeklyAvailability());
+        assertEquals(1, availabilityList.size());
+        assertEquals("MONDAY", availabilityList.get(0).get("dayOfWeek"));
+        assertEquals(startTime.getTime(), availabilityList.get(0).get("startTime"));
+        assertEquals(endTime.getTime(), availabilityList.get(0).get("endTime"));
+        assertEquals(10, availabilityList.get(0).get("maxAppointmentsLimit"));
+
     }
 
     @Test(expected = RuntimeException.class)
     public void should_notCreateAppointmentServiceWhenNameIsNull() throws Exception {
-
         String dataJson = "{}";
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
     }

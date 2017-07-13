@@ -37,8 +37,7 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     public AppointmentService getAppointmentServiceByUuid(String uuid) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
         criteria.add(Restrictions.eq("uuid", uuid));
-        List list = criteria.list();
-        return list.size() > 0? (AppointmentService) list.get(0) : null;
+        return (AppointmentService) criteria.uniqueResult();
     }
 
 

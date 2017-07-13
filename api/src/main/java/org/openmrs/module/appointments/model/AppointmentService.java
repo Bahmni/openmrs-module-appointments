@@ -21,7 +21,7 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     private Integer maxAppointmentsLimit;
     private Integer durationMins;
     private Location location;
-    private Set<ServiceWeeklyAvailability> weeklyAvailability = new HashSet<>();
+    private Set<ServiceWeeklyAvailability> weeklyAvailability;
 
     public Location getLocation() {
         return location;

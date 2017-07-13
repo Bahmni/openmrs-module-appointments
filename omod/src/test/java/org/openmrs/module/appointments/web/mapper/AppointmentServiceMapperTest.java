@@ -15,13 +15,16 @@ import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
+import org.openmrs.module.appointments.web.contract.ServiceWeeklyAvailabilityPayload;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.HashSet;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 @RunWith(PowerMockRunner.class)
 public class AppointmentServiceMapperTest {
@@ -34,8 +37,49 @@ public class AppointmentServiceMapperTest {
     @InjectMocks
     private AppointmentServiceMapper appointmentServiceMapper;
 
+    private Location location;
+
+    private Speciality speciality;
+
+    @Test
+    public void shouldGetAppointmentServiceFromPayloadWithoutWeeklyAvailability() throws Exception {
+        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
+        AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        assertEquals(appointmentService.getName(),appointmentServicePayload.getName());
+        assertEquals(appointmentService.getDurationMins(),appointmentServicePayload.getDurationMins());
+        assertEquals(appointmentService.getStartTime(),appointmentServicePayload.getStartTime());
+        assertEquals(appointmentService.getEndTime(),appointmentServicePayload.getEndTime());
+        assertEquals(appointmentService.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        assertNull(appointmentService.getWeeklyAvailability());
+    }
+
     @Test
     public void shouldGetAppointmentServiceFromPayload() throws Exception {
+        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
+        List<ServiceWeeklyAvailabilityPayload> weeklyAvailability = new ArrayList<>();
+        ServiceWeeklyAvailabilityPayload mondayMorning = new ServiceWeeklyAvailabilityPayload();
+        mondayMorning.setStartTime(Time.valueOf("09:00:00"));
+        mondayMorning.setEndTime(Time.valueOf("13:00:00"));
+        mondayMorning.setMaxAppointmentsLimit(20);
+        mondayMorning.setDayOfWeek(DayOfWeek.MONDAY);
+        weeklyAvailability.add(mondayMorning);
+        appointmentServicePayload.setWeeklyAvailability(weeklyAvailability);
+        AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        assertEquals(appointmentService.getName(),appointmentServicePayload.getName());
+        assertEquals(appointmentService.getDurationMins(),appointmentServicePayload.getDurationMins());
+        assertEquals(appointmentService.getStartTime(),appointmentServicePayload.getStartTime());
+        assertEquals(appointmentService.getEndTime(),appointmentServicePayload.getEndTime());
+        assertEquals(appointmentService.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        assertNotNull(appointmentService.getWeeklyAvailability());
+        List<ServiceWeeklyAvailability> availabilityList = new ArrayList<>(appointmentService.getWeeklyAvailability());
+        assertEquals(1, availabilityList.size());
+        assertEquals(mondayMorning.getDayOfWeek(), availabilityList.get(0).getDayOfWeek());
+        assertEquals(mondayMorning.getStartTime(), availabilityList.get(0).getStartTime());
+        assertEquals(mondayMorning.getEndTime(), availabilityList.get(0).getEndTime());
+        assertEquals(mondayMorning.getMaxAppointmentsLimit(), availabilityList.get(0).getMaxAppointmentsLimit());
+    }
+
+    private AppointmentServicePayload createAppointmentServicePayload() {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
         appointmentServicePayload.setName("Cardiology-OPD");
         appointmentServicePayload.setDurationMins(20);
@@ -43,62 +87,45 @@ public class AppointmentServiceMapperTest {
         appointmentServicePayload.setMaxAppointmentsLimit(30);
         appointmentServicePayload.setLocationUuid("locUuid");
         appointmentServicePayload.setSpecialityUuid("specUuid");
-        AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentService.getName(),appointmentServicePayload.getName());
-        assertEquals(appointmentService.getDurationMins(),appointmentServicePayload.getDurationMins());
-        assertEquals(appointmentService.getStartTime(),appointmentServicePayload.getStartTime());
-        assertEquals(appointmentService.getEndTime(),appointmentServicePayload.getEndTime());
-        assertEquals(appointmentService.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        return appointmentServicePayload;
     }
 
-
     @Test
-    public void shouldCreateResponseFromAppointmentService() throws Exception {
-        Location location = new Location();
-        location.setName("Room1");
-        location.setUuid("locUuid");
-        Speciality speciality = new Speciality();
-        speciality.setName("cardio");
-        speciality.setUuid("specUuid");
-        AppointmentService appointmentService = buildAppointmentService("Cardiology-OPD",Time.valueOf("09:00:00"),
-                null,20, 30, location, speciality );
+    public void shouldCreateFullResponseFromAnAppointmentService() throws Exception {
+
+        AppointmentService appointmentService = createAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"), null,
+                20, 30);
 
         ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(DayOfWeek.MONDAY);
         HashSet<ServiceWeeklyAvailability> availabilityList = new HashSet<>();
         availabilityList.add(availability);
         appointmentService.setWeeklyAvailability(availabilityList);
-        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
-        assertEquals(appointmentServiceFullResponse.getName(),appointmentService.getName());
-        assertEquals(appointmentServiceFullResponse.getDurationMins(),appointmentService.getDurationMins());
-        assertEquals(appointmentServiceFullResponse.getStartTime(),appointmentService.getStartTime().toString());
-        assertEquals(appointmentServiceFullResponse.getEndTime(),new String());
-        assertEquals(appointmentServiceFullResponse.getMaxAppointmentsLimit(),appointmentService.getMaxAppointmentsLimit());
-        assertEquals(appointmentServiceFullResponse.getLocation().get("name"), "Room1");
-        assertEquals(appointmentServiceFullResponse.getSpeciality().get("name"), "cardio");
+        AppointmentServiceFullResponse appointmentServiceFullResponse;
+        appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        assertEquals(appointmentService.getName(), appointmentServiceFullResponse.getName());
+        assertEquals(appointmentService.getDurationMins(), appointmentServiceFullResponse.getDurationMins());
+        assertEquals(appointmentService.getStartTime().getTime(), appointmentServiceFullResponse.getStartTime());
+        assertNull(appointmentServiceFullResponse.getEndTime());
+        assertEquals(appointmentService.getMaxAppointmentsLimit(), appointmentServiceFullResponse.getMaxAppointmentsLimit());
+        assertEquals(location.getName(), appointmentServiceFullResponse.getLocation().get("name"));
+        assertEquals(speciality.getName(), appointmentServiceFullResponse.getSpeciality().get("name"));
         assertNotNull(appointmentServiceFullResponse.getWeeklyAvailability());
-        assertEquals(1, appointmentServiceFullResponse.getWeeklyAvailability().size());
+        assertEquals(appointmentServiceFullResponse.getWeeklyAvailability().size(), 1);
     }
     
     @Test
     public void shouldCreateDefaultResponseFromAppointmentServicesList() throws Exception {
-        Location location = new Location();
-        location.setName("Room1");
-        location.setUuid("locUuid");
-        Speciality speciality = new Speciality();
-        speciality.setName("cardio");
-        speciality.setUuid("specUuid");
-        
-        AppointmentService cardiologyService = buildAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"),
-                null, 20, 30, location, speciality);
+        AppointmentService cardiologyService = createAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"),
+                null, 20, 30);
         ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(DayOfWeek.MONDAY);
         HashSet<ServiceWeeklyAvailability> availabilityList = new HashSet<>();
         availabilityList.add(availability);
         cardiologyService.setWeeklyAvailability(availabilityList);
         
-        AppointmentService chemoTherapyService = buildAppointmentService("Chemotherapy", Time.valueOf("11:00:00"),
-                Time.valueOf("18:30:00"), 30, 10, location, speciality);
+        AppointmentService chemoTherapyService = createAppointmentService("Chemotherapy", Time.valueOf("11:00:00"),
+                Time.valueOf("18:30:00"), 30, 10);
         ServiceWeeklyAvailability serviceWeeklyAvailability = new ServiceWeeklyAvailability();
         serviceWeeklyAvailability.setDayOfWeek(DayOfWeek.TUESDAY);
         HashSet<ServiceWeeklyAvailability> availabilities = new HashSet<>();
@@ -110,33 +137,42 @@ public class AppointmentServiceMapperTest {
         appointmentServices.add(chemoTherapyService);
         
         List<AppointmentServiceDefaultResponse> appointmentServicesResponse = appointmentServiceMapper.constructResponse(appointmentServices);
-        assertEquals(appointmentServicesResponse.get(0).getName(), cardiologyService.getName());
-        assertEquals(appointmentServicesResponse.get(0).getDurationMins(), cardiologyService.getDurationMins());
-        assertEquals(appointmentServicesResponse.get(0).getStartTime(), cardiologyService.getStartTime().toString());
-        assertEquals(appointmentServicesResponse.get(0).getEndTime(), new String());
-        assertEquals(appointmentServicesResponse.get(0).getMaxAppointmentsLimit(), cardiologyService.getMaxAppointmentsLimit());
-        assertEquals(appointmentServicesResponse.get(0).getLocation().get("name"), "Room1");
-        assertEquals(appointmentServicesResponse.get(0).getSpeciality().get("name"), "cardio");
-        assertEquals(appointmentServicesResponse.get(1).getName(), chemoTherapyService.getName());
-        assertEquals(appointmentServicesResponse.get(1).getDurationMins(), chemoTherapyService.getDurationMins());
-        assertEquals(appointmentServicesResponse.get(1).getStartTime(), chemoTherapyService.getStartTime().toString());
-        assertEquals(appointmentServicesResponse.get(1).getEndTime(), chemoTherapyService.getEndTime().toString());
-        assertEquals(appointmentServicesResponse.get(1).getMaxAppointmentsLimit(), chemoTherapyService.getMaxAppointmentsLimit());
-        assertEquals(appointmentServicesResponse.get(1).getLocation().get("name"), "Room1");
-        assertEquals(appointmentServicesResponse.get(1).getSpeciality().get("name"), "cardio");
+        assertEquals(cardiologyService.getName(), appointmentServicesResponse.get(0).getName());
+        assertEquals(cardiologyService.getDurationMins(), appointmentServicesResponse.get(0).getDurationMins());
+        assertEquals(cardiologyService.getStartTime().getTime(), appointmentServicesResponse.get(0).getStartTime());
+        assertNull(appointmentServicesResponse.get(0).getEndTime());
+        assertEquals(cardiologyService.getMaxAppointmentsLimit(),
+                appointmentServicesResponse.get(0).getMaxAppointmentsLimit());
+        assertEquals(location.getName(), appointmentServicesResponse.get(0).getLocation().get("name"));
+        assertEquals(speciality.getName(), appointmentServicesResponse.get(0).getSpeciality().get("name"));
+        assertEquals(chemoTherapyService.getName(), appointmentServicesResponse.get(1).getName());
+        assertEquals(chemoTherapyService.getDurationMins(), appointmentServicesResponse.get(1).getDurationMins());
+        assertEquals(chemoTherapyService.getStartTime().getTime(), appointmentServicesResponse.get(1).getStartTime());
+        assertEquals(chemoTherapyService.getEndTime().getTime(), appointmentServicesResponse.get(1).getEndTime());
+        assertEquals(chemoTherapyService.getMaxAppointmentsLimit(),
+                appointmentServicesResponse.get(1).getMaxAppointmentsLimit());
+        assertEquals(location.getName(), appointmentServicesResponse.get(1).getLocation().get("name"));
+        assertEquals(speciality.getName(), appointmentServicesResponse.get(1).getSpeciality().get("name"));
     }
     
-    private AppointmentService buildAppointmentService(String name, Time startTime, Time endTime, Integer duration,
-                                                       Integer maxAppointmentsLimit, Location location, Speciality speciality) {
+    private AppointmentService createAppointmentService(String name, Time startTime, Time endTime, Integer duration,
+                                                       Integer maxAppointmentsLimit) {
         AppointmentService appointmentService = new AppointmentService();
         appointmentService.setName(name);
         appointmentService.setStartTime(startTime);
         appointmentService.setEndTime(endTime);
         appointmentService.setDurationMins(duration);
         appointmentService.setMaxAppointmentsLimit(maxAppointmentsLimit);
+
+        location = new Location();
+        location.setName("Room1");
         appointmentService.setLocation(location);
+
+        speciality = new Speciality();
+        speciality.setName("cardio");
         appointmentService.setSpeciality(speciality);
         
         return appointmentService;
     }
+
 }

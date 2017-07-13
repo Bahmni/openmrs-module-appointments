@@ -43,7 +43,24 @@ public class AppointmentServiceMapper {
         Speciality speciality = specialityService.getSpecialityByUuid(specialityUuid);
         appointmentService.setSpeciality(speciality);
 
+        List<ServiceWeeklyAvailabilityPayload> availabilityPayload = appointmentServicePayload.getWeeklyAvailability();
+
+        if(availabilityPayload != null) {
+            Set<ServiceWeeklyAvailability> availabilityList = availabilityPayload.stream()
+                    .map(avb -> constructServiceWeeklyAvailability(avb)).collect(Collectors.toSet());
+            appointmentService.setWeeklyAvailability(availabilityList);
+        }
         return appointmentService;
+    }
+
+    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb) {
+        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        availability.setDayOfWeek(avb.getDayOfWeek());
+        availability.setStartTime(avb.getStartTime());
+        availability.setEndTime(avb.getEndTime());
+        availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
+
+        return availability;
     }
 
     public List<AppointmentServiceDefaultResponse> constructResponse(List<AppointmentService> appointmentServices) {
@@ -91,18 +108,15 @@ public class AppointmentServiceMapper {
     private Map constructAvailabilityResponse(ServiceWeeklyAvailability availability) {
         Map availabilityMap = new HashMap();
         availabilityMap.put("dayOfWeek",availability.getDayOfWeek());
-        availabilityMap.put("startTime", availability.getStartTime());
-        availabilityMap.put("endTime", availability.getEndTime());
+        availabilityMap.put("startTime", convertTimeToString(availability.getStartTime()));
+        availabilityMap.put("endTime", convertTimeToString(availability.getEndTime()));
         availabilityMap.put("maxAppointmentsLimit", availability.getMaxAppointmentsLimit());
         availabilityMap.put("uuid", availability.getUuid());
         return availabilityMap;
     }
 
-    private String convertTimeToString(Time t) {
-        if(t == null){
-            return new String();
-        }
-        return t.toString();
+    private String convertTimeToString(Time time) {
+       return time != null ? time.toString() : new String();
     }
 
 }
