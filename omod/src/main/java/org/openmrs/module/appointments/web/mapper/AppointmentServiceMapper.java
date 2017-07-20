@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
@@ -50,7 +51,22 @@ public class AppointmentServiceMapper {
                     .map(avb -> constructServiceWeeklyAvailability(avb, appointmentService)).collect(Collectors.toSet());
             appointmentService.setWeeklyAvailability(availabilityList);
         }
+        
+        if(appointmentServicePayload.getServiceTypes() != null) {
+            Set<AppointmentServiceType> appointmentServiceTypes = appointmentServicePayload.getServiceTypes().stream()
+                    .map(ast -> constructAppointmentServiceTypes(ast, appointmentService)).collect(Collectors.toSet());
+            appointmentService.setServiceTypes(appointmentServiceTypes);
+        }
         return appointmentService;
+    }
+
+    private AppointmentServiceType constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentService appointmentService) {
+        AppointmentServiceType serviceType = new AppointmentServiceType();
+        serviceType.setName(ast.getName());
+        serviceType.setDuration(ast.getDuration());
+        serviceType.setAppointmentService(appointmentService);
+
+        return serviceType;
     }
 
     private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {
@@ -68,12 +84,24 @@ public class AppointmentServiceMapper {
         return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
     }
 
+    private Map constructServiceTypeResponse(AppointmentServiceType serviceType) {
+        Map serviceTypeMap = new HashMap();
+        serviceTypeMap.put("name", serviceType.getName());
+        serviceTypeMap.put("duration",serviceType.getDuration());
+        serviceTypeMap.put("uuid", serviceType.getUuid());
+        return serviceTypeMap;
+    }
+
     public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
         AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
         mapToDefaultResponse(service, response);
         Set<ServiceWeeklyAvailability> serviceWeeklyAvailability = service.getWeeklyAvailability();
         if(serviceWeeklyAvailability != null) {
             response.setWeeklyAvailability(serviceWeeklyAvailability.stream().map(availability -> this.constructAvailabilityResponse(availability)).collect(Collectors.toList()));
+        }
+        Set<AppointmentServiceType> serviceTypes = service.getServiceTypes();
+        if(serviceTypes != null) {
+            response.setServiceTypes(serviceTypes.stream().map(serviceType -> this.constructServiceTypeResponse(serviceType)).collect(Collectors.toList()));
         }
         return response;
     }

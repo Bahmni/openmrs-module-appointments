@@ -119,4 +119,34 @@
             CONSTRAINT user_who_deleted_service FOREIGN KEY (voided_by) REFERENCES users (user_id));
         </sql>
     </changeSet>
+
+    <changeSet id="create-appointment_service_type_table-201707191650" author="Santhosh, Pramida">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_service_type" />
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE IF NOT EXISTS appointment_service_type (
+            appointment_service_type_id INT NOT NULL AUTO_INCREMENT ,
+            appointment_service_id INT NOT NULL,
+            name VARCHAR(50) NOT NULL ,
+            duration_mins INT NULL ,
+            date_created DATETIME NOT NULL ,
+            creator INT NOT NULL ,
+            date_changed DATETIME NULL ,
+            changed_by INT NULL ,
+            voided TINYINT NULL ,
+            voided_by INT,
+            date_voided DATETIME,
+            void_reason VARCHAR(255),
+            uuid  VARCHAR(38) NOT NULL UNIQUE,
+            PRIMARY KEY (appointment_service_type_id) ,
+            INDEX fk_appointment_service_idx (appointment_service_id ASC) ,
+            UNIQUE INDEX service_name_dur_UNIQUE (appointment_service_id, name, duration_mins ASC) ,
+            CONSTRAINT fk_appointment_service
+            FOREIGN KEY (appointment_service_id )
+            REFERENCES appointment_service (appointment_service_id ))
+        </sql>
+    </changeSet>
 </databaseChangeLog>

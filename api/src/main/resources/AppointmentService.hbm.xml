@@ -29,10 +29,13 @@
         <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
         <many-to-one name="location" class="org.openmrs.Location" column="location_id"/>
         <many-to-one name="speciality" class="org.openmrs.module.appointments.model.Speciality" column="speciality_id"/>
-
         <set name="weeklyAvailability" lazy="false" inverse="true" batch-size="100" cascade="all-delete-orphan" order-by="voided asc"  access="field">
             <key column="service_id" />
             <one-to-many class="org.openmrs.module.appointments.model.ServiceWeeklyAvailability" />
+        </set>
+        <set name="serviceTypes" inverse="true" cascade="all" lazy="false" access="field">
+            <key column="appointment_service_id"/>
+            <one-to-many class="org.openmrs.module.appointments.model.AppointmentServiceType"/>
         </set>
     </class>
 </hibernate-mapping>

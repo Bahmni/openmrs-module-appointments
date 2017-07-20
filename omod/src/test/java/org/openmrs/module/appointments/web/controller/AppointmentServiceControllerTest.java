@@ -2,15 +2,18 @@ package org.openmrs.module.appointments.web.controller;
 
 import java.util.ArrayList;
 import java.util.List;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 
+import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,9 +40,18 @@ public class AppointmentServiceControllerTest {
     public void shouldCreateAppointmentService() throws Exception {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
         appointmentServicePayload.setName("Cardio");
-        appointmentServiceController.createAppointmentService(appointmentServicePayload);
+        AppointmentService mappedServicePayload = new AppointmentService();
+        when(appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload)).thenReturn(mappedServicePayload);
+        when(appointmentServiceService.save(mappedServicePayload)).thenReturn(mappedServicePayload);
+        AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
+        when(appointmentServiceMapper.constructResponse(mappedServicePayload)).thenReturn(response);
+
+        AppointmentServiceFullResponse savedAppointmentService = appointmentServiceController.createAppointmentService(appointmentServicePayload);
+
         verify(appointmentServiceMapper, times(1)).getAppointmentServiceFromPayload(appointmentServicePayload);
         verify(appointmentServiceService, times(1)).save(any(AppointmentService.class));
+        verify(appointmentServiceMapper, times(1)).constructResponse(mappedServicePayload);
+        assertEquals(response, savedAppointmentService);
     }
 
     @Test(expected = RuntimeException.class)

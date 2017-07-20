@@ -9,7 +9,7 @@ public interface AppointmentServiceDao {
 
     List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
 
-    void save(AppointmentService appointmentService);
+    AppointmentService save(AppointmentService appointmentService);
 
     AppointmentService getAppointmentServiceByUuid(String uuid);
 }

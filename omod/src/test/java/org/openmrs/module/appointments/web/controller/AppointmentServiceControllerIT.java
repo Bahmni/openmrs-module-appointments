@@ -8,10 +8,12 @@ import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
+import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.sql.Time;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -103,6 +105,31 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("17:30:00", availabilityList.get(0).get("endTime"));
         assertEquals(10, availabilityList.get(0).get("maxAppointmentsLimit"));
 
+    }
+
+    @Test
+    public void shouldCreateAppointmentServiceWithServiceTypes() throws Exception {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
+        assertNull(appointmentService);
+        String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
+            "\"endTime\":\"17:30:00\"," +
+            "\"durationMins\":\"30\"," +
+            "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
+            "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+            "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+            "\"serviceTypes\": [{ \"name\": \"type1\", \"duration\":\"20\"}]" +
+            "}";
+
+        MockHttpServletResponse handle = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject response = SimpleObject.parseJson(handle.getContentAsString());
+        assertNotNull(response);
+        ArrayList serviceTypes = (ArrayList) response.get("serviceTypes");
+        assertNotNull(serviceTypes);
+        LinkedHashMap<String, Object> serviceTypes1 = (LinkedHashMap<String, Object>) serviceTypes.get(0);
+
+        assertNotNull(serviceTypes1.get("uuid"));
+        assertEquals("type1", serviceTypes1.get("name"));
+        assertEquals(20, serviceTypes1.get("duration"));
     }
 
     @Test(expected = RuntimeException.class)

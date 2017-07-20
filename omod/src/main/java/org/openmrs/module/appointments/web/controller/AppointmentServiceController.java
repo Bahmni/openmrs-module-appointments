@@ -46,11 +46,11 @@ public class AppointmentServiceController {
 
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
-    public void createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
+    public AppointmentServiceFullResponse createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
         if(appointmentServicePayload.getName() == null)
             throw new RuntimeException("Appointment Service name should not be null");
         AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        appointmentServiceService.save(appointmentService);
+        AppointmentService savedAppointmentService = appointmentServiceService.save(appointmentService);
+        return appointmentServiceMapper.constructResponse(savedAppointmentService);
     }
-
 }

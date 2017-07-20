@@ -1,12 +1,14 @@
 package org.openmrs.module.appointments.model;
 
+import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Location;
+
 import java.io.Serializable;
 import java.sql.Time;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import org.openmrs.BaseOpenmrsData;
-import org.openmrs.Location;
+
 
 public class AppointmentService extends BaseOpenmrsData implements Serializable {
 
@@ -20,6 +22,8 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     private Integer durationMins;
     private Location location;
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
+    private Set<AppointmentServiceType> serviceTypes;
+
 
     public Location getLocation() {
         return location;
@@ -125,5 +129,16 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     public void setWeeklyAvailability(
             Set<ServiceWeeklyAvailability> weeklyAvailability) {
         this.weeklyAvailability = weeklyAvailability;
+    }
+
+    public Set<AppointmentServiceType> getServiceTypes() {
+        if (serviceTypes == null) {
+            serviceTypes = new LinkedHashSet<>();
+        }
+        return serviceTypes;
+    }
+
+    public void setServiceTypes(Set<AppointmentServiceType> serviceTypes) {
+        this.serviceTypes = serviceTypes;
     }
 }

@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.dao.impl;
 
 import java.util.List;
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
@@ -27,8 +28,10 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
     @Transactional
     @Override
-    public void save(AppointmentService appointmentService) {
-        sessionFactory.getCurrentSession().saveOrUpdate(appointmentService);
+    public AppointmentService save(AppointmentService appointmentService) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.saveOrUpdate(appointmentService);
+        return appointmentService;
     }
 
     @Override

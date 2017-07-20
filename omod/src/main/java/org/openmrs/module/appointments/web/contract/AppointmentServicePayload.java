@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.contract;
 
 import java.sql.Time;
 import java.util.List;
+import java.util.Set;
 import javax.validation.constraints.Size;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
@@ -18,6 +19,16 @@ public class AppointmentServicePayload {
     private String locationUuid;
     private String uuid;
     private List<ServiceWeeklyAvailabilityPayload> weeklyAvailability;
+    private Set<AppointmentServiceTypePayload> serviceTypes;
+
+    public Set<AppointmentServiceTypePayload> getServiceTypes() {
+        return serviceTypes;
+    }
+
+    public void setServiceTypes(Set<AppointmentServiceTypePayload> serviceTypes) {
+        this.serviceTypes = serviceTypes;
+    }
+
 
     public String getName() {
         return name;
