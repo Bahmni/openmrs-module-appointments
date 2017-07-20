@@ -10,8 +10,6 @@
 	<description>${project.parent.description}</description>
 
 	<activator>${MODULE_PACKAGE}.AppointmentsActivator</activator>
-	
-	<require_version>${openmrs.platform.version}</require_version>
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
@@ -21,6 +19,7 @@
 		Speciality.hbm.xml
 		AppointmentService.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
+		Appointment.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->

@@ -1,0 +1,24 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <person person_id="3" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75e04d42-3ca8-11e3-bf2b-0800271c1b77"/>
+
+    <patient patient_id="1" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
+
+    <users user_id="1" person_id="3" system_id="3-6" username="superuser" retired="false"
+           password="ff6d1655327d385e11a04e1632b4f33ceb8fafd2" salt="5d32c5fd9fde391c755f1f4dfd5e1d6e3debe6"
+           secret_question="" creator="1" date_created="2008-08-15 15:46:47.0"
+           uuid="Z9fd3a7b-6482-487d-87eR-c07b123MxF99"/>
+
+    <location location_id="1" name="Room1" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="c36006e5-9fbb-4f20-866b-0ece245615a1"/>
+
+    <appointment_speciality speciality_id="1" name="Ortho" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1" creator="1"/>
+
+    <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1"
+                        speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" uuid="c36006e5-9fbb-4f20-866b-0ece245615a6" voided="false"/>
+
+    <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
+                         speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="true" voided_by="1" void_reason=""/>
+
+    <patient_appointment patient_appointment_id="1" patient_id ="1" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b77"/>
+</dataset>
