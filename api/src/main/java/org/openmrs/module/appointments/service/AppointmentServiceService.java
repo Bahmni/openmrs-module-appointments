@@ -12,5 +12,7 @@ public interface AppointmentServiceService {
     List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
 
     AppointmentService getAppointmentServiceByUuid(String uuid);
+
+    AppointmentService voidAppointmentService(AppointmentService appointmentService, String voidReason);
 }
 

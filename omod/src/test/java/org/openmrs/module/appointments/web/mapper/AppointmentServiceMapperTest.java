@@ -56,7 +56,7 @@ public class AppointmentServiceMapperTest {
         assertEquals(appointmentService.getStartTime(),appointmentServicePayload.getStartTime());
         assertEquals(appointmentService.getEndTime(),appointmentServicePayload.getEndTime());
         assertEquals(appointmentService.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
-        assertNull(appointmentService.getWeeklyAvailability());
+        assertEquals(0, appointmentService.getWeeklyAvailability().size());
     }
 
     @Test

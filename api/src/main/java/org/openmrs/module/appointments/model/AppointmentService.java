@@ -108,7 +108,10 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     }
 
     public Set<ServiceWeeklyAvailability> getWeeklyAvailability(boolean includeVoided) {
-        if(includeVoided || this.weeklyAvailability == null)
+        if (this.weeklyAvailability == null) {
+            this.weeklyAvailability = new LinkedHashSet<>();
+        }
+        if(includeVoided)
             return this.weeklyAvailability;
 
         Set<ServiceWeeklyAvailability> nonVoided = new LinkedHashSet<>(this.weeklyAvailability);

@@ -89,4 +89,37 @@ public class AppointmentServiceControllerTest {
         appointmentServiceController.getAppointmentServiceByUuid("random");
         verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid("random");
     }
+
+    @Test
+    public void shouldVoidTheAppointmentService() throws Exception {
+        String appointmentServiceUuid = "appointmentServiceUuid";
+        String voidReason = "voidReason";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
+
+        appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
+
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(1)).voidAppointmentService(appointmentService, voidReason);
+    }
+
+    @Test
+    public void shouldVoidTheAppointmentServiceBeIdempotent() throws Exception {
+        String appointmentServiceUuid = "appointmentServiceUuid";
+        String voidReason = "voidReason";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        appointmentService.setVoided(true);
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
+
+        appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
+
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(0)).voidAppointmentService(appointmentService, voidReason);
+    }
 }

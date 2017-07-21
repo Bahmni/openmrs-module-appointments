@@ -168,4 +168,21 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(1, asResponse.getWeeklyAvailability().size());
         assertEquals("MONDAY", ((Map)asResponse.getWeeklyAvailability().get(0)).get("dayOfWeek"));
     }
+
+    @Test
+    public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypes() throws Exception {
+        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        Parameter voidReason = new Parameter("void_reason", "webservice call");
+        MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid, voidReason));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypesWitoutVoidReason() throws Exception {
+        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+    }
 }

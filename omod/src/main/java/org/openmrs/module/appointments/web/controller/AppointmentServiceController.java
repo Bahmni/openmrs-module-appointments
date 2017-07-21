@@ -53,4 +53,14 @@ public class AppointmentServiceController {
         AppointmentService savedAppointmentService = appointmentServiceService.save(appointmentService);
         return appointmentServiceMapper.constructResponse(savedAppointmentService);
     }
+
+    @RequestMapping( method = RequestMethod.DELETE)
+    @ResponseBody
+    public void voidAppointmentService(@RequestParam(value = "uuid", required = true) String appointmentServiceUuid, @RequestParam(value = "void_reason", required = false) String voidReason ) {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid);
+        if (appointmentService.getVoided()){
+            return;
+        }
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
+    }
 }
