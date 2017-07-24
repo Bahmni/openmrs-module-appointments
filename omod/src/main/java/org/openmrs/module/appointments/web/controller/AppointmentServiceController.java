@@ -8,6 +8,8 @@ import org.openmrs.module.appointments.web.contract.AppointmentServiceFullRespon
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,12 +48,17 @@ public class AppointmentServiceController {
 
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
-    public AppointmentServiceFullResponse createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
+    public ResponseEntity<Object> createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
         if(appointmentServicePayload.getName() == null)
             throw new RuntimeException("Appointment Service name should not be null");
         AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        AppointmentService savedAppointmentService = appointmentServiceService.save(appointmentService);
-        return appointmentServiceMapper.constructResponse(savedAppointmentService);
+        try {
+            AppointmentService savedAppointmentService = appointmentServiceService.save(appointmentService);
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(savedAppointmentService);
+            return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping( method = RequestMethod.DELETE)

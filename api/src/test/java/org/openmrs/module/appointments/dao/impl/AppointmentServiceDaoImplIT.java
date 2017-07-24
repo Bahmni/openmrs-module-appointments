@@ -84,4 +84,19 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
         assertNull(type2.getDuration());
         assertNotNull("Type2", type2.getName());
     }
+
+    @Test
+    public void shouldNotGetAppointmentServiceByServiceNameIfTheAppointmentServiceIsVoidedAndNoNonVoidedAppointmentServicePresent() throws Exception {
+        AppointmentService appointmentService = appointmentServiceDao.getNonVoidedAppointmentServiceByName("Treatment");
+        assertNull(appointmentService);
+    }
+
+    @Test
+    public void shouldGetNonVoidedAppointmentServiceByServiceName() throws Exception {
+        AppointmentService appointmentService = appointmentServiceDao.getNonVoidedAppointmentServiceByName("Consultation");
+        assertNotNull(appointmentService);
+        assertEquals("Consultation", appointmentService.getName());
+        assertEquals(false, appointmentService.getVoided());
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentService.getUuid());
+    }
 }

@@ -41,5 +41,13 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         return (AppointmentService) criteria.uniqueResult();
     }
 
+    @Override
+    public AppointmentService getNonVoidedAppointmentServiceByName(String serviceName) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
+        criteria.add(Restrictions.eq("name", serviceName));
+        criteria.add(Restrictions.eq("voided", false));
+        return (AppointmentService) criteria.uniqueResult();
+    }
+
 
 }

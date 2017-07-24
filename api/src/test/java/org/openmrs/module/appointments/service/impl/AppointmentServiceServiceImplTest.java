@@ -2,7 +2,9 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.openmrs.User;
@@ -22,6 +24,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @PrepareForTest({Context.class})
@@ -30,6 +33,9 @@ public class AppointmentServiceServiceImplTest{
 
     @Captor
     private ArgumentCaptor<AppointmentService> captor;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Mock
     private AppointmentServiceDao appointmentServiceDao;
@@ -174,5 +180,25 @@ public class AppointmentServiceServiceImplTest{
         Assert.assertEquals( voidReason, serviceType2.getVoidReason());
         Assert.assertEquals( authenticatedUser, serviceType2.getVoidedBy());
         Assert.assertNotNull(serviceType2.getVoidedBy());
+    }
+
+    @Test
+    public void shouldValidateTheAppointmentServiceAndThrowAnExceptionWhenThereIsNonVoidedAppointmentServiceWithTheSameName() throws Exception {
+        String serviceName = "serviceName";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName(serviceName);
+        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+        appointmentServiceType.setId(1);
+        appointmentServiceType.setName("type1");
+        LinkedHashSet<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
+        serviceTypes.add(appointmentServiceType);
+        appointmentService.setServiceTypes(serviceTypes);
+        when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(appointmentService);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("The service 'serviceName' is already present");
+
+        appointmentServiceService.save(appointmentService);
     }
 }

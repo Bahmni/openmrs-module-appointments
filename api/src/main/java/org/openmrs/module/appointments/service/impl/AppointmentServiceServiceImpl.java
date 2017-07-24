@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -22,6 +23,10 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
 
     @Override
     public AppointmentService save(AppointmentService appointmentService) {
+        AppointmentService service = appointmentServiceDao.getNonVoidedAppointmentServiceByName(appointmentService.getName());
+        if(service != null) {
+            throw new RuntimeException("The service '" + appointmentService.getName() + "' is already present");
+        }
         return appointmentServiceDao.save(appointmentService);
     }
 

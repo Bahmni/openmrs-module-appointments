@@ -12,4 +12,6 @@ public interface AppointmentServiceDao {
     AppointmentService save(AppointmentService appointmentService);
 
     AppointmentService getAppointmentServiceByUuid(String uuid);
+
+    AppointmentService getNonVoidedAppointmentServiceByName(String serviceName);
 }
