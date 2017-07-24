@@ -1,18 +1,11 @@
 package org.openmrs.module.appointments.web.contract;
 
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.Provider;
-
-import java.sql.Date;
-import java.util.Map;
-
 public class AppointmentDefaultResponse {
 	private Integer appointmentId;
 	private String providerUuid;
 	private String appointmentNumber;
 	private String locationUuid;
-	private Patient patient;
+	private String patientUuid;
 	private String status;
 	private String startDateTime;
 	private String endDateTime;
@@ -61,14 +54,6 @@ public class AppointmentDefaultResponse {
 		this.status = status;
 	}
 
-	public Patient getPatient() {
-		return patient;
-	}
-
-	public void setPatient(Patient patient) {
-		this.patient = patient;
-	}
-
 	public String getAppointmentNumber() {
 		return appointmentNumber;
 	}
@@ -103,5 +88,13 @@ public class AppointmentDefaultResponse {
 
 	public void setLocationUuid(String locationUuid) {
 		this.locationUuid = locationUuid;
+	}
+
+	public String getPatientUuid() {
+		return patientUuid;
+	}
+
+	public void setPatientUuid(String patientUuid) {
+		this.patientUuid = patientUuid;
 	}
 }

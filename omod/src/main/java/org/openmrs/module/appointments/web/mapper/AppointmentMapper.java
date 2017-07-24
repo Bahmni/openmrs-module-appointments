@@ -6,10 +6,9 @@ import org.openmrs.Patient;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
-import org.openmrs.module.appointments.model.Speciality;
+import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +29,11 @@ public class AppointmentMapper {
     @Autowired
     PatientService patientService;
 
+    @Autowired
+    AppointmentServiceService appointmentServiceService;
+
+    @Autowired
+    AppointmentsService appointmentsService;
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
@@ -42,7 +46,7 @@ public class AppointmentMapper {
         response.setAppointmentNumber(a.getAppointmentNumber());
         response.setAppointmentsKind(a.getAppointmentsKind());
         response.setComments(a.getComments());
-        response.setPatient(a.getPatient());
+        response.setPatientUuid(a.getPatient().getUuid());
         if(a.getLocation()!=null){
             response.setLocationUuid(a.getLocation().getUuid());
         }
@@ -64,12 +68,16 @@ public class AppointmentMapper {
         if (!StringUtils.isBlank(appointmentPayload.getUuid())) {
             appointment.setUuid(appointmentPayload.getUuid());
         }
-        appointment.setAppointmentsKind(appointmentPayload.getAppointmentNumber());
+        appointment.setAppointmentsKind(appointmentPayload.getAppointmentsKind());
         appointment.setComments(appointmentPayload.getComments());
         appointment.setEndDateTime(appointmentPayload.getEndDateTime());
         appointment.setStartDateTime(appointmentPayload.getStartDateTime());
         appointment.setStatus(appointmentPayload.getStatus());
+        appointment.setAppointmentNumber(appointmentPayload.getAppointmentNumber());
 
+        appointment.setService(
+                appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid()));
+        //appointment.setServiceType((AppointmentServiceType) appointment.getService().getServiceTypes().toArray()[0]);
         appointment.setPatient(patientService.getPatientByUuid(appointmentPayload.getPatientUuid()));
         appointment.setLocation(locationService.getLocationByUuid(appointmentPayload.getLocationUuid()));
         appointment.setProvider(providerService.getProviderByUuid(appointmentPayload.getProviderUuid()));

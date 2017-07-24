@@ -6,7 +6,7 @@ import org.openmrs.Patient;
 import org.openmrs.Provider;
 
 import java.io.Serializable;
-import java.sql.Date;
+import java.util.Date;
 
 public class Appointment  extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
@@ -14,10 +14,12 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
     private String appointmentNumber;
     private Location location;
     private Patient patient;
+    private AppointmentService service;
+    private AppointmentServiceType serviceType;
     private String status;
     private Date startDateTime;
     private Date endDateTime;
-    private String AppointmentsKind;
+    private String appointmentsKind;
     private String comments;
 
     public String getComments() {
@@ -29,11 +31,11 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
     }
 
     public String getAppointmentsKind() {
-        return AppointmentsKind;
+        return appointmentsKind;
     }
 
     public void setAppointmentsKind(String appointmentsKind) {
-        AppointmentsKind = appointmentsKind;
+        this.appointmentsKind = appointmentsKind;
     }
 
     public Date getEndDateTime() {
@@ -108,6 +110,22 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
     @Override
     public void setId(Integer integer) {
         setAppointmentId(integer);
+    }
+
+    public AppointmentService getService() {
+        return service;
+    }
+
+    public void setService(AppointmentService service) {
+        this.service = service;
+    }
+
+    public AppointmentServiceType getServiceType() {
+        return serviceType;
+    }
+
+    public void setServiceType(AppointmentServiceType serviceType) {
+        this.serviceType = serviceType;
     }
 }
 

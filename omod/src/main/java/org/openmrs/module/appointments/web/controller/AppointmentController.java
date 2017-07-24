@@ -36,7 +36,7 @@ public class AppointmentController {
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
     public void createAppointmentService( @Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
-        if(StringUtils.isBlank(appointmentPayload.getUuid()))
+        if(StringUtils.isBlank(appointmentPayload.getPatientUuid()))
             throw new RuntimeException("Patient should not be empty");
         Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
         appointmentsService.save(appointment);

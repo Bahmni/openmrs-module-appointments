@@ -1,16 +1,22 @@
 package org.openmrs.module.appointments.web.contract;
 
-import java.sql.Date;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+
+import java.util.Date;
+
+@JsonIgnoreProperties
 public class AppointmentPayload {
     private String providerUuid;
     private String appointmentNumber;
+    private String serviceUuid;
+    private String serviceTypeUuid;
     private String locationUuid;
     private String patientUuid;
     private String status;
     private Date startDateTime;
     private Date endDateTime;
-    private String AppointmentsKind;
+    private String appointmentsKind;
     private String comments;
     private String uuid;
 
@@ -23,16 +29,14 @@ public class AppointmentPayload {
     }
 
     public String getAppointmentsKind() {
-        return AppointmentsKind;
+        return appointmentsKind;
     }
 
     public void setAppointmentsKind(String appointmentsKind) {
-        AppointmentsKind = appointmentsKind;
+        this.appointmentsKind = appointmentsKind;
     }
 
-    public Date getEndDateTime() {
-        return endDateTime;
-    }
+    public Date getEndDateTime() { return endDateTime;}
 
     public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
@@ -92,5 +96,21 @@ public class AppointmentPayload {
 
     public void setPatientUuid(String patientUuid) {
         this.patientUuid = patientUuid;
+    }
+
+    public String getServiceUuid() {
+        return serviceUuid;
+    }
+
+    public void setServiceUuid(String serviceUuid) {
+        this.serviceUuid = serviceUuid;
+    }
+
+    public String getServiceTypeUuid() {
+        return serviceTypeUuid;
+    }
+
+    public void setServiceTypeUuid(String serviceTypeUuid) {
+        this.serviceTypeUuid = serviceTypeUuid;
     }
 }
