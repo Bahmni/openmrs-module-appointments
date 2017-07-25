@@ -149,4 +149,50 @@
             REFERENCES appointment_service (appointment_service_id ))
         </sql>
     </changeSet>
+    <changeSet id="create-patient_appointment_table-201707211030" author="Deepak">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment" />
+            </not>
+        </preConditions>
+        <sql>
+            CREATE TABLE IF NOT EXISTS patient_appointment (
+            patient_appointment_id      INT          NOT NULL AUTO_INCREMENT,
+            provider_id                 INT          NULL,
+            appointment_number          VARCHAR(50)  NOT NULL,
+            patient_id                  INT          NOT NULL,
+            start_date_time             DATETIME     NOT NULL,
+            end_date_time               DATETIME     NOT NULL,
+            appointment_service_id      INT          NULL,
+            appointment_service_type_id INT          NULL,
+            status                      VARCHAR(45)  NOT NULL
+            COMMENT 'scheduled, checked in, started, completed, cancelled, missed',
+            location_id                 INT          NULL,
+            appointment_kind            VARCHAR(45)  NOT NULL
+            COMMENT 'scheduled, walk in',
+            comments                    VARCHAR(255) NULL,
+            uuid                        VARCHAR(38)  NOT NULL UNIQUE,
+            date_created                DATETIME     NOT NULL,
+            creator                     INT          NOT NULL,
+            date_changed                DATETIME     NULL,
+            changed_by                  INT          NULL,
+            voided                      TINYINT      NULL,
+            voided_by                   INT,
+            date_voided                 DATETIME,
+            void_reason                 VARCHAR(255),
+            PRIMARY KEY (`patient_appointment_id`),
+            CONSTRAINT fk_patient_appointment_patient FOREIGN KEY (`patient_id`)
+            REFERENCES patient (`patient_id`),
+            CONSTRAINT fk_patient_appointment_location FOREIGN KEY (`location_id`)
+            REFERENCES location (`location_id`),
+            CONSTRAINT fk_patient_appointment_provider FOREIGN KEY (`provider_id`)
+            REFERENCES provider (`provider_id`),
+            CONSTRAINT fk_patient_appointment_appointment_service FOREIGN KEY (`appointment_service_id`)
+            REFERENCES appointment_service (`appointment_service_id`),
+            CONSTRAINT fk_patient_appointment_appointment_service_type FOREIGN KEY (`appointment_service_type_id`)
+            REFERENCES appointment_service_type (`appointment_service_type_id`)
+            )
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

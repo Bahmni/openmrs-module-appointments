@@ -14,10 +14,20 @@
         <many-to-one name="service" class="org.openmrs.module.appointments.model.AppointmentService" column="appointment_service_id"/>
         <many-to-one name="serviceType" class="org.openmrs.module.appointments.model.AppointmentServiceType" column="appointment_service_type_id"/>
         <property name="appointmentNumber" type="java.lang.String" column="appointment_number"/>
-        <property name="status" type="java.lang.String" column="status"/>
+        <property name="status" column="status">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
         <property name="startDateTime" type="java.util.Date" column="start_date_time"/>
         <property name="endDateTime" type="java.util.Date" column="end_date_time"/>
-        <property name="appointmentsKind" type="java.lang.String" column="appointment_kind"/>
+        <property name="appointmentsKind" column="appointment_kind">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.model.AppointmentKind</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
         <property name="comments" type="java.lang.String" column="comments"/>
 
         <property name="dateCreated" type="java.util.Date" column="date_created"/>

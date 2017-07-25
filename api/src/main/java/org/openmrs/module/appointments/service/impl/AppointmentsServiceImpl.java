@@ -25,4 +25,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointmentDao.getAllAppointments();
     }
 
+    @Override
+    public List<Appointment> Search(Appointment appointment) {
+        return appointmentDao.search(appointment);
+    }
+
 }

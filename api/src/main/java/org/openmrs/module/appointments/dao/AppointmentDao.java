@@ -10,4 +10,6 @@ public interface AppointmentDao {
 
     @Transactional
     void save(Appointment appointmentService);
+
+    List<Appointment> search(Appointment appointment);
 }

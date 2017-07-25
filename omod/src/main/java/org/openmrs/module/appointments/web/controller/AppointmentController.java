@@ -32,10 +32,17 @@ public class AppointmentController {
         List<AppointmentDefaultResponse> response = appointmentMapper.constructResponse(appointments);
         return response;
     }
+    @RequestMapping( method = RequestMethod.POST, value = "search")
+    @ResponseBody
+    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
+        Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
+        List<Appointment> appointments =  appointmentsService.Search(appointment);
+        return appointmentMapper.constructResponse(appointments);
+    }
 
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
-    public void createAppointmentService( @Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
+    public void createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
         if(StringUtils.isBlank(appointmentPayload.getPatientUuid()))
             throw new RuntimeException("Patient should not be empty");
         Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);

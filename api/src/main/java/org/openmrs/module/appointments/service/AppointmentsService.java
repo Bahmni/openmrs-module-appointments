@@ -11,5 +11,7 @@ public interface AppointmentsService {
     Appointment save(Appointment appointment);
 
     List<Appointment> getAllAppointments();
+
+    List<Appointment> Search(Appointment appointment);
 }
 

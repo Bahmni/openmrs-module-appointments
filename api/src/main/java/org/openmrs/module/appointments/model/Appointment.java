@@ -16,10 +16,10 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
     private Patient patient;
     private AppointmentService service;
     private AppointmentServiceType serviceType;
-    private String status;
+    private AppointmentStatus status;
     private Date startDateTime;
     private Date endDateTime;
-    private String appointmentsKind;
+    private AppointmentKind appointmentsKind;
     private String comments;
 
     public String getComments() {
@@ -30,11 +30,11 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
         this.comments = comments;
     }
 
-    public String getAppointmentsKind() {
+    public AppointmentKind getAppointmentsKind() {
         return appointmentsKind;
     }
 
-    public void setAppointmentsKind(String appointmentsKind) {
+    public void setAppointmentsKind(AppointmentKind appointmentsKind) {
         this.appointmentsKind = appointmentsKind;
     }
 
@@ -54,11 +54,11 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
         this.startDateTime = startDateTime;
     }
 
-    public String getStatus() {
+    public AppointmentStatus getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
 

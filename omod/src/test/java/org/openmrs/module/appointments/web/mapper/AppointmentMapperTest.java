@@ -8,6 +8,8 @@ import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -30,6 +32,8 @@ public class AppointmentMapperTest {
         Appointment appointment = new Appointment();
         Patient patient = new Patient();
         appointment.setPatient(patient);
+        appointment.setAppointmentsKind(AppointmentKind.Scheduled);
+        appointment.setStatus(AppointmentStatus.Scheduled);
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
         
