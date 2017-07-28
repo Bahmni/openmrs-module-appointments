@@ -18,6 +18,7 @@ public class AppointmentServicePayload {
     private Integer durationMins;
     private String locationUuid;
     private String uuid;
+    private String color;
     private List<ServiceWeeklyAvailabilityPayload> weeklyAvailability;
     private Set<AppointmentServiceTypePayload> serviceTypes;
 
@@ -108,5 +109,13 @@ public class AppointmentServicePayload {
 
     public void setWeeklyAvailability(List<ServiceWeeklyAvailabilityPayload> weeklyAvailability) {
         this.weeklyAvailability = weeklyAvailability;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

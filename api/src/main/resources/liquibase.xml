@@ -202,4 +202,16 @@
         </preConditions>
         <dropIndex tableName="appointment_service" indexName="name_UNIQUE"/>
     </changeSet>
+
+    <changeSet id="add_color_column_to_appointment_service_table-201707251432" author="Santhosh, Maharjun">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="color" tableName="appointment_service"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE appointment_service
+            ADD COLUMN color varchar(8) NULL AFTER duration_mins;
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -21,6 +21,7 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     private Integer maxAppointmentsLimit;
     private Integer durationMins;
     private Location location;
+    private String  color;
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
     private Set<AppointmentServiceType> serviceTypes;
 
@@ -143,5 +144,13 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
 
     public void setServiceTypes(Set<AppointmentServiceType> serviceTypes) {
         this.serviceTypes = serviceTypes;
+    }
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
     }
 }

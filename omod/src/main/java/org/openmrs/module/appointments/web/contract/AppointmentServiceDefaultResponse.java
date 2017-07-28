@@ -13,6 +13,7 @@ public class AppointmentServiceDefaultResponse {
 	private Integer durationMins;
 	private Map location;
 	private String uuid;
+	private String color;
 	private String creatorName;
 
 	public Integer getAppointmentServiceId() {
@@ -103,4 +104,11 @@ public class AppointmentServiceDefaultResponse {
 		this.creatorName = creatorName;
 	}
 
+	public String getColor() {
+		return color;
+	}
+
+	public void setColor(String color) {
+		this.color = color;
+	}
 }

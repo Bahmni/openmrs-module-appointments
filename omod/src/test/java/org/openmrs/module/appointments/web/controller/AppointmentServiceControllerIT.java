@@ -43,7 +43,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"maxAppointmentsLimit\":\"30\"" +
+                "\"maxAppointmentsLimit\":\"30\"," +
+                "\"color\":\"#00ff00\"" +
                 "}";
 
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
@@ -54,6 +55,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(asResponse.getEndTime(), "17:30:00");
         assertEquals(asResponse.getDurationMins().intValue(), 30);
         assertEquals(asResponse.getMaxAppointmentsLimit().intValue(), 30);
+        assertEquals(asResponse.getColor(), "#00ff00");
         assertNull(asResponse.getWeeklyAvailability());
     }
 
@@ -84,6 +86,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"maxAppointmentsLimit\":\"30\"," +
+                "\"color\":\"#0000ff\"," +
                 "\"weeklyAvailability\": [{ \"dayOfWeek\": \"MONDAY\", \"startTime\":\"09:00:00\", \"endTime\":\"17:30:00\", \"maxAppointmentsLimit\":\"10\" }]" +
                 "}";
 
@@ -95,6 +98,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("17:30:00", asResponse.getEndTime());
         assertEquals(30, asResponse.getDurationMins().intValue());
         assertEquals(30, asResponse.getMaxAppointmentsLimit().intValue());
+        assertEquals("#0000ff", asResponse.getColor());
         assertNotNull(asResponse.getWeeklyAvailability());
         assertEquals(1, asResponse.getWeeklyAvailability().size());
 
@@ -114,6 +118,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
             "\"endTime\":\"17:30:00\"," +
             "\"durationMins\":\"30\"," +
+            "\"color\":\"#fff000\"," +
             "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
             "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
             "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +

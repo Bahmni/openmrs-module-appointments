@@ -35,6 +35,7 @@ public class AppointmentServiceMapper {
         appointmentService.setStartTime(appointmentServicePayload.getStartTime());
         appointmentService.setEndTime(appointmentServicePayload.getEndTime());
         appointmentService.setMaxAppointmentsLimit(appointmentServicePayload.getMaxAppointmentsLimit());
+        appointmentService.setColor(appointmentServicePayload.getColor());
 
         String locationUuid = appointmentServicePayload.getLocationUuid();
         Location location = locationService.getLocationByUuid(locationUuid);
@@ -114,6 +115,7 @@ public class AppointmentServiceMapper {
         asResponse.setDescription(as.getDescription());
         asResponse.setDurationMins(as.getDurationMins());
         asResponse.setMaxAppointmentsLimit(as.getMaxAppointmentsLimit());
+        asResponse.setColor(as.getColor());
 
         Map specialityMap = new HashMap();
         Speciality speciality = as.getSpeciality();
