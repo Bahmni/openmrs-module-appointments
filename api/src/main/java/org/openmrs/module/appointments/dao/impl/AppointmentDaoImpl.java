@@ -27,7 +27,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Transactional
     @Override
     public void save(Appointment appointment) {
+
+        if(appointment.getAppointmentNumber() == null) {
+            appointment.setAppointmentNumber(generateAppointmentNumber());
+        }
         sessionFactory.getCurrentSession().saveOrUpdate(appointment);
+    }
+
+    private String generateAppointmentNumber() {
+        // placeholder for generating appointment numbers
+        return "0000";
     }
 
     @Override
