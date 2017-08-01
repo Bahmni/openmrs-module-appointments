@@ -128,11 +128,16 @@ public class AppointmentServiceControllerTest {
         appointmentService.setName("serviceName");
         when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
         when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = new AppointmentServiceFullResponse();
+        when(appointmentServiceMapper.constructResponse(appointmentService)).thenReturn(appointmentServiceFullResponse);
 
-        appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
+        ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
 
         verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
         verify(appointmentServiceService, times(1)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
+        assertNotNull(response);
+        assertEquals(appointmentServiceFullResponse, response.getBody());
     }
 
     @Test
@@ -145,10 +150,35 @@ public class AppointmentServiceControllerTest {
         appointmentService.setVoided(true);
         when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
         when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = new AppointmentServiceFullResponse();
+        when(appointmentServiceMapper.constructResponse(appointmentService)).thenReturn(appointmentServiceFullResponse);
 
-        appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
+        ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
 
         verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
         verify(appointmentServiceService, times(0)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
+        assertNotNull(response);
+        assertEquals(appointmentServiceFullResponse, response.getBody());
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenThereAreFutureAppointmentsForTheServiceTryingToDelete() throws Exception {
+        String appointmentServiceUuid = "appointmentServiceUuid";
+        String voidReason = "voidReason";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        String exceptionMessage = "Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it";
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenThrow(new RuntimeException(exceptionMessage));
+
+        ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
+
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(1)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(0)).constructResponse(appointmentService);
+        assertNotNull(response);
+        assertEquals(exceptionMessage, ((RuntimeException)response.getBody()).getMessage());
     }
 }

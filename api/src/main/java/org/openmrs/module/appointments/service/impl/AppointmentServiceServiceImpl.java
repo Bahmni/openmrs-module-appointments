@@ -2,11 +2,14 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
+import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,6 +23,9 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
+
+    @Autowired
+    AppointmentsService appointmentsService;
 
     @Override
     public AppointmentService save(AppointmentService appointmentService) {
@@ -42,6 +48,10 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
 
     @Override
     public AppointmentService voidAppointmentService(AppointmentService appointmentService, String voidReason) {
+        List<Appointment> allFutureAppointmentsForService = appointmentsService.getAllFutureAppointmentsForService(appointmentService);
+        if (allFutureAppointmentsForService.size() > 0) {
+            throw new RuntimeException("Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it");
+        }
         setVoidInfoForAppointmentService(appointmentService, voidReason);
         return appointmentServiceDao.save(appointmentService);
     }

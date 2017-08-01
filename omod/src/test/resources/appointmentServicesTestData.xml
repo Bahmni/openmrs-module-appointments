@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
     <person person_id="3" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75e04d42-3ca8-11e3-bf2b-0800271c1b77"/>
+    <patient patient_id="1" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
 
     <users user_id="1" person_id="3" system_id="3-6" username="superuser" retired="false"
            password="ff6d1655327d385e11a04e1632b4f33ceb8fafd2" salt="5d32c5fd9fde391c755f1f4dfd5e1d6e3debe6"
@@ -17,7 +18,12 @@
     <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="1"/>
 
+    <appointment_service appointment_service_id="3" name="Ortho" description="ortho services" start_time="09:00:00" end_time="16:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece24560000"
+                         speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
+
     <appointment_service_weekly_availability service_weekly_availability_id="1" service_id="1" day_of_week="MONDAY" start_time="09:00:00" end_time="17:00:00" uuid="c36006d4-9fcc-4f20-866b-0ece245615b1"
                                             max_appointments_limit="4" creator="1" voided="0"/>
-
+    <patient_appointment patient_appointment_id="2" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1111"/>
+    <patient_appointment patient_appointment_id="3" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c12222"/>
+    <patient_appointment patient_appointment_id="4" patient_id ="1" appointment_service_id="3" start_date_time="2008-08-15 13:00:00.0" end_date_time="2008-08-15 14:00:00.0" creator="1" date_created="2008-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13333"/>
 </dataset>

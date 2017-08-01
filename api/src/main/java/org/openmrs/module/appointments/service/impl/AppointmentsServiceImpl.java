@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,4 +31,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointmentDao.search(appointment);
     }
 
+    @Override
+    public List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService) {
+        return appointmentDao.getAllFutureAppointmentsForService(appointmentService);
+    }
 }

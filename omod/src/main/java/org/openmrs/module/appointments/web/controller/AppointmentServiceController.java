@@ -63,11 +63,18 @@ public class AppointmentServiceController {
 
     @RequestMapping( method = RequestMethod.DELETE)
     @ResponseBody
-    public void voidAppointmentService(@RequestParam(value = "uuid", required = true) String appointmentServiceUuid, @RequestParam(value = "void_reason", required = false) String voidReason ) {
+    public ResponseEntity<Object> voidAppointmentService(@RequestParam(value = "uuid", required = true) String appointmentServiceUuid, @RequestParam(value = "void_reason", required = false) String voidReason ) {
         AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid);
         if (appointmentService.getVoided()){
-            return;
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+            return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
         }
-        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
+        try {
+            AppointmentService appointmentService1 = appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService1);
+            return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+        }
     }
 }

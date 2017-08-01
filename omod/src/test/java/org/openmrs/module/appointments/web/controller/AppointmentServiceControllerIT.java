@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
@@ -27,6 +28,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentServiceService appointmentServiceService;
+
+    @Autowired
+    AppointmentsService appointmentsService;
 
     @Before
     public void setUp() throws Exception {
@@ -176,18 +180,53 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypes() throws Exception {
-        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        String appointmentServiceUuid = "c36006d4-9fbb-4f20-866b-0ece24560000";
+        Parameter uuid = new Parameter("uuid", appointmentServiceUuid);
         Parameter voidReason = new Parameter("void_reason", "webservice call");
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid, voidReason));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
+        SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
+        assertNotNull(responseObject);
+        assertEquals(appointmentServiceUuid, responseObject.get("uuid"));
     }
 
     @Test
     public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypesWitoutVoidReason() throws Exception {
-        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        String appointmentServiceUuid = "c36006d4-9fbb-4f20-866b-0ece24560000";
+        Parameter uuid = new Parameter("uuid", appointmentServiceUuid);
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
+        SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
+        assertNotNull(responseObject);
+        assertEquals(appointmentServiceUuid, responseObject.get("uuid"));
+    }
+
+    @Test
+    public void shouldTheDeleteServiceBeIdempotent() throws Exception {
+        String voidedServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615b1";
+        Parameter uuid = new Parameter("uuid", voidedServiceUuid);
+        MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
+        assertNotNull(responseObject);
+        assertEquals(voidedServiceUuid, responseObject.get("uuid"));
+
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenThereAreFutureAppointmentsForAServiceAndTryingToDeleteService() throws Exception {
+        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        Parameter voidReason = new Parameter("void_reason", "webservice call");
+
+        MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid, voidReason));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+        SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
+        assertNotNull(responseObject);
+        assertEquals("There are appointments in future against this service. Please cancel those appointments before deleting this service. After deleting the service, you will not be able to see any appts. for that service", responseObject.get("message"));
+
     }
 }

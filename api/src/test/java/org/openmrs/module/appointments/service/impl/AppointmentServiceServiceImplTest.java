@@ -10,15 +10,18 @@ import org.mockito.*;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
+import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
+import org.openmrs.module.appointments.service.AppointmentsService;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -39,6 +42,9 @@ public class AppointmentServiceServiceImplTest{
 
     @Mock
     private AppointmentServiceDao appointmentServiceDao;
+
+    @Mock
+    private AppointmentsService appointmentsService;
 
     @InjectMocks
     AppointmentServiceServiceImpl appointmentServiceService;
@@ -200,5 +206,27 @@ public class AppointmentServiceServiceImplTest{
         expectedException.expectMessage("The service 'serviceName' is already present");
 
         appointmentServiceService.save(appointmentService);
+    }
+
+    @Test
+    public void shouldThrowAnExceptionWhenAppointmentServiceHasFutureAppointments() throws Exception {
+        String voidReason = "voidReason";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName("name");
+
+        ArrayList<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuin");
+        appointments.add(appointment);
+        when(appointmentsService.getAllFutureAppointmentsForService(appointmentService)).thenReturn(appointments);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it");
+
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
+
+        Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentService);
+        Mockito.verify(appointmentServiceDao, times(0)).save(captor.capture());
     }
 }

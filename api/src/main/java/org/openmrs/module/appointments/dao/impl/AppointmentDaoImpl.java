@@ -6,10 +6,13 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Date;
 import java.util.List;
 
 @Component
@@ -56,6 +59,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if(appointment.getProvider()!=null) criteria.createCriteria("provider").add(
                 Example.create(appointment.getProvider()));
 
+        return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("service", appointmentService));
+        criteria.add(Restrictions.gt("endDateTime", new Date()));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
         return criteria.list();
     }
 }

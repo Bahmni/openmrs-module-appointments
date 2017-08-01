@@ -21,4 +21,8 @@
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="true" voided_by="1" void_reason=""/>
 
     <patient_appointment patient_appointment_id="1" patient_id ="1" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b77"/>
+    <patient_appointment patient_appointment_id="2" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1111"/>
+    <patient_appointment patient_appointment_id="3" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c12222"/>
+    <patient_appointment patient_appointment_id="5" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13344"/>
+    <patient_appointment patient_appointment_id="6" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Cancelled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13345"/>
 </dataset>
