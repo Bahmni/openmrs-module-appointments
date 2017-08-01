@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -21,11 +20,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.Set;
+import java.util.*;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -89,10 +87,10 @@ public class AppointmentServiceServiceImplTest{
         appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
-        Assert.assertEquals(captor.getValue().getVoided(), true);
-        Assert.assertNotNull(captor.getValue().getDateVoided());
-        Assert.assertEquals(captor.getValue().getVoidedBy(), authenticatedUser);
-        Assert.assertEquals(captor.getValue().getVoidReason(), voidReason);
+        assertEquals(captor.getValue().getVoided(), true);
+        assertNotNull(captor.getValue().getDateVoided());
+        assertEquals(captor.getValue().getVoidedBy(), authenticatedUser);
+        assertEquals(captor.getValue().getVoidReason(), voidReason);
     }
 
 
@@ -121,26 +119,32 @@ public class AppointmentServiceServiceImplTest{
         appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
-        Assert.assertEquals(true, captor.getValue().getVoided());
-        Assert.assertNotNull(captor.getValue().getDateVoided());
-        Assert.assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
-        Assert.assertEquals(voidReason, captor.getValue().getVoidReason());
+        assertEquals(true, captor.getValue().getVoided());
+        assertNotNull(captor.getValue().getDateVoided());
+        assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
+        assertEquals(voidReason, captor.getValue().getVoidReason());
+        List toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
+        Collections.sort(toSort, new Comparator<ServiceWeeklyAvailability>() {
+            public int compare(ServiceWeeklyAvailability o1, ServiceWeeklyAvailability o2) {
 
-        Iterator<ServiceWeeklyAvailability> iterator = captor.getValue().getWeeklyAvailability(true).iterator();
+                return (o1.getId() > o2.getId() ? 1 : -1);
+            }
+        });
+        Iterator<ServiceWeeklyAvailability> iterator = toSort.iterator();
         ServiceWeeklyAvailability firstWeeklyAvailability = iterator.next();
         ServiceWeeklyAvailability secondWeeklyAvailability = iterator.next();
 
-        Assert.assertEquals( 1, firstWeeklyAvailability.getId(), 0);
-        Assert.assertEquals( true, firstWeeklyAvailability.getVoided());
-        Assert.assertEquals( voidReason, firstWeeklyAvailability.getVoidReason());
-        Assert.assertEquals( authenticatedUser, firstWeeklyAvailability.getVoidedBy());
-        Assert.assertNotNull(firstWeeklyAvailability.getVoidedBy());
+        assertEquals( 1, firstWeeklyAvailability.getId(), 0);
+        assertEquals( true, firstWeeklyAvailability.getVoided());
+        assertEquals( voidReason, firstWeeklyAvailability.getVoidReason());
+        assertEquals( authenticatedUser, firstWeeklyAvailability.getVoidedBy());
+        assertNotNull(firstWeeklyAvailability.getVoidedBy());
 
-        Assert.assertEquals( 2, secondWeeklyAvailability.getId(), 0);
-        Assert.assertEquals( true, secondWeeklyAvailability.getVoided());
-        Assert.assertEquals( voidReason, secondWeeklyAvailability.getVoidReason());
-        Assert.assertEquals( authenticatedUser, secondWeeklyAvailability.getVoidedBy());
-        Assert.assertNotNull(secondWeeklyAvailability.getVoidedBy());
+        assertEquals( 2, secondWeeklyAvailability.getId(), 0);
+        assertEquals( true, secondWeeklyAvailability.getVoided());
+        assertEquals( voidReason, secondWeeklyAvailability.getVoidReason());
+        assertEquals( authenticatedUser, secondWeeklyAvailability.getVoidedBy());
+        assertNotNull(secondWeeklyAvailability.getVoidedBy());
     }
 
     @Test
@@ -166,26 +170,34 @@ public class AppointmentServiceServiceImplTest{
         appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
-        Assert.assertEquals(true, captor.getValue().getVoided());
-        Assert.assertNotNull(captor.getValue().getDateVoided());
-        Assert.assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
-        Assert.assertEquals(voidReason, captor.getValue().getVoidReason());
+        assertEquals(true, captor.getValue().getVoided());
+        assertNotNull(captor.getValue().getDateVoided());
+        assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
+        assertEquals(voidReason, captor.getValue().getVoidReason());
 
-        Iterator<AppointmentServiceType> iterator = captor.getValue().getServiceTypes().iterator();
+        serviceTypes = captor.getValue().getServiceTypes();
+        List toSort = new ArrayList<>(serviceTypes);
+        Collections.sort(toSort, new Comparator<AppointmentServiceType>() {
+            public int compare(AppointmentServiceType o1, AppointmentServiceType o2) {
+
+                return (o1.getId() > o2.getId() ? 1 : -1);
+            }
+        });
+        Iterator<AppointmentServiceType> iterator = toSort.iterator();
         AppointmentServiceType serviceType1 = iterator.next();
         AppointmentServiceType serviceType2 = iterator.next();
 
-        Assert.assertEquals( 1, serviceType1.getId(), 0);
-        Assert.assertEquals( true, serviceType1.getVoided());
-        Assert.assertEquals( voidReason, serviceType1.getVoidReason());
-        Assert.assertEquals( authenticatedUser, serviceType1.getVoidedBy());
-        Assert.assertNotNull(serviceType1.getVoidedBy());
+        assertEquals( 1, serviceType1.getId().intValue());
+        assertEquals( true, serviceType1.getVoided());
+        assertEquals( voidReason, serviceType1.getVoidReason());
+        assertEquals( authenticatedUser, serviceType1.getVoidedBy());
+        assertNotNull(serviceType1.getVoidedBy());
 
-        Assert.assertEquals( 2, serviceType2.getId(), 0);
-        Assert.assertEquals( true, serviceType2.getVoided());
-        Assert.assertEquals( voidReason, serviceType2.getVoidReason());
-        Assert.assertEquals( authenticatedUser, serviceType2.getVoidedBy());
-        Assert.assertNotNull(serviceType2.getVoidedBy());
+        assertEquals( 2, serviceType2.getId().intValue());
+        assertEquals( true, serviceType2.getVoided());
+        assertEquals( voidReason, serviceType2.getVoidReason());
+        assertEquals( authenticatedUser, serviceType2.getVoidedBy());
+        assertNotNull(serviceType2.getVoidedBy());
     }
 
     @Test

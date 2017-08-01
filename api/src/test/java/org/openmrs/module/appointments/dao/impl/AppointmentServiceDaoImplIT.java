@@ -6,8 +6,11 @@ import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.sql.Time;
+import java.time.DayOfWeek;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -98,5 +101,33 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
         assertEquals("Consultation", appointmentService.getName());
         assertEquals(false, appointmentService.getVoided());
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentService.getUuid());
+    }
+
+    @Test
+    public void shouldUpdateAppointmentService() throws Exception {
+        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        assertNotNull(appointmentService);
+        assertEquals(4, appointmentService.getMaxAppointmentsLimit().intValue());
+        assertEquals(1, appointmentService.getWeeklyAvailability().size());
+        assertEquals(1, appointmentService.getServiceTypes().size());
+        appointmentService.setMaxAppointmentsLimit(40);
+        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        availability.setDayOfWeek(DayOfWeek.SATURDAY);
+        availability.setStartTime(Time.valueOf("10:00:00"));
+        availability.setEndTime(Time.valueOf("11:00:00"));
+        availability.setService(appointmentService);
+        Set avbList = appointmentService.getWeeklyAvailability(true);
+        avbList.add(availability);
+        AppointmentServiceType serviceType = new AppointmentServiceType();
+        serviceType.setName("Second stage of hallucination");
+        serviceType.setAppointmentService(appointmentService);
+        Set serviceTypes = appointmentService.getServiceTypes();
+        serviceTypes.add(serviceType);
+        appointmentServiceDao.save(appointmentService);
+        appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        assertEquals(40, appointmentService.getMaxAppointmentsLimit().intValue());
+        assertNotNull(appointmentService);
+        assertEquals(2, appointmentService.getWeeklyAvailability().size());
+        assertEquals(2, appointmentService.getServiceTypes().size());
     }
 }

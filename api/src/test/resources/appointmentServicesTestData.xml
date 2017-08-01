@@ -17,4 +17,8 @@
 
     <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="true" voided_by="1" void_reason=""/>
+    <appointment_service_weekly_availability service_weekly_availability_id="1" service_id="1" voided="false" day_of_week="SUNDAY"  start_time="09:00:00" end_time="17:00:00" max_appointments_limit="4" uuid="c36006d4-9fbb-4f20-866b-0fce245615b1" creator="1"/>
+    <appointment_service_weekly_availability service_weekly_availability_id="2" service_id="1" voided="true" day_of_week="MONDAY"  start_time="09:00:00" end_time="17:00:00" max_appointments_limit="4" uuid="c36006d4-9fbb-4e20-866b-0ece245615b1" creator="1" void_reason="" />
+    <appointment_service_type appointment_service_type_id="1" name="Initial Consultaion" appointment_service_id="1" duration_mins="30" creator="1" voided="0" uuid="c36006d5-9fcc-4f20-866b-0ece245615b1"
+                              date_created="2017-07-15 15:46:47.0"/>
 </dataset>

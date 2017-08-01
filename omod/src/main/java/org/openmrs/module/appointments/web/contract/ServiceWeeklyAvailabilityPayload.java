@@ -4,11 +4,20 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 
 public class ServiceWeeklyAvailabilityPayload {
+	private String uuid;
 	private Time startTime;
 	private Time endTime;
 	private Integer maxAppointmentsLimit;
 	private DayOfWeek dayOfWeek;
+	private boolean voided;
 
+	public String getUuid() {
+		return uuid;
+	}
+
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
+	}
 
 	public Time getStartTime() {
 		return startTime;
@@ -40,5 +49,13 @@ public class ServiceWeeklyAvailabilityPayload {
 
 	public void setDayOfWeek(DayOfWeek dayOfWeek) {
 		this.dayOfWeek = dayOfWeek;
+	}
+
+	public boolean isVoided() {
+		return voided;
+	}
+
+	public void setVoided(boolean voided) {
+		this.voided = voided;
 	}
 }

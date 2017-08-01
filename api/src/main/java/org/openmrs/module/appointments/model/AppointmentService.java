@@ -5,6 +5,7 @@ import org.openmrs.Location;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -131,8 +132,12 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     }
 
     public void setWeeklyAvailability(
-            Set<ServiceWeeklyAvailability> weeklyAvailability) {
-        this.weeklyAvailability = weeklyAvailability;
+            Set<ServiceWeeklyAvailability> availability) {
+        if (this.weeklyAvailability == null) {
+            this.weeklyAvailability = new HashSet<>();
+        }
+            this.weeklyAvailability.clear();
+            this.weeklyAvailability.addAll(availability);
     }
 
     public Set<AppointmentServiceType> getServiceTypes() {
@@ -143,7 +148,11 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     }
 
     public void setServiceTypes(Set<AppointmentServiceType> serviceTypes) {
-        this.serviceTypes = serviceTypes;
+        if (this.serviceTypes == null) {
+            this.serviceTypes = new HashSet<>();
+        }
+        this.serviceTypes.clear();
+        this.serviceTypes.addAll(serviceTypes);
     }
 
     public String getColor() {

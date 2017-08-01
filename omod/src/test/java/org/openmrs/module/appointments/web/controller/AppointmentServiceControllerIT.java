@@ -226,7 +226,28 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(400, response.getStatus());
         SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
         assertNotNull(responseObject);
-        assertEquals("There are appointments in future against this service. Please cancel those appointments before deleting this service. After deleting the service, you will not be able to see any appts. for that service", responseObject.get("message"));
+        assertEquals(
+                "There are appointments in future against this service. Please cancel those appointments before deleting this service. After deleting the service, you will not be able to see any appts. for that service",
+                responseObject.get("message"));
+    }
 
+    @Test
+    public void shouldUpdateService() throws Exception {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        assertNotNull(appointmentService);
+        String uuid = appointmentService.getUuid();
+        String dataJson = "{\"name\":\"Chemotherapy\",\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:30:00\"," +
+                "\"durationMins\":\"30\"," +
+                "\"uuid\":\""+ uuid +"\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"serviceTypes\": [{ \"name\": \"stage 1\", \"duration\":\"20\", \"uuid\":\"c36006d5-9fcc-4f20-866b-0ece245615b1\" }]" +
+                "}";
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        assertEquals("Chemotherapy",appointmentService.getName());
+        assertEquals(uuid, appointmentService.getUuid());
+        assertEquals(1, appointmentService.getServiceTypes().size());
     }
 }

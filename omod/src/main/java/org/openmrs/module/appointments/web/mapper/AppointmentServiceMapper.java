@@ -7,6 +7,7 @@ import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,10 +25,15 @@ public class AppointmentServiceMapper {
     @Autowired
     SpecialityService specialityService;
 
+    @Autowired
+    AppointmentServiceService appointmentServiceService;
+
     public AppointmentService getAppointmentServiceFromPayload(AppointmentServicePayload appointmentServicePayload) {
-        AppointmentService appointmentService = new AppointmentService();
+        AppointmentService appointmentService;
         if (!StringUtils.isBlank(appointmentServicePayload.getUuid())) {
-            appointmentService.setUuid(appointmentServicePayload.getUuid());
+            appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentServicePayload.getUuid());
+        }else{
+            appointmentService = new AppointmentService();
         }
         appointmentService.setName(appointmentServicePayload.getName());
         appointmentService.setDescription(appointmentServicePayload.getDescription());
@@ -62,7 +68,11 @@ public class AppointmentServiceMapper {
     }
 
     private AppointmentServiceType constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentService appointmentService) {
-        AppointmentServiceType serviceType = new AppointmentServiceType();
+        AppointmentServiceType serviceType;
+        if(ast.getUuid() != null)
+            serviceType = getServiceTypeByUuid(appointmentService.getServiceTypes(), ast.getUuid());
+        else
+            serviceType = new AppointmentServiceType();
         serviceType.setName(ast.getName());
         serviceType.setDuration(ast.getDuration());
         serviceType.setAppointmentService(appointmentService);
@@ -71,14 +81,29 @@ public class AppointmentServiceMapper {
     }
 
     private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {
-        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        ServiceWeeklyAvailability availability;
+        if(avb.getUuid() != null)
+            availability = getAvailabilityByUuid(appointmentService.getWeeklyAvailability(), avb.getUuid());
+        else
+            availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(avb.getDayOfWeek());
         availability.setStartTime(avb.getStartTime());
         availability.setEndTime(avb.getEndTime());
         availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
         availability.setService(appointmentService);
+        availability.setVoided(avb.isVoided());
 
         return availability;
+    }
+
+    private ServiceWeeklyAvailability getAvailabilityByUuid(Set<ServiceWeeklyAvailability> weeklyAvailabilities, String availabilityUuid) {
+           return weeklyAvailabilities.stream()
+                    .filter(avb -> avb.getUuid().equals(availabilityUuid)).findAny().get();
+    }
+
+    private AppointmentServiceType getServiceTypeByUuid(Set<AppointmentServiceType> serviceTypes, String serviceTypeUuid) {
+        return serviceTypes.stream()
+                .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
     public List<AppointmentServiceDefaultResponse> constructResponse(List<AppointmentService> appointmentServices) {
