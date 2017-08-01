@@ -3,6 +3,8 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
@@ -21,6 +23,9 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentsService appointmentsService;
+
+    @Autowired
+    private AppointmentServiceService appointmentServiceService;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -47,5 +52,13 @@ public class AppointmentController {
             throw new RuntimeException("Patient should not be empty");
         Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
         appointmentsService.save(appointment);
+    }
+
+    @RequestMapping( method = RequestMethod.GET)
+    @ResponseBody
+    public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(@RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
+        AppointmentServiceType appointmentServiceType = appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        List<Appointment> appointments = appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
+        return appointmentMapper.constructResponse(appointments);
     }
 }

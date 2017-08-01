@@ -52,6 +52,11 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
         return appointmentServiceDao.save(appointmentService);
     }
 
+    @Override
+    public AppointmentServiceType getAppointmentServiceTypeByUuid(String serviceTypeUuid) {
+        return appointmentServiceDao.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+    }
+
     private void setVoidInfoForAppointmentService(AppointmentService appointmentService, String voidReason) {
         setVoidInfoForService(appointmentService, voidReason);
         setVoidInfoForWeeklyAvailability(appointmentService, voidReason);

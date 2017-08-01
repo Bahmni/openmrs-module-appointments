@@ -232,7 +232,7 @@ public class AppointmentServiceServiceImplTest{
 
         ArrayList<Appointment> appointments = new ArrayList<>();
         Appointment appointment = new Appointment();
-        appointment.setUuid("appointmentUuin");
+        appointment.setUuid("appointmentUuid");
         appointments.add(appointment);
         when(appointmentsService.getAllFutureAppointmentsForService(appointmentService)).thenReturn(appointments);
 
@@ -243,5 +243,13 @@ public class AppointmentServiceServiceImplTest{
 
         Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentService);
         Mockito.verify(appointmentServiceDao, times(0)).save(captor.capture());
+    }
+
+    @Test
+    public void shouldGetAppointmentServiceTypebyUuid() throws Exception {
+        String serviceTypeUuid = "uuid";
+        appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+
+        Mockito.verify(appointmentServiceDao, times(1)).getAppointmentServiceTypeByUuid(serviceTypeUuid);
     }
 }

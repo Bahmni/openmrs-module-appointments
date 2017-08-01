@@ -3,10 +3,13 @@ package org.openmrs.module.appointments.web.controller;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 
 import java.util.List;
 
@@ -51,5 +54,15 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
         assertEquals(2, asResponses.size());
+    }
+
+    @Test
+    public void shouldGetAllNonVoidedNonCncelledFutureAppointmentsforaServiceType() throws Exception {
+        String requestURI = "/rest/v1/appointment";
+        String serviceTypeUuid = "678906e5-9fbb-4f20-866b-0ece24564578";
+        MockHttpServletRequest getRequest = newGetRequest(requestURI, new Parameter("appointmentServiceTypeUuid", serviceTypeUuid));
+        List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest), new TypeReference<List<AppointmentDefaultResponse>>() {});
+
+        assertEquals(1, asResponse.size());
     }
 }

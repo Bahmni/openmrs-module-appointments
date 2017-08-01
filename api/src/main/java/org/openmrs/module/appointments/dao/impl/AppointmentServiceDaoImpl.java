@@ -7,6 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,5 +50,10 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         return (AppointmentService) criteria.uniqueResult();
     }
 
-
+    @Override
+    public AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceType.class, "appointmentServiceType");
+        criteria.add(Restrictions.eq("uuid", uuid));
+        return (AppointmentServiceType) criteria.uniqueResult();
+    }
 }

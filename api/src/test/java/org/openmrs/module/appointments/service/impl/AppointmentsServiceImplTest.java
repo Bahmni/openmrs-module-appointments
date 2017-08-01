@@ -9,6 +9,7 @@ import org.openmrs.Patient;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
@@ -50,5 +51,16 @@ public class AppointmentsServiceImplTest {
         appointmentsService.getAllFutureAppointmentsForService(appointmentService);
 
         Mockito.verify(appointmentDao, times(1)).getAllFutureAppointmentsForService(appointmentService);
+    }
+
+    @Test
+    public void shouldGetAllFutureAppoitmentsForTheGivenAppointmentServiceType() throws Exception {
+        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+        appointmentServiceType.setUuid("typeUuid");
+        when(appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType)).thenReturn(new ArrayList<>());
+
+        appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
+
+        Mockito.verify(appointmentDao, times(1)).getAllFutureAppointmentsForServiceType(appointmentServiceType);
     }
 }

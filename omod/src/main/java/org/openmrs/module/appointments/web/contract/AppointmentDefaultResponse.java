@@ -76,6 +76,10 @@ public class AppointmentDefaultResponse {
 		this.uuid = uuid;
 	}
 
+	public String getUuid() {
+		return uuid;
+	}
+
 	public Map getProvider() {
 		return provider;
 	}

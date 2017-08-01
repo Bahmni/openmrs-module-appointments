@@ -130,4 +130,12 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
         assertEquals(2, appointmentService.getWeeklyAvailability().size());
         assertEquals(2, appointmentService.getServiceTypes().size());
     }
+
+    @Test
+    public void shouldGetAppointmentServiceTypeByUuid() throws Exception {
+        String serviceTypeUuid = "678906e5-9fbb-4f20-866b-0ece24564578";
+        AppointmentServiceType appointmentServiceType = appointmentServiceDao.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        assertNotNull(appointmentServiceType);
+        assertEquals(serviceTypeUuid, appointmentServiceType.getUuid());
+    }
 }
