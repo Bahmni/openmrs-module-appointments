@@ -83,7 +83,7 @@ public class AppointmentMapper {
     private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
         response.setUuid(a.getUuid());
         response.setStartDateTime(convertTimeToString(a.getStartDateTime()));
-        response.setEndDateTime(convertTimeToString(a.getStartDateTime()));
+        response.setEndDateTime(convertTimeToString(a.getEndDateTime()));
         response.setAppointmentNumber(a.getAppointmentNumber());
         response.setAppointmentsKind(a.getAppointmentsKind().name());
         response.setComments(a.getComments());
