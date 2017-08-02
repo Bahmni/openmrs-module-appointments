@@ -1,6 +1,9 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.Location;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
@@ -16,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
@@ -38,30 +43,6 @@ public class AppointmentMapper {
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
-    }
-
-    private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
-        response.setUuid(a.getUuid());
-        response.setStartDateTime(convertTimeToString(a.getStartDateTime()));
-        response.setEndDateTime(convertTimeToString(a.getStartDateTime()));
-        response.setAppointmentNumber(a.getAppointmentNumber());
-        response.setAppointmentsKind(a.getAppointmentsKind().name());
-        response.setComments(a.getComments());
-        response.setPatientUuid(a.getPatient().getUuid());
-        if (a.getLocation() != null) {
-            response.setLocationUuid(a.getLocation().getUuid());
-        }
-        if (a.getProvider() != null) {
-            response.setProviderUuid(a.getProvider().getUuid());
-        }
-        response.setStatus(a.getStatus().name());
-        response.setUuid(a.getUuid());
-
-        return response;
-    }
-
-    private String convertTimeToString(Date time) {
-        return time != null ? time.toString() : new String();
     }
 
     public Appointment getAppointmentFromPayload(AppointmentPayload appointmentPayload) {
@@ -98,4 +79,50 @@ public class AppointmentMapper {
         }
         return appointment;
     }
+
+    private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
+        response.setUuid(a.getUuid());
+        response.setStartDateTime(convertTimeToString(a.getStartDateTime()));
+        response.setEndDateTime(convertTimeToString(a.getStartDateTime()));
+        response.setAppointmentNumber(a.getAppointmentNumber());
+        response.setAppointmentsKind(a.getAppointmentsKind().name());
+        response.setComments(a.getComments());
+        response.setPatient(createPatientMap(a.getPatient()));
+        response.setLocation(createLocationMap(a.getLocation()));
+        response.setProvider(createProviderMap(a.getProvider()));
+        response.setStatus(a.getStatus().name());
+        response.setUuid(a.getUuid());
+
+        return response;
+    }
+
+    private Map createProviderMap(Provider p) {
+        Map map = new HashMap();
+        if (p != null) {
+            map.put("name", p.getName());
+            map.put("uuid", p.getUuid());
+        }
+        return map;
+    }
+
+    private Map createLocationMap(Location l) {
+        Map locationMap = new HashMap();
+        if (l != null) {
+            locationMap.put("name", l.getName());
+            locationMap.put("uuid", l.getUuid());
+        }
+        return locationMap;
+    }
+
+    private Map createPatientMap(Patient p) {
+        Map map = new HashMap();
+        map.put("name", p.getPersonName().getFullName());
+        map.put("uuid", p.getUuid());
+        return map;
+    }
+
+    private String convertTimeToString(Date time) {
+        return time != null ? time.toString() : new String();
+    }
+
 }

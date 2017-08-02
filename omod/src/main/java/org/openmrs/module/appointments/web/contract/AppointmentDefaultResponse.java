@@ -1,11 +1,13 @@
 package org.openmrs.module.appointments.web.contract;
 
+import java.util.Map;
+
 public class AppointmentDefaultResponse {
 	private Integer appointmentId;
-	private String providerUuid;
+	private Map provider;
 	private String appointmentNumber;
-	private String locationUuid;
-	private String patientUuid;
+	private Map location;
+	private Map patient;
 	private String status;
 	private String startDateTime;
 	private String endDateTime;
@@ -74,27 +76,27 @@ public class AppointmentDefaultResponse {
 		this.uuid = uuid;
 	}
 
-	public String getProviderUuid() {
-		return providerUuid;
+	public Map getProvider() {
+		return provider;
 	}
 
-	public void setProviderUuid(String providerUuid) {
-		this.providerUuid = providerUuid;
+	public void setProvider(Map provider) {
+		this.provider = provider;
 	}
 
-	public String getLocationUuid() {
-		return locationUuid;
+	public Map getLocation() {
+		return location;
 	}
 
-	public void setLocationUuid(String locationUuid) {
-		this.locationUuid = locationUuid;
+	public void setLocation(Map location) {
+		this.location = location;
 	}
 
-	public String getPatientUuid() {
-		return patientUuid;
+	public Map getPatient() {
+		return patient;
 	}
 
-	public void setPatientUuid(String patientUuid) {
-		this.patientUuid = patientUuid;
+	public void setPatient(Map patient) {
+		this.patient = patient;
 	}
 }

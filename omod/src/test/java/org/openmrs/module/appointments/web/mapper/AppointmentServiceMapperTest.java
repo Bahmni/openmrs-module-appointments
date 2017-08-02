@@ -288,9 +288,16 @@ public class AppointmentServiceMapperTest {
 
         List serviceTypesResponse = appointmentServiceFullResponse.getServiceTypes();
         assertEquals(2, serviceTypesResponse.size());
-        HashMap fullResponseType1 = (HashMap)serviceTypesResponse.get(0);
-        HashMap fullResponseType2 = (HashMap)serviceTypesResponse.get(1);
 
+        HashMap fullResponseType1 = null, fullResponseType2 = null;
+        for (Object r : serviceTypesResponse){
+            HashMap response = (HashMap)r;
+            if (response.get("name").equals(serviceType1.getName())) {
+                fullResponseType1 = response;
+            }else if (response.get("name").equals(serviceType2.getName())) {
+                fullResponseType2 = response;
+            }
+        }
         assertNotNull(fullResponseType1.get("uuid"));
         assertEquals(serviceType1.getName(), fullResponseType1.get("name"));
         assertEquals(serviceType1.getDuration(), fullResponseType1.get("duration"));
