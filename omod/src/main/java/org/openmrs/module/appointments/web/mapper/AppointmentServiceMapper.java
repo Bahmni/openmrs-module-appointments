@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.mapper;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
@@ -76,8 +77,17 @@ public class AppointmentServiceMapper {
         serviceType.setName(ast.getName());
         serviceType.setDuration(ast.getDuration());
         serviceType.setAppointmentService(appointmentService);
-
+        if (ast.getVoided() != null) {
+            setVoidedInfo(serviceType, ast.getVoidedReason());
+        }
         return serviceType;
+    }
+
+    private void setVoidedInfo(AppointmentServiceType serviceType, String voidReason) {
+        serviceType.setVoided(true);
+        serviceType.setVoidReason(voidReason);
+        serviceType.setDateVoided(new Date());
+        serviceType.setVoidedBy(Context.getAuthenticatedUser());
     }
 
     private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {

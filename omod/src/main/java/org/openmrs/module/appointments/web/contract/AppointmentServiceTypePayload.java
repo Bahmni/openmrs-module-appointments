@@ -4,6 +4,8 @@ public class AppointmentServiceTypePayload {
     private String name;
     private Integer duration;
     private String uuid;
+    private Boolean voided;
+    private String voidedReason;
 
     public String getName() {
         return name;
@@ -27,5 +29,21 @@ public class AppointmentServiceTypePayload {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
+    }
+
+    public Boolean getVoided() {
+        return voided;
+    }
+
+    public void setVoided(Boolean voided) {
+        this.voided = voided;
+    }
+
+    public String getVoidedReason() {
+        return voidedReason;
+    }
+
+    public void setVoidedReason(String voidedReason) {
+        this.voidedReason = voidedReason;
     }
 }

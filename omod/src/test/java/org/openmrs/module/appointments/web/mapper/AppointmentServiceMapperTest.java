@@ -2,12 +2,17 @@ package org.openmrs.module.appointments.web.mapper;
 
 import java.util.*;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
+import org.mockito.Matchers;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
+import org.openmrs.User;
 import org.openmrs.api.LocationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
@@ -16,17 +21,19 @@ import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
 
+import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
+import java.util.regex.Matcher;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
+@PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
 public class AppointmentServiceMapperTest {
     @Mock
@@ -44,6 +51,15 @@ public class AppointmentServiceMapperTest {
     private Location location;
 
     private Speciality speciality;
+    private User authenticatedUser;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mockStatic(Context.class);
+        authenticatedUser = new User(8);
+        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+    }
 
     @Test
     public void shouldGetAppointmentServiceFromPayloadWithoutWeeklyAvailability() throws Exception {
@@ -241,6 +257,35 @@ public class AppointmentServiceMapperTest {
                 appointmentServicesResponse.get(1).getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServicesResponse.get(1).getLocation().get("name"));
         assertEquals(speciality.getName(), appointmentServicesResponse.get(1).getSpeciality().get("name"));
+    }
+
+    @Test
+    public void ShouldMapTheVoidedAppointmentServiceTypes() throws Exception {
+        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
+        appointmentServicePayload.setName("Service1");
+        appointmentServicePayload.setWeeklyAvailability(new ArrayList<>());
+        Set<AppointmentServiceTypePayload> serviceTypes = new LinkedHashSet<>();
+        AppointmentServiceTypePayload payloadType1 = new AppointmentServiceTypePayload();
+        payloadType1.setName("Type1");
+        payloadType1.setDuration(15);
+        payloadType1.setVoided(true);
+        String voidedReason = "web services call";
+        payloadType1.setVoidedReason(voidedReason);
+        serviceTypes.add(payloadType1);
+        appointmentServicePayload.setServiceTypes(serviceTypes);
+
+        AppointmentService mappedAppointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        assertEquals(appointmentServicePayload.getName(), mappedAppointmentService.getName());
+        Set<AppointmentServiceType> mappedServiceTypes = mappedAppointmentService.getServiceTypes();
+        Iterator<AppointmentServiceType> iterator = mappedServiceTypes.iterator();
+        AppointmentServiceType mappedServiceType = iterator.next();
+        assertEquals(payloadType1.getName(), mappedServiceType.getName());
+        assertEquals(payloadType1.getDuration(), mappedServiceType.getDuration());
+        assertTrue(mappedServiceType.getVoided());
+        assertEquals(voidedReason, mappedServiceType.getVoidReason());
+        assertEquals(authenticatedUser, mappedServiceType.getVoidedBy());
+        assertNotNull(mappedServiceType.getDateVoided());
+        assertEquals(appointmentServicePayload.getName(), mappedServiceType.getAppointmentService().getName());
     }
 
     @Test
