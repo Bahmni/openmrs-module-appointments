@@ -1,8 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -14,9 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class AppointmentServiceServiceImpl implements AppointmentServiceService {
@@ -30,7 +26,7 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
     @Override
     public AppointmentService save(AppointmentService appointmentService) {
         AppointmentService service = appointmentServiceDao.getNonVoidedAppointmentServiceByName(appointmentService.getName());
-        if(service != null) {
+        if(service != null && !service.getUuid().equals(appointmentService.getUuid())) {
             throw new RuntimeException("The service '" + appointmentService.getName() + "' is already present");
         }
         return appointmentServiceDao.save(appointmentService);

@@ -203,20 +203,23 @@ public class AppointmentServiceServiceImplTest{
     @Test
     public void shouldValidateTheAppointmentServiceAndThrowAnExceptionWhenThereIsNonVoidedAppointmentServiceWithTheSameName() throws Exception {
         String serviceName = "serviceName";
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("uuid");
-        appointmentService.setName(serviceName);
+        AppointmentService existingAppointmentService = new AppointmentService();
+        existingAppointmentService.setUuid("uuid");
+        existingAppointmentService.setName(serviceName);
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
         appointmentServiceType.setId(1);
         appointmentServiceType.setName("type1");
         LinkedHashSet<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
         serviceTypes.add(appointmentServiceType);
-        appointmentService.setServiceTypes(serviceTypes);
-        when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(appointmentService);
+        existingAppointmentService.setServiceTypes(serviceTypes);
+        when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(existingAppointmentService);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("The service 'serviceName' is already present");
-
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setName(serviceName);
+        appointmentService.setUuid("otherUuid");
+    
         appointmentServiceService.save(appointmentService);
     }
 
