@@ -250,6 +250,9 @@
 	<profiles>
 		<profile>
 			<id>IT</id>
+			<activation>
+				<activeByDefault>true</activeByDefault>
+			</activation>
 			<build>
 				<plugins>
 					<plugin>
