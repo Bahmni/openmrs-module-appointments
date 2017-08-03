@@ -246,6 +246,40 @@ public class AppointmentServiceServiceImplTest{
     }
 
     @Test
+    public void shouldGetAllNonVoidedAppointmentServiceAndNonVoidedAppointmentServiceType() throws Exception {
+        boolean includeVoided = false;
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("service1Uuid");
+        appointmentService.setAppointmentServiceId(1);
+        AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
+        appointmentServiceType1.setName("serviceType1");
+        appointmentServiceType1.setDuration(15);
+        appointmentServiceType1.setUuid("serviceTypeUuid1");
+        appointmentServiceType1.setAppointmentService(appointmentService);
+        appointmentServiceType1.setId(1);
+        AppointmentServiceType appointmentServiceType2 = new AppointmentServiceType();
+        appointmentServiceType2.setName("serviceType2");
+        appointmentServiceType2.setDuration(15);
+        appointmentServiceType2.setUuid("serviceTypeUuid2");
+        appointmentServiceType2.setAppointmentService(appointmentService);
+        appointmentServiceType2.setId(2);
+        appointmentServiceType2.setVoided(true);
+        Set<AppointmentServiceType> appointmentServiceTypes = new TreeSet<>();
+        appointmentServiceTypes.add(appointmentServiceType1);
+        appointmentServiceTypes.add(appointmentServiceType2);
+        appointmentService.setServiceTypes(appointmentServiceTypes);
+        when(appointmentServiceDao.getAppointmentServiceByUuid("service1Uuid")).thenReturn(appointmentService);
+
+        AppointmentService returnedAppointmentService = appointmentServiceService.getAppointmentServiceByUuid("service1Uuid");
+
+        assertEquals("service1Uuid", returnedAppointmentService.getUuid());
+        Set<AppointmentServiceType> returnedServiceTypes = returnedAppointmentService.getServiceTypes();
+        assertNotNull(returnedServiceTypes);
+        assertEquals(1, returnedServiceTypes.size());
+        assertEquals("serviceTypeUuid1", returnedServiceTypes.iterator().next().getUuid());
+    }
+
+    @Test
     public void shouldGetAppointmentServiceTypebyUuid() throws Exception {
         String serviceTypeUuid = "uuid";
         appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);

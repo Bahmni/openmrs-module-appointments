@@ -176,6 +176,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertNotNull(asResponse.getWeeklyAvailability());
         assertEquals(1, asResponse.getWeeklyAvailability().size());
         assertEquals("MONDAY", ((Map)asResponse.getWeeklyAvailability().get(0)).get("dayOfWeek"));
+        assertNotNull(asResponse.getServiceTypes());
+        assertEquals(1, asResponse.getServiceTypes().size());
+        assertEquals("c36006d5-9fcc-4f20-866b-0ece245615b1", ((Map)asResponse.getServiceTypes().get(0)).get("uuid"));
     }
 
     @Test

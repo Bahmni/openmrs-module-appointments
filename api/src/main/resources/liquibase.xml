@@ -214,4 +214,12 @@
             ADD COLUMN color varchar(8) NULL AFTER duration_mins;
         </sql>
     </changeSet>
+
+    <changeSet id="drop_index_on_appointment_service_type_table-201708031638" author="Santhosh, Pramida">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="appointment_service_type"/>
+            <indexExists indexName="service_name_dur_UNIQUE"/>
+        </preConditions>
+        <dropIndex tableName="appointment_service_type" indexName="service_name_dur_UNIQUE"/>
+    </changeSet>
 </databaseChangeLog>

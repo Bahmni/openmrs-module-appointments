@@ -11,8 +11,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class AppointmentServiceServiceImpl implements AppointmentServiceService {
@@ -34,12 +33,27 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
 
     @Override
     public List<AppointmentService> getAllAppointmentServices(boolean includeVoided) {
-        return appointmentServiceDao.getAllAppointmentServices(includeVoided);
+        List<AppointmentService> appointmentServices = appointmentServiceDao.getAllAppointmentServices(includeVoided);
+        return appointmentServices;
+    }
+
+    private void removeVoidedApointmentServiceTypes(AppointmentService appointmentService) {
+        if (appointmentService != null) {
+            Set<AppointmentServiceType> nonVoidedAppointmentServiceTypes = new LinkedHashSet<>();
+            for (AppointmentServiceType appointmentServiceType : appointmentService.getServiceTypes()) {
+                if (!appointmentServiceType.getVoided()) {
+                    nonVoidedAppointmentServiceTypes.add(appointmentServiceType);
+                }
+            }
+            appointmentService.setServiceTypes(nonVoidedAppointmentServiceTypes);
+        }
     }
 
     @Override
     public AppointmentService getAppointmentServiceByUuid(String uuid) {
-        return appointmentServiceDao.getAppointmentServiceByUuid(uuid);
+        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid(uuid);
+        removeVoidedApointmentServiceTypes(appointmentService);
+        return appointmentService;
     }
 
     @Override

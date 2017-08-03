@@ -25,6 +25,8 @@
                                             max_appointments_limit="4" creator="1" voided="0"/>
     <appointment_service_type appointment_service_type_id="1" name="Initial Consultaion" appointment_service_id="1" duration_mins="30" creator="1" voided="0" uuid="c36006d5-9fcc-4f20-866b-0ece245615b1"
                               date_created="2017-07-15 15:46:47.0"/>
+    <appointment_service_type appointment_service_type_id="2" name="Followup Consultaion" appointment_service_id="1" duration_mins="30" creator="1" voided="1" uuid="c36006d5-9fcc-4f20-866b-0ece245615b2"
+                              date_created="2017-07-15 15:46:48.0"/>
 
     <patient_appointment patient_appointment_id="2" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1111"/>
     <patient_appointment patient_appointment_id="3" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c12222"/>
