@@ -1,6 +1,7 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>
     <person person_id="3" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75e04d42-3ca8-11e3-bf2b-0800271c1b77"/>
+    <person person_id="1" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="2c33920f-7aa6-48d6-998a-60412d8ff7d5"/>r
 
     <patient patient_id="1" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
 

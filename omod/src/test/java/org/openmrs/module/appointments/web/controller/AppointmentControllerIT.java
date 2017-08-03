@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -10,10 +11,12 @@ import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -33,31 +36,26 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(1, asResponses.size());
+        assertEquals(4, asResponses.size());
     }
 
     @Test
     public void should_SaveNewAppointment() throws Exception {
-        String content = "{ " +
-                "\"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
-                "\"locationUuid\": null, " +
                 "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
-                "\"status\": \"new\",  " +
+                "\"status\": \"Scheduled\",  " +
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
-                "\"comments\": null, " +
-                "\"appointmentsKind\": \"walkin\"}";
+                "\"appointmentsKind\": \"WalkIn\"}";
 
-        List<AppointmentDefaultResponse> asResponses
-                = deserialize(handle(newPostRequest("/rest/v1/appointment", "{patientUuid = ''}")),
-                new TypeReference<List<AppointmentDefaultResponse>>() {
-                });
-        assertEquals(2, asResponses.size());
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
     }
 
     @Test
-    public void shouldGetAllNonVoidedNonCncelledFutureAppointmentsforaServiceType() throws Exception {
+    public void shouldGetAllNonVoidedNonCancelledFutureAppointmentsforaServiceType() throws Exception {
         String requestURI = "/rest/v1/appointment";
         String serviceTypeUuid = "678906e5-9fbb-4f20-866b-0ece24564578";
         MockHttpServletRequest getRequest = newGetRequest(requestURI, new Parameter("appointmentServiceTypeUuid", serviceTypeUuid));

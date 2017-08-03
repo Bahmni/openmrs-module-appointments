@@ -39,54 +39,48 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_createAppointmentService() throws Exception {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
-        assertNull(appointmentService);
         String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
                 "\"endTime\":\"17:30:00\"," +
                 "\"durationMins\":\"30\"," +
-                "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"maxAppointmentsLimit\":\"30\"," +
                 "\"color\":\"#00ff00\"" +
                 "}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
-        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a2"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        MockHttpServletResponse handle = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject asResponse = SimpleObject.parseJson(handle.getContentAsString());
         assertNotNull(asResponse);
-        assertEquals(asResponse.getName(), "Cardiology Consultation");
-        assertEquals(asResponse.getStartTime(), "09:00:00");
-        assertEquals(asResponse.getEndTime(), "17:30:00");
-        assertEquals(asResponse.getDurationMins().intValue(), 30);
-        assertEquals(asResponse.getMaxAppointmentsLimit().intValue(), 30);
-        assertEquals(asResponse.getColor(), "#00ff00");
-        assertNull(asResponse.getWeeklyAvailability());
+        assertEquals("Cardiology Consultation", asResponse.get("name"));
+        assertEquals("09:00:00", asResponse.get("startTime"));
+        assertEquals("17:30:00", asResponse.get("endTime"));
+        assertEquals(30, asResponse.get("durationMins"));
+        assertEquals(30, asResponse.get("maxAppointmentsLimit"));
+        assertEquals("#00ff00", asResponse.get("color"));
+        assertNotNull(asResponse.get("weeklyAvailability"));
+        assertEquals(0, ((ArrayList)asResponse.get("weeklyAvailability")).size());
     }
 
     @Test
     public void should_createAppointmentServiceOnlyWithName() throws Exception {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
-        assertNull(appointmentService);
-        String dataJson = "{\"name\":\"Cardiology Consultation\", \"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"}";
+        String dataJson = "{\"name\":\"Cardiology Consultation\"}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
-        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a2"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        MockHttpServletResponse handle = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject asResponse = SimpleObject.parseJson(handle.getContentAsString());
         assertNotNull(asResponse);
-        assertEquals(asResponse.getName(), "Cardiology Consultation");
-        assertEquals(new String(),asResponse.getStartTime());
-        assertNull(asResponse.getDurationMins());
-        assertNull(asResponse.getMaxAppointmentsLimit());
-        assertNull(asResponse.getWeeklyAvailability());
+        assertEquals("Cardiology Consultation", asResponse.get("name"));
+        assertNotNull(asResponse.get("uuid"));
+        assertNull(asResponse.get("durationMins"));
+        assertNull(asResponse.get("maxAppointmentsLimit"));
+        assertNotNull(asResponse.get("weeklyAvailability"));
+        assertEquals(0, ((ArrayList)asResponse.get("weeklyAvailability")).size());
     }
 
     @Test
     public void should_createAppointmentServiceWithServiceAvailability() throws Exception {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
-        assertNull(appointmentService);
         String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
                 "\"endTime\":\"17:30:00\"," +
                 "\"durationMins\":\"30\"," +
-                "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"maxAppointmentsLimit\":\"30\"," +
@@ -94,36 +88,31 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"weeklyAvailability\": [{ \"dayOfWeek\": \"MONDAY\", \"startTime\":\"09:00:00\", \"endTime\":\"17:30:00\", \"maxAppointmentsLimit\":\"10\" }]" +
                 "}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
-        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a2"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        MockHttpServletResponse handle = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject asResponse = SimpleObject.parseJson(handle.getContentAsString());
         assertNotNull(asResponse);
-        assertEquals("Cardiology Consultation", asResponse.getName());
-        assertEquals("09:00:00", asResponse.getStartTime());
-        assertEquals("17:30:00", asResponse.getEndTime());
-        assertEquals(30, asResponse.getDurationMins().intValue());
-        assertEquals(30, asResponse.getMaxAppointmentsLimit().intValue());
-        assertEquals("#0000ff", asResponse.getColor());
-        assertNotNull(asResponse.getWeeklyAvailability());
-        assertEquals(1, asResponse.getWeeklyAvailability().size());
-
-        List<Map> availabilityList = new ArrayList<>(asResponse.getWeeklyAvailability());
-        assertEquals(1, availabilityList.size());
-        assertEquals("MONDAY", availabilityList.get(0).get("dayOfWeek"));
-        assertEquals("09:00:00", availabilityList.get(0).get("startTime"));
-        assertEquals("17:30:00", availabilityList.get(0).get("endTime"));
-        assertEquals(10, availabilityList.get(0).get("maxAppointmentsLimit"));
-
+        assertEquals("Cardiology Consultation", asResponse.get("name"));
+        assertEquals("09:00:00", asResponse.get("startTime"));
+        assertEquals("17:30:00", asResponse.get("endTime"));
+        assertEquals(30, asResponse.get("durationMins"));
+        assertEquals(30, asResponse.get("maxAppointmentsLimit"));
+        assertEquals("#0000ff", asResponse.get("color"));
+        ArrayList weeklyAvailabilities = (ArrayList) asResponse.get("weeklyAvailability");
+        assertNotNull(weeklyAvailabilities);
+        LinkedHashMap<String, Object> weeklyAvailability = (LinkedHashMap<String, Object>) (weeklyAvailabilities.get(0));
+        assertNotNull(weeklyAvailability);
+        assertEquals("MONDAY", weeklyAvailability.get("dayOfWeek"));
+        assertEquals("09:00:00", weeklyAvailability.get("startTime"));
+        assertEquals("17:30:00", weeklyAvailability.get("endTime"));
+        assertEquals(10, weeklyAvailability.get("maxAppointmentsLimit"));
     }
 
     @Test
     public void shouldCreateAppointmentServiceWithServiceTypes() throws Exception {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a2");
-        assertNull(appointmentService);
         String dataJson = "{\"name\":\"Cardiology Consultation\",\"startTime\":\"09:00:00\"," +
             "\"endTime\":\"17:30:00\"," +
             "\"durationMins\":\"30\"," +
             "\"color\":\"#fff000\"," +
-            "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a2\"," +
             "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
             "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
             "\"serviceTypes\": [{ \"name\": \"type1\", \"duration\":\"20\"}]" +
@@ -150,7 +139,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServices() throws Exception {
         List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
-        assertEquals(1,asResponses.size());
+        assertEquals(2,asResponses.size());
+        assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
         assertEquals("09:00:00", asResponses.get(0).getStartTime());
@@ -159,6 +149,14 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(4, asResponses.get(0).getMaxAppointmentsLimit().intValue());
         assertEquals("Ortho", asResponses.get(0).getSpeciality().get("name"));
         assertEquals("Room1", asResponses.get(0).getLocation().get("name"));
+        assertEquals("c36006d4-9fbb-4f20-866b-0ece24560000", asResponses.get(1).getUuid());
+        assertEquals("Ortho Service", asResponses.get(1).getName());
+        assertEquals("09:00:00", asResponses.get(1).getStartTime());
+        assertEquals("16:00:00", asResponses.get(1).getEndTime());
+        assertEquals(30, asResponses.get(1).getDurationMins().intValue());
+        assertEquals(4, asResponses.get(1).getMaxAppointmentsLimit().intValue());
+        assertEquals("Ortho", asResponses.get(1).getSpeciality().get("name"));
+        assertEquals("Room1", asResponses.get(1).getLocation().get("name"));
     }
 
     @Test
@@ -230,7 +228,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         SimpleObject responseObject = SimpleObject.parseJson(response.getContentAsString());
         assertNotNull(responseObject);
         assertEquals(
-                "There are appointments in future against this service. Please cancel those appointments before deleting this service. After deleting the service, you will not be able to see any appts. for that service",
+                "Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it",
                 responseObject.get("message"));
     }
 

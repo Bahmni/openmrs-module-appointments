@@ -32,18 +32,18 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments();
-        assertEquals(1, allAppointmentServices.size());
+        assertEquals(8, allAppointmentServices.size());
     }
 
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments();
-        assertEquals(1, allAppointments.size());
+        assertEquals(8, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments();
-        assertEquals(2, allAppointments.size());
+        assertEquals(9, allAppointments.size());
     }
 
     @Test
