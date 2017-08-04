@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import java.util.concurrent.TimeUnit;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
@@ -13,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -24,8 +24,14 @@ public class AppointmentDaoImpl implements AppointmentDao {
     private SessionFactory sessionFactory;
 
     @Override
-    public List<Appointment> getAllAppointments() {
+    public List<Appointment> getAllAppointments(Date forDate) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        if (forDate != null) {
+            Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+            criteria.add(Restrictions.ge("startDateTime", forDate));
+            criteria.add(Restrictions.lt("endDateTime", maxDate));
+        }
         return criteria.list();
     }
 

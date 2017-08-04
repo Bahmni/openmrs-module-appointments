@@ -3,57 +3,25 @@ package org.openmrs.module.appointments.web.contract;
 import java.util.Map;
 
 public class AppointmentDefaultResponse {
-	private Integer appointmentId;
-	private Map provider;
+	private String uuid;
 	private String appointmentNumber;
-	private Map location;
 	private Map patient;
-	private String status;
+	private Map service;
+	private Map serviceType;
+	private Map provider;
+	private Map location;
 	private String startDateTime;
 	private String endDateTime;
-	private String AppointmentsKind;
+	private String appointmentKind;
+	private String status;
 	private String comments;
-	private String uuid;
 
-
-	public String getComments() {
-		return comments;
+	public String getUuid() {
+		return uuid;
 	}
 
-	public void setComments(String comments) {
-		this.comments = comments;
-	}
-
-	public String getAppointmentsKind() {
-		return AppointmentsKind;
-	}
-
-	public void setAppointmentsKind(String appointmentsKind) {
-		AppointmentsKind = appointmentsKind;
-	}
-
-	public String getEndDateTime() {
-		return endDateTime;
-	}
-
-	public void setEndDateTime(String endDateTime) {
-		this.endDateTime = endDateTime;
-	}
-
-	public String getStartDateTime() {
-		return startDateTime;
-	}
-
-	public void setStartDateTime(String startDateTime) {
-		this.startDateTime = startDateTime;
-	}
-
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
+	public void setUuid(String uuid) {
+		this.uuid = uuid;
 	}
 
 	public String getAppointmentNumber() {
@@ -64,20 +32,28 @@ public class AppointmentDefaultResponse {
 		this.appointmentNumber = appointmentNumber;
 	}
 
-	public Integer getAppointmentId() {
-		return appointmentId;
+	public Map getPatient() {
+		return patient;
 	}
 
-	public void setAppointmentId(int appointmentId) {
-		this.appointmentId = appointmentId;
+	public void setPatient(Map patient) {
+		this.patient = patient;
 	}
 
-	public void setUuid(String uuid) {
-		this.uuid = uuid;
+	public Map getService() {
+		return service;
 	}
 
-	public String getUuid() {
-		return uuid;
+	public void setService(Map service) {
+		this.service = service;
+	}
+	
+	public Map getServiceType() {
+		return serviceType;
+	}
+	
+	public void setServiceType(Map serviceType) {
+		this.serviceType = serviceType;
 	}
 
 	public Map getProvider() {
@@ -96,11 +72,43 @@ public class AppointmentDefaultResponse {
 		this.location = location;
 	}
 
-	public Map getPatient() {
-		return patient;
+	public String getStartDateTime() {
+		return startDateTime;
 	}
 
-	public void setPatient(Map patient) {
-		this.patient = patient;
+	public void setStartDateTime(String startDateTime) {
+		this.startDateTime = startDateTime;
+	}
+	
+	public String getEndDateTime() {
+		return endDateTime;
+	}
+	
+	public void setEndDateTime(String endDateTime) {
+		this.endDateTime = endDateTime;
+	}
+	
+	public String getAppointmentKind() {
+		return appointmentKind;
+	}
+	
+	public void setAppointmentKind(String appointmentKind) {
+		this.appointmentKind = appointmentKind;
+	}
+	
+	public String getStatus() {
+		return status;
+	}
+	
+	public void setStatus(String status) {
+		this.status = status;
+	}
+	
+	public String getComments() {
+		return comments;
+	}
+	
+	public void setComments(String comments) {
+		this.comments = comments;
 	}
 }

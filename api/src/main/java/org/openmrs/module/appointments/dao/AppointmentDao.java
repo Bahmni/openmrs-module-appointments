@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao;
 
+import java.util.Date;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
@@ -8,7 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 public interface AppointmentDao {
-    List<Appointment> getAllAppointments();
+    List<Appointment> getAllAppointments(Date forDate);
 
     @Transactional
     void save(Appointment appointmentService);

@@ -8,99 +8,19 @@ import org.openmrs.Provider;
 import java.io.Serializable;
 import java.util.Date;
 
-public class Appointment  extends BaseOpenmrsData implements Serializable {
+public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
-    private Provider provider;
     private String appointmentNumber;
-    private Location location;
     private Patient patient;
     private AppointmentService service;
     private AppointmentServiceType serviceType;
-    private AppointmentStatus status;
+    private Provider provider;
+    private Location location;
     private Date startDateTime;
     private Date endDateTime;
-    private AppointmentKind appointmentsKind;
+    private AppointmentKind appointmentKind;
+    private AppointmentStatus status;
     private String comments;
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public AppointmentKind getAppointmentsKind() {
-        return appointmentsKind;
-    }
-
-    public void setAppointmentsKind(AppointmentKind appointmentsKind) {
-        this.appointmentsKind = appointmentsKind;
-    }
-
-    public Date getEndDateTime() {
-        return endDateTime;
-    }
-
-    public void setEndDateTime(Date endDateTime) {
-        this.endDateTime = endDateTime;
-    }
-
-    public Date getStartDateTime() {
-        return startDateTime;
-    }
-
-    public void setStartDateTime(Date startDateTime) {
-        this.startDateTime = startDateTime;
-    }
-
-    public AppointmentStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(AppointmentStatus status) {
-        this.status = status;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
-    public Location getLocation() {
-        return location;
-    }
-
-    public void setLocation(Location location) {
-        this.location = location;
-    }
-
-    public String getAppointmentNumber() {
-        return appointmentNumber;
-    }
-
-    public void setAppointmentNumber(String appointmentNumber) {
-        this.appointmentNumber = appointmentNumber;
-    }
-
-    public Provider getProvider() {
-        return provider;
-    }
-
-    public void setProvider(Provider provider) {
-        this.provider = provider;
-    }
-
-    public Integer getAppointmentId() {
-        return appointmentId;
-    }
-
-    public void setAppointmentId(int appointmentId) {
-        this.appointmentId = appointmentId;
-    }
 
     @Override
     public Integer getId() {
@@ -112,6 +32,30 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
         setAppointmentId(integer);
     }
 
+    public Integer getAppointmentId() {
+        return appointmentId;
+    }
+    
+    public void setAppointmentId(Integer appointmentId) {
+        this.appointmentId = appointmentId;
+    }
+    
+    public String getAppointmentNumber() {
+        return appointmentNumber;
+    }
+    
+    public void setAppointmentNumber(String appointmentNumber) {
+        this.appointmentNumber = appointmentNumber;
+    }
+    
+    public Patient getPatient() {
+        return patient;
+    }
+    
+    public void setPatient(Patient patient) {
+        this.patient = patient;
+    }
+    
     public AppointmentService getService() {
         return service;
     }
@@ -126,6 +70,62 @@ public class Appointment  extends BaseOpenmrsData implements Serializable {
 
     public void setServiceType(AppointmentServiceType serviceType) {
         this.serviceType = serviceType;
+    }
+    
+    public Provider getProvider() {
+        return provider;
+    }
+    
+    public void setProvider(Provider provider) {
+        this.provider = provider;
+    }
+    
+    public Location getLocation() {
+        return location;
+    }
+    
+    public void setLocation(Location location) {
+        this.location = location;
+    }
+    
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+    
+    public void setStartDateTime(Date startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+    
+    public Date getEndDateTime() {
+        return endDateTime;
+    }
+    
+    public void setEndDateTime(Date endDateTime) {
+        this.endDateTime = endDateTime;
+    }
+    
+    public AppointmentKind getAppointmentKind() {
+        return appointmentKind;
+    }
+    
+    public void setAppointmentKind(AppointmentKind appointmentKind) {
+        this.appointmentKind = appointmentKind;
+    }
+    
+    public AppointmentStatus getStatus() {
+        return status;
+    }
+    
+    public void setStatus(AppointmentStatus status) {
+        this.status = status;
+    }
+    
+    public String getComments() {
+        return comments;
+    }
+    
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }
 

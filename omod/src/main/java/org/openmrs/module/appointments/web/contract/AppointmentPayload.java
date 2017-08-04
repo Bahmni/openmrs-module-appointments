@@ -7,56 +7,18 @@ import java.util.Date;
 
 @JsonIgnoreProperties
 public class AppointmentPayload {
-    private String providerUuid;
     private String appointmentNumber;
+    private String uuid;
+    private String patientUuid;
     private String serviceUuid;
     private String serviceTypeUuid;
+    private String providerUuid;
     private String locationUuid;
-    private String patientUuid;
-    private String status;
     private Date startDateTime;
     private Date endDateTime;
-    private String appointmentsKind;
+    private String status;
+    private String appointmentKind;
     private String comments;
-    private String uuid;
-
-    public String getComments() {
-        return comments;
-    }
-
-    public void setComments(String comments) {
-        this.comments = comments;
-    }
-
-    public String getAppointmentsKind() {
-        return appointmentsKind;
-    }
-
-    public void setAppointmentsKind(String appointmentsKind) {
-        this.appointmentsKind = appointmentsKind;
-    }
-
-    public Date getEndDateTime() { return endDateTime;}
-
-    public void setEndDateTime(Date endDateTime) {
-        this.endDateTime = endDateTime;
-    }
-
-    public Date getStartDateTime() {
-        return startDateTime;
-    }
-
-    public void setStartDateTime(Date startDateTime) {
-        this.startDateTime = startDateTime;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -72,22 +34,6 @@ public class AppointmentPayload {
 
     public void setUuid(String uuid) {
         this.uuid = uuid;
-    }
-
-    public String getProviderUuid() {
-        return providerUuid;
-    }
-
-    public void setProviderUuid(String providerUuid) {
-        this.providerUuid = providerUuid;
-    }
-
-    public String getLocationUuid() {
-        return locationUuid;
-    }
-
-    public void setLocationUuid(String locationUuid) {
-        this.locationUuid = locationUuid;
     }
 
     public String getPatientUuid() {
@@ -112,5 +58,61 @@ public class AppointmentPayload {
 
     public void setServiceTypeUuid(String serviceTypeUuid) {
         this.serviceTypeUuid = serviceTypeUuid;
+    }
+    
+    public String getProviderUuid() {
+        return providerUuid;
+    }
+    
+    public void setProviderUuid(String providerUuid) {
+        this.providerUuid = providerUuid;
+    }
+    
+    public String getLocationUuid() {
+        return locationUuid;
+    }
+    
+    public void setLocationUuid(String locationUuid) {
+        this.locationUuid = locationUuid;
+    }
+    
+    public Date getStartDateTime() {
+        return startDateTime;
+    }
+    
+    public void setStartDateTime(Date startDateTime) {
+        this.startDateTime = startDateTime;
+    }
+    
+    public Date getEndDateTime() {
+        return endDateTime;
+    }
+    
+    public void setEndDateTime(Date endDateTime) {
+        this.endDateTime = endDateTime;
+    }
+    
+    public String getStatus() {
+        return status;
+    }
+    
+    public void setStatus(String status) {
+        this.status = status;
+    }
+    
+    public String getAppointmentKind() {
+        return appointmentKind;
+    }
+    
+    public void setAppointmentKind(String appointmentKind) {
+        this.appointmentKind = appointmentKind;
+    }
+    
+    public String getComments() {
+        return comments;
+    }
+    
+    public void setComments(String comments) {
+        this.comments = comments;
     }
 }

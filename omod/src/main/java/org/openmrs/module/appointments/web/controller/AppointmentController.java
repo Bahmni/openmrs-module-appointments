@@ -1,11 +1,12 @@
 package org.openmrs.module.appointments.web.controller;
 
+import java.text.ParseException;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -32,10 +33,9 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAllAppointments()  {
-        List<Appointment> appointments = appointmentsService.getAllAppointments();
-        List<AppointmentDefaultResponse> response = appointmentMapper.constructResponse(appointments);
-        return response;
+    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
+        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+        return appointmentMapper.constructResponse(appointments);
     }
     @RequestMapping( method = RequestMethod.POST, value = "search")
     @ResponseBody

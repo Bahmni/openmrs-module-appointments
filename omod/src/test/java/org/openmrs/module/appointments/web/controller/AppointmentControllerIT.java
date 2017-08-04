@@ -2,13 +2,10 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -36,7 +33,17 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(4, asResponses.size());
+        assertEquals(3, asResponses.size());
+    }
+    
+    @Test
+    public void should_GetAllAppointmentsForDate() throws Exception {
+        List<AppointmentDefaultResponse> asResponses
+                = deserialize(handle(newGetRequest("/rest/v1/appointment/all",
+                new Parameter("forDate", "2108-08-15T00:00:00.0Z"))),
+                new TypeReference<List<AppointmentDefaultResponse>>() {
+                });
+        assertEquals(2, asResponses.size());
     }
 
     @Test
@@ -47,7 +54,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 "\"status\": \"Scheduled\",  " +
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
-                "\"appointmentsKind\": \"WalkIn\"}";
+                "\"appointmentKind\": \"WalkIn\"}";
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
         assertNotNull(response);

@@ -38,8 +38,8 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void testGetAllAppointmentServices() throws Exception {
-        appointmentsService.getAllAppointments();
-        Mockito.verify(appointmentDao, times(1)).getAllAppointments();
+        appointmentsService.getAllAppointments(null);
+        Mockito.verify(appointmentDao, times(1)).getAllAppointments(null);
     }
 
     @Test

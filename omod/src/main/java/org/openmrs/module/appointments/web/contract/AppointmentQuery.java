@@ -3,8 +3,6 @@ package org.openmrs.module.appointments.web.contract;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
-import java.util.Date;
-
 @JsonIgnoreProperties
 public class AppointmentQuery {
     private String providerUuid;
@@ -13,14 +11,14 @@ public class AppointmentQuery {
     private String locationUuid;
     private String patientUuid;
     private String status;
-    private String appointmentsKind;
+    private String appointmentKind;
 
-    public String getAppointmentsKind() {
-        return appointmentsKind;
+    public String getAppointmentKind() {
+        return appointmentKind;
     }
 
-    public void setAppointmentsKind(String appointmentsKind) {
-        this.appointmentsKind = appointmentsKind;
+    public void setAppointmentKind(String appointmentKind) {
+        this.appointmentKind = appointmentKind;
     }
 
     public String getStatus() {

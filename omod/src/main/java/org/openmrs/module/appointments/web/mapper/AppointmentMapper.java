@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.mapper;
 
+import java.util.Set;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -9,9 +10,10 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
-import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
@@ -38,9 +40,6 @@ public class AppointmentMapper {
     @Autowired
     AppointmentServiceService appointmentServiceService;
 
-    @Autowired
-    AppointmentsService appointmentsService;
-
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
     }
@@ -50,21 +49,28 @@ public class AppointmentMapper {
         if (!StringUtils.isBlank(appointmentPayload.getUuid())) {
             appointment.setUuid(appointmentPayload.getUuid());
         }
-        appointment.setAppointmentsKind(AppointmentKind.valueOf(appointmentPayload.getAppointmentsKind()));
-        appointment.setComments(appointmentPayload.getComments());
-        appointment.setEndDateTime(appointmentPayload.getEndDateTime());
-        appointment.setStartDateTime(appointmentPayload.getStartDateTime());
-        appointment.setStatus(AppointmentStatus.valueOf(appointmentPayload.getStatus()));
         appointment.setAppointmentNumber(appointmentPayload.getAppointmentNumber());
-
-        appointment.setService(
-                appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid()));
-        //appointment.setServiceType((AppointmentServiceType) appointment.getService().getServiceTypes().toArray()[0]);
         appointment.setPatient(patientService.getPatientByUuid(appointmentPayload.getPatientUuid()));
-        appointment.setLocation(locationService.getLocationByUuid(appointmentPayload.getLocationUuid()));
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
+        if(appointmentPayload.getServiceTypeUuid() != null) {
+            AppointmentServiceType appointmentServiceType = getServiceTypeByUuid(appointmentService.getServiceTypes(), appointmentPayload.getServiceTypeUuid());
+            appointment.setServiceType(appointmentServiceType);
+        }
+        appointment.setService(appointmentService);
         appointment.setProvider(providerService.getProviderByUuid(appointmentPayload.getProviderUuid()));
+        appointment.setLocation(locationService.getLocationByUuid(appointmentPayload.getLocationUuid()));
+        appointment.setStartDateTime(appointmentPayload.getStartDateTime());
+        appointment.setEndDateTime(appointmentPayload.getEndDateTime());
+        appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentPayload.getAppointmentKind()));
+        appointment.setStatus(AppointmentStatus.valueOf(appointmentPayload.getStatus()));
+        appointment.setComments(appointmentPayload.getComments());
 
         return appointment;
+    }
+    
+    private AppointmentServiceType getServiceTypeByUuid(Set<AppointmentServiceType> serviceTypes, String serviceTypeUuid) {
+        return serviceTypes.stream()
+                .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
     public Appointment mapQueryToAppointment(AppointmentQuery searchQuery) {
@@ -72,8 +78,8 @@ public class AppointmentMapper {
         appointment.setService(
                 appointmentServiceService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
         appointment.setPatient(patientService.getPatientByUuid(searchQuery.getPatientUuid()));
-        appointment.setLocation(locationService.getLocationByUuid(searchQuery.getLocationUuid()));
         appointment.setProvider(providerService.getProviderByUuid(searchQuery.getProviderUuid()));
+        appointment.setLocation(locationService.getLocationByUuid(searchQuery.getLocationUuid()));
         if (searchQuery.getStatus() != null) {
             appointment.setStatus(AppointmentStatus.valueOf(searchQuery.getStatus()));
         }
@@ -82,18 +88,37 @@ public class AppointmentMapper {
 
     private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
         response.setUuid(a.getUuid());
-        response.setStartDateTime(convertTimeToString(a.getStartDateTime()));
-        response.setEndDateTime(convertTimeToString(a.getEndDateTime()));
         response.setAppointmentNumber(a.getAppointmentNumber());
-        response.setAppointmentsKind(a.getAppointmentsKind().name());
-        response.setComments(a.getComments());
         response.setPatient(createPatientMap(a.getPatient()));
-        response.setLocation(createLocationMap(a.getLocation()));
+        response.setService(createServiceMap(a.getService()));
+        response.setServiceType(createServiceTypeMap(a.getServiceType()));
         response.setProvider(createProviderMap(a.getProvider()));
+        response.setLocation(createLocationMap(a.getLocation()));
+        response.setStartDateTime(convertDateToString(a.getStartDateTime()));
+        response.setEndDateTime(convertDateToString(a.getEndDateTime()));
+        response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
-        response.setUuid(a.getUuid());
+        response.setComments(a.getComments());
 
         return response;
+    }
+    
+    private Map createServiceTypeMap(AppointmentServiceType s) {
+        Map serviceTypeMap = new HashMap();
+        if (s != null) {
+            serviceTypeMap.put("name", s.getName());
+            serviceTypeMap.put("uuid", s.getUuid());
+        }
+        return serviceTypeMap;
+    }
+    
+    private Map createServiceMap(AppointmentService s) {
+        Map serviceMap = new HashMap();
+        if (s != null) {
+            serviceMap.put("name", s.getName());
+            serviceMap.put("uuid", s.getUuid());
+        }
+        return serviceMap;
     }
 
     private Map createProviderMap(Provider p) {
@@ -118,11 +143,12 @@ public class AppointmentMapper {
         Map map = new HashMap();
         map.put("name", p.getPersonName().getFullName());
         map.put("uuid", p.getUuid());
+        map.put("identifier", p.getPatientIdentifier().getIdentifier());
         return map;
     }
 
-    private String convertTimeToString(Date time) {
-        return time != null ? time.toString() : new String();
+    private String convertDateToString(Date dateTime) {
+        return dateTime != null ? dateTime.toString() : new String();
     }
 
 }

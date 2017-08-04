@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -8,6 +9,7 @@ import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -31,23 +33,30 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
-        List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments();
-        assertEquals(8, allAppointmentServices.size());
+        List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
+        assertEquals(6, allAppointmentServices.size());
+    }
+    
+    @Test
+    public void shouldGetAllNonVoidedAppointmentsForDate() throws Exception {
+        Date forDate = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(forDate);
+        assertEquals(3, allAppointments.size());
     }
 
     @Test
     public void shouldSaveAppointmentService() throws Exception {
-        List<Appointment> allAppointments = appointmentDao.getAllAppointments();
-        assertEquals(8, allAppointments.size());
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        assertEquals(6, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
-        allAppointments = appointmentDao.getAllAppointments();
-        assertEquals(9, allAppointments.size());
+        allAppointments = appointmentDao.getAllAppointments(null);
+        assertEquals(7, allAppointments.size());
     }
 
     @Test
-    public void shouldGetAllFutureAppointmentFortheGivenService() throws Exception {
+    public void shouldGetAllFutureAppointmentForTheGivenService() throws Exception {
         AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         List<Appointment> allAppointments = appointmentDao.getAllFutureAppointmentsForService(appointmentService);
         assertNotNull(allAppointments);

@@ -1,29 +1,26 @@
 package org.openmrs.module.appointments.web.controller;
 
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
-import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
-import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.DateUtil;
+import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 
@@ -50,7 +47,7 @@ public class AppointmentControllerTest {
     }
 
     @Test
-    public void shouldGetAllFututreAppointmentsForGivenServiceType() throws Exception {
+    public void shouldGetAllFutureAppointmentsForGivenServiceType() throws Exception {
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
         String serviceTypeUuid = "serviceTypeUuid";
         appointmentServiceType.setUuid(serviceTypeUuid);
@@ -76,5 +73,32 @@ public class AppointmentControllerTest {
         assertNotNull(appointmentDefaultResponses);
         assertEquals(1, appointmentDefaultResponses.size());
         assertEquals(appointment.getUuid(), appointmentDefaultResponses.get(0).getUuid());
+    }
+    
+    @Test
+    public void shouldGetAllAppointments() throws Exception {
+        Appointment appointment = new Appointment();
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        when(appointmentsService.getAllAppointments(null)).thenReturn(appointmentList);
+        
+        appointmentController.getAllAppointments(null);
+        verify(appointmentsService, times(1)).getAllAppointments(null);
+        verify(appointmentMapper, times(1)).constructResponse(appointmentList);
+    }
+    
+    @Test
+    public void shouldGetAllAppointmentsForDate() throws Exception {
+        Appointment appointment = new Appointment();
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        String dateString = "2017-08-15T00:00:00.0Z";
+        Date forDate = DateUtil.convertToLocalDateFromUTC(dateString);
+        
+        when(appointmentsService.getAllAppointments(forDate)).thenReturn(appointmentList);
+        
+        appointmentController.getAllAppointments(dateString);
+        verify(appointmentsService, times(1)).getAllAppointments(forDate);
+        verify(appointmentMapper, times(1)).constructResponse(appointmentList);
     }
 }

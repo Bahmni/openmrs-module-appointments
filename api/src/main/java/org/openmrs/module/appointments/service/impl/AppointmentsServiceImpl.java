@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import java.util.Date;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -23,8 +24,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> getAllAppointments() {
-        return appointmentDao.getAllAppointments();
+    public List<Appointment> getAllAppointments(Date forDate) {
+        return appointmentDao.getAllAppointments(forDate);
     }
 
     @Override
