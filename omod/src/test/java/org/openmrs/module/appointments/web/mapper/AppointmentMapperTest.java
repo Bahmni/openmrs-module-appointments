@@ -5,6 +5,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashSet;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -127,8 +128,35 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getProvider().getUuid(), response.getProvider().get("uuid"));
         assertEquals(appointment.getLocation().getName(), response.getLocation().get("name"));
         assertEquals(appointment.getLocation().getUuid(), response.getLocation().get("uuid"));
-        assertEquals(appointment.getStartDateTime().toString(), response.getStartDateTime());
-        assertEquals(appointment.getEndDateTime().toString(), response.getEndDateTime());
+        assertEquals(appointment.getStartDateTime(), response.getStartDateTime());
+        assertEquals(appointment.getEndDateTime(), response.getEndDateTime());
+        assertEquals(appointment.getAppointmentKind(), AppointmentKind.valueOf(response.getAppointmentKind()));
+        assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
+        assertEquals(appointment.getComments(), response.getComments());
+    }
+    
+    @Test
+    public void shouldReturnNullIfNoProviderInDefaultResponse() throws Exception {
+        Appointment appointment = createAppointment();
+        appointment.setServiceType(null);
+        appointment.setProvider(null);
+        appointment.setLocation(null);
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        
+        List<AppointmentDefaultResponse> appointmentDefaultResponse = appointmentMapper.constructResponse(appointmentList);
+        AppointmentDefaultResponse response = appointmentDefaultResponse.get(0);
+        assertEquals(appointment.getUuid(), response.getUuid());
+        assertNull(response.getAppointmentNumber());
+        assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
+        assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
+        assertEquals(appointment.getService().getName(), response.getService().get("name"));
+        assertEquals(appointment.getService().getUuid(), response.getService().get("uuid"));
+        assertNull(response.getServiceType());
+        assertNull(response.getProvider());
+        assertNull(response.getLocation());
+        assertEquals(appointment.getStartDateTime(), response.getStartDateTime());
+        assertEquals(appointment.getEndDateTime(), response.getEndDateTime());
         assertEquals(appointment.getAppointmentKind(), AppointmentKind.valueOf(response.getAppointmentKind()));
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());

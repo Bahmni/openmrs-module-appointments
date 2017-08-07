@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.contract;
 
+import java.util.Date;
 import java.util.Map;
 
 public class AppointmentDefaultResponse {
@@ -10,8 +11,8 @@ public class AppointmentDefaultResponse {
 	private Map serviceType;
 	private Map provider;
 	private Map location;
-	private String startDateTime;
-	private String endDateTime;
+	private Date startDateTime;
+	private Date endDateTime;
 	private String appointmentKind;
 	private String status;
 	private String comments;
@@ -72,19 +73,19 @@ public class AppointmentDefaultResponse {
 		this.location = location;
 	}
 
-	public String getStartDateTime() {
+	public Date getStartDateTime() {
 		return startDateTime;
 	}
 
-	public void setStartDateTime(String startDateTime) {
+	public void setStartDateTime(Date startDateTime) {
 		this.startDateTime = startDateTime;
 	}
 	
-	public String getEndDateTime() {
+	public Date getEndDateTime() {
 		return endDateTime;
 	}
 	
-	public void setEndDateTime(String endDateTime) {
+	public void setEndDateTime(Date endDateTime) {
 		this.endDateTime = endDateTime;
 	}
 	

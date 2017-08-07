@@ -94,8 +94,8 @@ public class AppointmentMapper {
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
         response.setProvider(createProviderMap(a.getProvider()));
         response.setLocation(createLocationMap(a.getLocation()));
-        response.setStartDateTime(convertDateToString(a.getStartDateTime()));
-        response.setEndDateTime(convertDateToString(a.getEndDateTime()));
+        response.setStartDateTime(a.getStartDateTime());
+        response.setEndDateTime(a.getEndDateTime());
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
@@ -104,8 +104,9 @@ public class AppointmentMapper {
     }
     
     private Map createServiceTypeMap(AppointmentServiceType s) {
-        Map serviceTypeMap = new HashMap();
+        Map serviceTypeMap = null;
         if (s != null) {
+            serviceTypeMap = new HashMap();
             serviceTypeMap.put("name", s.getName());
             serviceTypeMap.put("uuid", s.getUuid());
         }
@@ -122,17 +123,19 @@ public class AppointmentMapper {
     }
 
     private Map createProviderMap(Provider p) {
-        Map map = new HashMap();
+        Map providerMap = null;
         if (p != null) {
-            map.put("name", p.getName());
-            map.put("uuid", p.getUuid());
+            providerMap = new HashMap();
+            providerMap.put("name", p.getName());
+            providerMap.put("uuid", p.getUuid());
         }
-        return map;
+        return providerMap;
     }
 
     private Map createLocationMap(Location l) {
-        Map locationMap = new HashMap();
+        Map locationMap = null;
         if (l != null) {
+            locationMap = new HashMap();
             locationMap.put("name", l.getName());
             locationMap.put("uuid", l.getUuid());
         }
@@ -146,9 +149,4 @@ public class AppointmentMapper {
         map.put("identifier", p.getPatientIdentifier().getIdentifier());
         return map;
     }
-
-    private String convertDateToString(Date dateTime) {
-        return dateTime != null ? dateTime.toString() : new String();
-    }
-
 }
