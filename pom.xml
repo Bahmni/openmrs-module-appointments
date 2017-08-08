@@ -22,6 +22,7 @@
 		<hamcrestVersion>1.3</hamcrestVersion>
 		<mockitoVersion>1.10.19</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
+		<jacocoVersion>0.7.9</jacocoVersion>
 	</properties>
 
 	<build>
@@ -271,6 +272,26 @@
 										<include>**/*IT.java</include>
 									</includes>
 								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>org.jacoco</groupId>
+						<artifactId>jacoco-maven-plugin</artifactId>
+						<version>${jacocoVersion}</version>
+						<configuration>
+							<includes>
+								<include>**/*</include>
+							</includes>
+							<excludes>
+								<exclude>**/*ModuleActivator.class</exclude>
+							</excludes>
+						</configuration>
+						<executions>
+							<execution>
+								<goals>
+									<goal>prepare-agent</goal>
+								</goals>
 							</execution>
 						</executions>
 					</plugin>
