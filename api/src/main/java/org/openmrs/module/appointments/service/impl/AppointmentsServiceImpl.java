@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
+import java.util.Date;
+import java.util.stream.Collectors;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -26,7 +28,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
-        return appointmentDao.getAllAppointments(forDate);
+        List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+    
+    private boolean isServiceOrServiceTypeVoided(Appointment appointment){
+        return (appointment.getService() != null && appointment.getService().getVoided()) ||
+               (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
     }
 
     @Override
