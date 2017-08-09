@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
@@ -20,7 +21,6 @@ import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +109,7 @@ public class AppointmentMapper {
             serviceTypeMap = new HashMap();
             serviceTypeMap.put("name", s.getName());
             serviceTypeMap.put("uuid", s.getUuid());
+            serviceTypeMap.put("duration", s.getDuration());
         }
         return serviceTypeMap;
     }
@@ -118,6 +119,14 @@ public class AppointmentMapper {
         if (s != null) {
             serviceMap.put("name", s.getName());
             serviceMap.put("uuid", s.getUuid());
+            Map specialityMap = null;
+            Speciality speciality = s.getSpeciality();
+            if(speciality != null){
+                specialityMap = new HashMap();
+                specialityMap.put("name", speciality.getName());
+                specialityMap.put("uuid", speciality.getUuid());
+            }
+            serviceMap.put("speciality", specialityMap);
         }
         return serviceMap;
     }

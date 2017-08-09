@@ -3,7 +3,9 @@ package org.openmrs.module.appointments.web.mapper;
 import java.text.ParseException;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
+import java.util.Map;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Before;
@@ -25,6 +27,7 @@ import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -71,6 +74,10 @@ public class AppointmentMapperTest {
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
         service = new AppointmentService();
         service.setUuid("serviceUuid");
+        Speciality speciality = new Speciality();
+        speciality.setName("Cardiology");
+        speciality.setUuid("specialityUuid");
+        service.setSpeciality(speciality);
         Set<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
         serviceType = new AppointmentServiceType();
         AppointmentServiceType serviceType2 = new AppointmentServiceType();
@@ -122,8 +129,12 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
         assertEquals(appointment.getService().getName(), response.getService().get("name"));
         assertEquals(appointment.getService().getUuid(), response.getService().get("uuid"));
+        Map speciality = (HashMap)response.getService().get("speciality");
+        assertEquals(appointment.getService().getSpeciality().getName(), speciality.get("name"));
+        assertEquals(appointment.getService().getSpeciality().getUuid(), speciality.get("uuid"));
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
+        assertEquals(appointment.getServiceType().getDuration(), response.getServiceType().get("duration"));
         assertEquals(appointment.getProvider().getName(), response.getProvider().get("name"));
         assertEquals(appointment.getProvider().getUuid(), response.getProvider().get("uuid"));
         assertEquals(appointment.getLocation().getName(), response.getLocation().get("name"));
@@ -138,6 +149,7 @@ public class AppointmentMapperTest {
     @Test
     public void shouldReturnNullIfNoProviderInDefaultResponse() throws Exception {
         Appointment appointment = createAppointment();
+        appointment.getService().setSpeciality(null);
         appointment.setServiceType(null);
         appointment.setProvider(null);
         appointment.setLocation(null);
@@ -152,6 +164,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
         assertEquals(appointment.getService().getName(), response.getService().get("name"));
         assertEquals(appointment.getService().getUuid(), response.getService().get("uuid"));
+        assertNull(response.getService().get("speciality"));
         assertNull(response.getServiceType());
         assertNull(response.getProvider());
         assertNull(response.getLocation());
