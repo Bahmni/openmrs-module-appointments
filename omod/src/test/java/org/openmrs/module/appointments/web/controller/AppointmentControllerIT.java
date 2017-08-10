@@ -6,10 +6,15 @@ import org.junit.Test;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -33,7 +38,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(3, asResponses.size());
+        assertEquals(5, asResponses.size());
     }
     
     @Test
@@ -43,7 +48,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 new Parameter("forDate", "2108-08-15T00:00:00.0Z"))),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(2, asResponses.size());
+        assertEquals(4, asResponses.size());
     }
 
     @Test
@@ -66,8 +71,34 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         String requestURI = "/rest/v1/appointment";
         String serviceTypeUuid = "678906e5-9fbb-4f20-866b-0ece24564578";
         MockHttpServletRequest getRequest = newGetRequest(requestURI, new Parameter("appointmentServiceTypeUuid", serviceTypeUuid));
-        List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest), new TypeReference<List<AppointmentDefaultResponse>>() {});
+        List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
+            new TypeReference<List<AppointmentDefaultResponse>>() {});
 
-        assertEquals(1, asResponse.size());
+        assertEquals(3, asResponse.size());
+    }
+
+    @Test
+    public void shouldGetCountOfAppointmentsForAllServicesInAGivenDateRange() throws Exception {
+        MockHttpServletRequest getRequest = newGetRequest("/rest/v1/appointment/appointmentSummary",
+                new Parameter("startDate", "2108-08-15T00:00:00.0Z"),
+                new Parameter("endDate", "2108-08-22T00:00:00.0Z"));
+        List<AppointmentsSummary> appointmentsSummaries
+                = deserialize(handle(getRequest), new TypeReference<List<AppointmentsSummary>>() {
+        });
+        AppointmentsSummary appointmentsSummary = appointmentsSummaries.get(0);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date appointmentDate = simpleDateFormat.parse("2108-08-15");
+        assertEquals(1, appointmentsSummaries.size());
+        assertNotNull(appointmentsSummary);
+        assertEquals(1, appointmentsSummary.getAppointmentService().getAppointmentServiceId(), 0);
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentsSummary.getAppointmentService().getUuid());
+        assertEquals(1, appointmentsSummary.getAppointmentCountList().size());
+        Iterator<LinkedHashMap> iterator = appointmentsSummary.getAppointmentCountList().iterator();
+
+        LinkedHashMap<String, String> firstAppointment = iterator.next();
+        assertEquals(3, firstAppointment.get("allAppointmentsCount"));
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", firstAppointment.get("appointmentServiceUuid"));
+        assertEquals(1, firstAppointment.get("missedAppointmentsCount"));
+        assertEquals(appointmentDate.getTime(), firstAppointment.get("appointmentDate"));
     }
 }

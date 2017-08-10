@@ -89,4 +89,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
         return criteria.list();
     }
+
+    @Override
+    public List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.ge("startDateTime", startDate));
+        criteria.add(Restrictions.le("startDateTime", endDate));
+        if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
+            criteria.add(Restrictions.in("status", appointmentStatusFilterList));
+        }
+        return  criteria.list();
+
+    }
 }

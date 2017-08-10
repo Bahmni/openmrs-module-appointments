@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -9,11 +8,13 @@ import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.List;
-import java.util.Set;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -34,7 +35,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
-        assertEquals(6, allAppointmentServices.size());
+        assertEquals(8, allAppointmentServices.size());
     }
     
     @Test
@@ -47,12 +48,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(6, allAppointments.size());
+        assertEquals(8, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(7, allAppointments.size());
+        assertEquals(9, allAppointments.size());
     }
 
     @Test
@@ -74,5 +75,39 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(allFutureAppointmentsForServiceType);
         assertEquals(1,allFutureAppointmentsForServiceType.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13346", allFutureAppointmentsForServiceType.get(0).getUuid());
+    }
+
+    @Test
+    public void shouldGetAppointmentServicesInADateRange() throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = simpleDateFormat.parse("2017-08-08");
+        Date endDate = simpleDateFormat.parse("2017-08-09");
+        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, null);
+        Iterator iterator = appointmentsForService.iterator();
+        Appointment appointment1  = (Appointment) iterator.next();
+        Appointment appointment2  = (Appointment) iterator.next();
+        assertEquals(2, appointmentsForService.size());
+        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13349", appointment1.getUuid());
+        assertEquals(false, appointment1.getVoided());
+        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13351", appointment2.getUuid());
+        assertEquals(false, appointment2.getVoided());
+    }
+
+    @Test
+    public void shouldFilterAppointmentsByStatus() throws ParseException {
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = simpleDateFormat.parse("2017-08-08");
+        Date endDate = simpleDateFormat.parse("2017-08-09");
+        List<AppointmentStatus> appointmentStatusList = new ArrayList<>();
+        appointmentStatusList.add(AppointmentStatus.Scheduled);
+        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatusList);
+        assertEquals(1, appointmentsForService.size());
+        Iterator iterator = appointmentsForService.iterator();
+        Appointment appointment1  = (Appointment) iterator.next();
+        assertEquals(1, appointmentsForService.size());
+        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13349", appointment1.getUuid());
+        assertEquals(AppointmentStatus.Scheduled, appointment1.getStatus());
     }
 }

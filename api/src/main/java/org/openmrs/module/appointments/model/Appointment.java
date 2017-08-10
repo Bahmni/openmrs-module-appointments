@@ -1,9 +1,11 @@
 package org.openmrs.module.appointments.model;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -126,6 +128,10 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public Date getDateFromStartDateTime() {
+        return DateUtils.truncate(getStartDateTime(), java.util.Calendar.DAY_OF_MONTH);
     }
 }
 

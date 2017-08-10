@@ -30,7 +30,7 @@ public class AppointmentServiceController {
     @ResponseBody
     public List<AppointmentServiceDefaultResponse> getAllAppointmentServices()  {
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        List<AppointmentServiceDefaultResponse> response = appointmentServiceMapper.constructResponse(appointmentServices);
+        List<AppointmentServiceDefaultResponse> response = appointmentServiceMapper.constructDefaultResponseForServiceList(appointmentServices);
         return response;
     }
 

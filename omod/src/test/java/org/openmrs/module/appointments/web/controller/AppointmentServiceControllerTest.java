@@ -1,8 +1,5 @@
 package org.openmrs.module.appointments.web.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,6 +12,9 @@ import org.openmrs.module.appointments.web.contract.AppointmentServiceFullRespon
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.springframework.http.ResponseEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -98,7 +98,7 @@ public class AppointmentServiceControllerTest {
         
         appointmentServiceController.getAllAppointmentServices();
         verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
-        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceList);
+        verify(appointmentServiceMapper, times(1)).constructDefaultResponseForServiceList(appointmentServiceList);
     }
     
     @Test
