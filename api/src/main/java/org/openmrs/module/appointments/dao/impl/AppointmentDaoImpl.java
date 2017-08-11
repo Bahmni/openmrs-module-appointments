@@ -96,6 +96,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("voided", false));
         criteria.add(Restrictions.ge("startDateTime", startDate));
         criteria.add(Restrictions.le("startDateTime", endDate));
+        criteria.createCriteria("service").add(Example.create(appointmentService));
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
             criteria.add(Restrictions.in("status", appointmentStatusFilterList));
         }

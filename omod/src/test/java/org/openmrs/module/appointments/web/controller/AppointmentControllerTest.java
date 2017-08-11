@@ -150,13 +150,13 @@ public class AppointmentControllerTest {
         List<AppointmentsSummary> allAppointmentsSummary = appointmentController.getAllAppointmentsSummary(startDateString, endDateString);
         verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
         verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatuses);
-        assertEquals(allAppointmentsSummary.size(), 1);
-        assertEquals(allAppointmentsSummary.get(0).getAppointmentService().getUuid(), "someUuid");
-        assertEquals(allAppointmentsSummary.get(0).getAppointmentCountList().size(),1);
+        assertEquals(1, allAppointmentsSummary.size());
+        assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
+        assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountList().size());
         AppointmentCount appointmentCount = (AppointmentCount)allAppointmentsSummary.get(0).getAppointmentCountList().get(0);
-        assertEquals(appointmentCount.getAllAppointmentsCount(), 1, 0);
-        assertEquals(appointmentCount.getMissedAppointmentsCount(), 0, 0);
-        assertEquals(appointmentCount.getAppointmentDate(), startDate);
-        assertEquals(appointmentCount.getAppointmentServiceUuid(), "someUuid");
+        assertEquals(1, appointmentCount.getAllAppointmentsCount(), 0);
+        assertEquals(0, appointmentCount.getMissedAppointmentsCount(), 0);
+        assertEquals(startDate, appointmentCount.getAppointmentDate());
+        assertEquals("someUuid", appointmentCount.getAppointmentServiceUuid());
     }
 }

@@ -120,10 +120,6 @@ public class AppointmentServiceMapper {
         return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
     }
 
-    public AppointmentServiceDefaultResponse constructDefaultResponse(AppointmentService appointmentService) {
-        return this.mapToDefaultResponse(appointmentService, new AppointmentServiceDefaultResponse());
-    }
-
     private Map constructServiceTypeResponse(AppointmentServiceType serviceType) {
         Map serviceTypeMap = new HashMap();
         serviceTypeMap.put("name", serviceType.getName());
