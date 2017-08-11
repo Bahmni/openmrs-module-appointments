@@ -21,6 +21,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
@@ -122,5 +123,16 @@ public class AppointmentsServiceImplTest {
 
         appointmentsService.getAppointmentsForService(appointmentService, startDate, endDate, null);
         Mockito.verify(appointmentDao, times(1)).getAppointmentsForService(appointmentService, startDate, endDate, null);
+    }
+
+    @Test
+    public void shouldSearchForanAppointment() {
+        Appointment appointment = new Appointment();
+        appointment.setUuid("Uuid");
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        when(appointmentDao.search(appointment)).thenReturn(appointmentList);
+        appointmentsService.search(appointment);
+        verify(appointmentDao, times(1)).search(appointment);
     }
 }

@@ -49,7 +49,7 @@ public class AppointmentController {
     @ResponseBody
     public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
-        List<Appointment> appointments =  appointmentsService.Search(appointment);
+        List<Appointment> appointments =  appointmentsService.search(appointment);
         return appointmentMapper.constructResponse(appointments);
     }
 

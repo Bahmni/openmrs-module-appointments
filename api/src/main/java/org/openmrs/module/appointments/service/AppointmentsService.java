@@ -16,7 +16,7 @@ public interface AppointmentsService {
 
     List<Appointment> getAllAppointments(Date forDate);
 
-    List<Appointment> Search(Appointment appointment);
+    List<Appointment> search(Appointment appointment);
 
     List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService);
 

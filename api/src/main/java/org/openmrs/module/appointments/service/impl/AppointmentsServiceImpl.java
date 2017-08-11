@@ -38,7 +38,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> Search(Appointment appointment) {
+    public List<Appointment> search(Appointment appointment) {
         return appointmentDao.search(appointment);
     }
 
