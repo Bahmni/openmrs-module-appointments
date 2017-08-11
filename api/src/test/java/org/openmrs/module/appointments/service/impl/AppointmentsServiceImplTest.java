@@ -13,7 +13,10 @@ import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -100,5 +103,24 @@ public class AppointmentsServiceImplTest {
         appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
 
         Mockito.verify(appointmentDao, times(1)).getAllFutureAppointmentsForServiceType(appointmentServiceType);
+    }
+
+    @Test
+    public void shouldGetAppointmentsForAService() throws ParseException {
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date startDate = simpleDateFormat.parse("2017-08-08");
+        Date endDate = simpleDateFormat.parse("2017-08-09");
+
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setId(2);
+        appointment.setUuid("someUuid");
+
+        when(appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, null)).thenReturn(appointments);
+
+        appointmentsService.getAppointmentsForService(appointmentService, startDate, endDate, null);
+        Mockito.verify(appointmentDao, times(1)).getAppointmentsForService(appointmentService, startDate, endDate, null);
     }
 }
