@@ -1,12 +1,9 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import java.util.*;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Matchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
@@ -20,18 +17,17 @@ import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
-
-import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
-
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
-import java.util.regex.Matcher;
+import java.util.*;
+
+import static org.junit.Assert.*;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
@@ -239,8 +235,8 @@ public class AppointmentServiceMapperTest {
         List<AppointmentService> appointmentServices = new ArrayList<>();
         appointmentServices.add(cardiologyService);
         appointmentServices.add(chemoTherapyService);
-        
-        List<AppointmentServiceDefaultResponse> appointmentServicesResponse = appointmentServiceMapper.constructResponse(appointmentServices);
+
+        List<AppointmentServiceDefaultResponse> appointmentServicesResponse = appointmentServiceMapper.constructDefaultResponseForServiceList(appointmentServices);
         assertEquals(cardiologyService.getName(), appointmentServicesResponse.get(0).getName());
         assertEquals(cardiologyService.getDurationMins(), appointmentServicesResponse.get(0).getDurationMins());
         assertEquals(cardiologyService.getStartTime().toString(), appointmentServicesResponse.get(0).getStartTime());
@@ -349,6 +345,18 @@ public class AppointmentServiceMapperTest {
         assertNotNull(fullResponseType2.get("uuid"));
         assertEquals(serviceType2.getName(), fullResponseType2.get("name"));
         assertEquals(serviceType1.getDuration(), fullResponseType1.get("duration"));
+    }
+
+    @Test
+    public void shouldMapAppointmentServiceToDefaultResponse() {
+        AppointmentService appointmentService = createAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"), null,
+                20, 30);
+        appointmentService.setUuid("someUuid");
+        AppointmentServiceDefaultResponse appointmentServiceDefaultResponse = appointmentServiceMapper.constructDefaultResponse(appointmentService);
+        assertEquals(appointmentService.getName(), appointmentServiceDefaultResponse.getName());
+        assertEquals(appointmentService.getDurationMins(), appointmentServiceDefaultResponse.getDurationMins());
+        assertEquals(appointmentService.getStartTime().toString(), appointmentServiceDefaultResponse.getStartTime());
+        assertEquals(appointmentService.getUuid(), appointmentServiceDefaultResponse.getUuid());
     }
 
     private AppointmentService createAppointmentService(String name, Time startTime, Time endTime, Integer duration,

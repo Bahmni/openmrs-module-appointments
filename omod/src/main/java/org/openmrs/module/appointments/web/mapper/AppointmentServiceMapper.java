@@ -116,7 +116,7 @@ public class AppointmentServiceMapper {
                 .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
-    public List<AppointmentServiceDefaultResponse> constructResponse(List<AppointmentService> appointmentServices) {
+    public List<AppointmentServiceDefaultResponse> constructDefaultResponseForServiceList(List<AppointmentService> appointmentServices) {
         return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
     }
 
@@ -148,6 +148,7 @@ public class AppointmentServiceMapper {
     
     private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentService as, AppointmentServiceDefaultResponse asResponse) {
         asResponse.setUuid(as.getUuid());
+        asResponse.setAppointmentServiceId(as.getAppointmentServiceId());
         asResponse.setName(as.getName());
         asResponse.setStartTime(convertTimeToString(as.getStartTime()));
         asResponse.setEndTime(convertTimeToString(as.getEndTime()));
