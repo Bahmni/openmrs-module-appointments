@@ -145,6 +145,10 @@ public class AppointmentServiceMapper {
         }
         return response;
     }
+
+    public AppointmentServiceDefaultResponse constructDefaultResponse(AppointmentService appointmentService){
+        return mapToDefaultResponse(appointmentService, new AppointmentServiceDefaultResponse());
+    }
     
     private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentService as, AppointmentServiceDefaultResponse asResponse) {
         asResponse.setUuid(as.getUuid());

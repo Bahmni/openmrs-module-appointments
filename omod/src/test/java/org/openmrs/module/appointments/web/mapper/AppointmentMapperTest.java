@@ -33,6 +33,8 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import static org.powermock.api.mockito.PowerMockito.when;
+
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
@@ -56,6 +58,9 @@ public class AppointmentMapperTest {
     
     @Mock
     private AppointmentServiceService appointmentServiceService;
+
+    @Mock
+    private AppointmentServiceMapper appointmentServiceMapper;
 
     @InjectMocks
     private AppointmentMapper appointmentMapper;
@@ -120,18 +125,16 @@ public class AppointmentMapperTest {
         Appointment appointment = createAppointment();
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
-        
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
         List<AppointmentDefaultResponse> appointmentDefaultResponse = appointmentMapper.constructResponse(appointmentList);
         AppointmentDefaultResponse response = appointmentDefaultResponse.get(0);
         assertEquals(appointment.getUuid(), response.getUuid());
         assertEquals(appointment.getAppointmentNumber(), response.getAppointmentNumber());
         assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
-        assertEquals(appointment.getService().getName(), response.getService().get("name"));
-        assertEquals(appointment.getService().getUuid(), response.getService().get("uuid"));
-        Map speciality = (HashMap)response.getService().get("speciality");
-        assertEquals(appointment.getService().getSpeciality().getName(), speciality.get("name"));
-        assertEquals(appointment.getService().getSpeciality().getUuid(), speciality.get("uuid"));
+        assertEquals(serviceDefaultResponse, response.getService());
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
         assertEquals(appointment.getServiceType().getDuration(), response.getServiceType().get("duration"));
@@ -155,16 +158,19 @@ public class AppointmentMapperTest {
         appointment.setLocation(null);
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
-        
+
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+
         List<AppointmentDefaultResponse> appointmentDefaultResponse = appointmentMapper.constructResponse(appointmentList);
         AppointmentDefaultResponse response = appointmentDefaultResponse.get(0);
         assertEquals(appointment.getUuid(), response.getUuid());
         assertNull(response.getAppointmentNumber());
         assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
-        assertEquals(appointment.getService().getName(), response.getService().get("name"));
-        assertEquals(appointment.getService().getUuid(), response.getService().get("uuid"));
-        assertNull(response.getService().get("speciality"));
+        assertEquals(serviceDefaultResponse, response.getService());
+
         assertNull(response.getServiceType());
         assertNull(response.getProvider());
         assertNull(response.getLocation());
