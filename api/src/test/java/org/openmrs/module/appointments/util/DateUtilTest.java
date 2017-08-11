@@ -37,4 +37,10 @@ public class DateUtilTest {
         String expectedDateString = "Wed Mar 15 16:57:09 ".concat(timeZoneShort).concat(" 2017");
         assertEquals(expectedDateString, date.toString());
     }
+
+    @Test
+    public void shouldReturnNUllifDateStringIsNull() throws ParseException {
+        Date date = DateUtil.convertToLocalDateFromUTC(null);
+        assertNull(date);
+    }
 }

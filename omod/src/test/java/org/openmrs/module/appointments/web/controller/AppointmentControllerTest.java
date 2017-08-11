@@ -13,10 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.openmrs.module.appointments.web.contract.AppointmentCount;
-import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
+import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 
@@ -158,5 +155,13 @@ public class AppointmentControllerTest {
         assertEquals(0, appointmentCount.getMissedAppointmentsCount(), 0);
         assertEquals(startDate, appointmentCount.getAppointmentDate());
         assertEquals("someUuid", appointmentCount.getAppointmentServiceUuid());
+    }
+
+    @Test
+    public void shouldThrowExceptionifPatientUuidisBlankWhileCreatingAppointment() throws Exception {
+        AppointmentPayload appointmentPayload = new AppointmentPayload();
+        appointmentPayload.setPatientUuid("");
+        expectedException.expectMessage("Patient should not be empty");
+        appointmentController.createAppointment(appointmentPayload);
     }
 }
