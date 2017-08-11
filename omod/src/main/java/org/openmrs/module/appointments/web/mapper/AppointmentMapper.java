@@ -40,6 +40,9 @@ public class AppointmentMapper {
     @Autowired
     AppointmentServiceService appointmentServiceService;
 
+    @Autowired
+    AppointmentServiceMapper appointmentServiceMapper;
+
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
     }
@@ -90,7 +93,7 @@ public class AppointmentMapper {
         response.setUuid(a.getUuid());
         response.setAppointmentNumber(a.getAppointmentNumber());
         response.setPatient(createPatientMap(a.getPatient()));
-        response.setService(createServiceMap(a.getService()));
+        response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
         response.setProvider(createProviderMap(a.getProvider()));
         response.setLocation(createLocationMap(a.getLocation()));
@@ -114,23 +117,6 @@ public class AppointmentMapper {
         return serviceTypeMap;
     }
     
-    private Map createServiceMap(AppointmentService s) {
-        Map serviceMap = new HashMap();
-        if (s != null) {
-            serviceMap.put("name", s.getName());
-            serviceMap.put("uuid", s.getUuid());
-            Map specialityMap = null;
-            Speciality speciality = s.getSpeciality();
-            if(speciality != null){
-                specialityMap = new HashMap();
-                specialityMap.put("name", speciality.getName());
-                specialityMap.put("uuid", speciality.getUuid());
-            }
-            serviceMap.put("speciality", specialityMap);
-        }
-        return serviceMap;
-    }
-
     private Map createProviderMap(Provider p) {
         Map providerMap = null;
         if (p != null) {

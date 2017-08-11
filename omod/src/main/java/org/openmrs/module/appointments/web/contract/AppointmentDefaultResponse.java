@@ -7,7 +7,7 @@ public class AppointmentDefaultResponse {
 	private String uuid;
 	private String appointmentNumber;
 	private Map patient;
-	private Map service;
+	private AppointmentServiceDefaultResponse service;
 	private Map serviceType;
 	private Map provider;
 	private Map location;
@@ -41,14 +41,14 @@ public class AppointmentDefaultResponse {
 		this.patient = patient;
 	}
 
-	public Map getService() {
+	public AppointmentServiceDefaultResponse getService() {
 		return service;
 	}
 
-	public void setService(Map service) {
+	public void setService(AppointmentServiceDefaultResponse service) {
 		this.service = service;
 	}
-	
+
 	public Map getServiceType() {
 		return serviceType;
 	}
