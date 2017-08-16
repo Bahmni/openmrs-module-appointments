@@ -8,6 +8,7 @@ import org.openmrs.Provider;
 import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class Appointment extends BaseOpenmrsData implements Serializable {
@@ -130,8 +131,10 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.comments = comments;
     }
 
-    public Date getDateFromStartDateTime() {
-        return DateUtils.truncate(getStartDateTime(), java.util.Calendar.DAY_OF_MONTH);
+    public String getDateFromStartDateTime() {
+//        return DateUtils.truncate(getStartDateTime(), java.util.Calendar.DAY_OF_MONTH);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd MMM E");
+        return simpleDateFormat.format(getStartDateTime());
     }
 }
 

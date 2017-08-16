@@ -5,10 +5,10 @@ import java.util.Date;
 public class AppointmentCount {
     private Integer allAppointmentsCount;
     private Integer missedAppointmentsCount;
-    private Date appointmentDate;
+    private String appointmentDate;
     private String appointmentServiceUuid;
 
-    public AppointmentCount(Integer allAppointmentsCount, Integer missedAppointmentsCount, Date appointmentDate, String appointmentServiceUuid) {
+    public AppointmentCount(Integer allAppointmentsCount, Integer missedAppointmentsCount, String appointmentDate, String appointmentServiceUuid) {
         this.allAppointmentsCount = allAppointmentsCount;
         this.missedAppointmentsCount = missedAppointmentsCount;
         this.appointmentDate = appointmentDate;
@@ -31,11 +31,11 @@ public class AppointmentCount {
         this.missedAppointmentsCount = missedAppointmentsCount;
     }
 
-    public Date getAppointmentDate() {
+    public String getAppointmentDate() {
         return appointmentDate;
     }
 
-    public void setAppointmentDate(Date appointmentDate) {
+    public void setAppointmentDate(String appointmentDate) {
         this.appointmentDate = appointmentDate;
     }
 

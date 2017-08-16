@@ -153,10 +153,10 @@ public class AppointmentControllerTest {
         assertEquals(1, allAppointmentsSummary.size());
         assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
         assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountList().size());
-        AppointmentCount appointmentCount = (AppointmentCount)allAppointmentsSummary.get(0).getAppointmentCountList().get(0);
+        AppointmentCount appointmentCount = (AppointmentCount)allAppointmentsSummary.get(0).getAppointmentCountList().get("15 Aug Tue");
         assertEquals(1, appointmentCount.getAllAppointmentsCount(), 0);
         assertEquals(0, appointmentCount.getMissedAppointmentsCount(), 0);
-        assertEquals(startDate, appointmentCount.getAppointmentDate());
+        assertEquals("15 Aug Tue", appointmentCount.getAppointmentDate());
         assertEquals("someUuid", appointmentCount.getAppointmentServiceUuid());
     }
 }
