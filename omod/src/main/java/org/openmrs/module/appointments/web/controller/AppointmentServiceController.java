@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
@@ -15,7 +16,11 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
+import java.sql.Time;
+import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentService")
@@ -76,5 +81,18 @@ public class AppointmentServiceController {
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
+    }
+
+
+    @RequestMapping(method = RequestMethod.GET, value = "load")
+    @ResponseBody
+    public Integer calculateLoadForService(@RequestParam("uuid") String serviceUuid, @RequestParam(value = "startDateTime") String startDateTime, @RequestParam(value = "endDateTime") String endDateTime)
+            throws ParseException {
+        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(serviceUuid);
+        if(appointmentService == null){
+            throw new RuntimeException("Appointment Service does not exist");
+        }
+
+        return appointmentServiceService.calculateCurrentLoad(appointmentService, DateUtil.convertToLocalDateFromUTC(startDateTime), DateUtil.convertToLocalDateFromUTC(endDateTime));
     }
 }

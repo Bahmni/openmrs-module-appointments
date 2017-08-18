@@ -2,10 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,6 +66,14 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
     @Override
     public AppointmentServiceType getAppointmentServiceTypeByUuid(String serviceTypeUuid) {
         return appointmentServiceDao.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+    }
+
+    @Override
+    public Integer calculateCurrentLoad(AppointmentService appointmentService, Date startDateTime, Date endDateTime) {
+        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Started, AppointmentStatus.Scheduled};
+        List<Appointment> appointmentsForService = appointmentsService
+                .getAppointmentsForService(appointmentService, startDateTime, endDateTime, Arrays.asList(includeStatus));
+        return appointmentsForService.size();
     }
 
     private void setVoidInfoForAppointmentService(AppointmentService appointmentService, String voidReason) {

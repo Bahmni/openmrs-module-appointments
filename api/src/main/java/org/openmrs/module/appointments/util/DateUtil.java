@@ -30,14 +30,6 @@ public class DateUtil {
         return simpleDateFormat.parse(dateString);
     }
     
-    public static Date convertToDate(String dateString, String dateFormat) throws ParseException {
-        if (StringUtils.isEmpty(dateString) || StringUtils.isEmpty(dateFormat)) {
-            return null;
-        }
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat);
-        return simpleDateFormat.parse(dateString);
-    }
-    
     public static Date convertToLocalDateFromUTC(String dateString) throws ParseException {
         if (StringUtils.isEmpty(dateString)) {
             return null;

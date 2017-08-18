@@ -8,12 +8,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.springframework.http.ResponseEntity;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -180,5 +182,23 @@ public class AppointmentServiceControllerTest {
         verify(appointmentServiceMapper, times(0)).constructResponse(appointmentService);
         assertNotNull(response);
         assertEquals(exceptionMessage, ((RuntimeException)response.getBody()).getMessage());
+    }
+
+    @Test
+    public void shouldGetLoad() throws Exception {
+        String appointmentServiceUuid = "appointmentServiceUuid";
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        String startDateString = "2108-08-14T18:30:00.0Z";
+        String endDateString = "2108-08-15T18:30:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        when(appointmentServiceService.calculateCurrentLoad(appointmentService, startDate, endDate)).thenReturn(new Integer(45));
+        Integer response = appointmentServiceController.calculateLoadForService(appointmentServiceUuid, startDateString, endDateString);
+        verify(appointmentServiceService, times(1)).calculateCurrentLoad(appointmentService, startDate, endDate);
+        assertNotNull(response);
+        assertEquals(45, response.intValue());
     }
 }

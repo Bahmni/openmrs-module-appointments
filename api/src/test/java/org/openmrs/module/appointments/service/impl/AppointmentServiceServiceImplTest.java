@@ -9,15 +9,14 @@ import org.mockito.*;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.sql.Array;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.*;
@@ -285,5 +284,18 @@ public class AppointmentServiceServiceImplTest{
         appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
 
         Mockito.verify(appointmentServiceDao, times(1)).getAppointmentServiceTypeByUuid(serviceTypeUuid);
+    }
+
+    @Test
+    public void shouldGetAppointmentsForAServiceAndDateTimeRange() throws Exception {
+        AppointmentService appointmentService = new AppointmentService();
+        Date startDateTime = DateUtil.convertToLocalDateFromUTC("2108-08-14T18:30:00.0Z");
+        Date endDateTime = DateUtil.convertToLocalDateFromUTC("2108-08-15T18:29:29.0Z");
+        appointmentServiceService.calculateCurrentLoad(appointmentService,
+                startDateTime, endDateTime);
+        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Started, AppointmentStatus.Scheduled};
+
+        Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDateTime, endDateTime,
+                Arrays.asList(includeStatus));
     }
 }

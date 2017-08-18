@@ -2,7 +2,9 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -13,10 +15,7 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static junit.framework.TestCase.assertNull;
 import static org.junit.Assert.assertEquals;
@@ -31,6 +30,11 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+
 
     @Before
     public void setUp() throws Exception {
@@ -139,7 +143,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServices() throws Exception {
         List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
-        assertEquals(2,asResponses.size());
+        assertEquals(3,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
@@ -250,5 +254,16 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("Chemotherapy",appointmentService.getName());
         assertEquals(uuid, appointmentService.getUuid());
         assertEquals(1, appointmentService.getServiceTypes().size());
+    }
+
+    @Test
+    public void shouldGetCurrentLoadForServiceForGivenDateTimes() throws Exception {
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment Service does not exist");
+        deserialize(handle(newGetRequest("/rest/v1/appointmentService/load",
+                new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245625b4"),
+                new Parameter("startDateTime", "2108-08-14T18:30:00.0Z"), new Parameter("endDateTime", "2108-08-15T18:29:29.0Z"))),
+                new TypeReference<Integer>() {});
+
     }
 }
