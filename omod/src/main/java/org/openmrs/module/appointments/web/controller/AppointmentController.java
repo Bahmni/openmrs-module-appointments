@@ -91,16 +91,16 @@ public class AppointmentController {
             Map<Date, List<Appointment>> appointmentsGroupedByDate =
                     appointmentsForService.stream().collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime));
 
-            List<AppointmentCount> appointmentCountList = new ArrayList<>();
+            Map<String, AppointmentCount> appointmentCountMap = new LinkedHashMap<>();
             for (Map.Entry<Date, List<Appointment>> appointmentDateMap : appointmentsGroupedByDate.entrySet()) {
                 List<Appointment> appointments = appointmentDateMap.getValue();
                 Long missedAppointmentsCount = appointments.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
                 AppointmentCount appointmentCount = new AppointmentCount(
                         appointments.size(),Math.toIntExact(missedAppointmentsCount), appointmentDateMap.getKey(), appointmentService.getUuid());
-                appointmentCountList.add(appointmentCount);
+                appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), appointmentCount);
             }
 
-            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentService), appointmentCountList);
+            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentService), appointmentCountMap);
             appointmentsSummaryList.add(appointmentsSummary);
         }
         return appointmentsSummaryList;

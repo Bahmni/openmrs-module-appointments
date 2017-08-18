@@ -3,17 +3,17 @@ package org.openmrs.module.appointments.web.contract;
 import org.codehaus.jackson.annotate.JsonCreator;
 import org.codehaus.jackson.annotate.JsonProperty;
 
-import java.util.List;
+import java.util.Map;
 
 public class AppointmentsSummary {
     private AppointmentServiceDefaultResponse appointmentService;
-    private List appointmentCountList;
+    private Map<String, AppointmentCount> appointmentCountMap;
 
     @JsonCreator
     public AppointmentsSummary(@JsonProperty("appointmentService")AppointmentServiceDefaultResponse appointmentService,
-                               @JsonProperty("appointmentCountList") List appointmentCountList) {
+                               @JsonProperty("appointmentCountMap") Map appointmentCountMap) {
         this.appointmentService = appointmentService;
-        this.appointmentCountList = appointmentCountList;
+        this.appointmentCountMap = appointmentCountMap;
     }
     public AppointmentServiceDefaultResponse getAppointmentService() {
         return appointmentService;
@@ -23,11 +23,11 @@ public class AppointmentsSummary {
         this.appointmentService = appointmentService;
     }
 
-    public List getAppointmentCountList() {
-        return appointmentCountList;
+    public Map<String, AppointmentCount> getAppointmentCountMap() {
+        return appointmentCountMap;
     }
 
-    public void setAppointmentCountList(List appointmentCountList) {
-        this.appointmentCountList = appointmentCountList;
+    public void setAppointmentCountMap(Map<String, AppointmentCount> appointmentCountMap) {
+        this.appointmentCountMap = appointmentCountMap;
     }
 }
