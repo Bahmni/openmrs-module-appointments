@@ -359,6 +359,36 @@ public class AppointmentServiceMapperTest {
         assertEquals(appointmentService.getUuid(), appointmentServiceDefaultResponse.getUuid());
     }
 
+    @Test
+    public void shouldMapAppointmentServiceToFullResponse() {
+        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+        appointmentServiceType.setName("Something");
+        Set<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
+        serviceTypes.add(appointmentServiceType);
+        Speciality speciality = new Speciality();
+        speciality.setName("Speciality");
+        AppointmentService cardiologyService = createAppointmentService("Cardiology-OPD", Time.valueOf("09:00:00"),
+                null, 20, 30);
+        ServiceWeeklyAvailability availability = new ServiceWeeklyAvailability();
+        availability.setDayOfWeek(DayOfWeek.MONDAY);
+        HashSet<ServiceWeeklyAvailability> availabilityList = new HashSet<>();
+        availabilityList.add(availability);
+        cardiologyService.setWeeklyAvailability(availabilityList);
+        cardiologyService.setServiceTypes(serviceTypes);
+        cardiologyService.setSpeciality(speciality);
+
+        List<AppointmentService> appointmentServices = new ArrayList<>();
+        appointmentServices.add(cardiologyService);
+
+        List<AppointmentServiceFullResponse> appointmentServiceFullResponses = appointmentServiceMapper.constructFullResponseForServiceList(appointmentServices);
+
+        AppointmentServiceFullResponse cardioService = appointmentServiceFullResponses.get(0);
+        assertEquals("Cardiology-OPD", cardiologyService.getName());
+        AppointmentServiceType appointmentServiceType1 = cardiologyService.getServiceTypes().iterator().next();
+        assertEquals("Something", appointmentServiceType1.getName());
+        assertEquals("Speciality", cardioService.getSpeciality().get("name"));
+    }
+
     private AppointmentService createAppointmentService(String name, Time startTime, Time endTime, Integer duration,
                                                         Integer maxAppointmentsLimit) {
         AppointmentService appointmentService = new AppointmentService();

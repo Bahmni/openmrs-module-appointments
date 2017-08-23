@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -265,5 +266,32 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 new Parameter("startDateTime", "2108-08-14T18:30:00.0Z"), new Parameter("endDateTime", "2108-08-15T18:29:29.0Z"))),
                 new TypeReference<Integer>() {});
 
+    }
+
+    @Test
+    public void should_GetAllAppointmentServicesWithServiceTypes() throws Exception {
+        List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/allWithServiceTypes")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
+        assertEquals(3,asResponses.size());
+        assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
+        assertEquals("Consultation", asResponses.get(0).getName());
+        assertEquals("Consultation", asResponses.get(0).getDescription());
+        assertEquals("09:00:00", asResponses.get(0).getStartTime());
+        assertEquals("17:00:00", asResponses.get(0).getEndTime());
+        assertEquals(30, asResponses.get(0).getDurationMins().intValue());
+        assertEquals(4, asResponses.get(0).getMaxAppointmentsLimit().intValue());
+        assertEquals("Ortho", asResponses.get(0).getSpeciality().get("name"));
+        assertEquals("Room1", asResponses.get(0).getLocation().get("name"));
+        ArrayList serviceTypes = (ArrayList) asResponses.get(0).getServiceTypes();
+        assertNotNull(serviceTypes);
+        LinkedHashMap<String, Object> serviceTypes1 = (LinkedHashMap<String, Object>) serviceTypes.get(0);
+        assertEquals("Initial Consultaion", serviceTypes1.get("name"));
+        assertEquals("c36006d4-9fbb-4f20-866b-0ece24560000", asResponses.get(1).getUuid());
+        assertEquals("Ortho Service", asResponses.get(1).getName());
+        assertEquals("09:00:00", asResponses.get(1).getStartTime());
+        assertEquals("16:00:00", asResponses.get(1).getEndTime());
+        assertEquals(30, asResponses.get(1).getDurationMins().intValue());
+        assertEquals(4, asResponses.get(1).getMaxAppointmentsLimit().intValue());
+        assertEquals("Ortho", asResponses.get(1).getSpeciality().get("name"));
+        assertEquals("Room1", asResponses.get(1).getLocation().get("name"));
     }
 }
