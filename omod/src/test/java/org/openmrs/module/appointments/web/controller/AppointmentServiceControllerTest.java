@@ -201,4 +201,16 @@ public class AppointmentServiceControllerTest {
         assertNotNull(response);
         assertEquals(45, response.intValue());
     }
+
+    @Test
+    public void shouldGetAppointmentServiceWithSpecialityAndAppointmentServiceTypesInIt() {
+        AppointmentService appointmentService = new AppointmentService();
+        List<AppointmentService> appointmentServiceList = new ArrayList<>();
+        appointmentServiceList.add(appointmentService);
+        when(appointmentServiceService.getAllAppointmentServices(false)).thenReturn(appointmentServiceList);
+
+        List<AppointmentServiceFullResponse> allAppointmentServicesWithTypes = appointmentServiceController.getAllAppointmentServicesWithTypes();
+        verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
+        verify(appointmentServiceMapper, times(1)).constructFullResponseForServiceList(appointmentServiceList);
+    }
 }

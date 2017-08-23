@@ -128,6 +128,10 @@ public class AppointmentServiceMapper {
         return serviceTypeMap;
     }
 
+    public List<AppointmentServiceFullResponse> constructFullResponseForServiceList(List<AppointmentService> appointmentServices) {
+        return appointmentServices.stream().map(as -> this.constructResponse(as)).collect(Collectors.toList());
+    }
+
     public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
         AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
         mapToDefaultResponse(service, response);
@@ -189,5 +193,4 @@ public class AppointmentServiceMapper {
     private String convertTimeToString(Time time) {
        return time != null ? time.toString() : new String();
     }
-
 }

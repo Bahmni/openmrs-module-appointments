@@ -39,6 +39,14 @@ public class AppointmentServiceController {
         return response;
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "allWithServiceTypes")
+    @ResponseBody
+    public List<AppointmentServiceFullResponse> getAllAppointmentServicesWithTypes() {
+        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
+        List<AppointmentServiceFullResponse> response = appointmentServiceMapper.constructFullResponseForServiceList(appointmentServices);
+        return response;
+    }
+
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public AppointmentServiceFullResponse getAppointmentServiceByUuid(@RequestParam("uuid") String uuid)  {
