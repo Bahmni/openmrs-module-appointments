@@ -86,6 +86,7 @@ public class AppointmentController {
                             Arrays.asList(
                                     AppointmentStatus.Completed,
                                     AppointmentStatus.Scheduled,
+                                    AppointmentStatus.CheckedIn,
                                     AppointmentStatus.Missed));
 
             Map<Date, List<Appointment>> appointmentsGroupedByDate =

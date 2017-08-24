@@ -38,7 +38,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(5, asResponses.size());
+        assertEquals(6, asResponses.size());
     }
     
     @Test
@@ -74,13 +74,12 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
             new TypeReference<List<AppointmentDefaultResponse>>() {});
 
-        assertEquals(3, asResponse.size());
+        assertEquals(4, asResponse.size());
     }
 
     @Test
     public void shouldGetCountOfAppointmentsForAllServicesInAGivenDateRange() throws Exception {
-        MockHttpServletRequest getRequest = newGetRequest("/rest/v1/appointment/appointmentSummary",
-                new Parameter("startDate", "2108-08-15T00:00:00.0Z"),
+        MockHttpServletRequest getRequest = newGetRequest("/rest/v1/appointment/appointmentSummary", new Parameter("startDate", "2108-08-15T00:00:00.0Z"),
                 new Parameter("endDate", "2108-08-22T00:00:00.0Z"));
         List<AppointmentsSummary> appointmentsSummaries
                 = deserialize(handle(getRequest), new TypeReference<List<AppointmentsSummary>>() {
@@ -96,7 +95,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         Map<String, AppointmentCount> appointmentCountMap = appointmentsSummary.getAppointmentCountMap();
         Map appointmentCount = (Map)appointmentCountMap.get("2108-08-15");
         assertNotNull(appointmentCount);
-        assertEquals(3, appointmentCount.get("allAppointmentsCount"));
+        assertEquals(4, appointmentCount.get("allAppointmentsCount"));
         assertEquals(1, appointmentCount.get("missedAppointmentsCount"));
         assertEquals(appointmentDate.getTime(), appointmentCount.get("appointmentDate"));
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentCount.get("appointmentServiceUuid"));

@@ -138,6 +138,7 @@ public class AppointmentControllerTest {
         List<AppointmentStatus> appointmentStatuses = Arrays.asList(
                 AppointmentStatus.Completed,
                 AppointmentStatus.Scheduled,
+                AppointmentStatus.CheckedIn,
                 AppointmentStatus.Missed);
         AppointmentServiceDefaultResponse appointmentServiceDefaultResponse = new AppointmentServiceDefaultResponse();
         appointmentServiceDefaultResponse.setUuid("someUuid");
