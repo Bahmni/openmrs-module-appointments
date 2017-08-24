@@ -1,10 +1,10 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import java.util.concurrent.TimeUnit;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.sql.JoinType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Component
 public class AppointmentDaoImpl implements AppointmentDao {
@@ -93,6 +94,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.createAlias("serviceType", "serviceType", JoinType.LEFT_OUTER_JOIN);
+        criteria.add(Restrictions.or(Restrictions.isNull("serviceType"), Restrictions.eq("serviceType.voided", false)));
         criteria.add(Restrictions.eq("voided", false));
         criteria.add(Restrictions.ge("startDateTime", startDate));
         criteria.add(Restrictions.le("startDateTime", endDate));

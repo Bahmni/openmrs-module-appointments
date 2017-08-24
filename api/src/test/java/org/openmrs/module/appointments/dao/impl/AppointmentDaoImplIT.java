@@ -35,7 +35,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
-        assertEquals(8, allAppointmentServices.size());
+        assertEquals(9, allAppointmentServices.size());
     }
     
     @Test
@@ -48,12 +48,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(8, allAppointments.size());
+        assertEquals(9, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(9, allAppointments.size());
+        assertEquals(10, allAppointments.size());
     }
 
     @Test
@@ -85,13 +85,13 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, null);
         Iterator iterator = appointmentsForService.iterator();
-        Appointment appointment1  = (Appointment) iterator.next();
-        Appointment appointment2  = (Appointment) iterator.next();
+        Appointment appointmentWithNonVoidedServiceType  = (Appointment) iterator.next();
+        Appointment appointmentWithoutServiceType  = (Appointment) iterator.next();
         assertEquals(2, appointmentsForService.size());
-        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13349", appointment1.getUuid());
-        assertEquals(false, appointment1.getVoided());
-        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13351", appointment2.getUuid());
-        assertEquals(false, appointment2.getVoided());
+        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13349", appointmentWithNonVoidedServiceType.getUuid());
+        assertEquals(false, appointmentWithNonVoidedServiceType.getVoided());
+        assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13351", appointmentWithoutServiceType.getUuid());
+        assertEquals(false, appointmentWithoutServiceType.getVoided());
     }
 
     @Test
