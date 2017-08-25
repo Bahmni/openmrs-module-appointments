@@ -75,8 +75,8 @@ public class AppointmentController {
     public List<AppointmentsSummary> getAllAppointmentsSummary(@RequestParam(value = "startDate") String startDateString, @RequestParam(value = "endDate") String endDateString) throws ParseException {
         List<AppointmentsSummary> appointmentsSummaryList = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDate = DateUtil.convertToDate(startDateString, DateUtil.DateFormatType.UTC);
-        Date endDate = DateUtil.convertToDate(endDateString, DateUtil.DateFormatType.UTC);
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
 
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
         for (AppointmentService appointmentService : appointmentServices) {
