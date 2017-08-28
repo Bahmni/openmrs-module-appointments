@@ -115,11 +115,11 @@ public class AppointmentControllerTest {
 
     @Test
     public void shouldGetAllAppointmentsSummary() throws ParseException {
-        String startDateString = "2017-08-15T00:00:00.0Z";
-        String endDateString = "2017-08-22T00:00:00.0Z";
+        String startDateString = "2017-08-15T00:00:00.000Z";
+        String endDateString = "2017-08-22T00:00:00.000Z";
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
-        Date startDate = simpleDateFormat.parse(startDateString);
-        Date endDate = simpleDateFormat.parse(endDateString);
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
         AppointmentService appointmentService = new AppointmentService();
         appointmentService.setName("Ortho");
         appointmentService.setUuid("someUuid");
@@ -153,7 +153,7 @@ public class AppointmentControllerTest {
         AppointmentCount appointmentCount = (AppointmentCount)allAppointmentsSummary.get(0).getAppointmentCountMap().get("2017-08-15");
         assertEquals(1, appointmentCount.getAllAppointmentsCount(), 0);
         assertEquals(0, appointmentCount.getMissedAppointmentsCount(), 0);
-        assertEquals(startDate, appointmentCount.getAppointmentDate());
+        assertEquals(simpleDateFormat.parse(startDateString), appointmentCount.getAppointmentDate());
         assertEquals("someUuid", appointmentCount.getAppointmentServiceUuid());
     }
 

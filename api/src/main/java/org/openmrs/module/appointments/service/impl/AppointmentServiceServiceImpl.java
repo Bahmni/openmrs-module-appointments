@@ -31,6 +31,11 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
     @Override
     public List<AppointmentService> getAllAppointmentServices(boolean includeVoided) {
         List<AppointmentService> appointmentServices = appointmentServiceDao.getAllAppointmentServices(includeVoided);
+        if(!includeVoided) {
+            for (AppointmentService appointmentService : appointmentServices) {
+                removeVoidedApointmentServiceTypes(appointmentService);
+            }
+        }
         return appointmentServices;
     }
 
