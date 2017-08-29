@@ -2,7 +2,9 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentCount;
@@ -26,6 +28,9 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -99,5 +104,28 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertEquals(1, appointmentCount.get("missedAppointmentsCount"));
         assertEquals(appointmentDate.getTime(), appointmentCount.get("appointmentDate"));
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentCount.get("appointmentServiceUuid"));
+    }
+
+    @Test
+    public void shouldThrowErrorWhenAppointmentDoesnotHavePatientInIT() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"status\": \"Scheduled\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Patient should not be empty");
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+    }
+
+    @Test
+    public void should_SearchWithAppointment() throws Exception {
+        String content = "{ \"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/search", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
     }
 }

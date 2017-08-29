@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.openmrs.Patient;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
@@ -163,5 +165,55 @@ public class AppointmentControllerTest {
         appointmentPayload.setPatientUuid("");
         expectedException.expectMessage("Patient should not be empty");
         appointmentController.createAppointment(appointmentPayload);
+    }
+
+    @Test
+    public void shouldSearchWithAppointment() throws Exception {
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuid");
+        Patient patient = new Patient();
+        patient.setUuid("somePatientUuid");
+        appointment.setPatient(patient);
+        appointments.add(appointment);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("someServiceUuid");
+        AppointmentQuery appointmentQuery = new AppointmentQuery();
+        appointmentQuery.setLocationUuid("someLocationUuid");
+        appointmentQuery.setPatientUuid("somePatientUuid");
+        appointmentQuery.setProviderUuid("someProviderUuid");
+        appointmentQuery.setServiceUuid("someServiceUuid");
+
+        AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
+        appointmentDefaultResponse.setUuid("appointmentUuid1");
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
+        appointmentDefaultResponses.add(appointmentDefaultResponse);
+
+        when(appointmentMapper.mapQueryToAppointment(appointmentQuery)).thenReturn(appointment);
+        when(appointmentsService.search(appointment)).thenReturn(appointments);
+        when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
+        List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
+        AppointmentDefaultResponse appointmentResponse = appointmentDefaultResponses.get(0);
+        assertEquals("appointmentUuid1", appointmentResponse.getUuid());
+    }
+
+    @Test
+    public void shouldSaveAnAppointment() throws Exception{
+        AppointmentPayload appointmentPayload = new AppointmentPayload();
+        appointmentPayload.setPatientUuid("somePatientUuid");
+        appointmentPayload.setUuid("someUuid");
+        appointmentPayload.setServiceUuid("someServiceUuid");
+
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuid");
+
+        when(appointmentMapper.getAppointmentFromPayload(appointmentPayload)).thenReturn(appointment);
+        when(appointmentsService.save(appointment)).thenReturn(appointment);
+
+        appointmentController.createAppointment(appointmentPayload);
+        Mockito.verify(appointmentMapper, times(1)).getAppointmentFromPayload(appointmentPayload);
+        Mockito.verify(appointmentsService, times(1)).save(appointment);
+
     }
 }

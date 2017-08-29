@@ -294,4 +294,12 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("Ortho", asResponses.get(1).getSpeciality().get("name"));
         assertEquals("Room1", asResponses.get(1).getLocation().get("name"));
     }
+
+
+    @Test
+    public void shouldThrowErrorWhenAppointmentServieIsNotAvailable() throws Exception {
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment Service does not exist");
+        MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));
+    }
 }

@@ -34,6 +34,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -228,5 +229,36 @@ public class AppointmentMapperTest {
         appointment.setStatus(AppointmentStatus.Scheduled);
         appointment.setComments("Secondary Consultation");
         return appointment;
+    }
+
+    @Test
+    public void shouldMapAppointmentQueryToAppointment() {
+        AppointmentQuery appointmentQuery = new AppointmentQuery();
+        appointmentQuery.setServiceUuid("someServiceUuid");
+        appointmentQuery.setProviderUuid("providerUuid");
+        appointmentQuery.setPatientUuid("patientUuid");
+        appointmentQuery.setLocationUuid("locationUuid");
+        appointmentQuery.setStatus("Completed");
+        Appointment appointment = appointmentMapper.mapQueryToAppointment(appointmentQuery);
+
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("serviceUuid");
+        when(appointmentServiceService.getAppointmentServiceByUuid("someServiceUuid")).thenReturn(appointmentService);
+        Patient patient = new Patient();
+        patient.setUuid("patientUuid");
+        when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
+
+        Provider provider = new Provider();
+        provider.setUuid("providerUuid");
+        when(providerService.getProviderByUuid("providerUuid")).thenReturn(provider);
+
+        Location location = new Location();
+        location.setUuid("locationUuid");
+        when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
+
+        assertEquals("locationUuid", appointment.getLocation().getUuid());
+        assertEquals("patientUuid", appointment.getPatient().getUuid());
+        assertEquals("providerUuid", appointment.getProvider().getUuid());
+        assertEquals("Completed", appointment.getStatus().toString());
     }
 }
