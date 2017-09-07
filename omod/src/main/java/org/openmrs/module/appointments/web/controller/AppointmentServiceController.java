@@ -31,7 +31,7 @@ public class AppointmentServiceController {
     @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
 
-    @RequestMapping(method = RequestMethod.GET, value = "all")
+    @RequestMapping(method = RequestMethod.GET, value = "all/default")
     @ResponseBody
     public List<AppointmentServiceDefaultResponse> getAllAppointmentServices()  {
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
@@ -39,7 +39,7 @@ public class AppointmentServiceController {
         return response;
     }
 
-    @RequestMapping(method = RequestMethod.GET, value = "allWithServiceTypes")
+    @RequestMapping(method = RequestMethod.GET, value = "all/full")
     @ResponseBody
     public List<AppointmentServiceFullResponse> getAllAppointmentServicesWithTypes() {
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
