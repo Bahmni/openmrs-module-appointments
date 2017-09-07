@@ -180,6 +180,8 @@ public class AppointmentMapperTest {
     public void shouldCreateAuditEventOnEditAppointment() throws Exception {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
         Appointment existingAppointment = createAppointment();
+	    String existingStartDateTime = existingAppointment.getStartDateTime().toInstant().toString();
+	    String existingEndDateTime = existingAppointment.getEndDateTime().toInstant().toString();
         existingAppointment.setUuid(appointmentUuid);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
         AppointmentPayload appointmentPayload = new AppointmentPayload();
@@ -198,7 +200,7 @@ public class AppointmentMapperTest {
         verify(auditDao, times(1)).save(captor.capture());
         List<AppointmentAudit> auditEvents = captor.getAllValues();
         assertEquals(existingAppointment.getStatus(), auditEvents.get(0).getStatus());
-        String message = "{\"serviceTypeUuid\":\"serviceTypeUuid\",\"startDateTime\":\"2017-03-15T11:27:09Z\",\"locationUuid\":\"serviceUuid\",\"appointmentKind\":\"Scheduled\",\"providerUuid\":\"providerUuid\",\"endDateTime\":\"2017-03-15T12:27:09Z\",\"serviceUuid\":\"serviceUuid\",\"appointmentNotes\":\"Initial Consultation\"} to {\"serviceTypeUuid\":null,\"startDateTime\":\"2017-03-16T11:27:09Z\",\"locationUuid\":null,\"appointmentKind\":\"WalkIn\",\"providerUuid\":null,\"endDateTime\":\"2017-03-16T12:27:09Z\",\"serviceUuid\":\"service2Uuid\",\"appointmentNotes\":\"Secondary Consultation\"}";
+        String message = "{\"serviceTypeUuid\":\"serviceTypeUuid\",\"startDateTime\":\"" + existingStartDateTime + "\",\"locationUuid\":\"locationUuid\",\"appointmentKind\":\"Scheduled\",\"providerUuid\":\"providerUuid\",\"endDateTime\":\"" + existingEndDateTime + "\",\"serviceUuid\":\"serviceUuid\",\"appointmentNotes\":\"Initial Consultation\"} to {\"serviceTypeUuid\":null,\"startDateTime\":\"" + startDate.toInstant().toString() + "\",\"locationUuid\":null,\"appointmentKind\":\"WalkIn\",\"providerUuid\":null,\"endDateTime\":\"" + endDate.toInstant().toString() + "\",\"serviceUuid\":\"service2Uuid\",\"appointmentNotes\":\"Secondary Consultation\"}";
         assertEquals(message, auditEvents.get(0).getNotes());
         assertEquals(existingAppointment,auditEvents.get(0).getAppointment());
     }

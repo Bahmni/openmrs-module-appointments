@@ -101,7 +101,7 @@ public class AppointmentMapper {
         }
         String locationUuid = existingAppointment.getLocation() != null ? existingAppointment.getLocation().getUuid() : null;
         if(!Objects.equals(payload.getLocationUuid(), locationUuid)){
-            fromObject.put("locationUuid", serviceUuid);
+            fromObject.put("locationUuid", locationUuid);
             toObject.put("locationUuid", payload.getLocationUuid());
         }
         if(!Objects.equals(payload.getStartDateTime().toInstant().toString(),
