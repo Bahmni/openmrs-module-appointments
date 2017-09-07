@@ -60,30 +60,4 @@ public class DefaultAppointmentValidatorTest {
         assertEquals(1,errors.size());
         assertEquals("Appointment cannot be created without Service", errors.get(0));
     }
-
-    @Test
-    public void shouldRunValidationsIfConfigIsFalse(){
-        when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("false");
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        defaultAppointmentValidator.validate(new Appointment(), new ArrayList<>());
-        verify(administrationService, times(1)).getGlobalProperty("disableDefaultAppointmentValidations");
-        Appointment appointment = new Appointment();
-        appointment.setService(new AppointmentService());
-        List<String> errors = new ArrayList<>();
-        defaultAppointmentValidator.validate(appointment, errors);
-        assertEquals(1,errors.size());
-    }
-
-    @Test
-    public void shouldNotRunValidationsIfConfigIsTrue(){
-        when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("true");
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        defaultAppointmentValidator.validate(new Appointment(), new ArrayList<>());
-        verify(administrationService, times(1)).getGlobalProperty("disableDefaultAppointmentValidations");
-        Appointment appointment = new Appointment();
-        appointment.setService(new AppointmentService());
-        List<String> errors = new ArrayList<>();
-        defaultAppointmentValidator.validate(appointment, errors);
-        assertEquals(0,errors.size());
-    }
 }

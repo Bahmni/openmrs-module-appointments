@@ -54,6 +54,10 @@ public class AppointmentMapper {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
     }
 
+    public AppointmentDefaultResponse constructResponse(Appointment appointment) {
+        return this.mapToDefaultResponse(appointment, new AppointmentDefaultResponse());
+    }
+
     public Appointment getAppointmentFromPayload(AppointmentPayload appointmentPayload) {
         Appointment appointment;
         if (!StringUtils.isBlank(appointmentPayload.getUuid())) {

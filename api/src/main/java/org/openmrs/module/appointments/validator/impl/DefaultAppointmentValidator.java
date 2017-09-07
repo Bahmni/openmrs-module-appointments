@@ -12,13 +12,9 @@ public class DefaultAppointmentValidator implements AppointmentValidator {
 
 	@Override
 	public void validate(Appointment appointment, List<String> errors) {
-		String disableDefaultValidationValue = Context.getAdministrationService().getGlobalProperty("disableDefaultAppointmentValidations");
-		boolean disableValidation = disableDefaultValidationValue != null ? Boolean.valueOf(disableDefaultValidationValue): false;
-		if(!disableValidation) {
-			if (appointment.getPatient() == null)
-				errors.add("Appointment cannot be created without Patient");
-			if (appointment.getService() == null)
-				errors.add("Appointment cannot be created without Service");
-		}
+		if (appointment.getPatient() == null)
+			errors.add("Appointment cannot be created without Patient");
+		if (appointment.getService() == null)
+			errors.add("Appointment cannot be created without Service");
 	}
 }

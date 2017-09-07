@@ -61,13 +61,13 @@ public class AppointmentController {
         try {
             Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
             appointmentsService.save(appointment);
-            return new ResponseEntity<>(appointment.getUuid(), HttpStatus.OK);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         }catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
-    @RequestMapping( method = RequestMethod.GET)
+    @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody
     public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(@RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
         AppointmentServiceType appointmentServiceType = appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
@@ -120,11 +120,22 @@ public class AppointmentController {
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
             if(appointment != null){
                 appointmentsService.changeStatus(appointment, toStatus, onDate);
-                return new ResponseEntity<>(appointmentUuid, HttpStatus.OK);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             }else
                 throw new RuntimeException("Appointment does not exist");
         }catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public AppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
+        Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
+        if(appointment == null){
+            throw new RuntimeException("Appointment does not exist");
+        }
+        return appointmentMapper.constructResponse(appointment);
+    }
+
 }

@@ -77,7 +77,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllNonVoidedNonCancelledFutureAppointmentsforaServiceType() throws Exception {
-        String requestURI = "/rest/v1/appointment";
+        String requestURI = "/rest/v1/appointment/futureAppointmentsForServiceType";
         String serviceTypeUuid = "678906e5-9fbb-4f20-866b-0ece24564578";
         MockHttpServletRequest getRequest = newGetRequest(requestURI, new Parameter("appointmentServiceTypeUuid", serviceTypeUuid));
         List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
@@ -124,20 +124,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldNotThrowErrorWhenAppointmentHasNoPatientAndConfigToDisableDefaultValidationsIsTrue() throws Exception {
-        Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "true");
-        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
-                "\"appointmentNumber\": \"1\",  " +
-                "\"startDateTime\": \"2017-07-20\", " +
-                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
-                "\"endDateTime\": \"2017-07-20\",  " +
-                "\"appointmentKind\": \"WalkIn\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
-        assertEquals(200, response.getStatus());
-    }
-
-    @Test
     public void shouldThrowErrorWhenAppointmentDoesNotHaveServiceInIT() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
@@ -148,20 +134,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
         assertEquals(400, response.getStatus());
-    }
-
-    @Test
-    public void shouldNotThrowErrorWhenAppointmentHasNoServiceAndConfigToDisableDefaultValidationsIsTrue() throws Exception {
-        Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "true");
-        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
-                "\"appointmentNumber\": \"1\",  " +
-                "\"startDateTime\": \"2017-07-20\", " +
-                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
-                "\"endDateTime\": \"2017-07-20\",  " +
-                "\"appointmentKind\": \"WalkIn\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
-        assertEquals(200, response.getStatus());
     }
 
     @Test
