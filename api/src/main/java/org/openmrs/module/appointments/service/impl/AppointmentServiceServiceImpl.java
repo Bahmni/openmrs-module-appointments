@@ -75,7 +75,7 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
 
     @Override
     public Integer calculateCurrentLoad(AppointmentService appointmentService, Date startDateTime, Date endDateTime) {
-        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Started, AppointmentStatus.Scheduled};
+        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Scheduled};
         List<Appointment> appointmentsForService = appointmentsService
                 .getAppointmentsForService(appointmentService, startDateTime, endDateTime, Arrays.asList(includeStatus));
         return appointmentsForService.size();

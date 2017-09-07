@@ -292,7 +292,7 @@ public class AppointmentServiceServiceImplTest{
         Date endDateTime = DateUtil.convertToLocalDateFromUTC("2108-08-15T18:29:29.0Z");
         appointmentServiceService.calculateCurrentLoad(appointmentService,
                 startDateTime, endDateTime);
-        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Started, AppointmentStatus.Scheduled};
+        AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Scheduled};
 
         Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDateTime, endDateTime,
                 Arrays.asList(includeStatus));

@@ -106,4 +106,11 @@ public class AppointmentDaoImpl implements AppointmentDao {
         return  criteria.list();
 
     }
+
+    @Override
+    public Appointment getAppointmentByUuid(String uuid) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class, "appointment");
+        criteria.add(Restrictions.eq("uuid", uuid));
+        return (Appointment) criteria.uniqueResult();
+    }
 }

@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.lang.StringUtils;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
@@ -12,7 +11,10 @@ import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -53,13 +55,16 @@ public class AppointmentController {
         return appointmentMapper.constructResponse(appointments);
     }
 
-    @RequestMapping( method = RequestMethod.POST)
+    @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public void createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
-        if(StringUtils.isBlank(appointmentPayload.getPatientUuid()))
-            throw new RuntimeException("Patient should not be empty");
-        Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
-        appointmentsService.save(appointment);
+    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
+        try {
+            Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
+            appointmentsService.save(appointment);
+            return new ResponseEntity<>(appointment.getUuid(), HttpStatus.OK);
+        }catch (RuntimeException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @RequestMapping( method = RequestMethod.GET)
@@ -77,7 +82,6 @@ public class AppointmentController {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-
         List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
         for (AppointmentService appointmentService : appointmentServices) {
             List<Appointment> appointmentsForService =
@@ -105,5 +109,22 @@ public class AppointmentController {
             appointmentsSummaryList.add(appointmentsSummary);
         }
         return appointmentsSummaryList;
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/changeStatus")
+    @ResponseBody
+    public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
+        try {
+            String toStatus = statusDetails.get("toStatus");
+            Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if(appointment != null){
+                appointmentsService.changeStatus(appointment, toStatus, onDate);
+                return new ResponseEntity<>(appointmentUuid, HttpStatus.OK);
+            }else
+                throw new RuntimeException("Appointment does not exist");
+        }catch (RuntimeException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }

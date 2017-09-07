@@ -22,4 +22,6 @@ public interface AppointmentDao {
     List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType);
 
     List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList);
+
+	Appointment getAppointmentByUuid(String uuid);
 }

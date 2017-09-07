@@ -1,18 +1,21 @@
 package org.openmrs.module.appointments.service.impl;
 
-import java.util.Date;
-import java.util.stream.Collectors;
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openmrs.api.APIException;
+import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
+import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class AppointmentsServiceImpl implements AppointmentsService {
@@ -20,8 +23,27 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Autowired
     AppointmentDao appointmentDao;
 
+    @Autowired
+    List<AppointmentStatusChangeValidator> statusChangeValidators;
+
+    @Autowired
+    List<AppointmentValidator> appointmentValidators;
+
+    @Autowired
+    AppointmentAuditDao appointmentAuditDao;
+
     @Override
     public Appointment save(Appointment appointment) {
+        if(!CollectionUtils.isEmpty(appointmentValidators)){
+            List<String> errors = new ArrayList<>();
+            for(AppointmentValidator validator: appointmentValidators){
+                validator.validate(appointment, errors);
+            }
+            if(!errors.isEmpty()) {
+                String message = StringUtils.join(errors, "\n");
+                throw new APIException(message);
+            }
+        }
         appointmentDao.save(appointment);
         return appointment;
     }
@@ -55,5 +77,45 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
         return appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatusList);
+    }
+
+    @Override
+    public Appointment getAppointmentByUuid(String uuid) {
+        Appointment appointment = appointmentDao.getAppointmentByUuid(uuid);
+        return appointment;
+    }
+
+    @Override
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
+        List<String> errors = new ArrayList<>();
+        AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
+        validateStatusChange(appointment, appointmentStatus, errors);
+        if(errors.isEmpty()) {
+            appointment.setStatus(appointmentStatus);
+            createStatusChangeEventInAppointmentAudit(appointment, appointmentStatus, onDate);
+            appointmentDao.save(appointment);
+        }
+        else {
+            String message = StringUtils.join(errors, "\n");
+            throw new APIException(message);
+        }
+    }
+
+    private void createStatusChangeEventInAppointmentAudit(Appointment appointment, AppointmentStatus appointmentStatus,
+            Date onDate) {
+        AppointmentAudit appointmentAuditEvent = new AppointmentAudit();
+        appointmentAuditEvent.setAppointment(appointment);
+        appointmentAuditEvent.setStatus(appointmentStatus);
+        if(onDate != null)
+            appointmentAuditEvent.setNotes(onDate.toInstant().toString());
+        appointmentAuditDao.save(appointmentAuditEvent);
+    }
+
+    private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
+        if(!CollectionUtils.isEmpty(statusChangeValidators)) {
+            for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
+                validator.validate(appointment, status, errors);
+            }
+        }
     }
 }

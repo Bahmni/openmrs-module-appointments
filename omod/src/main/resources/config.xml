@@ -20,6 +20,7 @@
 		AppointmentService.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
 		Appointment.hbm.xml
+		AppointmentAudit.hbm.xml
 		AppointmentServiceType.hbm.xml
 	</mappingFiles>
 
@@ -38,6 +39,12 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+
+	<globalProperty>
+		<property>disableDefaultAppointmentValidations</property>
+		<defaultValue>false</defaultValue>
+		<description>Disable default appointment validations</description>
+	</globalProperty>
 	
 </module>
 

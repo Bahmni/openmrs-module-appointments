@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="org.openmrs.module.appointments.model">
+    <class name="AppointmentAudit" table="patient_appointment_audit" batch-size="50">
+        <id name="appointmentAuditId" type="java.lang.Integer" column="patient_appointment_audit_id">
+            <generator class="native">
+                <param name="sequence">patient_appointment_audit_id_seq</param>
+            </generator>
+        </id>
+        <property name="status" column="status">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
+        <property name="notes" type="java.lang.String" column="notes" length="1000"/>
+
+        <property name="dateCreated" type="java.util.Date" column="date_created"/>
+        <property name="dateChanged" type="java.util.Date" column="date_changed"/>
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true"/>
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true" />
+        <property name="dateVoided" type="java.util.Date" column="date_voided" length="19" />
+        <property name="voidReason" type="java.lang.String" column="void_reason" length="255" />
+        <many-to-one name="appointment" class="org.openmrs.module.appointments.model.Appointment" column="appointment_id" />
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
+
+    </class>
+</hibernate-mapping>

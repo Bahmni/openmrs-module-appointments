@@ -18,6 +18,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
@@ -109,5 +110,20 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertEquals(1, appointmentsForService.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13349", appointment1.getUuid());
         assertEquals(AppointmentStatus.Scheduled, appointment1.getStatus());
+    }
+
+    @Test
+    public void shouldGetAppointmentByUuid() throws Exception {
+        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c1b77";
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        assertNotNull(appointment);
+        assertEquals(appointmentUuid, appointment.getUuid());
+    }
+
+    @Test
+    public void shouldGetReturnNullWhenAppointmentDoesNotExist() throws Exception {
+        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c1b78";
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        assertNull(appointment);
     }
 }

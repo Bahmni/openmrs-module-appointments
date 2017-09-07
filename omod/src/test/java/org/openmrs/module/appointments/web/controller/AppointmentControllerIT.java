@@ -2,9 +2,11 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.dao.AppointmentAuditDao;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentCount;
@@ -21,6 +23,7 @@ import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -29,12 +32,13 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
     AppointmentsService appointmentsService;
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    @Autowired
+    AppointmentAuditDao appointmentAuditDao;
 
     @Before
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
+        Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "false");
     }
 
     @Test
@@ -43,7 +47,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(6, asResponses.size());
+        assertEquals(7, asResponses.size());
     }
     
     @Test
@@ -61,7 +65,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
                 "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
-                "\"status\": \"Scheduled\",  " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
                 "\"appointmentKind\": \"WalkIn\"}";
@@ -79,7 +83,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
             new TypeReference<List<AppointmentDefaultResponse>>() {});
 
-        assertEquals(4, asResponse.size());
+        assertEquals(5, asResponse.size());
     }
 
     @Test
@@ -92,7 +96,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         AppointmentsSummary appointmentsSummary = appointmentsSummaries.get(0);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date appointmentDate = simpleDateFormat.parse("2108-08-15");
-        assertEquals(1, appointmentsSummaries.size());
+        assertEquals(2, appointmentsSummaries.size());
         assertNotNull(appointmentsSummary);
         assertEquals(1, appointmentsSummary.getAppointmentService().getAppointmentServiceId(), 0);
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentsSummary.getAppointmentService().getUuid());
@@ -107,17 +111,57 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldThrowErrorWhenAppointmentDoesnotHavePatientInIT() throws Exception {
+    public void shouldThrowErrorWhenAppointmentDoesNotHavePatientInIT() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
-                "\"status\": \"Scheduled\",  " +
                 "\"startDateTime\": \"2017-07-20\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
                 "\"appointmentKind\": \"WalkIn\"}";
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Patient should not be empty");
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldNotThrowErrorWhenAppointmentHasNoPatientAndConfigToDisableDefaultValidationsIsTrue() throws Exception {
+        Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "true");
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void shouldThrowErrorWhenAppointmentDoesNotHaveServiceInIT() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldNotThrowErrorWhenAppointmentHasNoServiceAndConfigToDisableDefaultValidationsIsTrue() throws Exception {
+        Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "true");
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertEquals(200, response.getStatus());
     }
 
     @Test
@@ -127,5 +171,78 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/search", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void should_changeAppointmentStatusWithDate() throws Exception {
+        String content = "{ \"toStatus\": \"CheckedIn\", \"onDate\":\"2108-08-22T10:30:00.0Z\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
+        assertNotNull(response);
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals(200, response.getStatus());
+        assertNotNull(appointmentByUuid);
+        List<AppointmentAudit> historyForAppointment = appointmentAuditDao
+                .getAppointmentHistoryForAppointment(appointmentByUuid);
+        assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getNotes());
+    }
+
+    @Test
+    public void should_changeAppointmentStatusWithoutDate() throws Exception {
+        String content = "{ \"toStatus\": \"CheckedIn\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
+        assertNotNull(response);
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals(200, response.getStatus());
+        assertNotNull(appointmentByUuid);
+        List<AppointmentAudit> historyForAppointment = appointmentAuditDao
+                .getAppointmentHistoryForAppointment(appointmentByUuid);
+        assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getDateCreated());
+        assertNotNull(historyForAppointment.get(0).getCreator());
+        assertEquals(appointmentByUuid, historyForAppointment.get(0).getAppointment());
+        assertEquals(appointmentByUuid.getStatus(), historyForAppointment.get(0).getStatus());
+        assertNull(historyForAppointment.get(0).getNotes());
+    }
+
+    @Test
+    public void should_throwExceptionForInvalidStatusChange() throws Exception {
+        String content = "{ \"toStatus\": \"Scheduled\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void should_throwExceptionForInvalidAppoinment() throws Exception {
+        String content = "{ \"toStatus\": \"Scheduled\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldCreateAuditEventsWhenDetailsChangesOnEditAppointment() throws Exception {
+        String content = "{ \"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        Appointment appointment = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        List<AppointmentAudit> historyForAppointment = appointmentAuditDao
+                .getAppointmentHistoryForAppointment(appointment);
+        assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getDateCreated());
+        assertNotNull(historyForAppointment.get(0).getCreator());
+        assertEquals(appointment, historyForAppointment.get(0).getAppointment());
+        assertNotNull(historyForAppointment.get(0).getNotes());
     }
 }

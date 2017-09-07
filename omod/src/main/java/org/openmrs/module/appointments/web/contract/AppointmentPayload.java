@@ -16,7 +16,6 @@ public class AppointmentPayload {
     private String locationUuid;
     private Date startDateTime;
     private Date endDateTime;
-    private String status;
     private String appointmentKind;
     private String comments;
 
@@ -90,14 +89,6 @@ public class AppointmentPayload {
     
     public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
-    }
-    
-    public String getStatus() {
-        return status;
-    }
-    
-    public void setStatus(String status) {
-        this.status = status;
     }
     
     public String getAppointmentKind() {

@@ -25,7 +25,12 @@
     <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="true" voided_by="1" void_reason=""/>
 
+    <appointment_service appointment_service_id="3" name="Cardiology" description="Cardiology" start_time="11:00:00" end_time="15:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615c1"
+                         speciality_id="1" max_appointments_limit="7" duration_mins="16" creator="1" voided="false"/>
+
     <appointment_service_type appointment_service_type_id="1" appointment_service_id="1" name="serviceType1" duration_mins="30" uuid="678906e5-9fbb-4f20-866b-0ece24564578" creator="1" date_created="2108-08-10 15:57:09.0"  voided="false"/>
+
+    <appointment_service_type appointment_service_type_id="2" appointment_service_id="3" name="cardioType" duration_mins="45" uuid="672546e5-9fbb-4f20-866b-0ece24564578" creator="1" date_created="2108-08-10 15:57:09.0"  voided="false"/>
 
     <patient_appointment patient_appointment_id="1" patient_id ="1" appointment_service_id="1" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b77"/>
     <patient_appointment patient_appointment_id="2" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13346"/>
@@ -34,4 +39,5 @@
     <patient_appointment patient_appointment_id="5" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2108-08-15 15:00:00.0" end_date_time="2108-08-15 16:00:00.0" appointment_kind="Scheduled" status="Missed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13555"/>
     <patient_appointment patient_appointment_id="6" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2108-08-15 16:00:00.0" end_date_time="2108-08-15 17:00:00.0" appointment_kind="Scheduled" status="Completed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13544"/>
     <patient_appointment patient_appointment_id="7" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2108-08-15 17:00:00.0" end_date_time="2108-08-20 18:00:00.0" appointment_kind="Scheduled" status="CheckedIn" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13545"/>
+    <patient_appointment patient_appointment_id="8" patient_id ="1" appointment_service_id="3" appointment_service_type_id="1" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-866b-0ece245615a7"/>
 </dataset>

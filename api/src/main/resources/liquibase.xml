@@ -222,4 +222,35 @@
         </preConditions>
         <dropIndex tableName="appointment_service_type" indexName="service_name_dur_UNIQUE"/>
     </changeSet>
+
+    <changeSet id="create-patient_appointment_audit_table-201708311030" author="Shruthi">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_audit" />
+            </not>
+        </preConditions>
+        <sql>
+            CREATE  TABLE IF NOT EXISTS patient_appointment_audit (
+            patient_appointment_audit_id INT NOT NULL AUTO_INCREMENT,
+            appointment_id INT NOT NULL,
+            uuid VARCHAR(38) NOT NULL UNIQUE,
+            date_created DATETIME NOT NULL,
+            creator INT NOT NULL,
+            date_changed DATETIME NULL,
+            changed_by INT NULL,
+            voided TINYINT NULL,
+            voided_by INT,
+            date_voided DATETIME,
+            void_reason VARCHAR(255),
+            status VARCHAR(45) NOT NULL,
+            notes VARCHAR(1000),
+            PRIMARY KEY (patient_appointment_audit_id) ,
+            INDEX fk_patient_appointment_audit_patient_appointment_idx (appointment_id ASC) ,
+            CONSTRAINT fk_patient_appointment_audit_patient_appointment
+            FOREIGN KEY (appointment_id )
+            REFERENCES patient_appointment (patient_appointment_id )
+            )
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>
