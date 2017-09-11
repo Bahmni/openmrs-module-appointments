@@ -16,11 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.io.IOException;
-import java.sql.Time;
 import java.text.ParseException;
-import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentService")
@@ -90,7 +87,6 @@ public class AppointmentServiceController {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
     }
-
 
     @RequestMapping(method = RequestMethod.GET, value = "load")
     @ResponseBody

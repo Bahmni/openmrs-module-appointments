@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.util;
 
-import org.apache.commons.lang.ObjectUtils;
-import org.junit.Assert;
 import org.junit.Test;
 
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
@@ -16,20 +13,20 @@ import static org.junit.Assert.assertNull;
 
 public class DateUtilTest {
     @Test
-    public void shouldReturnNullifDateStringisEmpty() throws ParseException {
+    public void shouldReturnNullIfDateStringIsEmpty() throws ParseException {
         Date date = DateUtil.convertToDate("", DateUtil.DateFormatType.UTC);
         assertNull(date);
     }
 
     @Test
-    public void shouldReturnNullifDateFormatTypeisNull() throws ParseException {
+    public void shouldReturnNullIfDateFormatTypeIsNull() throws ParseException {
         DateUtil.DateFormatType dateFormatType = null;
         Date date = DateUtil.convertToDate("2017-03-15T16:57:09.0Z", dateFormatType);
         assertNull(date);
     }
 
     @Test
-    public void shouldConvertStringtoDate() throws ParseException {
+    public void shouldConvertStringToDate() throws ParseException {
         Date date = DateUtil.convertToDate("2017-03-15T16:57:09.0Z", DateUtil.DateFormatType.UTC);
         assertNotNull(date);
         boolean daylightTime = TimeZone.getDefault().inDaylightTime(date);
@@ -39,7 +36,7 @@ public class DateUtilTest {
     }
 
     @Test
-    public void shouldReturnNUllifDateStringIsNull() throws ParseException {
+    public void shouldReturnNullIfDateStringIsNull() throws ParseException {
         Date date = DateUtil.convertToLocalDateFromUTC(null);
         assertNull(date);
     }

@@ -115,7 +115,7 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceType serviceType = new AppointmentServiceType();
         serviceType.setName("Second stage of hallucination");
         serviceType.setAppointmentService(appointmentService);
-        Set serviceTypes = appointmentService.getServiceTypes();
+        Set serviceTypes = appointmentService.getServiceTypes(true);
         serviceTypes.add(serviceType);
         appointmentServiceDao.save(appointmentService);
         appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");

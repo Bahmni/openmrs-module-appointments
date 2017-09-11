@@ -70,7 +70,7 @@ public class AppointmentMapper {
         appointment.setAppointmentNumber(appointmentPayload.getAppointmentNumber());
         AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
         if(appointmentPayload.getServiceTypeUuid() != null) {
-            AppointmentServiceType appointmentServiceType = getServiceTypeByUuid(appointmentService.getServiceTypes(), appointmentPayload.getServiceTypeUuid());
+            AppointmentServiceType appointmentServiceType = getServiceTypeByUuid(appointmentService.getServiceTypes(true), appointmentPayload.getServiceTypeUuid());
             appointment.setServiceType(appointmentServiceType);
         }
         appointment.setService(appointmentService);

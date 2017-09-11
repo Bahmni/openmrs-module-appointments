@@ -173,7 +173,7 @@ public class AppointmentServiceServiceImplTest{
         assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
         assertEquals(voidReason, captor.getValue().getVoidReason());
 
-        serviceTypes = captor.getValue().getServiceTypes();
+        serviceTypes = captor.getValue().getServiceTypes(true);
         List toSort = new ArrayList<>(serviceTypes);
         Collections.sort(toSort, new Comparator<AppointmentServiceType>() {
             public int compare(AppointmentServiceType o1, AppointmentServiceType o2) {
@@ -244,7 +244,7 @@ public class AppointmentServiceServiceImplTest{
     }
 
     @Test
-    public void shouldGetAllNonVoidedAppointmentServiceAndNonVoidedAppointmentServiceType() throws Exception {
+    public void shouldGetAllNonVoidedAppointmentService() throws Exception {
         boolean includeVoided = false;
         AppointmentService appointmentService = new AppointmentService();
         appointmentService.setUuid("service1Uuid");
@@ -274,11 +274,12 @@ public class AppointmentServiceServiceImplTest{
         Set<AppointmentServiceType> returnedServiceTypes = returnedAppointmentService.getServiceTypes();
         assertNotNull(returnedServiceTypes);
         assertEquals(1, returnedServiceTypes.size());
+        assertEquals(2, returnedAppointmentService.getServiceTypes(true).size());
         assertEquals("serviceTypeUuid1", returnedServiceTypes.iterator().next().getUuid());
     }
 
     @Test
-    public void shouldGetAppointmentServiceTypebyUuid() throws Exception {
+    public void shouldGetAppointmentServiceTypeByUuid() throws Exception {
         String serviceTypeUuid = "uuid";
         appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
 
@@ -296,78 +297,5 @@ public class AppointmentServiceServiceImplTest{
 
         Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDateTime, endDateTime,
                 Arrays.asList(includeStatus));
-    }
-
-    @Test
-    public void shouldFilterVoidedServiceTypesInNonVoidedAppointmentServices() {
-        List<AppointmentService> appointmentServices = new ArrayList<>();
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("service1Uuid");
-        appointmentService.setAppointmentServiceId(1);
-        AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
-        appointmentServiceType1.setName("serviceType1");
-        appointmentServiceType1.setDuration(15);
-        appointmentServiceType1.setUuid("serviceTypeUuid1");
-        appointmentServiceType1.setAppointmentService(appointmentService);
-        appointmentServiceType1.setId(1);
-        AppointmentServiceType appointmentServiceType2 = new AppointmentServiceType();
-        appointmentServiceType2.setName("serviceType2");
-        appointmentServiceType2.setDuration(15);
-        appointmentServiceType2.setUuid("serviceTypeUuid2");
-        appointmentServiceType2.setAppointmentService(appointmentService);
-        appointmentServiceType2.setId(2);
-        appointmentServiceType2.setVoided(true);
-        Set<AppointmentServiceType> appointmentServiceTypes = new TreeSet<>();
-        appointmentServiceTypes.add(appointmentServiceType1);
-        appointmentServiceTypes.add(appointmentServiceType2);
-        appointmentService.setServiceTypes(appointmentServiceTypes);
-        appointmentServices.add(appointmentService);
-
-        when(appointmentServiceDao.getAllAppointmentServices(false)).thenReturn(appointmentServices);
-        List<AppointmentService> filteredApppointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-
-        AppointmentService filteredAppointmentService = filteredApppointmentServices.get(0);
-        assertNotNull(filteredAppointmentService);
-        assertEquals(1, filteredAppointmentService.getServiceTypes().size());
-        AppointmentServiceType filteredServiceType = filteredAppointmentService.getServiceTypes().iterator().next();
-        assertEquals("serviceType1", filteredServiceType.getName());
-    }
-
-    @Test
-    public void shouldNotFilterVoidedServiceTypesWhenIncludingVoidedServices() {
-        List<AppointmentService> appointmentServices = new ArrayList<>();
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("service1Uuid");
-        appointmentService.setAppointmentServiceId(1);
-        AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
-        appointmentServiceType1.setName("serviceType1");
-        appointmentServiceType1.setDuration(15);
-        appointmentServiceType1.setUuid("serviceTypeUuid1");
-        appointmentServiceType1.setAppointmentService(appointmentService);
-        appointmentServiceType1.setId(1);
-        AppointmentServiceType appointmentServiceType2 = new AppointmentServiceType();
-        appointmentServiceType2.setName("serviceType2");
-        appointmentServiceType2.setDuration(15);
-        appointmentServiceType2.setUuid("serviceTypeUuid2");
-        appointmentServiceType2.setAppointmentService(appointmentService);
-        appointmentServiceType2.setId(2);
-        appointmentServiceType2.setVoided(true);
-        Set<AppointmentServiceType> appointmentServiceTypes = new TreeSet<>();
-        appointmentServiceTypes.add(appointmentServiceType1);
-        appointmentServiceTypes.add(appointmentServiceType2);
-        appointmentService.setServiceTypes(appointmentServiceTypes);
-        appointmentServices.add(appointmentService);
-
-        when(appointmentServiceDao.getAllAppointmentServices(true)).thenReturn(appointmentServices);
-        List<AppointmentService> filteredApppointmentServices = appointmentServiceService.getAllAppointmentServices(true);
-
-        AppointmentService filteredAppointmentService = filteredApppointmentServices.get(0);
-        assertNotNull(filteredAppointmentService);
-        assertEquals(2, filteredAppointmentService.getServiceTypes().size());
-        Iterator iterator = filteredAppointmentService.getServiceTypes().iterator();
-        AppointmentServiceType filteredAppointmentServiceType1 = (AppointmentServiceType) iterator.next();
-        assertEquals("serviceType1", filteredAppointmentServiceType1.getName());
-        AppointmentServiceType filteredAppointmentServiceType2 = (AppointmentServiceType) iterator.next();
-        assertEquals("serviceType2",  filteredAppointmentServiceType2.getName());
     }
 }

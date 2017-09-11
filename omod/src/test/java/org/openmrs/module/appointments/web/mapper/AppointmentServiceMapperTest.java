@@ -24,6 +24,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -272,7 +273,7 @@ public class AppointmentServiceMapperTest {
 
         AppointmentService mappedAppointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
         assertEquals(appointmentServicePayload.getName(), mappedAppointmentService.getName());
-        Set<AppointmentServiceType> mappedServiceTypes = mappedAppointmentService.getServiceTypes();
+        Set<AppointmentServiceType> mappedServiceTypes = mappedAppointmentService.getServiceTypes(true);
         Iterator<AppointmentServiceType> iterator = mappedServiceTypes.iterator();
         AppointmentServiceType mappedServiceType = iterator.next();
         assertEquals(payloadType1.getName(), mappedServiceType.getName());
@@ -307,7 +308,82 @@ public class AppointmentServiceMapperTest {
     }
 
     @Test
-    public void shouldCreateFullResponseWithServiceTypeFromAnAppointmentService() throws Exception {
+    public void ShouldUpdateTheExistingAppointmentServiceWithTheAppointmentServiceTypes() throws Exception {
+        AppointmentService existingAppointmentService = new AppointmentService();
+        existingAppointmentService.setName("Chemotherapy");
+        existingAppointmentService.setUuid("ServiceUuid");
+        Set<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
+        AppointmentServiceType serviceType1 = new AppointmentServiceType();
+        AppointmentServiceType serviceType2 = new AppointmentServiceType();
+        AppointmentServiceType serviceType3 = new AppointmentServiceType();
+        serviceType1.setName("Type1");
+        serviceType1.setUuid("type1Uuid");
+        serviceType1.setDuration(10);
+        serviceType2.setName("Type2");
+        serviceType2.setUuid("type2Uuid");
+        serviceType2.setDuration(0);
+        serviceType2.setVoided(true);
+        serviceType3.setName("Type3");
+        serviceType3.setUuid("type3Uuid");
+        serviceType3.setDuration(25);
+        serviceTypes.add(serviceType1);
+        serviceTypes.add(serviceType2);
+        serviceTypes.add(serviceType3);
+        existingAppointmentService.setServiceTypes(serviceTypes);
+        when(appointmentServiceService.getAppointmentServiceByUuid("ServiceUuid")).thenReturn(existingAppointmentService);
+
+        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
+        appointmentServicePayload.setName("Chemotherapy");
+        appointmentServicePayload.setUuid("ServiceUuid");
+        appointmentServicePayload.setWeeklyAvailability(new ArrayList<>());
+        Set<AppointmentServiceTypePayload> serviceTypePayloads = new LinkedHashSet<>();
+        AppointmentServiceTypePayload payloadType1 = new AppointmentServiceTypePayload();
+        payloadType1.setName("Type1");
+        payloadType1.setUuid("type1Uuid");
+        payloadType1.setDuration(30);
+        AppointmentServiceTypePayload payloadType3 = new AppointmentServiceTypePayload();
+        payloadType3.setName("Type3");
+        payloadType3.setUuid("type3Uuid");
+        payloadType3.setVoided(true);
+        AppointmentServiceTypePayload payloadType4 = new AppointmentServiceTypePayload();
+        payloadType4.setName("Type4");
+        payloadType4.setDuration(20);
+        serviceTypePayloads.add(payloadType1);
+        serviceTypePayloads.add(payloadType3);
+        serviceTypePayloads.add(payloadType4);
+        appointmentServicePayload.setServiceTypes(serviceTypePayloads);
+        AppointmentService mappedAppointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        assertEquals(appointmentServicePayload.getName(), mappedAppointmentService.getName());
+        assertEquals(4, mappedAppointmentService.getServiceTypes(true).size());
+        assertEquals(2, mappedAppointmentService.getServiceTypes().size());
+
+        List<AppointmentServiceType> mappedServiceTypes =
+                mappedAppointmentService.getServiceTypes(true).stream()
+                .sorted(Comparator.comparing(AppointmentServiceType::getName))
+                .collect(Collectors.toList());
+        assertEquals(payloadType1.getName(), mappedServiceTypes.get(0).getName());
+        assertEquals(payloadType1.getDuration(), mappedServiceTypes.get(0).getDuration());
+        assertEquals(payloadType1.getUuid(), mappedServiceTypes.get(0).getUuid());
+        assertFalse(mappedServiceTypes.get(0).getVoided());
+
+        assertEquals(serviceType2.getName(), mappedServiceTypes.get(1).getName());
+        assertEquals(serviceType2.getDuration(), mappedServiceTypes.get(1).getDuration());
+        assertEquals(serviceType2.getUuid(), mappedServiceTypes.get(1).getUuid());
+        assertEquals(serviceType2.getVoided(), mappedServiceTypes.get(1).getVoided());
+
+        assertEquals(payloadType3.getName(), mappedServiceTypes.get(2).getName());
+        assertEquals(payloadType3.getDuration(), mappedServiceTypes.get(2).getDuration());
+        assertEquals(payloadType3.getUuid(), mappedServiceTypes.get(2).getUuid());
+        assertTrue(mappedServiceTypes.get(2).getVoided());
+
+        assertEquals(payloadType4.getName(), mappedServiceTypes.get(3).getName());
+        assertEquals(payloadType4.getDuration(), mappedServiceTypes.get(3).getDuration());
+        assertNotNull(mappedServiceTypes.get(3).getUuid());
+        assertFalse(mappedServiceTypes.get(3).getVoided());
+    }
+
+    @Test
+    public void shouldCreateFullResponseWithNonVoidedServiceTypeFromAnAppointmentService() throws Exception {
 
         AppointmentService appointmentService = createAppointmentService("Cardiology-OPD", null, null,
                 null, null);
@@ -315,12 +391,17 @@ public class AppointmentServiceMapperTest {
         Set<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
         AppointmentServiceType serviceType1 = new AppointmentServiceType();
         AppointmentServiceType serviceType2 = new AppointmentServiceType();
+        AppointmentServiceType serviceType3 = new AppointmentServiceType();
         serviceType1.setName("Type1");
         serviceType1.setDuration(10);
         serviceType2.setName("Type2");
         serviceType2.setDuration(0);
+        serviceType3.setName("Type3");
+        serviceType3.setDuration(3);
+        serviceType3.setVoided(true);
         serviceTypes.add(serviceType1);
         serviceTypes.add(serviceType2);
+        serviceTypes.add(serviceType3);
         appointmentService.setServiceTypes(serviceTypes);
 
         AppointmentServiceFullResponse appointmentServiceFullResponse;

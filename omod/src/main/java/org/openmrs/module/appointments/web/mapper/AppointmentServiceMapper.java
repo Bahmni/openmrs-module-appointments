@@ -61,17 +61,17 @@ public class AppointmentServiceMapper {
         }
         
         if(appointmentServicePayload.getServiceTypes() != null) {
-            Set<AppointmentServiceType> appointmentServiceTypes = appointmentServicePayload.getServiceTypes().stream()
-                    .map(ast -> constructAppointmentServiceTypes(ast, appointmentService)).collect(Collectors.toSet());
-            appointmentService.setServiceTypes(appointmentServiceTypes);
+            appointmentServicePayload.getServiceTypes()
+                    .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentService));
         }
         return appointmentService;
     }
 
-    private AppointmentServiceType constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentService appointmentService) {
+    private void constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentService appointmentService) {
         AppointmentServiceType serviceType;
+        Set<AppointmentServiceType> existingServiceTypes = appointmentService.getServiceTypes(true);
         if(ast.getUuid() != null)
-            serviceType = getServiceTypeByUuid(appointmentService.getServiceTypes(), ast.getUuid());
+            serviceType = getServiceTypeByUuid(existingServiceTypes, ast.getUuid());
         else
             serviceType = new AppointmentServiceType();
         serviceType.setName(ast.getName());
@@ -80,7 +80,7 @@ public class AppointmentServiceMapper {
         if (ast.getVoided() != null) {
             setVoidedInfo(serviceType, ast.getVoidedReason());
         }
-        return serviceType;
+        existingServiceTypes.add(serviceType);
     }
 
     private void setVoidedInfo(AppointmentServiceType serviceType, String voidReason) {

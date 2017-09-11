@@ -35,8 +35,6 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-
-
     @Before
     public void setUp() throws Exception {
         executeDataSet("appointmentServicesTestData.xml");
@@ -198,7 +196,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypesWitoutVoidReason() throws Exception {
+    public void shouldVoidTheAppointmentServiceAlongWithServiceAvailabilityAndServiceTypesWithoutVoidReason() throws Exception {
         String appointmentServiceUuid = "c36006d4-9fbb-4f20-866b-0ece24560000";
         Parameter uuid = new Parameter("uuid", appointmentServiceUuid);
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid));
@@ -269,7 +267,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void should_GetAllAppointmentServicesWithServiceTypes() throws Exception {
+    public void should_GetAllAppointmentServicesWithNonVoidedServiceTypes() throws Exception {
         List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/full")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
         assertEquals(3,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
@@ -284,7 +282,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         ArrayList serviceTypes = (ArrayList) asResponses.get(0).getServiceTypes();
         assertNotNull(serviceTypes);
         LinkedHashMap<String, Object> serviceTypes1 = (LinkedHashMap<String, Object>) serviceTypes.get(0);
-        assertEquals("Initial Consultaion", serviceTypes1.get("name"));
+        assertEquals("Initial Consultation", serviceTypes1.get("name"));
         assertEquals("c36006d4-9fbb-4f20-866b-0ece24560000", asResponses.get(1).getUuid());
         assertEquals("Ortho Service", asResponses.get(1).getName());
         assertEquals("09:00:00", asResponses.get(1).getStartTime());
@@ -295,9 +293,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("Room1", asResponses.get(1).getLocation().get("name"));
     }
 
-
     @Test
-    public void shouldThrowErrorWhenAppointmentServieIsNotAvailable() throws Exception {
+    public void shouldThrowErrorWhenAppointmentServiceIsNotAvailable() throws Exception {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Appointment Service does not exist");
         MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));

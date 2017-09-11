@@ -26,7 +26,6 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
     private Set<AppointmentServiceType> serviceTypes;
 
-
     public Location getLocation() {
         return location;
     }
@@ -117,13 +116,7 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
             return this.weeklyAvailability;
 
         Set<ServiceWeeklyAvailability> nonVoided = new LinkedHashSet<>(this.weeklyAvailability);
-        Iterator<ServiceWeeklyAvailability> i = nonVoided.iterator();
-        while (i.hasNext()) {
-            ServiceWeeklyAvailability availability = i.next();
-            if (availability.getVoided()) {
-                i.remove();
-            }
-        }
+        nonVoided.removeIf(ServiceWeeklyAvailability::getVoided);
         return nonVoided;
     }
 
@@ -140,11 +133,20 @@ public class AppointmentService extends BaseOpenmrsData implements Serializable 
             this.weeklyAvailability.addAll(availability);
     }
 
-    public Set<AppointmentServiceType> getServiceTypes() {
-        if (serviceTypes == null) {
-            serviceTypes = new LinkedHashSet<>();
+    public Set<AppointmentServiceType> getServiceTypes(boolean includeVoided) {
+        if (this.serviceTypes == null) {
+            this.serviceTypes = new LinkedHashSet<>();
         }
-        return serviceTypes;
+        if(includeVoided)
+            return this.serviceTypes;
+
+        Set<AppointmentServiceType> nonVoided = new LinkedHashSet<>(this.serviceTypes);
+        nonVoided.removeIf(AppointmentServiceType::getVoided);
+        return nonVoided;
+    }
+
+    public Set<AppointmentServiceType> getServiceTypes() {
+        return getServiceTypes(false);
     }
 
     public void setServiceTypes(Set<AppointmentServiceType> serviceTypes) {

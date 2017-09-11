@@ -1,7 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -11,6 +10,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
@@ -23,7 +23,6 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -41,7 +40,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AppointmentsServiceImplTest {
 
     @Rule
@@ -179,14 +178,12 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, times(1)).search(appointment);
     }
 
-    @Ignore
     @Test
     public void shouldRunDefaultAppointmentValidatorsOnSave(){
         appointmentsService.save(new Appointment());
         verify(appointmentValidator, times(1)).validate(any(Appointment.class), anyListOf(String.class));
     }
 
-    @Ignore
     @Test
     public void shouldThrowExceptionIfValidationFailsOnAppointmentSave(){
         String errorMessage = "Appointment cannot be created without Patient";
@@ -203,7 +200,6 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, never()).save(any(Appointment.class));
     }
 
-    @Ignore
     @Test
     public void shouldRunDefaultValidatorOnStatusChange(){
         Appointment appointment = new Appointment();
@@ -212,13 +208,12 @@ public class AppointmentsServiceImplTest {
         verify(statusChangeValidator, times(1)).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
     }
 
-    @Ignore
     @Test
     public void shouldThrowExceptionIfValidationFailsOnStatusChange(){
         String errorMessage = "Appointment status cannot be changed from Completed to Missed";
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
-            List<String> errors = (List) args[1];
+            List<String> errors = (List) args[2];
             errors.add(errorMessage);
             return null;
         }).when(statusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));

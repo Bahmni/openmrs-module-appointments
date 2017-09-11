@@ -31,30 +31,12 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
     @Override
     public List<AppointmentService> getAllAppointmentServices(boolean includeVoided) {
         List<AppointmentService> appointmentServices = appointmentServiceDao.getAllAppointmentServices(includeVoided);
-        if(!includeVoided) {
-            for (AppointmentService appointmentService : appointmentServices) {
-                removeVoidedApointmentServiceTypes(appointmentService);
-            }
-        }
         return appointmentServices;
-    }
-
-    private void removeVoidedApointmentServiceTypes(AppointmentService appointmentService) {
-        if (appointmentService != null) {
-            Set<AppointmentServiceType> nonVoidedAppointmentServiceTypes = new LinkedHashSet<>();
-            for (AppointmentServiceType appointmentServiceType : appointmentService.getServiceTypes()) {
-                if (!appointmentServiceType.getVoided()) {
-                    nonVoidedAppointmentServiceTypes.add(appointmentServiceType);
-                }
-            }
-            appointmentService.setServiceTypes(nonVoidedAppointmentServiceTypes);
-        }
     }
 
     @Override
     public AppointmentService getAppointmentServiceByUuid(String uuid) {
         AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid(uuid);
-        removeVoidedApointmentServiceTypes(appointmentService);
         return appointmentService;
     }
 
