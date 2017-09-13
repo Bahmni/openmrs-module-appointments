@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.util;
 
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
@@ -7,9 +8,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class DateUtilTest {
     @Test
@@ -39,5 +38,16 @@ public class DateUtilTest {
     public void shouldReturnNullIfDateStringIsNull() throws ParseException {
         Date date = DateUtil.convertToLocalDateFromUTC(null);
         assertNull(date);
+    }
+
+    @Test
+    public void shouldReturnLocalDateWithGivenUTCDate() throws ParseException {
+        String dateString = "2017-03-15T16:57:09.0Z";
+        DateUtil dateUtil = new DateUtil();
+        Date date = dateUtil.convertToLocalDateFromUTC(dateString);
+        boolean daylightTime = TimeZone.getDefault().inDaylightTime(date);
+        String timeZoneShort = TimeZone.getDefault().getDisplayName(daylightTime, TimeZone.SHORT, Locale.ENGLISH);
+        assertNotNull(date);
+        assertTrue(date.toString().contains(timeZoneShort));
     }
 }

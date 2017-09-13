@@ -51,6 +51,9 @@ public class AppointmentController {
     @ResponseBody
     public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
+        if (searchQuery.getStatus() == null) {
+            appointment.setStatus(null);
+        }
         List<Appointment> appointments =  appointmentsService.search(appointment);
         return appointmentMapper.constructResponse(appointments);
     }

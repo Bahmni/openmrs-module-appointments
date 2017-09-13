@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.scheduler.tasks;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,8 +11,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.scheduler.SchedulerService;
-import org.openmrs.scheduler.TaskDefinition;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -35,25 +32,16 @@ public class MarkAppointmentAsCompleteTaskTest {
     private AppointmentsService appointmentsService;
 
     @Mock
-    private SchedulerService schedulerService;
-
-    @Mock
     private AdministrationService administrationService;
 
     private MarkAppointmentAsCompleteTask markAppointmentAsCompleteTask;
     private GlobalProperty globalProperty;
 
-    private TaskDefinition task = new TaskDefinition();
-
     @Before
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Context.class);
         when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
-        when(Context.getService(SchedulerService.class)).thenReturn(schedulerService);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
-        when(schedulerService.getTaskByName("Mark Appointment As Complete Task")).thenReturn(task);
-        long interval = 86400;
-        task.setRepeatInterval(interval);
         markAppointmentAsCompleteTask = new MarkAppointmentAsCompleteTask();
     }
 
@@ -80,6 +68,7 @@ public class MarkAppointmentAsCompleteTaskTest {
         String schedulerMarksComplete = "SchedulerMarksComplete";
         globalProperty = new GlobalProperty(schedulerMarksComplete, "false");
         when(administrationService.getGlobalPropertyObject(schedulerMarksComplete)).thenReturn(globalProperty);
+        markAppointmentAsCompleteTask.execute();
         Mockito.verify(appointmentsService, times(0)).changeStatus(any(Appointment.class), any(String.class), any(Date.class));
     }
 }

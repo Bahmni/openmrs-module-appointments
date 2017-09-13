@@ -136,8 +136,28 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldGetAppointmentsBeforeCurrentDateWhenStartDateIsNotProvided() throws ParseException {
+        Date to = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointmentsInDateRange(null, to);
+        assertEquals(4, allAppointments.size());
+    }
+
+    @Test
     public void shouldGetAllNonVoidedAppointmentsWhenNoDateRangeIsProvided() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointmentsInDateRange(null, null);
         assertEquals(9, allAppointmentServices.size());
+    }
+
+    @Test
+    public void shouldSearchAppointmentsForAPatient() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointment = new Appointment();
+        appointment.setPatient(allAppointments.get(0).getPatient());
+        appointment.setLocation(allAppointments.get(0).getLocation());
+        appointment.setProvider(allAppointments.get(0).getProvider());
+        appointment.setService(allAppointments.get(0).getService());
+        appointment.setStatus(null);
+        List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
+        assertEquals(1, searchedAppointmentList.size());
     }
 }

@@ -34,15 +34,9 @@ public class MarkAppointmentAsMissedTaskTest {
     private AppointmentsService appointmentsService;
 
     @Mock
-    private SchedulerService schedulerService;
-
-    @Mock
     private AdministrationService administrationService;
 
-
     private MarkAppointmentAsMissedTask markAppointmentAsMissedTask;
-
-    private TaskDefinition task = new TaskDefinition();
 
     private GlobalProperty globalProperty;
 
@@ -50,11 +44,7 @@ public class MarkAppointmentAsMissedTaskTest {
     public void setUp() throws Exception {
         PowerMockito.mockStatic(Context.class);
         when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
-        when(Context.getService(SchedulerService.class)).thenReturn(schedulerService);
-        when(schedulerService.getTaskByName("Mark Appointment As Missed Task")).thenReturn(task);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
-        long interval = 86400;
-        task.setRepeatInterval(interval);
         markAppointmentAsMissedTask = new MarkAppointmentAsMissedTask();
     }
 
