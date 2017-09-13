@@ -275,26 +275,6 @@
 							</execution>
 						</executions>
 					</plugin>
-					<plugin>
-						<groupId>org.jacoco</groupId>
-						<artifactId>jacoco-maven-plugin</artifactId>
-						<version>${jacocoVersion}</version>
-						<configuration>
-							<includes>
-								<include>**/*</include>
-							</includes>
-							<excludes>
-								<exclude>**/*Activator.class</exclude>
-							</excludes>
-						</configuration>
-						<executions>
-							<execution>
-								<goals>
-									<goal>prepare-agent</goal>
-								</goals>
-							</execution>
-						</executions>
-					</plugin>
 				</plugins>
 			</build>
 		</profile>

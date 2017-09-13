@@ -39,6 +39,27 @@
 				<groupId>org.jacoco</groupId>
 				<artifactId>jacoco-maven-plugin</artifactId>
 				<version>${jacocoVersion}</version>
+				<configuration>
+					<includes>
+						<include>**/*</include>
+						<include>**/*</include>
+					</includes>
+					<excludes>
+						<exclude>**/*Activator.class</exclude>
+					</excludes>
+				</configuration>
+				<executions>
+					<execution>
+						<goals>
+							<goal>prepare-agent</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacocoVersion}</version>
 				<executions>
 					<execution>
 						<id>check</id>
@@ -55,12 +76,12 @@
 										<limit>
 											<counter>LINE</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.56</minimum>
+											<minimum>0.60</minimum>
 										</limit>
 										<limit>
 											<counter>BRANCH</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.66</minimum>
+											<minimum>0.68</minimum>
 										</limit>
 									</limits>
 								</rule>
