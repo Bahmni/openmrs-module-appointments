@@ -24,4 +24,6 @@ public interface AppointmentDao {
     List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList);
 
 	Appointment getAppointmentByUuid(String uuid);
+
+    List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 }

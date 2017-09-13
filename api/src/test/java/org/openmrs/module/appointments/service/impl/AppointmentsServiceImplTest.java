@@ -26,6 +26,7 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -251,5 +252,31 @@ public class AppointmentsServiceImplTest {
         assertEquals(appointment.getStatus(),auditEvents.get(0).getStatus());
         assertEquals(appointment,auditEvents.get(0).getAppointment());
         assertEquals(onDate.toInstant().toString(), auditEvents.get(0).getNotes());
+    }
+
+    @Test
+    public void shouldCallAppointmentDaoOnce() {
+        appointmentsService.getAllAppointmentsInDateRange(null, null);
+        verify(appointmentDao, times(1)).getAllAppointmentsInDateRange(null, null);
+    }
+
+    @Test
+    public void shouldGetAllNonVoidedAppointmentsForAGivenDateRange() throws ParseException {
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment1 = new Appointment();
+        AppointmentService appointmentService1 = new AppointmentService();
+        appointmentService1.setVoided(true);
+        appointment1.setService(appointmentService1);
+        LocalDate yesterday = LocalDate.now().minusDays(1);
+        appointment1.setStartDateTime(new SimpleDateFormat("yyyy-MM-dd").parse(yesterday.toString()));
+        Appointment appointment2 = new Appointment();
+        appointment2.setService(new AppointmentService());
+        appointment1.setStartDateTime(new Date());
+        appointments.add(appointment1);
+        appointments.add(appointment2);
+        when(appointmentDao.getAllAppointmentsInDateRange(null, null)).thenReturn(appointments);
+        List<Appointment> appointmentList = appointmentsService.getAllAppointmentsInDateRange(null, null);
+        verify(appointmentDao, times(1)).getAllAppointmentsInDateRange(null, null);
+        assertEquals(appointmentList.size(), 1);
     }
 }

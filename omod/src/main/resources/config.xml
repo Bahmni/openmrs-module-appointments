@@ -45,6 +45,11 @@
 		<defaultValue>false</defaultValue>
 		<description>Disable default appointment validations</description>
 	</globalProperty>
+	<globalProperty>
+		<property>SchedulerMarksComplete</property>
+		<defaultValue>false</defaultValue>
+		<description>Scheduler marks checked in appointments as complete when it turned on</description>
+	</globalProperty>
 	
 </module>
 

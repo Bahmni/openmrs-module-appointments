@@ -126,4 +126,18 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         assertNull(appointment);
     }
+
+    @Test
+    public void shouldGetAppointmentsForGivenDateRange() throws Exception {
+        Date from = DateUtil.convertToDate("2108-08-10T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        Date to = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointmentsInDateRange(from, to);
+        assertEquals(1, allAppointments.size());
+    }
+
+    @Test
+    public void shouldGetAllNonVoidedAppointmentsWhenNoDateRangeIsProvided() throws Exception {
+        List<Appointment> allAppointmentServices = appointmentDao.getAllAppointmentsInDateRange(null, null);
+        assertEquals(9, allAppointmentServices.size());
+    }
 }

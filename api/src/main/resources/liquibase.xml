@@ -253,4 +253,26 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create-appointment-status-change-task-20170912101533" author="Kaustav">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Mark Appointment As Missed Or Complete Task";
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO
+            scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+            start_on_startup, created_by, date_created, uuid)
+            VALUES
+            ('Mark Appointment As Missed Task', 'Mark appointments as missed task', 'org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsMissedTask',
+            TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+
+            INSERT INTO
+            scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+            start_on_startup, created_by, date_created, uuid)
+            VALUES
+            ('Mark Appointment As Complete Task', 'Mark appointments as complete task', 'org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsCompleteTask',
+            TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+        </sql>
+    </changeSet>
 </databaseChangeLog>

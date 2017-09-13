@@ -113,4 +113,15 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("uuid", uuid));
         return (Appointment) criteria.uniqueResult();
     }
+
+    @Override
+    public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        if (startDate != null && endDate != null) {
+            criteria.add(Restrictions.ge("startDateTime", startDate));
+            criteria.add(Restrictions.lt("endDateTime", endDate));
+        }
+        return criteria.list();
+    }
 }

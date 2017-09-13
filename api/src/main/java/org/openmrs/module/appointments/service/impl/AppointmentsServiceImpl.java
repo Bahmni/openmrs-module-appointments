@@ -101,6 +101,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }
     }
 
+    @Override
+    public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
+        List<Appointment> appointments = appointmentDao.getAllAppointmentsInDateRange(startDate, endDate);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+
     private void createStatusChangeEventInAppointmentAudit(Appointment appointment, AppointmentStatus appointmentStatus,
             Date onDate) {
         AppointmentAudit appointmentAuditEvent = new AppointmentAudit();

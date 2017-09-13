@@ -26,5 +26,7 @@ public interface AppointmentsService {
     Appointment getAppointmentByUuid(String uuid);
 
 	void changeStatus(Appointment appointment, String status, Date onDate);
+
+    List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 }
 
