@@ -293,6 +293,32 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());
     }
+
+
+    @Test
+    public void shouldCreateDefaultResponseForSingleAppointment() throws Exception {
+        Appointment appointment = createAppointment();
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+        AppointmentDefaultResponse response = appointmentMapper.constructResponse(appointment);
+        assertEquals(appointment.getUuid(), response.getUuid());
+        assertEquals(appointment.getAppointmentNumber(), response.getAppointmentNumber());
+        assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
+        assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
+        assertEquals(serviceDefaultResponse, response.getService());
+        assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
+        assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
+        assertEquals(appointment.getServiceType().getDuration(), response.getServiceType().get("duration"));
+        assertEquals(appointment.getProvider().getName(), response.getProvider().get("name"));
+        assertEquals(appointment.getProvider().getUuid(), response.getProvider().get("uuid"));
+        assertEquals(appointment.getLocation().getName(), response.getLocation().get("name"));
+        assertEquals(appointment.getLocation().getUuid(), response.getLocation().get("uuid"));
+        assertEquals(appointment.getStartDateTime(), response.getStartDateTime());
+        assertEquals(appointment.getEndDateTime(), response.getEndDateTime());
+        assertEquals(appointment.getAppointmentKind(), AppointmentKind.valueOf(response.getAppointmentKind()));
+        assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
+        assertEquals(appointment.getComments(), response.getComments());
+    }
     
     @Test
     public void shouldReturnNullIfNoProviderInDefaultResponse() throws Exception {
