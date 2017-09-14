@@ -61,7 +61,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public List<Appointment> search(Appointment appointment) {
-        return appointmentDao.search(appointment);
+        List<Appointment> appointments = appointmentDao.search(appointment);
+        return appointments.stream().filter(searchedAppointment -> !isServiceOrServiceTypeVoided(searchedAppointment)).collect(Collectors.toList());
     }
 
     @Override
