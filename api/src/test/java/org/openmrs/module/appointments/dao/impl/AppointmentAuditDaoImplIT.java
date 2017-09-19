@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertNull;
 
 public class AppointmentAuditDaoImplIT extends BaseIntegrationTest {
 
@@ -48,5 +50,22 @@ public class AppointmentAuditDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointment);
         List<AppointmentAudit> allAuditEvents = appointmentAuditDao.getAppointmentHistoryForAppointment(appointment);
         assertEquals(1, allAuditEvents.size());
+    }
+
+    @Test
+    public void shouldGetPriorStatusChangeAuditForAppointment() throws Exception {
+        Appointment appointment = appointmentDao.getAppointmentByUuid("75504r42-3ca8-11e3-bf2b-0800271c12222");
+        assertNotNull(appointment);
+        AppointmentAudit priorStatusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
+        assertNotEquals(appointment.getStatus().toString(), priorStatusChangeEvent.getStatus().toString());
+        assertEquals("Completed", priorStatusChangeEvent.getStatus().toString());
+    }
+
+    @Test
+    public void shouldGetNullIfThereIsNoStatusChangeEvent() throws Exception {
+        Appointment appointment = appointmentDao.getAppointmentByUuid("75504r42-3ca8-11e3-bf2b-0800271c1b77");
+        assertNotNull(appointment);
+        AppointmentAudit priorStatusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
+        assertNull(priorStatusChangeEvent);
     }
 }

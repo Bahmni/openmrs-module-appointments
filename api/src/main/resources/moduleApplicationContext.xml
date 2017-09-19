@@ -34,20 +34,11 @@
     <bean parent="serviceContext">
         <property name="moduleService">
             <list merge="true">
-                <value>org.openmrs.scheduler.SchedulerService</value>
-                <ref bean="schedulerService"/>
-            </list>
-        </property>
-    </bean>
-    <bean parent="serviceContext">
-        <property name="moduleService">
-            <list merge="true">
                 <value>org.openmrs.api.AdministrationService</value>
                 <ref bean="administrationService"/>
             </list>
         </property>
     </bean>
     <bean id="appointmentsService" name="appointmentsService" class="org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl"/>
-    <bean id="schedulerService" name="schedulerService" class="org.openmrs.scheduler.timer.TimerSchedulerServiceImpl"/>
     <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>
 </beans>

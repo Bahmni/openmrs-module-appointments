@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.dao.impl;
 
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -29,6 +30,16 @@ public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
 		criteria.add(Restrictions.eq("appointment", appointment));
 		return criteria.list();
+	}
+
+	@Override
+	public AppointmentAudit getPriorStatusChangeEvent(Appointment appointment) {
+		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
+		criteria.add(Restrictions.eq("appointment", appointment));
+		criteria.add(Restrictions.ne("status", appointment.getStatus()));
+		criteria.addOrder(Order.desc("dateCreated"));
+		criteria.setMaxResults(1);
+		return (AppointmentAudit) criteria.uniqueResult();
 	}
 
 }

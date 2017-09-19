@@ -10,4 +10,6 @@ public interface AppointmentAuditDao {
 	void save(AppointmentAudit appointmentAuditEvent);
 
 	List<AppointmentAudit> getAppointmentHistoryForAppointment(Appointment appointment);
+
+	AppointmentAudit getPriorStatusChangeEvent(Appointment appointment);
 }

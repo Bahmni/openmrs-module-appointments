@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentCount;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -24,6 +25,7 @@ import java.util.Map;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -147,7 +149,8 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_changeAppointmentStatusWithDate() throws Exception {
-        String content = "{ \"toStatus\": \"CheckedIn\", \"onDate\":\"2108-08-22T10:30:00.0Z\"}";
+        String onDate = "2108-08-22T10:30:00.0Z";
+        String content = "{ \"toStatus\": \"CheckedIn\", \"onDate\":\""+ onDate +"\"}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
         assertNotNull(response);
         Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
@@ -156,7 +159,9 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         List<AppointmentAudit> historyForAppointment = appointmentAuditDao
                 .getAppointmentHistoryForAppointment(appointmentByUuid);
         assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getId());
         assertNotNull(historyForAppointment.get(0).getNotes());
+        assertEquals(DateUtil.convertToLocalDateFromUTC(onDate).toInstant().toString(), historyForAppointment.get(0).getNotes());
     }
 
     @Test
@@ -186,7 +191,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void should_throwExceptionForInvalidAppoinment() throws Exception {
+    public void should_throwExceptionForInvalidAppointment() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
         assertNotNull(response);
@@ -217,4 +222,80 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertEquals(appointment, historyForAppointment.get(0).getAppointment());
         assertNotNull(historyForAppointment.get(0).getNotes());
     }
+
+    @Test
+    public void shouldThrowExceptionForInvalidAppointmentOnUndoStatus() throws Exception {
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/undoStatusChange/"+ "randomUuid", "{}"));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+        assertTrue(response.getContentAsString().contains("Appointment does not exist"));
+    }
+
+    @Test
+    public void shouldUndoCheckedInAppointment() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"3\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        AppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<AppointmentDefaultResponse>() {});
+        String appointmentUuid = appointmentDefaultResponse.getUuid();
+
+        content = "{ \"toStatus\": \"CheckedIn\"}";
+        response = handle(newPostRequest("/rest/v1/appointment/"+ appointmentUuid +"/changeStatus", content));
+        assertEquals(200, response.getStatus());
+        content = "{}";
+        response = handle(newPostRequest("/rest/v1/appointment/undoStatusChange/"+ appointmentUuid, content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+        assertNotNull(appointment);
+        assertEquals("Scheduled", appointment.getStatus().toString());
+    }
+
+    @Test
+    public void shouldUndoMissedAppointment() throws Exception {
+        String appointmentUuid = "c36006e5-9fbb-4f20-866b-0ece245615a7";
+        String content = "{ \"toStatus\": \"CheckedIn\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/"+ appointmentUuid +"/changeStatus", content));
+        assertEquals(200, response.getStatus());
+        content = "{ \"toStatus\": \"Missed\"}";
+        response = handle(newPostRequest("/rest/v1/appointment/"+ appointmentUuid +"/changeStatus", content));
+        assertEquals(200, response.getStatus());
+        content = "{}";
+        response = handle(newPostRequest("/rest/v1/appointment/undoStatusChange/"+ appointmentUuid, content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+        assertNotNull(appointment);
+        assertEquals("CheckedIn", appointment.getStatus().toString());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsNoPriorActionToUndo() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"3\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        AppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<AppointmentDefaultResponse>() {});
+        String appointmentUuid = appointmentDefaultResponse.getUuid();
+        content = "{}";
+        response = handle(newPostRequest("/rest/v1/appointment/undoStatusChange/"+ appointmentUuid, content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+        assertTrue(response.getContentAsString().contains("No status change actions to undo"));
+    }
+
 }

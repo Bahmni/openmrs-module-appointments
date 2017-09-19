@@ -17,6 +17,7 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
@@ -80,8 +81,38 @@ public class AppointmentsServiceImplTest {
     public void testCreateAppointment() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
-        appointmentsService.save(appointment);
+        appointment.setService(new AppointmentService());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointmentsService.validateAndSave(appointment);
         verify(appointmentDao, times(1)).save(appointment);
+    }
+
+    @Test
+    public void shouldCreateAuditEventOnSaveAppointment() throws ParseException {
+        Appointment appointment = new Appointment();
+        Patient patient = new Patient();
+        appointment.setPatient(patient);
+        AppointmentService service = new AppointmentService();
+        appointment.setService(service);
+        AppointmentServiceType serviceType = new AppointmentServiceType();
+        appointment.setServiceType(serviceType);
+        Date startDateTime = DateUtil.convertToDate("2108-08-15T10:00:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDateTime = DateUtil.convertToDate("2108-08-15T10:30:00.0Z", DateUtil.DateFormatType.UTC);
+        appointment.setStartDateTime(startDateTime);
+        appointment.setEndDateTime(endDateTime);
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointmentsService.validateAndSave(appointment);
+        ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
+        verify(appointmentAuditDao, times(1)).save(captor.capture());
+        List<AppointmentAudit> auditEvents = captor.getAllValues();
+        assertEquals(appointment.getStatus(),auditEvents.get(0).getStatus());
+        assertEquals(appointment,auditEvents.get(0).getAppointment());
+        String notes = "{\"serviceTypeUuid\":\""+ serviceType.getUuid() +"\",\"startDateTime\":\""+ startDateTime.toInstant().toString()
+                +"\",\"locationUuid\":null,\"appointmentKind\":\"Scheduled\",\"providerUuid\":null,\"endDateTime\":\""+ endDateTime.toInstant().toString()
+                +"\",\"serviceUuid\":\""+ service.getUuid() +"\",\"appointmentNotes\":null}";
+        assertEquals(notes, auditEvents.get(0).getNotes());
     }
 
     @Test
@@ -181,7 +212,13 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldRunDefaultAppointmentValidatorsOnSave(){
-        appointmentsService.save(new Appointment());
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentService());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointmentsService.validateAndSave(appointment);
         verify(appointmentValidator, times(1)).validate(any(Appointment.class), anyListOf(String.class));
     }
 
@@ -197,7 +234,7 @@ public class AppointmentsServiceImplTest {
 
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
-        appointmentsService.save(new Appointment());
+        appointmentsService.validateAndSave(new Appointment());
         verify(appointmentDao, never()).save(any(Appointment.class));
     }
 
@@ -279,4 +316,58 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, times(1)).getAllAppointmentsInDateRange(null, null);
         assertEquals(appointmentList.size(), 1);
     }
+
+    @Test
+    public void shouldGetAppointmentByUuid() {
+        String appointmentUuid = "appointmentUuid";
+        appointmentsService.getAppointmentByUuid(appointmentUuid);
+        verify(appointmentDao, times(1)).getAppointmentByUuid(appointmentUuid);
+    }
+
+    @Test
+    public void shouldUndoStatusChange() throws ParseException {
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Completed);
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        appointmentAudit.setAppointment(appointment);
+        appointmentAudit.setStatus(AppointmentStatus.CheckedIn);
+        appointmentAudit.setNotes("2108-08-15T11:30:00.0Z");
+        when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(appointmentAudit);
+        appointmentsService.undoStatusChange(appointment);
+        verify(appointmentAuditDao, times(1)).getPriorStatusChangeEvent(appointment);
+        ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);;
+        verify(appointmentDao, times(1)).save(captor.capture());
+        assertEquals(appointmentAudit.getStatus(), captor.getValue().getStatus());
+    }
+
+    @Test
+    public void shouldCreateStatusChangeAuditEventOnUndoStatusChange() throws ParseException {
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Completed);
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        appointmentAudit.setAppointment(appointment);
+        appointmentAudit.setStatus(AppointmentStatus.CheckedIn);
+        appointmentAudit.setNotes("2108-08-15T11:30:00.0Z");
+        when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(appointmentAudit);
+        appointmentsService.undoStatusChange(appointment);
+        ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);;
+        verify(appointmentAuditDao, times(1)).save(captor.capture());
+        AppointmentAudit savedEvent = captor.getValue();
+        assertEquals(appointmentAudit.getNotes(), savedEvent.getNotes());
+        assertEquals(appointment.getStatus(), savedEvent.getStatus());
+        assertEquals(appointment, savedEvent.getAppointment());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsNoPriorStatusChangeExists() throws ParseException {
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Scheduled);
+        when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(null);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("No status change actions to undo");
+        appointmentsService.undoStatusChange(appointment);
+        verify(appointmentAuditDao, times(0)).getPriorStatusChangeEvent(appointment);
+        verify(appointmentDao, times(0)).save(appointment);
+    }
+
 }

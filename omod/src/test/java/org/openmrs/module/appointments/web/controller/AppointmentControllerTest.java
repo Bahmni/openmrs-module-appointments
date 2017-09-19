@@ -164,7 +164,7 @@ public class AppointmentControllerTest {
 
     @Test
     public void shouldThrowExceptionIfPatientUuidIsBlankWhileCreatingAppointment() throws Exception {
-        when(appointmentsService.save(any(Appointment.class))).thenThrow(new APIException("Exception Msg"));
+        when(appointmentsService.validateAndSave(any(Appointment.class))).thenThrow(new APIException("Exception Msg"));
         ResponseEntity<Object> responseEntity = appointmentController.createAppointment(new AppointmentPayload());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -210,6 +210,28 @@ public class AppointmentControllerTest {
     }
 
     @Test
+    public void shouldUndoStatusOfAppointment() throws Exception {
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuid");
+        when(appointmentsService.getAppointmentByUuid(appointment.getUuid())).thenReturn(appointment);
+        ResponseEntity<Object> responseEntity = appointmentController.undoStatusChange(appointment.getUuid());
+        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid(appointment.getUuid());
+        Mockito.verify(appointmentsService, times(1)).undoStatusChange(appointment);
+        Mockito.verify(appointmentMapper, times(1)).constructResponse(appointment);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+    }
+
+    @Test
+    public void shouldReturnErrorResponseWhenAppointmentDoesNotExistOnUndoStaus() throws Exception {
+        String appointmentUuid = "appointmentUuid";
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(null);
+        ResponseEntity<Object> responseEntity = appointmentController.undoStatusChange(appointmentUuid);
+        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
+        Mockito.verify(appointmentsService, never()).undoStatusChange(any());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
+    @Test
     public void shouldSearchWithAppointment() throws Exception {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment = new Appointment();
@@ -251,10 +273,10 @@ public class AppointmentControllerTest {
         appointment.setUuid("appointmentUuid");
 
         when(appointmentMapper.getAppointmentFromPayload(appointmentPayload)).thenReturn(appointment);
-        when(appointmentsService.save(appointment)).thenReturn(appointment);
+        when(appointmentsService.validateAndSave(appointment)).thenReturn(appointment);
 
         appointmentController.createAppointment(appointmentPayload);
         Mockito.verify(appointmentMapper, times(1)).getAppointmentFromPayload(appointmentPayload);
-        Mockito.verify(appointmentsService, times(1)).save(appointment);
+        Mockito.verify(appointmentsService, times(1)).validateAndSave(appointment);
     }
 }

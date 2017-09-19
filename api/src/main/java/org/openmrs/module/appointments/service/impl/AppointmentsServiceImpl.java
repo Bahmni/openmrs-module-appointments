@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -12,9 +13,12 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -33,7 +37,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     AppointmentAuditDao appointmentAuditDao;
 
     @Override
-    public Appointment save(Appointment appointment) {
+    public Appointment validateAndSave(Appointment appointment) throws APIException {
         if(!CollectionUtils.isEmpty(appointmentValidators)){
             List<String> errors = new ArrayList<>();
             for(AppointmentValidator validator: appointmentValidators){
@@ -45,7 +49,31 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             }
         }
         appointmentDao.save(appointment);
-        return appointment;
+	    try {
+		    createEventInAppointmentAudit(appointment, getAppointmentAsJsonString(appointment));
+	    }
+	    catch (IOException e) {
+		    throw new APIException(e);
+	    }
+	    return appointment;
+    }
+
+    private String getAppointmentAsJsonString(Appointment appointment) throws IOException {
+        Map appointmentJson = new HashMap<String,String>();
+        String serviceUuid = appointment.getService().getUuid();
+        appointmentJson.put("serviceUuid", serviceUuid);
+        String serviceTypeUuid = appointment.getServiceType() != null ? appointment.getServiceType().getUuid() : null;
+        appointmentJson.put("serviceTypeUuid", serviceTypeUuid);
+        String providerUuid = appointment.getProvider() != null ? appointment.getProvider().getUuid() : null;
+        appointmentJson.put("providerUuid", providerUuid);
+        String locationUuid = appointment.getLocation() != null ? appointment.getLocation().getUuid() : null;
+        appointmentJson.put("locationUuid", locationUuid);
+        appointmentJson.put("startDateTime", appointment.getStartDateTime().toInstant().toString());
+        appointmentJson.put("endDateTime", appointment.getEndDateTime().toInstant().toString());
+        appointmentJson.put("appointmentKind", appointment.getAppointmentKind().name());
+        appointmentJson.put("appointmentNotes", appointment.getComments());
+        ObjectMapper mapperObj = new ObjectMapper();
+        return String.format("%s", mapperObj.writeValueAsString(appointmentJson));
     }
 
     @Override
@@ -93,8 +121,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         validateStatusChange(appointment, appointmentStatus, errors);
         if(errors.isEmpty()) {
             appointment.setStatus(appointmentStatus);
-            createStatusChangeEventInAppointmentAudit(appointment, appointmentStatus, onDate);
             appointmentDao.save(appointment);
+            String notes = onDate != null ? onDate.toInstant().toString(): null;
+            createEventInAppointmentAudit(appointment, notes);
         }
         else {
             String message = StringUtils.join(errors, "\n");
@@ -108,15 +137,26 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
-    private void createStatusChangeEventInAppointmentAudit(Appointment appointment, AppointmentStatus appointmentStatus,
-            Date onDate) {
+    @Override
+    public void undoStatusChange(Appointment appointment) throws APIException{
+        AppointmentAudit statusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
+        if(statusChangeEvent != null) {
+	        appointment.setStatus(statusChangeEvent.getStatus());
+	        appointmentDao.save(appointment);
+	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
+        } else
+            throw new APIException("No status change actions to undo");
+    }
+
+    private void createEventInAppointmentAudit(Appointment appointment,
+            String notes) {
         AppointmentAudit appointmentAuditEvent = new AppointmentAudit();
         appointmentAuditEvent.setAppointment(appointment);
-        appointmentAuditEvent.setStatus(appointmentStatus);
-        if(onDate != null)
-            appointmentAuditEvent.setNotes(onDate.toInstant().toString());
+        appointmentAuditEvent.setStatus(appointment.getStatus());
+        appointmentAuditEvent.setNotes(notes);
         appointmentAuditDao.save(appointmentAuditEvent);
     }
+
 
     private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
         if(!CollectionUtils.isEmpty(statusChangeValidators)) {

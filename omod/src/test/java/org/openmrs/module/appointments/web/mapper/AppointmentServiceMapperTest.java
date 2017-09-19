@@ -502,6 +502,7 @@ public class AppointmentServiceMapperTest {
         speciality.setUuid("specUuid");
         appointmentServicePayload.setLocationUuid("locUuid");
         appointmentServicePayload.setSpecialityUuid("specUuid");
+        appointmentServicePayload.setDescription("OPD ward for cardiology");
         return appointmentServicePayload;
     }
 

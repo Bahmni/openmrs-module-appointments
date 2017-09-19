@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface AppointmentsService {
 
-    Appointment save(Appointment appointment);
+    Appointment validateAndSave(Appointment appointment);
 
     List<Appointment> getAllAppointments(Date forDate);
 
@@ -28,5 +28,7 @@ public interface AppointmentsService {
 	void changeStatus(Appointment appointment, String status, Date onDate);
 
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
+
+	void undoStatusChange(Appointment appointment);
 }
 
