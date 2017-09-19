@@ -17,6 +17,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -41,6 +42,9 @@ public class AppointmentMapper {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Autowired(required = false)
+    AppointmentResponseExtension appointmentResponseExtension;
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
@@ -107,7 +111,8 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-
+        if(appointmentResponseExtension!=null)
+            response.setAdditionalInfo(appointmentResponseExtension.run(a));
         return response;
     }
     

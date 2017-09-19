@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.web.contract;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 public class AppointmentDefaultResponse {
@@ -16,6 +17,7 @@ public class AppointmentDefaultResponse {
 	private String appointmentKind;
 	private String status;
 	private String comments;
+	private Map additionalInfo;
 
 	public String getUuid() {
 		return uuid;
@@ -111,5 +113,13 @@ public class AppointmentDefaultResponse {
 	
 	public void setComments(String comments) {
 		this.comments = comments;
+	}
+
+	public Map getAdditionalInfo() {
+		return additionalInfo;
+	}
+
+	public void setAdditionalInfo(Map additionalInfo) {
+		this.additionalInfo = additionalInfo;
 	}
 }

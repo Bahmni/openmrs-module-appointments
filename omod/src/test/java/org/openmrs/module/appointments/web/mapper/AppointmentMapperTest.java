@@ -1,19 +1,14 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import java.text.ParseException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.LinkedHashSet;
+import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -34,6 +29,7 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -42,12 +38,8 @@ import static org.powermock.api.mockito.PowerMockito.when;
 
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
+import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 
@@ -71,6 +63,9 @@ public class AppointmentMapperTest {
 
     @Mock
     private AppointmentsService appointmentsService;
+
+    @Mock
+    private AppointmentResponseExtension extension;
 
     @InjectMocks
     private AppointmentMapper appointmentMapper;
@@ -233,9 +228,13 @@ public class AppointmentMapperTest {
         Appointment appointment = createAppointment();
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
+        Map additionalInfo = new HashMap();
+        additionalInfo.put("Program Name", "Tuberculosis");
+        additionalInfo.put("Last Visit", "02/09/2016");
 
         AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
         when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+        when(extension.run(appointment)).thenReturn(additionalInfo);
         List<AppointmentDefaultResponse> appointmentDefaultResponse = appointmentMapper.constructResponse(appointmentList);
         AppointmentDefaultResponse response = appointmentDefaultResponse.get(0);
         assertEquals(appointment.getUuid(), response.getUuid());
@@ -255,6 +254,8 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getAppointmentKind(), AppointmentKind.valueOf(response.getAppointmentKind()));
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());
+        verify(extension, times(1)).run(appointment);
+        assertEquals(2, response.getAdditionalInfo().keySet().size());
     }
 
 
@@ -281,6 +282,17 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getAppointmentKind(), AppointmentKind.valueOf(response.getAppointmentKind()));
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());
+    }
+
+    @Test
+    public void shouldCreateDefaultResponseWhenNoExtension() throws Exception {
+        Appointment appointment = createAppointment();
+        appointmentMapper.appointmentResponseExtension = null;
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+        AppointmentDefaultResponse response = appointmentMapper.constructResponse(appointment);
+        assertEquals(appointment.getUuid(), response.getUuid());
+        assertNull(response.getAdditionalInfo());
     }
     
     @Test
