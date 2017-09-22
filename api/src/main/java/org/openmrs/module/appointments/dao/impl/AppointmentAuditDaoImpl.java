@@ -19,6 +19,10 @@ public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 	@Autowired
 	private SessionFactory sessionFactory;
 
+	public void setSessionFactory(SessionFactory sessionFactory) {
+		this.sessionFactory = sessionFactory;
+	}
+
 	@Transactional
 	@Override
 	public void save(AppointmentAudit appointmentAuditEvent) {

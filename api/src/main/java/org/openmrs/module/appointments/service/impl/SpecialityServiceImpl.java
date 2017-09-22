@@ -13,6 +13,10 @@ public class SpecialityServiceImpl implements SpecialityService {
     @Autowired
     SpecialityDao specialityDao;
 
+    public void setSpecialityDao(SpecialityDao specialityDao) {
+        this.specialityDao = specialityDao;
+    }
+
     @Override
     public Speciality getSpecialityByUuid(String uuid) {
         return specialityDao.getSpecialityByUuid(uuid);

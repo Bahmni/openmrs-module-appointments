@@ -14,6 +14,10 @@ public class SpecialityDaoImpl implements SpecialityDao{
     @Autowired
     private SessionFactory sessionFactory;
 
+    public void setSessionFactory(SessionFactory sessionFactory) {
+        this.sessionFactory = sessionFactory;
+    }
+
     @Override
     public Speciality getSpecialityByUuid(String uuid) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Speciality.class, "Speciality");

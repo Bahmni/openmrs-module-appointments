@@ -36,6 +36,22 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
 
+    public void setAppointmentDao(AppointmentDao appointmentDao) {
+        this.appointmentDao = appointmentDao;
+    }
+
+    public void setStatusChangeValidators(List<AppointmentStatusChangeValidator> statusChangeValidators) {
+        this.statusChangeValidators = statusChangeValidators;
+    }
+
+    public void setAppointmentValidators(List<AppointmentValidator> appointmentValidators) {
+        this.appointmentValidators = appointmentValidators;
+    }
+
+    public void setAppointmentAuditDao(AppointmentAuditDao appointmentAuditDao) {
+        this.appointmentAuditDao = appointmentAuditDao;
+    }
+
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         if(!CollectionUtils.isEmpty(appointmentValidators)){
