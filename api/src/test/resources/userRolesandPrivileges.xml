@@ -1,0 +1,50 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <person person_id="1" uuid="5631b434-78aa-102b-91a0-001e378eb17e" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <person_name person_name_id="1" preferred="true" person_id="1" given_name="Super" middle_name="" family_name="User" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb91515141e"/>
+    <!--<patient patient_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>-->
+
+    <person person_id="2" uuid="5631b434-78aa-102b-91a0-001e378eb110" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <person_name person_name_id="2" preferred="true" person_id="2" given_name="Manage" middle_name="" family_name="User" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915151111"/>
+    <!--<patient patient_id="10" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>-->
+
+    <person person_id="3" uuid="5631b434-78aa-102b-91a0-001e378e0000" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <person_name person_name_id="3" preferred="true" person_id="3" given_name="ReadOnly" middle_name="" family_name="User" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915152222"/>
+    <!--<patient patient_id="11" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>-->
+
+    <person person_id="4" uuid="5631b434-78aa-102b-91a0-001e378e0011" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <person_name person_name_id="3" preferred="true" person_id="3" given_name="Noprivilege" middle_name="" family_name="User" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915153333"/>
+    <!--<patient patient_id="11" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/-->
+
+    <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module"/>
+    <privilege privilege="Manage Appointments" description="Able to manage Appointments in Appointments module"/>
+    <privilege privilege="View Appointment Services" description="Able to view Services in Appointments module"/>
+    <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
+
+    <role role="Appointment: FullAccess" description="To allow full access to Appointments module" uuid="3480cb6d-c551-46c8-8d3a-96dc33d109fb"/>
+    <role role="Appointment: ReadOnly" description="To allow only view access to Appointments module" uuid="3480cb6d-c121-46c8-8d3a-96dc33d109fb"/>
+    <role role="Appointment: Manage" description="To allow managing of appointments in Appointments module" uuid="3480cb6d-c121-46c8-8d3a-96dc33d109fc"/>
+    <role_privilege role="Appointment: FullAccess" privilege="View Appointments"/>
+    <role_privilege role="Appointment: FullAccess" privilege="Manage Appointments"/>
+    <role_privilege role="Appointment: FullAccess" privilege="View Appointment Services"/>
+    <role_privilege role="Appointment: FullAccess" privilege="Manage Appointment Services"/>
+    <role_privilege role="Appointment: ReadOnly" privilege="View Appointments"/>
+    <role_privilege role="Appointment: ReadOnly" privilege="View Appointment Services"/>
+    <role_privilege role="Appointment: Manage" privilege="Manage Appointments"/>
+    <role_privilege role="Appointment: Manage" privilege="View Appointments"/>
+    <role_privilege role="Appointment: Manage" privilege="View Appointment Services"/>
+
+    <users user_id="100" person_id="1" system_id="1-8" username="super-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1210d442-e135-11de-babe-001e378eb670"/>
+    <user_role user_id="100" role="Appointment: FullAccess"/>
+
+    <users user_id="101" person_id="2" system_id="1-8" username="manage-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1010d432-e134-11de-babe-001e378ev670"/>
+    <user_role user_id="101" role="Appointment: Manage"/>
+
+    <users user_id="102" person_id="3" system_id="1-8" username="read-only-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1010d432-e136-11de-babe-001e378ev671"/>
+    <user_role user_id="102" role="Appointment: ReadOnly"/>
+
+    <users user_id="103" person_id="4" system_id="1-8" username="no-privilege-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1299d442-e137-11de-babe-001e378eb670"/>
+</dataset>
+
+
+
