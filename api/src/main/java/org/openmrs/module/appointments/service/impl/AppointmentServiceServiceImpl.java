@@ -19,14 +19,6 @@ public class AppointmentServiceServiceImpl implements AppointmentServiceService 
     @Autowired
     AppointmentsService appointmentsService;
 
-    public void setAppointmentServiceDao(AppointmentServiceDao appointmentServiceDao) {
-        this.appointmentServiceDao = appointmentServiceDao;
-    }
-
-    public void setAppointmentsService(AppointmentsService appointmentsService) {
-        this.appointmentsService = appointmentsService;
-    }
-
     @Override
     public AppointmentService save(AppointmentService appointmentService) {
         AppointmentService service = appointmentServiceDao.getNonVoidedAppointmentServiceByName(appointmentService.getName());

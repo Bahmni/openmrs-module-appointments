@@ -38,15 +38,7 @@
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.SpecialityServiceImpl">
-                <property name="specialityDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.SpecialityDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
-                </property>
-           </bean>
+            <bean class="org.openmrs.module.appointments.service.impl.SpecialityServiceImpl"/>
         </property>
         <property name="preInterceptors">
             <ref bean="serviceInterceptors"/>
@@ -61,32 +53,7 @@
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl">
-                <property name="appointmentDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
-                </property>
-                <property name="appointmentAuditDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
-                </property>
-                <property name="statusChangeValidators">
-                    <list>
-                        <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
-                    </list>
-                </property>
-                <property name="appointmentValidators">
-                    <list>
-                        <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
-                    </list>
-                </property>
-            </bean>
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl"/>
         </property>
         <property name="preInterceptors">
             <ref bean="serviceInterceptors"/>
@@ -109,18 +76,7 @@
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceServiceImpl">
-                <property name="appointmentServiceDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentServiceDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
-                </property>
-                <property name="appointmentsService">
-                    <ref bean="appointmentsService"/>
-                </property>
-            </bean>
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceServiceImpl"/>
         </property>
         <property name="preInterceptors">
             <ref bean="serviceInterceptors"/>
