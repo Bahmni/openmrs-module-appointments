@@ -24,10 +24,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Autowired
     private SessionFactory sessionFactory;
 
-    public void setSessionFactory(SessionFactory sessionFactory) {
-        this.sessionFactory = sessionFactory;
-    }
-
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);

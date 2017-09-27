@@ -275,44 +275,4 @@
             TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
         </sql>
     </changeSet>
-
-    <changeSet id="Create-privilege-view-appointments-201709201603"  author="Santhosh, Pramida">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='View Appointments'</sqlCheck>
-        </preConditions>
-        <comment>Adding privilege for viewing Appointments</comment>
-        <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('View Appointments', 'Able to view Appointments in Appointments module', uuid());
-        </sql>
-    </changeSet>
-
-    <changeSet id="Create-privilege-manage-appointments-201709201605"  author="Santhosh, Pramida">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Manage Appointments'</sqlCheck>
-        </preConditions>
-        <comment>Adding privilege for managing Appointments</comment>
-        <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointments', 'Able to manage Appointments in Appointments module', uuid());
-        </sql>
-    </changeSet>
-
-    <changeSet id="Create-privilege-view-appointment-services-201709201606"  author="Santhosh, Pramida">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='View Appointment Services'</sqlCheck>
-        </preConditions>
-        <comment>Adding privilege to view Services in Appointments module</comment>
-        <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('View Appointment Services', 'Able to view Services in Appointments module', uuid());
-        </sql>
-    </changeSet>
-
-    <changeSet id="Create-privilege-manage-appointment-services-201709201607"  author="Santhosh, Pramida">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Manage Appointment Services'</sqlCheck>
-        </preConditions>
-        <comment>Adding privilege to manage Services in Appointments module</comment>
-        <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Services', 'Able to manage Services in Appointments module', uuid());
-        </sql>
-    </changeSet>
 </databaseChangeLog>
