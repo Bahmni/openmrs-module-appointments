@@ -40,11 +40,7 @@
         <property name="target">
             <bean class="org.openmrs.module.appointments.service.impl.SpecialityServiceImpl">
                 <property name="specialityDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.SpecialityDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
+                    <ref bean="specialityDao"/>
                 </property>
            </bean>
         </property>
@@ -56,6 +52,12 @@
         </property>
     </bean>
 
+    <bean id="specialityDao" class="org.openmrs.module.appointments.dao.impl.SpecialityDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
@@ -63,18 +65,10 @@
         <property name="target">
             <bean class="org.openmrs.module.appointments.service.impl.AppointmentsServiceImpl">
                 <property name="appointmentDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
+                    <ref bean="appointmentDao"/>
                 </property>
                 <property name="appointmentAuditDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
+                    <ref bean="appointmentAuditDao"/>
                 </property>
                 <property name="statusChangeValidators">
                     <list>
@@ -96,6 +90,12 @@
         </property>
     </bean>
 
+    <bean id="appointmentDao" class="org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
     <bean parent="serviceContext">
         <property name="moduleService">
             <list merge="true">
@@ -104,6 +104,25 @@
             </list>
         </property>
     </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.appointments.service.AppointmentServiceService</value>
+                <ref bean="appointmentServiceService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.appointments.service.SpecialityService</value>
+                <ref bean="specialityService"/>
+            </list>
+        </property>
+    </bean>
+
     <bean id="appointmentServiceService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
@@ -111,11 +130,7 @@
         <property name="target">
             <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceServiceImpl">
                 <property name="appointmentServiceDao">
-                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentServiceDaoImpl">
-                        <property name="sessionFactory">
-                            <ref bean="sessionFactory"/>
-                        </property>
-                    </bean>
+                    <ref bean="appointmentServiceDao"/>
                 </property>
                 <property name="appointmentsService">
                     <ref bean="appointmentsService"/>
@@ -127,6 +142,18 @@
         </property>
         <property name="transactionAttributeSource">
             <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
+    <bean id="appointmentServiceDao" class="org.openmrs.module.appointments.dao.impl.AppointmentServiceDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="appointmentAuditDao" class="org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
         </property>
     </bean>
 </beans>

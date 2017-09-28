@@ -18,10 +18,8 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@Component
 public class AppointmentDaoImpl implements AppointmentDao {
 
-    @Autowired
     private SessionFactory sessionFactory;
 
     public void setSessionFactory(SessionFactory sessionFactory) {

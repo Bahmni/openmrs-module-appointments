@@ -13,10 +13,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Component
 public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 
-	@Autowired
 	private SessionFactory sessionFactory;
 
 	public void setSessionFactory(SessionFactory sessionFactory) {

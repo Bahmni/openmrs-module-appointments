@@ -7,16 +7,14 @@ import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-
-@Service
+@Transactional
 public class AppointmentServiceServiceImpl implements AppointmentServiceService {
 
-    @Autowired
     AppointmentServiceDao appointmentServiceDao;
 
-    @Autowired
     AppointmentsService appointmentsService;
 
     public void setAppointmentServiceDao(AppointmentServiceDao appointmentServiceDao) {

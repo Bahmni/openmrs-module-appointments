@@ -12,6 +12,7 @@ import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidato
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -21,19 +22,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Service
+@Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
-    @Autowired
     AppointmentDao appointmentDao;
 
-    @Autowired
     List<AppointmentStatusChangeValidator> statusChangeValidators;
 
-    @Autowired
     List<AppointmentValidator> appointmentValidators;
 
-    @Autowired
     AppointmentAuditDao appointmentAuditDao;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {

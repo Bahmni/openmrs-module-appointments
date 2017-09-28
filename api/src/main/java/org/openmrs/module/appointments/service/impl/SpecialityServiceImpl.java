@@ -5,12 +5,12 @@ import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
+@Transactional
 public class SpecialityServiceImpl implements SpecialityService {
-    @Autowired
     SpecialityDao specialityDao;
 
     public void setSpecialityDao(SpecialityDao specialityDao) {
