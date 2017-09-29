@@ -62,7 +62,6 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentPayload.getPatientUuid()));
         }
-        appointment.setAppointmentNumber(appointmentPayload.getAppointmentNumber());
         AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
         if(appointmentPayload.getServiceTypeUuid() != null) {
