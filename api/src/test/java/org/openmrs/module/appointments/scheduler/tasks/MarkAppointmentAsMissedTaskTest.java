@@ -23,6 +23,7 @@ import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -45,7 +46,19 @@ public class MarkAppointmentAsMissedTaskTest {
         PowerMockito.mockStatic(Context.class);
         when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        String schedulerMarksMissed = "SchedulerMarksMissed";
+        GlobalProperty missedGlobalProperty = new GlobalProperty(schedulerMarksMissed, "true");
+        when(administrationService.getGlobalPropertyObject(schedulerMarksMissed)).thenReturn(missedGlobalProperty);
         markAppointmentAsMissedTask = new MarkAppointmentAsMissedTask();
+    }
+
+    @Test
+    public void shouldNotMarkAppointmentAsMissedWhenSchedulerIsTurnedOff() {
+        String schedulerMarksMissed = "SchedulerMarksMissed";
+        globalProperty = new GlobalProperty(schedulerMarksMissed, "false");
+        when(administrationService.getGlobalPropertyObject(schedulerMarksMissed)).thenReturn(globalProperty);
+        markAppointmentAsMissedTask.execute();
+        Mockito.verify(appointmentsService, never()).changeStatus(any(Appointment.class), any(String.class), any(Date.class));
     }
 
     @Test

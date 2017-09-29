@@ -18,6 +18,11 @@ public class MarkAppointmentAsMissedTask extends AbstractTask {
     public void execute() {
         AppointmentsService appointmentsService = Context.getService(AppointmentsService.class);
         AdministrationService administrationService = Context.getService(AdministrationService.class);
+        GlobalProperty schedulerMarksMissedProperty = administrationService.getGlobalPropertyObject("SchedulerMarksMissed");
+        Boolean schedulerMarksMissed = Boolean.valueOf(schedulerMarksMissedProperty.getPropertyValue());
+        if (!schedulerMarksMissed){
+           return;
+        }
         GlobalProperty schedulerMarksCompleteProperty = administrationService.getGlobalPropertyObject("SchedulerMarksComplete");
         Boolean schedulerMarksComplete = Boolean.valueOf(schedulerMarksCompleteProperty.getPropertyValue());
         Date today = new Date();

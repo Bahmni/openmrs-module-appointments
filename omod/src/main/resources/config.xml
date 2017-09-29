@@ -50,6 +50,11 @@
 		<defaultValue>false</defaultValue>
 		<description>Scheduler marks checked in appointments as complete when it turned on</description>
 	</globalProperty>
+	<globalProperty>
+		<property>SchedulerMarksMissed</property>
+		<defaultValue>false</defaultValue>
+		<description>Scheduler marks scheduled appointments as missed when it is turned on</description>
+	</globalProperty>
 	
 </module>
 
