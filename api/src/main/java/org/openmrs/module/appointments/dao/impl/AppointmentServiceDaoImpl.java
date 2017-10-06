@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import java.util.List;
 import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -8,9 +7,9 @@ import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
@@ -39,17 +38,23 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
     @Override
     public AppointmentService getAppointmentServiceByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
+        Session currentSession = sessionFactory.getCurrentSession();
+        Criteria criteria = currentSession.createCriteria(AppointmentService.class, "appointmentService");
         criteria.add(Restrictions.eq("uuid", uuid));
-        return (AppointmentService) criteria.uniqueResult();
+        AppointmentService appointmentService = (AppointmentService) criteria.uniqueResult();
+        evictObjectFromSession(currentSession, appointmentService);
+        return appointmentService;
     }
 
     @Override
     public AppointmentService getNonVoidedAppointmentServiceByName(String serviceName) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
+        Session currentSession = sessionFactory.getCurrentSession();
+        Criteria criteria = currentSession.createCriteria(AppointmentService.class, "appointmentService");
         criteria.add(Restrictions.eq("name", serviceName));
         criteria.add(Restrictions.eq("voided", false));
-        return (AppointmentService) criteria.uniqueResult();
+        AppointmentService appointmentService = (AppointmentService) criteria.uniqueResult();
+        evictObjectFromSession(currentSession, appointmentService);
+        return appointmentService;
     }
 
     @Override
@@ -57,5 +62,11 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceType.class, "appointmentServiceType");
         criteria.add(Restrictions.eq("uuid", uuid));
         return (AppointmentServiceType) criteria.uniqueResult();
+    }
+
+    private void evictObjectFromSession(Session currentSession, AppointmentService appointmentService) {
+        if (appointmentService != null) {
+            currentSession.evict(appointmentService);
+        }
     }
 }

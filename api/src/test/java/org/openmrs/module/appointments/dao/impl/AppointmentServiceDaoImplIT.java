@@ -51,6 +51,20 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldGetAppointmentServiceByUuidAndChangeTheStateOfObjectFromPersistedToDetachedUsingEvict() throws Exception {
+        String appointmentServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid(appointmentServiceUuid);
+        assertNotNull(appointmentService);
+        assertEquals(appointmentServiceUuid, appointmentService.getUuid());
+        assertEquals(30, appointmentService.getDurationMins().intValue());
+        appointmentService.setDurationMins(60);
+        AppointmentService appointmentService2 = appointmentServiceDao.getAppointmentServiceByUuid(appointmentServiceUuid);
+        assertNotNull(appointmentService2);
+        assertEquals(appointmentServiceUuid, appointmentService2.getUuid());
+        assertEquals(30, appointmentService2.getDurationMins().intValue());
+    }
+
+    @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<AppointmentService> allAppointmentServices = appointmentServiceDao.getAllAppointmentServices(false);
         assertEquals(2, allAppointmentServices.size());
@@ -80,6 +94,23 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
         assertNotNull(type1.getId());
         assertEquals(15, type1.getDuration(), 0);
         assertEquals("Type1", type1.getName());
+    }
+
+    @Test
+    public void shouldGetNonVoidedAppointmentServiceByNameAndChangeTheStateOfObjectFromPersistedToDetachedUsingEvict() throws Exception {
+        String appointmentServiceName = "Consultation";
+        String appointmentServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        AppointmentService appointmentService = appointmentServiceDao.getNonVoidedAppointmentServiceByName(appointmentServiceName);
+        assertNotNull(appointmentService);
+        assertEquals(appointmentServiceUuid, appointmentService.getUuid());
+        assertEquals(appointmentServiceName, appointmentService.getName());
+        assertEquals(30, appointmentService.getDurationMins().intValue());
+        appointmentService.setDurationMins(60);
+        AppointmentService appointmentService2 = appointmentServiceDao.getNonVoidedAppointmentServiceByName(appointmentServiceName);
+        assertNotNull(appointmentService2);
+        assertEquals(appointmentServiceUuid, appointmentService2.getUuid());
+        assertEquals(appointmentServiceName, appointmentService2.getName());
+        assertEquals(30, appointmentService2.getDurationMins().intValue());
     }
 
     @Test
