@@ -15,7 +15,7 @@
 	</modules>
 
 	<properties>
-		<openmrs.platform.version>2.1.1-SNAPSHOT</openmrs.platform.version>
+		<openmrs.platform.version>2.1.1</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.12</junitVersion>
 		<powerMockVersion>1.6.5</powerMockVersion>
