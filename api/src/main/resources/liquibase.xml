@@ -315,4 +315,20 @@
             INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Services', 'Able to manage Services in Appointments module', uuid());
         </sql>
     </changeSet>
+
+    <changeSet id="global-property-past-appointments-sql" author="Maharjun, Shireesha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
+        </preConditions>
+        <comment>Adding query to fetch past appointments for patient</comment>
+        <sqlFile path="patientPastAppointments.sql"/>
+    </changeSet>
+
+    <changeSet id="global-property-upcoming-appointments-sql" author="Maharjun, Shireesha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
+        </preConditions>
+        <comment>Adding query to fetch upcoming appointments for patient</comment>
+        <sqlFile path="patientUpcomingAppointments.sql"/>
+    </changeSet>
 </databaseChangeLog>
