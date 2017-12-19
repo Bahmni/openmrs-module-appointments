@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 
+
 <databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
@@ -330,5 +330,20 @@
         </preConditions>
         <comment>Adding query to fetch upcoming appointments for patient</comment>
         <sqlFile path="patientUpcomingAppointments.sql"/>
+    </changeSet>
+
+    <changeSet id="Create-Available-for-appointments-201712121212" author="Maharjun, Saikumar">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT count(*) FROM provider_attribute_type where name="Available for appointments";
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding provider attribute type for Appointments</comment>
+        <sql>
+            INSERT INTO provider_attribute_type (name, description, datatype, min_occurs, creator, date_created,
+            retired, uuid)
+            VALUES ("Available for appointments","providers will be available for appointments",
+            "org.openmrs.customdatatype.datatype.BooleanDatatype", 0, 8, NOW(), 0, UUID());
+        </sql>
     </changeSet>
 </databaseChangeLog>
