@@ -46,6 +46,11 @@
 		<class>org.openmrs.module.appointments.advice.AppointmentServiceAdvice</class>
 	</advice>
 
+	<advice>
+		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
+		<class>org.openmrs.module.appointments.advice.AppointmentAdvice</class>
+	</advice>
+
 	<globalProperty>
 		<property>disableDefaultAppointmentValidations</property>
 		<defaultValue>false</defaultValue>
