@@ -1,8 +1,9 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -27,8 +28,6 @@ import java.util.stream.Collectors;
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointment")
 public class AppointmentController {
-
-    private Log log = LogFactory.getLog(this.getClass());
 
     @Autowired
     private AppointmentsService appointmentsService;
@@ -67,7 +66,6 @@ public class AppointmentController {
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         }catch (RuntimeException e) {
-            log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -128,8 +126,7 @@ public class AppointmentController {
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             }else
                 throw new RuntimeException("Appointment does not exist");
-        } catch (RuntimeException e) {
-            log.error("Runtime error while trying to update appointment status", e);
+        }catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -144,8 +141,7 @@ public class AppointmentController {
             }
             appointmentsService.undoStatusChange(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("Runtime error while trying to undo appointment status", e);
+        }catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -154,28 +150,10 @@ public class AppointmentController {
     @ResponseBody
     public AppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        if(appointment == null) {
-            log.error("Invalid. Appointment does not exist. UUID - " + uuid);
+        if(appointment == null){
             throw new RuntimeException("Appointment does not exist");
         }
         return appointmentMapper.constructResponse(appointment);
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/providerResponse")
-    @ResponseBody
-    public ResponseEntity<Object> updateAppointmentProviderResponse(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
-        try {
-            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment == null){
-                throw new RuntimeException("Appointment does not exist");
-            }
-            AppointmentProvider appointmentProviderProvider = appointmentMapper.mapAppointmentProvider(providerResponse);
-            appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
-            return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RuntimeException e) {
-            log.error("Runtime error while trying to update appointment provider response", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
     }
 
 }

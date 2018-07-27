@@ -9,7 +9,6 @@ import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Date;
-import java.util.Set;
 
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
@@ -24,15 +23,6 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private AppointmentKind appointmentKind;
     private AppointmentStatus status;
     private String comments;
-    private Set<AppointmentProvider> providers;
-
-    public Set<AppointmentProvider> getProviders() {
-        return providers;
-    }
-
-    public void setProviders(Set<AppointmentProvider> providers) {
-        this.providers = providers;
-    }
 
     public Appointment() {
         super();

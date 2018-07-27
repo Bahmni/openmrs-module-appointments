@@ -44,28 +44,4 @@
     <patient_appointment_audit patient_appointment_audit_id="2" appointment_id="3" status="CheckedIn" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="26104r42-3ca8-11e3-bf2b-0800271c13233"/>
     <patient_appointment_audit patient_appointment_audit_id="3" appointment_id="3" status="Completed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="26104r42-3ca8-11e3-bf2b-0800271c13234"/>
     <patient_appointment_audit patient_appointment_audit_id="4" appointment_id="3" status="CheckedIn" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="26104r42-3ca8-11e3-bf2b-0800271c13235"/>
-
-
-    <person person_id="220" gender="M" dead="false" creator="1" birthdate_estimated="0"
-            date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""
-            uuid="85c632b5-d6fb-4624-9400-c45ffbc7f076"/>
-    <person_name person_name_id="220" preferred="true" person_id="220" prefix="" given_name="System" middle_name=""
-                 family_name="OpenMRS" family_name_suffix="" creator="1" date_created="2005-09-22 00:00:00.0"
-                 voided="false" void_reason="" uuid="644ae99d-67ff-4077-a42d-03768fce0f9e"/>
-
-    <person person_id="221" gender="M" dead="false" creator="1" birthdate_estimated="0"
-            date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""
-            uuid="f9a9c62d-53c2-4de2-ad00-79355e6d48b3"/>
-    <person_name person_name_id="221" person_id="221" preferred="true" prefix="" given_name="Lab System" middle_name=""
-                 family_name="OpenMRS" family_name_suffix="" creator="1" date_created="2005-09-22 00:00:00.0"
-                 voided="false" void_reason="" uuid="203bb950-34aa-4b8a-aa6b-585e989f3939"/>
-
-
-    <provider provider_id="2220" person_id="220" name="System" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="2bdc3f7d-d911-401a-84e9-5494dda83e8e" />
-    <provider provider_id="2221" person_id="221" name="labtechnician" identifier="labtechnician" creator="1"
-              date_created="2005-01-01 00:00:00.0"  retired="false" uuid="2d15071d-439d-44e8-9825-aa8e1a30d2a2"/>
-
-    <patient_appointment_provider patient_appointment_provider_id="1" provider_id="2220" patient_appointment_id="2" response="ACCEPTED"
-              comments="visit as scheduled" date_created="2005-09-22 00:00:00.0" creator="1"
-                                  voided="false" void_reason="" uuid="f716177b-82ca-49e7-8394-cfe7c8d21f80"/>
 </dataset>

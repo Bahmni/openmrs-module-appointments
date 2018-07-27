@@ -346,32 +346,4 @@
             "org.openmrs.customdatatype.datatype.BooleanDatatype", 0, 8, NOW(), 0, UUID());
         </sql>
     </changeSet>
-
-    <changeSet id="patient_appointment_provider_table_201807251345" author="angshu">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="patient_appointment_provider" />
-            </not>
-        </preConditions>
-        <sql>
-            CREATE  TABLE IF NOT EXISTS patient_appointment_provider (
-            patient_appointment_provider_id INT NOT NULL AUTO_INCREMENT,
-            patient_appointment_id INT NOT NULL,
-            provider_id int NOT NULL,
-            comments VARCHAR(1000),
-            date_created DATETIME NOT NULL,
-            creator INT NOT NULL,
-            date_changed DATETIME NULL,
-            changed_by INT NULL,
-            voided TINYINT NULL,
-            voided_by INT,
-            date_voided DATETIME,
-            void_reason VARCHAR(255),
-            PRIMARY KEY (patient_appointment_provider_id) ,
-            CONSTRAINT fk_patient_appointment_provider_patient_appointment FOREIGN KEY (patient_appointment_id) REFERENCES patient_appointment(patient_appointment_id),
-            CONSTRAINT fk_patient_appointment_provider_provider FOREIGN KEY (provider_id) REFERENCES provider (provider_id)
-            )
-        </sql>
-    </changeSet>
-
 </databaseChangeLog>
