@@ -84,8 +84,7 @@ public class AppointmentMapper {
 
         if (existingProviders != null) {
             for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders == null ? false :
-                        newProviders.stream().anyMatch(p -> p.getUuid().equals(appointmentProvider.getProvider().getUuid()));
+                boolean exists = newProviders == null ? false : newProviders.stream().anyMatch(p -> p.getProviderUuid().equals(appointmentProvider.getUuid()));
                 if (!exists) {
                     appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
                     appointmentProvider.setVoided(true);
@@ -99,7 +98,7 @@ public class AppointmentMapper {
                 appointment.setProviders(new HashSet<>());
             }
             for (AppointmentProviderDetail providerDetail : newProviders) {
-                List<AppointmentProvider> providers = appointment.getProviders().stream().filter(p -> p.getProvider().getUuid().equals(providerDetail.getUuid())).collect(Collectors.toList());
+                List<AppointmentProvider> providers = appointment.getProviders().stream().filter(p -> p.getProvider().getUuid().equals(providerDetail.getProviderUuid())).collect(Collectors.toList());
                 if (providers.isEmpty()) {
                     AppointmentProvider newAppointmentProvider = createNewAppointmentProvider(providerDetail);
                     newAppointmentProvider.setAppointment(appointment);
@@ -115,7 +114,7 @@ public class AppointmentMapper {
     }
 
     private AppointmentProvider createNewAppointmentProvider(AppointmentProviderDetail providerDetail) {
-        Provider provider = providerService.getProviderByUuid(providerDetail.getUuid());
+        Provider provider = providerService.getProviderByUuid(providerDetail.getProviderUuid());
         if (provider == null) {
             throw new ConversionException("Bad Request. No such provider.");
         }
@@ -173,12 +172,12 @@ public class AppointmentMapper {
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
         List<AppointmentProviderDetail> providerDetailList = new ArrayList<>();
         if (providers != null) {
-            for (AppointmentProvider apptProviderAssociation : providers) {
+            for (AppointmentProvider provider : providers) {
                 AppointmentProviderDetail apptProvider = new AppointmentProviderDetail();
-                apptProvider.setUuid(apptProviderAssociation.getProvider().getUuid());
-                apptProvider.setComments(apptProviderAssociation.getComments());
-                apptProvider.setResponse(apptProviderAssociation.getResponse().toString());
-                apptProvider.setName(apptProviderAssociation.getProvider().getName());
+                apptProvider.setProviderUuid(provider.getUuid());
+                apptProvider.setComments(provider.getComments());
+                apptProvider.setResponse(provider.getResponse().toString());
+                apptProvider.setName(provider.getProvider().getName());
                 providerDetailList.add(apptProvider);
             }
         }
@@ -226,7 +225,7 @@ public class AppointmentMapper {
 
     public AppointmentProvider mapAppointmentProvider(AppointmentProviderDetail providerResponse) {
         AppointmentProvider appointmentProvider = new AppointmentProvider();
-        appointmentProvider.setProvider(providerService.getProviderByUuid(providerResponse.getUuid()));
+        appointmentProvider.setProvider(providerService.getProviderByUuid(providerResponse.getProviderUuid()));
         appointmentProvider.setResponse(withResponse(providerResponse.getResponse()));
         appointmentProvider.setComments(providerResponse.getComments());
         return appointmentProvider;
