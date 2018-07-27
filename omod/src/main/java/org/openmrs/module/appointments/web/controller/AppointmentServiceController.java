@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
@@ -24,34 +24,34 @@ import java.util.List;
 public class AppointmentServiceController {
 
     @Autowired
-    private AppointmentServiceService appointmentServiceService;
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
     @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
 
     @RequestMapping(method = RequestMethod.GET, value = "all/default")
     @ResponseBody
     public List<AppointmentServiceDefaultResponse> getAllAppointmentServices()  {
-        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        List<AppointmentServiceDefaultResponse> response = appointmentServiceMapper.constructDefaultResponseForServiceList(appointmentServices);
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        List<AppointmentServiceDefaultResponse> response = appointmentServiceMapper.constructDefaultResponseForServiceList(appointmentServiceDefinitions);
         return response;
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "all/full")
     @ResponseBody
     public List<AppointmentServiceFullResponse> getAllAppointmentServicesWithTypes() {
-        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        List<AppointmentServiceFullResponse> response = appointmentServiceMapper.constructFullResponseForServiceList(appointmentServices);
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        List<AppointmentServiceFullResponse> response = appointmentServiceMapper.constructFullResponseForServiceList(appointmentServiceDefinitions);
         return response;
     }
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public AppointmentServiceFullResponse getAppointmentServiceByUuid(@RequestParam("uuid") String uuid)  {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(uuid);
-        if(appointmentService == null){
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid);
+        if(appointmentServiceDefinition == null){
             throw new RuntimeException("Appointment Service does not exist");
         }
-        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition);
 
         return appointmentServiceFullResponse;
     }
@@ -61,10 +61,10 @@ public class AppointmentServiceController {
     public ResponseEntity<Object> createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
         if(appointmentServicePayload.getName() == null)
             throw new RuntimeException("Appointment Service name should not be null");
-        AppointmentService appointmentService = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
         try {
-            AppointmentService savedAppointmentService = appointmentServiceService.save(appointmentService);
-            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(savedAppointmentService);
+            AppointmentServiceDefinition savedAppointmentServiceDefinition = appointmentServiceDefinitionService.save(appointmentServiceDefinition);
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(savedAppointmentServiceDefinition);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
         } catch (RuntimeException e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
@@ -74,14 +74,14 @@ public class AppointmentServiceController {
     @RequestMapping( method = RequestMethod.DELETE)
     @ResponseBody
     public ResponseEntity<Object> voidAppointmentService(@RequestParam(value = "uuid", required = true) String appointmentServiceUuid, @RequestParam(value = "void_reason", required = false) String voidReason ) {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid);
-        if (appointmentService.getVoided()){
-            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid);
+        if (appointmentServiceDefinition.getVoided()){
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
         }
         try {
-            AppointmentService appointmentService1 = appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
-            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService1);
+            AppointmentServiceDefinition appointmentServiceDefinition1 = appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, voidReason);
+            AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition1);
             return new ResponseEntity<>(appointmentServiceFullResponse, HttpStatus.OK);
         } catch (Exception e) {
             return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
@@ -92,11 +92,11 @@ public class AppointmentServiceController {
     @ResponseBody
     public Integer calculateLoadForService(@RequestParam("uuid") String serviceUuid, @RequestParam(value = "startDateTime") String startDateTime, @RequestParam(value = "endDateTime") String endDateTime)
             throws ParseException {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(serviceUuid);
-        if(appointmentService == null){
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid);
+        if(appointmentServiceDefinition == null){
             throw new RuntimeException("Appointment Service does not exist");
         }
 
-        return appointmentServiceService.calculateCurrentLoad(appointmentService, DateUtil.convertToLocalDateFromUTC(startDateTime), DateUtil.convertToLocalDateFromUTC(endDateTime));
+        return appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, DateUtil.convertToLocalDateFromUTC(startDateTime), DateUtil.convertToLocalDateFromUTC(endDateTime));
     }
 }

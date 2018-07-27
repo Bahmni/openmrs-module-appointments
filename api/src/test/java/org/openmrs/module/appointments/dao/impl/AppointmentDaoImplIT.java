@@ -6,7 +6,7 @@ import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -59,8 +59,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllFutureAppointmentForTheGivenService() throws Exception {
-        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
-        List<Appointment> allAppointments = appointmentDao.getAllFutureAppointmentsForService(appointmentService);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        List<Appointment> allAppointments = appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
         assertNotNull(allAppointments);
         assertEquals(2, allAppointments.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c1111", allAppointments.get(0).getUuid());
@@ -69,8 +69,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllNonVoidedAndNonCancelledFutureAppointmentFortheGivenServiceType() throws Exception {
-        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
-        Set<AppointmentServiceType> serviceTypes = appointmentService.getServiceTypes();
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        Set<AppointmentServiceType> serviceTypes = appointmentServiceDefinition.getServiceTypes();
         AppointmentServiceType appointmentServiceType = serviceTypes.iterator().next();
         List<Appointment> allFutureAppointmentsForServiceType = appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         assertNotNull(allFutureAppointmentsForServiceType);
@@ -83,8 +83,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = simpleDateFormat.parse("2017-08-08");
         Date endDate = simpleDateFormat.parse("2017-08-09");
-        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
-        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, null);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, null);
         Iterator iterator = appointmentsForService.iterator();
         Appointment appointmentWithNonVoidedServiceType  = (Appointment) iterator.next();
         Appointment appointmentWithoutServiceType  = (Appointment) iterator.next();
@@ -102,8 +102,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         Date endDate = simpleDateFormat.parse("2017-08-09");
         List<AppointmentStatus> appointmentStatusList = new ArrayList<>();
         appointmentStatusList.add(AppointmentStatus.Scheduled);
-        AppointmentService appointmentService = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
-        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatusList);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
+        List<Appointment> appointmentsForService = appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatusList);
         assertEquals(1, appointmentsForService.size());
         Iterator iterator = appointmentsForService.iterator();
         Appointment appointment1  = (Appointment) iterator.next();

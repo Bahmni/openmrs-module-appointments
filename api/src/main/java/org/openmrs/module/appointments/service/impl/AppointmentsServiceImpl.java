@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -10,8 +11,6 @@ import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -107,8 +106,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService) {
-        return appointmentDao.getAllFutureAppointmentsForService(appointmentService);
+    public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
+        return appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
     }
 
     @Override
@@ -117,8 +116,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
-        return appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatusList);
+    public List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
+        return appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatusList);
     }
 
     @Override
@@ -159,6 +158,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
         } else
             throw new APIException("No status change actions to undo");
+    }
+
+    @Override
+    public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
+        //TODO
+        throw new NotYetImplementedException("This feature is not yet implemented");
     }
 
     private void createEventInAppointmentAudit(Appointment appointment,

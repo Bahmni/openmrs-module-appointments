@@ -7,7 +7,7 @@ import java.io.Serializable;
 public class AppointmentServiceType extends BaseOpenmrsData implements Serializable, Comparable<AppointmentServiceType> {
 
     private Integer id;
-    private AppointmentService appointmentService;
+    private AppointmentServiceDefinition appointmentServiceDefinition;
     private String name;
     private Integer duration;
 
@@ -37,20 +37,20 @@ public class AppointmentServiceType extends BaseOpenmrsData implements Serializa
         this.duration = duration;
     }
 
-    public AppointmentService getAppointmentService() {
-        return appointmentService;
+    public AppointmentServiceDefinition getAppointmentServiceDefinition() {
+        return appointmentServiceDefinition;
     }
 
-    public void setAppointmentService(AppointmentService appointmentService) {
-        this.appointmentService = appointmentService;
+    public void setAppointmentServiceDefinition(AppointmentServiceDefinition appointmentServiceDefinition) {
+        this.appointmentServiceDefinition = appointmentServiceDefinition;
     }
 
     @Override
     public int compareTo(AppointmentServiceType o) {
         if (this.getName().compareTo(o.getName()) != 0) {
             return this.getName().compareTo(o.getName());
-        } else if (this.getAppointmentService().getUuid().compareTo(o.getAppointmentService().getUuid()) != 0 ) {
-            return this.getAppointmentService().getUuid().compareTo(o.getAppointmentService().getUuid());
+        } else if (this.getAppointmentServiceDefinition().getUuid().compareTo(o.getAppointmentServiceDefinition().getUuid()) != 0 ) {
+            return this.getAppointmentServiceDefinition().getUuid().compareTo(o.getAppointmentServiceDefinition().getUuid());
         }
         return this.getDuration().compareTo(o.getDuration());
     }

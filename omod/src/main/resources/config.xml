@@ -17,11 +17,12 @@
 
 	<mappingFiles>
 		Speciality.hbm.xml
-		AppointmentService.hbm.xml
+		AppointmentServiceDefinition.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
 		Appointment.hbm.xml
 		AppointmentAudit.hbm.xml
 		AppointmentServiceType.hbm.xml
+		AppointmentProvider.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
