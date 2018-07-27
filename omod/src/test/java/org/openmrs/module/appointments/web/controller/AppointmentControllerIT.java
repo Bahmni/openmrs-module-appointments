@@ -70,7 +70,12 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
-                "\"appointmentKind\": \"WalkIn\"}";
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": [ {" +
+                    "\"providerUuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\"," +
+                    "\"comments\":\"available\"," +
+                    "\"response\":\"ACCEPTED\"" +
+                "} ] }";
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
         assertNotNull(response);

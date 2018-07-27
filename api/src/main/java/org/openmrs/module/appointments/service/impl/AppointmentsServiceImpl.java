@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -159,6 +160,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
         } else
             throw new APIException("No status change actions to undo");
+    }
+
+    @Override
+    public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
+        //TODO
+        throw new NotYetImplementedException("This feature is not yet implemented");
     }
 
     private void createEventInAppointmentAudit(Appointment appointment,

@@ -9,8 +9,11 @@ import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
@@ -19,8 +22,13 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TestTransaction;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -40,9 +48,16 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
 
     @Autowired
     AppointmentsService appointmentsService;
+    @Autowired
+    ProviderService providerService;
+    @Autowired
+    PatientService patientService;
 
     @Mock
     private AppointmentAuditDao appointmentAuditDao;
+
+    @Autowired
+    AppointmentServiceService appointmentServiceService;
 
     @Before
     public void init() throws Exception {
@@ -55,6 +70,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         noPrivilegeUser = "no-privilege-user";
         noPrivilegeUserPassword = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
+        executeDataSet("appointmentTestData.xml");
     }
 
     @Test
@@ -68,7 +84,27 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         appointment.setStartDateTime(startDateTime);
         appointment.setEndDateTime(endDateTime);
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
-        assertNotNull(appointmentsService.validateAndSave(appointment));
+
+        Set<AppointmentProvider> appointmentProviders = new HashSet<>();
+
+
+        AppointmentProvider appointmentProvider1 = new AppointmentProvider();
+        appointmentProvider1.setAppointment(appointment);
+        appointmentProvider1.setProvider(providerService.getProvider(2220));
+        appointmentProvider1.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+
+        AppointmentProvider appointmentProvider2 = new AppointmentProvider();
+        appointmentProvider2.setAppointment(appointment);
+        appointmentProvider2.setProvider(providerService.getProvider(2220));
+        appointmentProvider2.setResponse(AppointmentProviderResponse.AWAITING);
+
+        appointmentProviders.add(appointmentProvider1);
+        appointmentProviders.add(appointmentProvider2);
+
+        appointment.setProviders(appointmentProviders);
+        Appointment app = appointmentsService.validateAndSave(appointment);
+        assertNotNull(app);
     }
 
     @Test(expected = APIAuthenticationException.class)
@@ -205,5 +241,24 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         Appointment appointment = new Appointment();
         appointment.setId(1);
         appointmentsService.undoStatusChange(appointment);
+    }
+
+    @Test
+    public void shouldFetchAppointments() throws Exception {
+        Context.authenticate(adminUser, adminUserPassword);
+        List<Appointment> allAppointments = appointmentsService.getAllAppointments(DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC));
+        List<Appointment> appointments = allAppointments.stream().filter(appointment ->
+            appointment.getId().equals(2)
+        ).collect(Collectors.toList());
+
+        assertNotNull(appointments);
+        assertEquals(1, appointments.size());
+        List<AppointmentProvider> appointmentProviders = appointments.get(0).getProviders().stream().filter(
+                appointmentProvider -> appointmentProvider.getProvider().getId() == 2220).collect(Collectors.toList());
+        assertEquals(1, appointmentProviders.size());
+        Provider provider = appointmentProviders.get(0).getProvider();
+        assertEquals("System OpenMRS", provider.getName());
+
+
     }
 }
