@@ -17,7 +17,7 @@
 
 	<mappingFiles>
 		Speciality.hbm.xml
-		AppointmentServiceDefinition.hbm.xml
+		AppointmentService.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
 		Appointment.hbm.xml
 		AppointmentAudit.hbm.xml

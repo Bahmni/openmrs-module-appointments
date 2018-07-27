@@ -6,8 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
@@ -27,10 +27,10 @@ import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 
-public class AppointmentServiceDefinitionControllerTest {
+public class AppointmentServiceControllerTest {
 
     @Mock
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+    private AppointmentServiceService appointmentServiceService;
 
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
@@ -50,16 +50,16 @@ public class AppointmentServiceDefinitionControllerTest {
     public void shouldCreateAppointmentService() throws Exception {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
         appointmentServicePayload.setName("Cardio");
-        AppointmentServiceDefinition mappedServicePayload = new AppointmentServiceDefinition();
+        AppointmentService mappedServicePayload = new AppointmentService();
         when(appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload)).thenReturn(mappedServicePayload);
-        when(appointmentServiceDefinitionService.save(mappedServicePayload)).thenReturn(mappedServicePayload);
+        when(appointmentServiceService.save(mappedServicePayload)).thenReturn(mappedServicePayload);
         AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
         when(appointmentServiceMapper.constructResponse(mappedServicePayload)).thenReturn(response);
 
         ResponseEntity<Object> savedAppointmentService = appointmentServiceController.createAppointmentService(appointmentServicePayload);
 
         verify(appointmentServiceMapper, times(1)).getAppointmentServiceFromPayload(appointmentServicePayload);
-        verify(appointmentServiceDefinitionService, times(1)).save(any(AppointmentServiceDefinition.class));
+        verify(appointmentServiceService, times(1)).save(any(AppointmentService.class));
         verify(appointmentServiceMapper, times(1)).constructResponse(mappedServicePayload);
         assertNotNull(savedAppointmentService);
         assertEquals(response, savedAppointmentService.getBody());
@@ -80,9 +80,9 @@ public class AppointmentServiceDefinitionControllerTest {
     public void shouldValidateTheAppointmentServiceAndThrowAnExceptionWhenThereIsNonVoidedAppointmentServiceWithTheSameName() throws Exception {
         AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
         appointmentServicePayload.setName("Cardio");
-        AppointmentServiceDefinition mappedServicePayload = new AppointmentServiceDefinition();
+        AppointmentService mappedServicePayload = new AppointmentService();
         when(appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload)).thenReturn(mappedServicePayload);
-        when(appointmentServiceDefinitionService.save(mappedServicePayload)).thenThrow(new RuntimeException("The service 'Cardio' is already present"));
+        when(appointmentServiceService.save(mappedServicePayload)).thenThrow(new RuntimeException("The service 'Cardio' is already present"));
 
         ResponseEntity<Object> appointmentService = appointmentServiceController.createAppointmentService(appointmentServicePayload);
 
@@ -93,51 +93,51 @@ public class AppointmentServiceDefinitionControllerTest {
 
     @Test
     public void shouldGetAllAppointmentServices() throws Exception {
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        List<AppointmentServiceDefinition> appointmentServiceDefinitionList = new ArrayList<>();
-        appointmentServiceDefinitionList.add(appointmentServiceDefinition);
-        when(appointmentServiceDefinitionService.getAllAppointmentServices(false)).thenReturn(appointmentServiceDefinitionList);
+        AppointmentService appointmentService = new AppointmentService();
+        List<AppointmentService> appointmentServiceList = new ArrayList<>();
+        appointmentServiceList.add(appointmentService);
+        when(appointmentServiceService.getAllAppointmentServices(false)).thenReturn(appointmentServiceList);
         
         appointmentServiceController.getAllAppointmentServices();
-        verify(appointmentServiceDefinitionService, times(1)).getAllAppointmentServices(false);
-        verify(appointmentServiceMapper, times(1)).constructDefaultResponseForServiceList(appointmentServiceDefinitionList);
+        verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
+        verify(appointmentServiceMapper, times(1)).constructDefaultResponseForServiceList(appointmentServiceList);
     }
     
     @Test
     public void shouldGetAppointmentServiceByUUID() throws Exception {
         String uuid = "c36006d4-9fbb-4f20-866b-0ece245615b1";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid(uuid);
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid)).thenReturn(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(uuid);
+        when(appointmentServiceService.getAppointmentServiceByUuid(uuid)).thenReturn(appointmentService);
         
         appointmentServiceController.getAppointmentServiceByUuid(uuid);
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(uuid);
-        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDefinition);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(uuid);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
     }
     
     @Test(expected = RuntimeException.class)
     public void shouldThrowExceptionIfServiceNotFound() throws Exception {
         appointmentServiceController.getAppointmentServiceByUuid("random");
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid("random");
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid("random");
     }
 
     @Test
     public void shouldVoidTheAppointmentService() throws Exception {
         String appointmentServiceUuid = "appointmentServiceUuid";
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid(appointmentServiceUuid);
-        appointmentServiceDefinition.setName("serviceName");
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentServiceDefinition);
-        when(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, voidReason)).thenReturn(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
         AppointmentServiceFullResponse appointmentServiceFullResponse = new AppointmentServiceFullResponse();
-        when(appointmentServiceMapper.constructResponse(appointmentServiceDefinition)).thenReturn(appointmentServiceFullResponse);
+        when(appointmentServiceMapper.constructResponse(appointmentService)).thenReturn(appointmentServiceFullResponse);
 
         ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
 
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
-        verify(appointmentServiceDefinitionService, times(1)).voidAppointmentService(appointmentServiceDefinition, voidReason);
-        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDefinition);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(1)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
         assertNotNull(response);
         assertEquals(appointmentServiceFullResponse, response.getBody());
     }
@@ -146,20 +146,20 @@ public class AppointmentServiceDefinitionControllerTest {
     public void shouldVoidTheAppointmentServiceBeIdempotent() throws Exception {
         String appointmentServiceUuid = "appointmentServiceUuid";
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid(appointmentServiceUuid);
-        appointmentServiceDefinition.setName("serviceName");
-        appointmentServiceDefinition.setVoided(true);
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentServiceDefinition);
-        when(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, voidReason)).thenReturn(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        appointmentService.setVoided(true);
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenReturn(appointmentService);
         AppointmentServiceFullResponse appointmentServiceFullResponse = new AppointmentServiceFullResponse();
-        when(appointmentServiceMapper.constructResponse(appointmentServiceDefinition)).thenReturn(appointmentServiceFullResponse);
+        when(appointmentServiceMapper.constructResponse(appointmentService)).thenReturn(appointmentServiceFullResponse);
 
         ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
 
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
-        verify(appointmentServiceDefinitionService, times(0)).voidAppointmentService(appointmentServiceDefinition, voidReason);
-        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDefinition);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(0)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(1)).constructResponse(appointmentService);
         assertNotNull(response);
         assertEquals(appointmentServiceFullResponse, response.getBody());
     }
@@ -168,18 +168,18 @@ public class AppointmentServiceDefinitionControllerTest {
     public void shouldThrowAnExceptionWhenThereAreFutureAppointmentsForTheServiceTryingToDelete() throws Exception {
         String appointmentServiceUuid = "appointmentServiceUuid";
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid(appointmentServiceUuid);
-        appointmentServiceDefinition.setName("serviceName");
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
         String exceptionMessage = "Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it";
-        when(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, voidReason)).thenThrow(new RuntimeException(exceptionMessage));
+        when(appointmentServiceService.voidAppointmentService(appointmentService, voidReason)).thenThrow(new RuntimeException(exceptionMessage));
 
         ResponseEntity<Object> response = appointmentServiceController.voidAppointmentService(appointmentServiceUuid, voidReason);
 
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
-        verify(appointmentServiceDefinitionService, times(1)).voidAppointmentService(appointmentServiceDefinition, voidReason);
-        verify(appointmentServiceMapper, times(0)).constructResponse(appointmentServiceDefinition);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentServiceUuid);
+        verify(appointmentServiceService, times(1)).voidAppointmentService(appointmentService, voidReason);
+        verify(appointmentServiceMapper, times(0)).constructResponse(appointmentService);
         assertNotNull(response);
         assertEquals(exceptionMessage, ((RuntimeException)response.getBody()).getMessage());
     }
@@ -187,30 +187,30 @@ public class AppointmentServiceDefinitionControllerTest {
     @Test
     public void shouldGetLoad() throws Exception {
         String appointmentServiceUuid = "appointmentServiceUuid";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid(appointmentServiceUuid);
-        appointmentServiceDefinition.setName("serviceName");
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid(appointmentServiceUuid);
+        appointmentService.setName("serviceName");
+        when(appointmentServiceService.getAppointmentServiceByUuid(appointmentServiceUuid)).thenReturn(appointmentService);
         String startDateString = "2108-08-14T18:30:00.0Z";
         String endDateString = "2108-08-15T18:30:00.0Z";
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        when(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, startDate, endDate)).thenReturn(new Integer(45));
+        when(appointmentServiceService.calculateCurrentLoad(appointmentService, startDate, endDate)).thenReturn(new Integer(45));
         Integer response = appointmentServiceController.calculateLoadForService(appointmentServiceUuid, startDateString, endDateString);
-        verify(appointmentServiceDefinitionService, times(1)).calculateCurrentLoad(appointmentServiceDefinition, startDate, endDate);
+        verify(appointmentServiceService, times(1)).calculateCurrentLoad(appointmentService, startDate, endDate);
         assertNotNull(response);
         assertEquals(45, response.intValue());
     }
 
     @Test
     public void shouldGetAppointmentServiceWithSpecialityAndAppointmentServiceTypesInIt() {
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        List<AppointmentServiceDefinition> appointmentServiceDefinitionList = new ArrayList<>();
-        appointmentServiceDefinitionList.add(appointmentServiceDefinition);
-        when(appointmentServiceDefinitionService.getAllAppointmentServices(false)).thenReturn(appointmentServiceDefinitionList);
+        AppointmentService appointmentService = new AppointmentService();
+        List<AppointmentService> appointmentServiceList = new ArrayList<>();
+        appointmentServiceList.add(appointmentService);
+        when(appointmentServiceService.getAllAppointmentServices(false)).thenReturn(appointmentServiceList);
 
         List<AppointmentServiceFullResponse> allAppointmentServicesWithTypes = appointmentServiceController.getAllAppointmentServicesWithTypes();
-        verify(appointmentServiceDefinitionService, times(1)).getAllAppointmentServices(false);
-        verify(appointmentServiceMapper, times(1)).constructFullResponseForServiceList(appointmentServiceDefinitionList);
+        verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
+        verify(appointmentServiceMapper, times(1)).constructFullResponseForServiceList(appointmentServiceList);
     }
 }

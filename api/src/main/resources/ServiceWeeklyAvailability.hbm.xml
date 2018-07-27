@@ -30,6 +30,6 @@
 
         <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
         <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
-        <many-to-one name="service" class="AppointmentServiceDefinition" not-null="true" column="service_id"/>
+        <many-to-one name="service" class="org.openmrs.module.appointments.model.AppointmentService" not-null="true" column="service_id"/>
     </class>
 </hibernate-mapping>

@@ -11,10 +11,10 @@ import static org.mockito.Matchers.any;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.service.AppointmentServiceService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
@@ -43,7 +43,7 @@ public class AppointmentControllerTest {
     private AppointmentsService appointmentsService;
 
     @Mock
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+    private AppointmentServiceService appointmentServiceService;
 
     @Mock
     private AppointmentMapper appointmentMapper;
@@ -75,7 +75,7 @@ public class AppointmentControllerTest {
         appointments.add(appointment);
 
         when(appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType)).thenReturn(appointments);
-        when(appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(serviceTypeUuid)).thenReturn(appointmentServiceType);
+        when(appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid)).thenReturn(appointmentServiceType);
         ArrayList<AppointmentDefaultResponse> responses = new ArrayList<>();
         AppointmentDefaultResponse defaultResponse = new AppointmentDefaultResponse();
         defaultResponse.setUuid(appointment.getUuid());
@@ -84,7 +84,7 @@ public class AppointmentControllerTest {
 
         List<AppointmentDefaultResponse> appointmentDefaultResponses = appointmentController.getAllFututreAppointmentsForGivenServiceType(serviceTypeUuid);
 
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        verify(appointmentServiceService, times(1)).getAppointmentServiceTypeByUuid(serviceTypeUuid);
         verify(appointmentsService, times(1)).getAllFutureAppointmentsForServiceType(appointmentServiceType);
         assertNotNull(appointmentDefaultResponses);
         assertEquals(1, appointmentDefaultResponses.size());
@@ -125,14 +125,14 @@ public class AppointmentControllerTest {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setName("Ortho");
-        appointmentServiceDefinition.setUuid("someUuid");
-        List<AppointmentServiceDefinition> appointmentServiceDefinitions = new ArrayList<>();
-        appointmentServiceDefinitions.add(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setName("Ortho");
+        appointmentService.setUuid("someUuid");
+        List<AppointmentService> appointmentServices = new ArrayList<>();
+        appointmentServices.add(appointmentService);
         Appointment appointment = new Appointment();
         appointment.setUuid("apptUuid");
-        appointment.setService(appointmentServiceDefinition);
+        appointment.setService(appointmentService);
         appointment.setStartDateTime(startDate);
         appointment.setStatus(AppointmentStatus.Scheduled);
         List<Appointment> appointmentList = new ArrayList<>();
@@ -145,13 +145,13 @@ public class AppointmentControllerTest {
         AppointmentServiceDefaultResponse appointmentServiceDefaultResponse = new AppointmentServiceDefaultResponse();
         appointmentServiceDefaultResponse.setUuid("someUuid");
 
-        when(appointmentServiceDefinitionService.getAllAppointmentServices(false)).thenReturn(appointmentServiceDefinitions);
-        when(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatuses)).thenReturn(appointmentList);
-        when(appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition)).thenReturn(appointmentServiceDefaultResponse);
+        when(appointmentServiceService.getAllAppointmentServices(false)).thenReturn(appointmentServices);
+        when(appointmentsService.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatuses)).thenReturn(appointmentList);
+        when(appointmentServiceMapper.constructDefaultResponse(appointmentService)).thenReturn(appointmentServiceDefaultResponse);
 
         List<AppointmentsSummary> allAppointmentsSummary = appointmentController.getAllAppointmentsSummary(startDateString, endDateString);
-        verify(appointmentServiceDefinitionService, times(1)).getAllAppointmentServices(false);
-        verify(appointmentsService, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatuses);
+        verify(appointmentServiceService, times(1)).getAllAppointmentServices(false);
+        verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatuses);
         assertEquals(1, allAppointmentsSummary.size());
         assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
         assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountMap().size());
@@ -240,8 +240,8 @@ public class AppointmentControllerTest {
         patient.setUuid("somePatientUuid");
         appointment.setPatient(patient);
         appointments.add(appointment);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("someServiceUuid");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("someServiceUuid");
         AppointmentQuery appointmentQuery = new AppointmentQuery();
         appointmentQuery.setLocationUuid("someLocationUuid");
         appointmentQuery.setPatientUuid("somePatientUuid");

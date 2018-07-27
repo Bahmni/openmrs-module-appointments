@@ -1,20 +1,22 @@
 package org.openmrs.module.appointments.dao;
 
 
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentService;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 
+import java.util.Date;
 import java.util.List;
 
 public interface AppointmentServiceDao {
 
-    List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided);
+    List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
 
-    AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition);
+    AppointmentService save(AppointmentService appointmentService);
 
-    AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid);
+    AppointmentService getAppointmentServiceByUuid(String uuid);
 
-    AppointmentServiceDefinition getNonVoidedAppointmentServiceByName(String serviceName);
+    AppointmentService getNonVoidedAppointmentServiceByName(String serviceName);
 
     AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid);
 }

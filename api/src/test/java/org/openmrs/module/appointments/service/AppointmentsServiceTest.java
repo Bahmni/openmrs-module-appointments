@@ -1,9 +1,13 @@
 package org.openmrs.module.appointments.service;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.api.APIAuthenticationException;
@@ -18,6 +22,7 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.transaction.TestTransaction;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -27,6 +32,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
@@ -51,7 +57,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     private AppointmentAuditDao appointmentAuditDao;
 
     @Autowired
-    AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+    AppointmentServiceService appointmentServiceService;
 
     @Before
     public void init() throws Exception {
@@ -72,7 +78,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         Context.authenticate(manageUser, manageUserPassword);
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
-        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setService(new AppointmentService());
         Date startDateTime = DateUtil.convertToDate("2108-08-15T10:00:00.0Z", DateUtil.DateFormatType.UTC);
         Date endDateTime = DateUtil.convertToDate("2108-08-15T10:30:00.0Z", DateUtil.DateFormatType.UTC);
         appointment.setStartDateTime(startDateTime);
@@ -140,17 +146,17 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     @Test
     public void shouldGetAllFutureAppointmentsIfuserHasReadOnlyPrivilege() throws Exception {
         Context.authenticate(manageUser, manageUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition));
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setId(1);
+        assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentService));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAllFutureAppointmentsForServiceIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition));
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setId(1);
+        assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentService));
     }
 
     @Test
@@ -172,17 +178,17 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     @Test
     public void shouldGetAppointmentsForServiceIfUserHasReadOnlyPrivilege() throws Exception {
         Context.authenticate(manageUser, manageUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, null, null, null));
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setId(1);
+        assertNotNull(appointmentsService.getAppointmentsForService(appointmentService, null, null, null));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAppointmentsForServiceIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, null, null, null));
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setId(1);
+        assertNotNull(appointmentsService.getAppointmentsForService(appointmentService, null, null, null));
     }
 
     @Test

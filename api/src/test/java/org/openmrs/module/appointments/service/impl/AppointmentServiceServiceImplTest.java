@@ -28,10 +28,10 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @PrepareForTest({Context.class})
 @RunWith(PowerMockRunner.class)
-public class AppointmentServiceDefinitionServiceImplTest {
+public class AppointmentServiceServiceImplTest{
 
     @Captor
-    private ArgumentCaptor<AppointmentServiceDefinition> captor;
+    private ArgumentCaptor<AppointmentService> captor;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -43,7 +43,7 @@ public class AppointmentServiceDefinitionServiceImplTest {
     private AppointmentsService appointmentsService;
 
     @InjectMocks
-    AppointmentServiceDefinitionServiceImpl appointmentServiceService;
+    AppointmentServiceServiceImpl appointmentServiceService;
 
     private User authenticatedUser;
 
@@ -57,10 +57,10 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
     @Test
     public void testCreateAppointmentService() throws Exception {
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setName("Cardiology OPD");
-        appointmentServiceService.save(appointmentServiceDefinition);
-        Mockito.verify(appointmentServiceDao, times(1)).save(appointmentServiceDefinition);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setName("Cardiology OPD");
+        appointmentServiceService.save(appointmentService);
+        Mockito.verify(appointmentServiceDao, times(1)).save(appointmentService);
     }
 
     @Test
@@ -78,11 +78,11 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Test
     public void shouldVoidTheAppointmentService() throws Exception {
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("uuid");
-        appointmentServiceDefinition.setName("name");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName("name");
 
-        appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
         assertEquals(captor.getValue().getVoided(), true);
@@ -95,9 +95,9 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Test
     public void shouldVoidTheAppointmentServiceAlongWithServiceAvailability() throws Exception {
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("uuid");
-        appointmentServiceDefinition.setName("name");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName("name");
         ServiceWeeklyAvailability serviceWeeklyAvailability1 = new ServiceWeeklyAvailability();
         serviceWeeklyAvailability1.setId(1);
         serviceWeeklyAvailability1.setStartTime(Time.valueOf("10:10:10"));
@@ -111,10 +111,10 @@ public class AppointmentServiceDefinitionServiceImplTest {
         Set<ServiceWeeklyAvailability> weeklyAvailability = new LinkedHashSet<>();
         weeklyAvailability.add(serviceWeeklyAvailability1);
         weeklyAvailability.add(serviceWeeklyAvailability2);
-        appointmentServiceDefinition.setWeeklyAvailability(weeklyAvailability);
+        appointmentService.setWeeklyAvailability(weeklyAvailability);
 
 
-        appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
         assertEquals(true, captor.getValue().getVoided());
@@ -148,9 +148,9 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Test
     public void shouldVoidTheAppointmentServiceAlongWithServiceTypes() throws Exception {
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("uuid");
-        appointmentServiceDefinition.setName("name");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName("name");
         AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
         AppointmentServiceType appointmentServiceType2 = new AppointmentServiceType();
         appointmentServiceType1.setId(1);
@@ -162,10 +162,10 @@ public class AppointmentServiceDefinitionServiceImplTest {
         serviceTypes.add(appointmentServiceType1);
         serviceTypes.add(appointmentServiceType2);
 
-        appointmentServiceDefinition.setServiceTypes(serviceTypes);
+        appointmentService.setServiceTypes(serviceTypes);
 
 
-        appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
         Mockito.verify(appointmentServiceDao, times(1)).save(captor.capture());
         assertEquals(true, captor.getValue().getVoided());
@@ -201,80 +201,80 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Test
     public void shouldValidateTheAppointmentServiceAndThrowAnExceptionWhenThereIsNonVoidedAppointmentServiceWithTheSameName() throws Exception {
         String serviceName = "serviceName";
-        AppointmentServiceDefinition existingAppointmentServiceDefinition = new AppointmentServiceDefinition();
-        existingAppointmentServiceDefinition.setUuid("uuid");
-        existingAppointmentServiceDefinition.setName(serviceName);
+        AppointmentService existingAppointmentService = new AppointmentService();
+        existingAppointmentService.setUuid("uuid");
+        existingAppointmentService.setName(serviceName);
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
         appointmentServiceType.setId(1);
         appointmentServiceType.setName("type1");
         LinkedHashSet<AppointmentServiceType> serviceTypes = new LinkedHashSet<>();
         serviceTypes.add(appointmentServiceType);
-        existingAppointmentServiceDefinition.setServiceTypes(serviceTypes);
-        when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(existingAppointmentServiceDefinition);
+        existingAppointmentService.setServiceTypes(serviceTypes);
+        when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(existingAppointmentService);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("The service 'serviceName' is already present");
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setName(serviceName);
-        appointmentServiceDefinition.setUuid("otherUuid");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setName(serviceName);
+        appointmentService.setUuid("otherUuid");
     
-        appointmentServiceService.save(appointmentServiceDefinition);
+        appointmentServiceService.save(appointmentService);
     }
 
     @Test
     public void shouldThrowAnExceptionWhenAppointmentServiceHasFutureAppointments() throws Exception {
         String voidReason = "voidReason";
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("uuid");
-        appointmentServiceDefinition.setName("name");
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("uuid");
+        appointmentService.setName("name");
 
         ArrayList<Appointment> appointments = new ArrayList<>();
         Appointment appointment = new Appointment();
         appointment.setUuid("appointmentUuid");
         appointments.add(appointment);
-        when(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition)).thenReturn(appointments);
+        when(appointmentsService.getAllFutureAppointmentsForService(appointmentService)).thenReturn(appointments);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it");
 
-        appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
+        appointmentServiceService.voidAppointmentService(appointmentService, voidReason);
 
-        Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentServiceDefinition);
+        Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentService);
         Mockito.verify(appointmentServiceDao, times(0)).save(captor.capture());
     }
 
     @Test
     public void shouldGetAllNonVoidedAppointmentService() throws Exception {
         boolean includeVoided = false;
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setUuid("service1Uuid");
-        appointmentServiceDefinition.setAppointmentServiceId(1);
+        AppointmentService appointmentService = new AppointmentService();
+        appointmentService.setUuid("service1Uuid");
+        appointmentService.setAppointmentServiceId(1);
         AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
         appointmentServiceType1.setName("serviceType1");
         appointmentServiceType1.setDuration(15);
         appointmentServiceType1.setUuid("serviceTypeUuid1");
-        appointmentServiceType1.setAppointmentServiceDefinition(appointmentServiceDefinition);
+        appointmentServiceType1.setAppointmentService(appointmentService);
         appointmentServiceType1.setId(1);
         AppointmentServiceType appointmentServiceType2 = new AppointmentServiceType();
         appointmentServiceType2.setName("serviceType2");
         appointmentServiceType2.setDuration(15);
         appointmentServiceType2.setUuid("serviceTypeUuid2");
-        appointmentServiceType2.setAppointmentServiceDefinition(appointmentServiceDefinition);
+        appointmentServiceType2.setAppointmentService(appointmentService);
         appointmentServiceType2.setId(2);
         appointmentServiceType2.setVoided(true);
         Set<AppointmentServiceType> appointmentServiceTypes = new TreeSet<>();
         appointmentServiceTypes.add(appointmentServiceType1);
         appointmentServiceTypes.add(appointmentServiceType2);
-        appointmentServiceDefinition.setServiceTypes(appointmentServiceTypes);
-        when(appointmentServiceDao.getAppointmentServiceByUuid("service1Uuid")).thenReturn(appointmentServiceDefinition);
+        appointmentService.setServiceTypes(appointmentServiceTypes);
+        when(appointmentServiceDao.getAppointmentServiceByUuid("service1Uuid")).thenReturn(appointmentService);
 
-        AppointmentServiceDefinition returnedAppointmentServiceDefinition = appointmentServiceService.getAppointmentServiceByUuid("service1Uuid");
+        AppointmentService returnedAppointmentService = appointmentServiceService.getAppointmentServiceByUuid("service1Uuid");
 
-        assertEquals("service1Uuid", returnedAppointmentServiceDefinition.getUuid());
-        Set<AppointmentServiceType> returnedServiceTypes = returnedAppointmentServiceDefinition.getServiceTypes();
+        assertEquals("service1Uuid", returnedAppointmentService.getUuid());
+        Set<AppointmentServiceType> returnedServiceTypes = returnedAppointmentService.getServiceTypes();
         assertNotNull(returnedServiceTypes);
         assertEquals(1, returnedServiceTypes.size());
-        assertEquals(2, returnedAppointmentServiceDefinition.getServiceTypes(true).size());
+        assertEquals(2, returnedAppointmentService.getServiceTypes(true).size());
         assertEquals("serviceTypeUuid1", returnedServiceTypes.iterator().next().getUuid());
     }
 
@@ -288,14 +288,14 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
     @Test
     public void shouldGetAppointmentsForAServiceAndDateTimeRange() throws Exception {
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        AppointmentService appointmentService = new AppointmentService();
         Date startDateTime = DateUtil.convertToLocalDateFromUTC("2108-08-14T18:30:00.0Z");
         Date endDateTime = DateUtil.convertToLocalDateFromUTC("2108-08-15T18:29:29.0Z");
-        appointmentServiceService.calculateCurrentLoad(appointmentServiceDefinition,
+        appointmentServiceService.calculateCurrentLoad(appointmentService,
                 startDateTime, endDateTime);
         AppointmentStatus[] includeStatus = new AppointmentStatus[]{AppointmentStatus.CheckedIn, AppointmentStatus.Completed, AppointmentStatus.Scheduled};
 
-        Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDateTime, endDateTime,
+        Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentService, startDateTime, endDateTime,
                 Arrays.asList(includeStatus));
     }
 }

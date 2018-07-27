@@ -14,7 +14,7 @@ public class ServiceWeeklyAvailability extends BaseOpenmrsData implements Serial
 
 	private Time startTime;
 
-	private AppointmentServiceDefinition service;
+	private AppointmentService service;
 
 	private Integer maxAppointmentsLimit;
 
@@ -28,11 +28,11 @@ public class ServiceWeeklyAvailability extends BaseOpenmrsData implements Serial
 		this.serviceWeeklyAvailabilityId = serviceWeeklyAvailabilityId;
 	}
 
-	public AppointmentServiceDefinition getService() {
+	public AppointmentService getService() {
 		return service;
 	}
 
-	public void setService(AppointmentServiceDefinition service) {
+	public void setService(AppointmentService service) {
 		this.service = service;
 	}
 
