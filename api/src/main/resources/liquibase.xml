@@ -407,4 +407,41 @@
         </insert>
     </changeSet>
 
+    <changeSet id="patient_appointment_provider_table_201807251345" author="angshu">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_provider" />
+            </not>
+        </preConditions>
+        <sql>
+            CREATE  TABLE IF NOT EXISTS patient_appointment_provider (
+            patient_appointment_provider_id INT NOT NULL AUTO_INCREMENT,
+            patient_appointment_id INT NOT NULL,
+            provider_id int NOT NULL,
+            response varchar(32) DEFAULT NULL,
+            comments VARCHAR(1000),
+            date_created DATETIME NOT NULL,
+            creator INT NOT NULL,
+            date_changed DATETIME NULL,
+            changed_by INT NULL,
+            voided TINYINT NULL,
+            voided_by INT,
+            date_voided DATETIME,
+            void_reason VARCHAR(255),
+            uuid VARCHAR(38)  NOT NULL UNIQUE,
+            PRIMARY KEY (patient_appointment_provider_id) ,
+            CONSTRAINT fk_patient_appointment_provider_patient_appointment FOREIGN KEY (patient_appointment_id) REFERENCES patient_appointment(patient_appointment_id),
+            CONSTRAINT fk_patient_appointment_provider_provider FOREIGN KEY (provider_id) REFERENCES provider (provider_id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="patient_appointment_provider_migration_201807281845" author="angshu">
+        <comment>Migrating appointment provider to appointment_provider table</comment>
+        <sql>
+            insert into patient_appointment_provider (patient_appointment_id, provider_id, response, date_created, creator, uuid)
+            select a.patient_appointment_id, a.provider_id, 'ACCEPTED', now(), 1, uuid() from patient_appointment a where a.provider_id is not null;
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

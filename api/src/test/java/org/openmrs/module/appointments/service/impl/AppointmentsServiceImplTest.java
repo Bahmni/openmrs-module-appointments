@@ -15,12 +15,8 @@ import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -81,7 +77,7 @@ public class AppointmentsServiceImplTest {
     public void testCreateAppointment() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
-        appointment.setService(new AppointmentService());
+        appointment.setService(new AppointmentServiceDefinition());
         appointment.setStartDateTime(new Date());
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
@@ -94,7 +90,7 @@ public class AppointmentsServiceImplTest {
         Appointment appointment = new Appointment();
         Patient patient = new Patient();
         appointment.setPatient(patient);
-        AppointmentService service = new AppointmentService();
+        AppointmentServiceDefinition service = new AppointmentServiceDefinition();
         appointment.setService(service);
         AppointmentServiceType serviceType = new AppointmentServiceType();
         appointment.setServiceType(serviceType);
@@ -125,11 +121,11 @@ public class AppointmentsServiceImplTest {
     public void shouldNotGetAppointmentsWithVoidedService() throws Exception {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();
-        AppointmentService appointmentService1 = new AppointmentService();
-        appointmentService1.setVoided(true);
-        appointment1.setService(appointmentService1);
+        AppointmentServiceDefinition appointmentServiceDefinition1 = new AppointmentServiceDefinition();
+        appointmentServiceDefinition1.setVoided(true);
+        appointment1.setService(appointmentServiceDefinition1);
         Appointment appointment2 = new Appointment();
-        appointment2.setService(new AppointmentService());
+        appointment2.setService(new AppointmentServiceDefinition());
         appointments.add(appointment1);
         appointments.add(appointment2);
         when(appointmentDao.getAllAppointments(null)).thenReturn(appointments);
@@ -142,15 +138,15 @@ public class AppointmentsServiceImplTest {
     public void shouldNotGetAppointmentsWithVoidedServiceType() throws Exception {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();
-        AppointmentService appointmentService1 = new AppointmentService();
+        AppointmentServiceDefinition appointmentServiceDefinition1 = new AppointmentServiceDefinition();
         AppointmentServiceType appointmentServiceType1 = new AppointmentServiceType();
         appointmentServiceType1.setVoided(true);
-        appointmentService1.setServiceTypes(Collections.singleton(appointmentServiceType1));
-        appointment1.setService(appointmentService1);
+        appointmentServiceDefinition1.setServiceTypes(Collections.singleton(appointmentServiceType1));
+        appointment1.setService(appointmentServiceDefinition1);
         appointment1.setServiceType(appointmentServiceType1);
         appointments.add(appointment1);
         Appointment appointment2 = new Appointment();
-        appointment2.setService(new AppointmentService());
+        appointment2.setService(new AppointmentServiceDefinition());
         appointments.add(appointment2);
         when(appointmentDao.getAllAppointments(null)).thenReturn(appointments);
         List<Appointment> appointmentList = appointmentsService.getAllAppointments(null);
@@ -160,13 +156,13 @@ public class AppointmentsServiceImplTest {
     
     @Test
     public void shouldGetAllFutureAppointmentsForTheGivenAppointmentService() throws Exception {
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("uuid");
-        when(appointmentDao.getAllFutureAppointmentsForService(appointmentService)).thenReturn(new ArrayList<>());
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setUuid("uuid");
+        when(appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition)).thenReturn(new ArrayList<>());
 
-        appointmentsService.getAllFutureAppointmentsForService(appointmentService);
+        appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition);
 
-        verify(appointmentDao, times(1)).getAllFutureAppointmentsForService(appointmentService);
+        verify(appointmentDao, times(1)).getAllFutureAppointmentsForService(appointmentServiceDefinition);
     }
 
     @Test
@@ -182,8 +178,8 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldGetAppointmentsForAService() throws ParseException {
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("uuid");
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setUuid("uuid");
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = simpleDateFormat.parse("2017-08-08");
         Date endDate = simpleDateFormat.parse("2017-08-09");
@@ -193,10 +189,10 @@ public class AppointmentsServiceImplTest {
         appointment.setId(2);
         appointment.setUuid("someUuid");
 
-        when(appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, null)).thenReturn(appointments);
+        when(appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, null)).thenReturn(appointments);
 
-        appointmentsService.getAppointmentsForService(appointmentService, startDate, endDate, null);
-        verify(appointmentDao, times(1)).getAppointmentsForService(appointmentService, startDate, endDate, null);
+        appointmentsService.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, null);
+        verify(appointmentDao, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, null);
     }
 
     @Test
@@ -214,7 +210,7 @@ public class AppointmentsServiceImplTest {
     public void shouldRunDefaultAppointmentValidatorsOnSave(){
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
-        appointment.setService(new AppointmentService());
+        appointment.setService(new AppointmentServiceDefinition());
         appointment.setStartDateTime(new Date());
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
@@ -301,13 +297,13 @@ public class AppointmentsServiceImplTest {
     public void shouldGetAllNonVoidedAppointmentsForAGivenDateRange() throws ParseException {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();
-        AppointmentService appointmentService1 = new AppointmentService();
-        appointmentService1.setVoided(true);
-        appointment1.setService(appointmentService1);
+        AppointmentServiceDefinition appointmentServiceDefinition1 = new AppointmentServiceDefinition();
+        appointmentServiceDefinition1.setVoided(true);
+        appointment1.setService(appointmentServiceDefinition1);
         LocalDate yesterday = LocalDate.now().minusDays(1);
         appointment1.setStartDateTime(new SimpleDateFormat("yyyy-MM-dd").parse(yesterday.toString()));
         Appointment appointment2 = new Appointment();
-        appointment2.setService(new AppointmentService());
+        appointment2.setService(new AppointmentServiceDefinition());
         appointment1.setStartDateTime(new Date());
         appointments.add(appointment1);
         appointments.add(appointment2);

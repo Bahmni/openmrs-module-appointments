@@ -108,7 +108,7 @@
     <bean parent="serviceContext">
         <property name="moduleService">
             <list merge="true">
-                <value>org.openmrs.module.appointments.service.AppointmentServiceService</value>
+                <value>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</value>
                 <ref bean="appointmentServiceService"/>
             </list>
         </property>
@@ -128,7 +128,7 @@
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceServiceImpl">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceDefinitionServiceImpl">
                 <property name="appointmentServiceDao">
                     <ref bean="appointmentServiceDao"/>
                 </property>

@@ -3,7 +3,9 @@ package org.openmrs.module.appointments.web.contract;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @JsonIgnoreProperties
 public class AppointmentPayload {
@@ -18,6 +20,7 @@ public class AppointmentPayload {
     private Date endDateTime;
     private String appointmentKind;
     private String comments;
+    private List<AppointmentProviderDetail> providers = new ArrayList<>();
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -105,5 +108,13 @@ public class AppointmentPayload {
     
     public void setComments(String comments) {
         this.comments = comments;
+    }
+
+    public List<AppointmentProviderDetail> getProviders() {
+        return providers;
+    }
+
+    public void setProviders(List<AppointmentProviderDetail> providers) {
+        this.providers = providers;
     }
 }

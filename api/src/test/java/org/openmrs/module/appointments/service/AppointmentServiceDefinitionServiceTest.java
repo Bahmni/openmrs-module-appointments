@@ -5,8 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
@@ -16,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
-public class AppointmentServiceServiceTest extends BaseModuleWebContextSensitiveTest {
+public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContextSensitiveTest {
     private String adminUser;
     private String manageUser;
     private String readOnlyUser;
@@ -24,7 +23,7 @@ public class AppointmentServiceServiceTest extends BaseModuleWebContextSensitive
     private String password;
 
     @Autowired
-    AppointmentServiceService appointmentServiceService;
+    AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Before
     public void init() throws Exception {
@@ -39,85 +38,85 @@ public class AppointmentServiceServiceTest extends BaseModuleWebContextSensitive
     @Test
     public void shouldBeAbleToSaveServiceIfUserHasManageServicesPrivilege() throws Exception {
         Context.authenticate(adminUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setName("service");
-        assertNotNull(appointmentServiceService.save(appointmentService));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setName("service");
+        assertNotNull(appointmentServiceDefinitionService.save(appointmentServiceDefinition));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotBeAbleToSaveServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
         Context.authenticate(manageUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setName("service");
-        assertNotNull(appointmentServiceService.save(appointmentService));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setName("service");
+        assertNotNull(appointmentServiceDefinitionService.save(appointmentServiceDefinition));
     }
 
     @Test
     public void shouldGetAllAppointmentServicesIfUserHasViewServicesPrivilege() throws Exception {
         Context.authenticate(manageUser, password);
-        assertNotNull(appointmentServiceService.getAllAppointmentServices(false));
+        assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAllAppointmentServicesIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        assertNotNull(appointmentServiceService.getAllAppointmentServices(false));
+        assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
     }
 
     @Test
     public void shouldGetAppointmentServiceByUuidIfUserHasViewServicesPrivilege() throws Exception {
         Context.authenticate(readOnlyUser, password);
-        assertEquals(null, appointmentServiceService.getAppointmentServiceByUuid("uuid"));
+        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAppointmentServiceByUuidIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        assertEquals(null, appointmentServiceService.getAppointmentServiceByUuid("uuid"));
+        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
     }
 
     @Test
     public void shouldBeAbleToDeleteServiceIfUserHasManageServicesPrivilege() throws Exception {
         Context.authenticate(adminUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setId(1);
-        assertNotNull(appointmentServiceService.voidAppointmentService(appointmentService, null));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setId(1);
+        assertNotNull(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, null));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotBeAbleToDeleteServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
         Context.authenticate(readOnlyUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setId(1);
-        assertNotNull(appointmentServiceService.voidAppointmentService(appointmentService, null));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setId(1);
+        assertNotNull(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, null));
     }
 
     @Test
     public void shouldGetAppointmentServiceTypeByUuidIfUserHasViewServicesPrivilege() throws Exception {
         Context.authenticate(readOnlyUser, password);
-        assertEquals(null, appointmentServiceService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
+        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
 
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAppointmentServiceTypeByUuidIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        assertEquals(null, appointmentServiceService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
+        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
     }
 
     @Test
     public void shouldCalculateCurrentLoadIfUserHasViewServicesPrivilege() throws Exception {
         Context.authenticate(adminUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setId(1);
-        assertNotNull(appointmentServiceService.calculateCurrentLoad(appointmentService, null, null));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setId(1);
+        assertNotNull(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, null, null));
     }
 
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotCalculateCurrentLoadIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setId(1);
-        assertNotNull(appointmentServiceService.calculateCurrentLoad(appointmentService, null, null));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setId(1);
+        assertNotNull(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, null, null));
     }
 }
