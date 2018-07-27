@@ -2,17 +2,17 @@ package org.openmrs.module.appointments.web.contract;
 
 
 public class AppointmentProviderDetail {
-    private String providerUuid;
+    private String uuid;
     private String comments;
     private String response;
     private String name;
 
-    public String getProviderUuid() {
-        return providerUuid;
+    public String getUuid() {
+        return uuid;
     }
 
-    public void setProviderUuid(String providerUuid) {
-        this.providerUuid = providerUuid;
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getComments() {
