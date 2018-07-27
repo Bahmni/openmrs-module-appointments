@@ -5,7 +5,6 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
-import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -15,7 +14,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
     private Patient patient;
-    private AppointmentService service;
+    private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
     private Provider provider;
     private Location location;
@@ -73,11 +72,11 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.patient = patient;
     }
     
-    public AppointmentService getService() {
+    public AppointmentServiceDefinition getService() {
         return service;
     }
 
-    public void setService(AppointmentService service) {
+    public void setService(AppointmentServiceDefinition service) {
         this.service = service;
     }
 

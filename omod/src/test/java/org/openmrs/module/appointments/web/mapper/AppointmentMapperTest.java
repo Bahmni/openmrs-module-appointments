@@ -17,13 +17,9 @@ import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.model.Speciality;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -56,7 +52,7 @@ public class AppointmentMapperTest {
     private ProviderService providerService;
     
     @Mock
-    private AppointmentServiceService appointmentServiceService;
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
@@ -71,13 +67,13 @@ public class AppointmentMapperTest {
     private AppointmentMapper appointmentMapper;
 
     private Patient patient;
-    private AppointmentService service;
+    private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
     private AppointmentServiceType serviceType2;
     private Provider provider;
     private Location location;
 
-    private AppointmentService service2;
+    private AppointmentServiceDefinition service2;
 
     @Before
     public void setUp() throws Exception {
@@ -85,10 +81,10 @@ public class AppointmentMapperTest {
         patient = new Patient();
         patient.setUuid("patientUuid");
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
-        service = new AppointmentService();
+        service = new AppointmentServiceDefinition();
         service.setUuid("serviceUuid");
 
-        service2 = new AppointmentService();
+        service2 = new AppointmentServiceDefinition();
         service2.setUuid("service2Uuid");
 
         Speciality speciality = new Speciality();
@@ -108,7 +104,7 @@ public class AppointmentMapperTest {
         serviceTypes.add(serviceType);
         serviceTypes.add(serviceType2);
         service.setServiceTypes(serviceTypes);
-        when(appointmentServiceService.getAppointmentServiceByUuid("serviceUuid")).thenReturn(service);
+        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("serviceUuid")).thenReturn(service);
         provider = new Provider();
         provider.setUuid("providerUuid");
         when(providerService.getProviderByUuid("providerUuid")).thenReturn(provider);
@@ -124,7 +120,7 @@ public class AppointmentMapperTest {
         assertNotNull(appointment);
         verify(patientService, times(1)).getPatientByUuid(appointmentPayload.getPatientUuid());
         assertEquals(patient, appointment.getPatient());
-        verify(appointmentServiceService, times(1)).getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
+        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
         assertEquals(service, appointment.getService());
         assertEquals(serviceType, appointment.getServiceType());
         verify(providerService, times(1)).getProviderByUuid(appointmentPayload.getProviderUuid());
@@ -387,9 +383,9 @@ public class AppointmentMapperTest {
         appointmentQuery.setServiceTypeUuid("serviceTypeUuid");
         Appointment appointment = appointmentMapper.mapQueryToAppointment(appointmentQuery);
 
-        AppointmentService appointmentService = new AppointmentService();
-        appointmentService.setUuid("serviceUuid");
-        when(appointmentServiceService.getAppointmentServiceByUuid("someServiceUuid")).thenReturn(appointmentService);
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setUuid("serviceUuid");
+        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("someServiceUuid")).thenReturn(appointmentServiceDefinition);
         Patient patient = new Patient();
         patient.setUuid("patientUuid");
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);

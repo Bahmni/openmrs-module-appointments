@@ -10,7 +10,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.*;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
@@ -35,7 +35,7 @@ public class AppointmentMapper {
     PatientService patientService;
 
     @Autowired
-    AppointmentServiceService appointmentServiceService;
+    AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     AppointmentServiceMapper appointmentServiceMapper;
@@ -62,13 +62,13 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentPayload.getPatientUuid()));
         }
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
         if(appointmentPayload.getServiceTypeUuid() != null) {
-            appointmentServiceType = getServiceTypeByUuid(appointmentService.getServiceTypes(true), appointmentPayload.getServiceTypeUuid());
+            appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentPayload.getServiceTypeUuid());
         }
         appointment.setServiceType(appointmentServiceType);
-        appointment.setService(appointmentService);
+        appointment.setService(appointmentServiceDefinition);
         appointment.setProvider(providerService.getProviderByUuid(appointmentPayload.getProviderUuid()));
         appointment.setLocation(locationService.getLocationByUuid(appointmentPayload.getLocationUuid()));
         appointment.setStartDateTime(appointmentPayload.getStartDateTime());
@@ -140,7 +140,7 @@ public class AppointmentMapper {
     public Appointment mapQueryToAppointment(AppointmentQuery searchQuery) {
         Appointment appointment = new Appointment();
         appointment.setService(
-                appointmentServiceService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
+                appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
         appointment.setPatient(patientService.getPatientByUuid(searchQuery.getPatientUuid()));
         appointment.setProvider(providerService.getProviderByUuid(searchQuery.getProviderUuid()));
         appointment.setLocation(locationService.getLocationByUuid(searchQuery.getLocationUuid()));

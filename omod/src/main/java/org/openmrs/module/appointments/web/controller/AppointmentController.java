@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.*;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
@@ -34,7 +34,7 @@ public class AppointmentController {
     private AppointmentsService appointmentsService;
 
     @Autowired
-    private AppointmentServiceService appointmentServiceService;
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -75,7 +75,7 @@ public class AppointmentController {
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody
     public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(@RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
-        AppointmentServiceType appointmentServiceType = appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        AppointmentServiceType appointmentServiceType = appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
         List<Appointment> appointments = appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         return appointmentMapper.constructResponse(appointments);
     }
@@ -87,11 +87,11 @@ public class AppointmentController {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        for (AppointmentService appointmentService : appointmentServices) {
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        for (AppointmentServiceDefinition appointmentServiceDefinition : appointmentServiceDefinitions) {
             List<Appointment> appointmentsForService =
                     appointmentsService.getAppointmentsForService(
-                appointmentService, startDate, endDate,
+                            appointmentServiceDefinition, startDate, endDate,
                             Arrays.asList(
                                     AppointmentStatus.Completed,
                                     AppointmentStatus.Scheduled,
@@ -106,11 +106,11 @@ public class AppointmentController {
                 List<Appointment> appointments = appointmentDateMap.getValue();
                 Long missedAppointmentsCount = appointments.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
                 AppointmentCount appointmentCount = new AppointmentCount(
-                        appointments.size(),Math.toIntExact(missedAppointmentsCount), appointmentDateMap.getKey(), appointmentService.getUuid());
+                        appointments.size(),Math.toIntExact(missedAppointmentsCount), appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid());
                 appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), appointmentCount);
             }
 
-            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentService), appointmentCountMap);
+            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition), appointmentCountMap);
             appointmentsSummaryList.add(appointmentsSummary);
         }
         return appointmentsSummaryList;

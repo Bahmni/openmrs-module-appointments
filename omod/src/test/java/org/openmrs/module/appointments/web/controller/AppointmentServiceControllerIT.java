@@ -5,9 +5,8 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
@@ -27,7 +26,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     AppointmentServiceController appointmentServiceController;
 
     @Autowired
-    AppointmentServiceService appointmentServiceService;
+    AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     AppointmentsService appointmentsService;
@@ -237,9 +236,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldUpdateService() throws Exception {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
-        assertNotNull(appointmentService);
-        String uuid = appointmentService.getUuid();
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        assertNotNull(appointmentServiceDefinition);
+        String uuid = appointmentServiceDefinition.getUuid();
         String dataJson = "{\"name\":\"Chemotherapy\",\"startTime\":\"09:00:00\"," +
                 "\"endTime\":\"17:30:00\"," +
                 "\"durationMins\":\"30\"," +
@@ -249,10 +248,10 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"serviceTypes\": [{ \"name\": \"stage 1\", \"duration\":\"20\", \"uuid\":\"c36006d5-9fcc-4f20-866b-0ece245615b1\" }]" +
                 "}";
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
-        appointmentService = appointmentServiceService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
-        assertEquals("Chemotherapy",appointmentService.getName());
-        assertEquals(uuid, appointmentService.getUuid());
-        assertEquals(1, appointmentService.getServiceTypes().size());
+        appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        assertEquals("Chemotherapy", appointmentServiceDefinition.getName());
+        assertEquals(uuid, appointmentServiceDefinition.getUuid());
+        assertEquals(1, appointmentServiceDefinition.getServiceTypes().size());
     }
 
     @Test

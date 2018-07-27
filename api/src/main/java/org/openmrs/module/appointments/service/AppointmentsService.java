@@ -4,7 +4,7 @@ package org.openmrs.module.appointments.service;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ public interface AppointmentsService {
 
     @Transactional
 	@Authorized({"View Appointments"})
-    List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService);
+    List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition);
 
     @Transactional
 	@Authorized({"View Appointments"})
@@ -36,7 +36,7 @@ public interface AppointmentsService {
 
     @Transactional
 	@Authorized({"View Appointments"})
-    List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList);
+    List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList);
 
     @Transactional
 	@Authorized({"View Appointments"})

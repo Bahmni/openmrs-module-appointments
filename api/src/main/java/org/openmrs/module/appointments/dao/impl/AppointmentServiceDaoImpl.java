@@ -5,7 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,8 +20,8 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     }
 
     @Override
-    public List<AppointmentService> getAllAppointmentServices(boolean includeVoided) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentService.class, "appointmentService");
+    public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceDefinition.class, "appointmentService");
         if(!includeVoided) {
             criteria.add(Restrictions.eq("voided", includeVoided));
         }
@@ -30,31 +30,31 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
     @Transactional
     @Override
-    public AppointmentService save(AppointmentService appointmentService) {
+    public AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition) {
         Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(appointmentService);
-        return appointmentService;
+        currentSession.saveOrUpdate(appointmentServiceDefinition);
+        return appointmentServiceDefinition;
     }
 
     @Override
-    public AppointmentService getAppointmentServiceByUuid(String uuid) {
+    public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
         Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentService.class, "appointmentService");
+        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
         criteria.add(Restrictions.eq("uuid", uuid));
-        AppointmentService appointmentService = (AppointmentService) criteria.uniqueResult();
-        evictObjectFromSession(currentSession, appointmentService);
-        return appointmentService;
+        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
+        evictObjectFromSession(currentSession, appointmentServiceDefinition);
+        return appointmentServiceDefinition;
     }
 
     @Override
-    public AppointmentService getNonVoidedAppointmentServiceByName(String serviceName) {
+    public AppointmentServiceDefinition getNonVoidedAppointmentServiceByName(String serviceName) {
         Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentService.class, "appointmentService");
+        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
         criteria.add(Restrictions.eq("name", serviceName));
         criteria.add(Restrictions.eq("voided", false));
-        AppointmentService appointmentService = (AppointmentService) criteria.uniqueResult();
-        evictObjectFromSession(currentSession, appointmentService);
-        return appointmentService;
+        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
+        evictObjectFromSession(currentSession, appointmentServiceDefinition);
+        return appointmentServiceDefinition;
     }
 
     @Override
@@ -64,9 +64,9 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
         return (AppointmentServiceType) criteria.uniqueResult();
     }
 
-    private void evictObjectFromSession(Session currentSession, AppointmentService appointmentService) {
-        if (appointmentService != null) {
-            currentSession.evict(appointmentService);
+    private void evictObjectFromSession(Session currentSession, AppointmentServiceDefinition appointmentServiceDefinition) {
+        if (appointmentServiceDefinition != null) {
+            currentSession.evict(appointmentServiceDefinition);
         }
     }
 }

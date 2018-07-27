@@ -358,6 +358,7 @@
             patient_appointment_provider_id INT NOT NULL AUTO_INCREMENT,
             patient_appointment_id INT NOT NULL,
             provider_id int NOT NULL,
+            response varchar(32) DEFAULT NULL,
             comments VARCHAR(1000),
             date_created DATETIME NOT NULL,
             creator INT NOT NULL,
@@ -367,6 +368,7 @@
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
+            uuid VARCHAR(38)  NOT NULL UNIQUE,
             PRIMARY KEY (patient_appointment_provider_id) ,
             CONSTRAINT fk_patient_appointment_provider_patient_appointment FOREIGN KEY (patient_appointment_id) REFERENCES patient_appointment(patient_appointment_id),
             CONSTRAINT fk_patient_appointment_provider_provider FOREIGN KEY (provider_id) REFERENCES provider (provider_id)

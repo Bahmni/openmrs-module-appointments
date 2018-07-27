@@ -11,7 +11,7 @@
         </id>
         <property name="appointmentNumber" type="java.lang.String" column="appointment_number"/>
         <many-to-one name="patient" class="org.openmrs.Patient" column="patient_id"/>
-        <many-to-one name="service" class="org.openmrs.module.appointments.model.AppointmentService" column="appointment_service_id"/>
+        <many-to-one name="service" class="org.openmrs.module.appointments.model.AppointmentServiceDefinition" column="appointment_service_id"/>
         <many-to-one name="serviceType" class="org.openmrs.module.appointments.model.AppointmentServiceType" column="appointment_service_type_id"/>
 
 

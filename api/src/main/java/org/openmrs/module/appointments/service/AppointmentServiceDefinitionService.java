@@ -2,32 +2,30 @@ package org.openmrs.module.appointments.service;
 
 
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.sql.Time;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
-public interface AppointmentServiceService {
-
-    @Transactional
-    @Authorized({"Manage Appointment Services"})
-    AppointmentService save(AppointmentService appointmentService);
-
-    @Transactional
-    @Authorized({"View Appointment Services"})
-    List<AppointmentService> getAllAppointmentServices(boolean includeVoided);
-
-    @Transactional
-    @Authorized({"View Appointment Services"})
-    AppointmentService getAppointmentServiceByUuid(String uuid);
+public interface AppointmentServiceDefinitionService {
 
     @Transactional
     @Authorized({"Manage Appointment Services"})
-    AppointmentService voidAppointmentService(AppointmentService appointmentService, String voidReason);
+    AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition);
+
+    @Transactional
+    @Authorized({"View Appointment Services"})
+    List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided);
+
+    @Transactional
+    @Authorized({"View Appointment Services"})
+    AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid);
+
+    @Transactional
+    @Authorized({"Manage Appointment Services"})
+    AppointmentServiceDefinition voidAppointmentService(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason);
 
     @Transactional
     @Authorized({"View Appointment Services"})
@@ -35,6 +33,6 @@ public interface AppointmentServiceService {
 
     @Transactional
     @Authorized({"View Appointment Services"})
-	Integer calculateCurrentLoad(AppointmentService appointmentService, Date startDateTime, Date endDateTime);
+	Integer calculateCurrentLoad(AppointmentServiceDefinition appointmentServiceDefinition, Date startDateTime, Date endDateTime);
 }
 
