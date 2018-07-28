@@ -4,7 +4,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDescription;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -58,10 +58,10 @@ public class AppointmentServiceController {
 
     @RequestMapping( method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> createAppointmentService( @Valid @RequestBody AppointmentServicePayload appointmentServicePayload) throws IOException {
-        if(appointmentServicePayload.getName() == null)
+    public ResponseEntity<Object> defineAppointmentService(@Valid @RequestBody AppointmentServiceDescription appointmentServiceDescription) throws IOException {
+        if(appointmentServiceDescription.getName() == null)
             throw new RuntimeException("Appointment Service name should not be null");
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
         try {
             AppointmentServiceDefinition savedAppointmentServiceDefinition = appointmentServiceDefinitionService.save(appointmentServiceDefinition);
             AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(savedAppointmentServiceDefinition);

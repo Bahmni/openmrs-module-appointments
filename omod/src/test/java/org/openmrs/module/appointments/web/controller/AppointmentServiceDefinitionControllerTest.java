@@ -10,7 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentServicePayload;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDescription;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.springframework.http.ResponseEntity;
 
@@ -48,17 +48,17 @@ public class AppointmentServiceDefinitionControllerTest {
 
     @Test
     public void shouldCreateAppointmentService() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
-        appointmentServicePayload.setName("Cardio");
+        AppointmentServiceDescription appointmentServiceDescription = new AppointmentServiceDescription();
+        appointmentServiceDescription.setName("Cardio");
         AppointmentServiceDefinition mappedServicePayload = new AppointmentServiceDefinition();
-        when(appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload)).thenReturn(mappedServicePayload);
+        when(appointmentServiceMapper.fromDescription(appointmentServiceDescription)).thenReturn(mappedServicePayload);
         when(appointmentServiceDefinitionService.save(mappedServicePayload)).thenReturn(mappedServicePayload);
         AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
         when(appointmentServiceMapper.constructResponse(mappedServicePayload)).thenReturn(response);
 
-        ResponseEntity<Object> savedAppointmentService = appointmentServiceController.createAppointmentService(appointmentServicePayload);
+        ResponseEntity<Object> savedAppointmentService = appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
 
-        verify(appointmentServiceMapper, times(1)).getAppointmentServiceFromPayload(appointmentServicePayload);
+        verify(appointmentServiceMapper, times(1)).fromDescription(appointmentServiceDescription);
         verify(appointmentServiceDefinitionService, times(1)).save(any(AppointmentServiceDefinition.class));
         verify(appointmentServiceMapper, times(1)).constructResponse(mappedServicePayload);
         assertNotNull(savedAppointmentService);
@@ -68,23 +68,23 @@ public class AppointmentServiceDefinitionControllerTest {
 
     @Test
     public void shouldThrowExceptionWhenCreateAppointmentServiceWhenEmptyPayloadIsGiven() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
+        AppointmentServiceDescription appointmentServiceDescription = new AppointmentServiceDescription();
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Appointment Service name should not be null");
 
-        appointmentServiceController.createAppointmentService(appointmentServicePayload);
+        appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
     }
 
     @Test
     public void shouldValidateTheAppointmentServiceAndThrowAnExceptionWhenThereIsNonVoidedAppointmentServiceWithTheSameName() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
-        appointmentServicePayload.setName("Cardio");
+        AppointmentServiceDescription appointmentServiceDescription = new AppointmentServiceDescription();
+        appointmentServiceDescription.setName("Cardio");
         AppointmentServiceDefinition mappedServicePayload = new AppointmentServiceDefinition();
-        when(appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload)).thenReturn(mappedServicePayload);
+        when(appointmentServiceMapper.fromDescription(appointmentServiceDescription)).thenReturn(mappedServicePayload);
         when(appointmentServiceDefinitionService.save(mappedServicePayload)).thenThrow(new RuntimeException("The service 'Cardio' is already present"));
 
-        ResponseEntity<Object> appointmentService = appointmentServiceController.createAppointmentService(appointmentServicePayload);
+        ResponseEntity<Object> appointmentService = appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
 
         assertNotNull(appointmentService);
         assertEquals("400", appointmentService.getStatusCode().toString());

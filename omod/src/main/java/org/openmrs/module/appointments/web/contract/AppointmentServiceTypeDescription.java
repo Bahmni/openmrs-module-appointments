@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.web.contract;
 
-public class AppointmentServiceTypePayload {
+public class AppointmentServiceTypeDescription {
     private String name;
     private Integer duration;
     private String uuid;

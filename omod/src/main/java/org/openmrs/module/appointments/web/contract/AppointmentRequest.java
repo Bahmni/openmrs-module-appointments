@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 
 @JsonIgnoreProperties
-public class AppointmentPayload {
+public class AppointmentRequest {
     private String appointmentNumber;
     private String uuid;
     private String patientUuid;

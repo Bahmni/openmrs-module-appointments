@@ -29,45 +29,45 @@ public class AppointmentServiceMapper {
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    public AppointmentServiceDefinition getAppointmentServiceFromPayload(AppointmentServicePayload appointmentServicePayload) {
+    public AppointmentServiceDefinition fromDescription(AppointmentServiceDescription appointmentServiceDescription) {
         AppointmentServiceDefinition appointmentServiceDefinition;
-        if (!StringUtils.isBlank(appointmentServicePayload.getUuid())) {
-            appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServicePayload.getUuid());
+        if (!StringUtils.isBlank(appointmentServiceDescription.getUuid())) {
+            appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceDescription.getUuid());
         }else{
             appointmentServiceDefinition = new AppointmentServiceDefinition();
         }
-        appointmentServiceDefinition.setName(appointmentServicePayload.getName());
-        appointmentServiceDefinition.setDescription(appointmentServicePayload.getDescription());
-        appointmentServiceDefinition.setDurationMins(appointmentServicePayload.getDurationMins());
-        appointmentServiceDefinition.setStartTime(appointmentServicePayload.getStartTime());
-        appointmentServiceDefinition.setEndTime(appointmentServicePayload.getEndTime());
-        appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServicePayload.getMaxAppointmentsLimit());
-        appointmentServiceDefinition.setColor(appointmentServicePayload.getColor());
+        appointmentServiceDefinition.setName(appointmentServiceDescription.getName());
+        appointmentServiceDefinition.setDescription(appointmentServiceDescription.getDescription());
+        appointmentServiceDefinition.setDurationMins(appointmentServiceDescription.getDurationMins());
+        appointmentServiceDefinition.setStartTime(appointmentServiceDescription.getStartTime());
+        appointmentServiceDefinition.setEndTime(appointmentServiceDescription.getEndTime());
+        appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServiceDescription.getMaxAppointmentsLimit());
+        appointmentServiceDefinition.setColor(appointmentServiceDescription.getColor());
 
-        String locationUuid = appointmentServicePayload.getLocationUuid();
+        String locationUuid = appointmentServiceDescription.getLocationUuid();
         Location location = locationService.getLocationByUuid(locationUuid);
         appointmentServiceDefinition.setLocation(location);
 
-        String specialityUuid = appointmentServicePayload.getSpecialityUuid();
+        String specialityUuid = appointmentServiceDescription.getSpecialityUuid();
         Speciality speciality = specialityService.getSpecialityByUuid(specialityUuid);
         appointmentServiceDefinition.setSpeciality(speciality);
 
-        List<ServiceWeeklyAvailabilityPayload> availabilityPayload = appointmentServicePayload.getWeeklyAvailability();
+        List<ServiceWeeklyAvailabilityDescription> weeklyAvailabilities = appointmentServiceDescription.getWeeklyAvailability();
 
-        if(availabilityPayload != null) {
-            Set<ServiceWeeklyAvailability> availabilityList = availabilityPayload.stream()
+        if(weeklyAvailabilities != null) {
+            Set<ServiceWeeklyAvailability> availabilityList = weeklyAvailabilities.stream()
                     .map(avb -> constructServiceWeeklyAvailability(avb, appointmentServiceDefinition)).collect(Collectors.toSet());
             appointmentServiceDefinition.setWeeklyAvailability(availabilityList);
         }
         
-        if(appointmentServicePayload.getServiceTypes() != null) {
-            appointmentServicePayload.getServiceTypes()
+        if(appointmentServiceDescription.getServiceTypes() != null) {
+            appointmentServiceDescription.getServiceTypes()
                     .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentServiceDefinition));
         }
         return appointmentServiceDefinition;
     }
 
-    private void constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentServiceDefinition appointmentServiceDefinition) {
+    private void constructAppointmentServiceTypes(AppointmentServiceTypeDescription ast, AppointmentServiceDefinition appointmentServiceDefinition) {
         AppointmentServiceType serviceType;
         Set<AppointmentServiceType> existingServiceTypes = appointmentServiceDefinition.getServiceTypes(true);
         if(ast.getUuid() != null)
@@ -90,7 +90,7 @@ public class AppointmentServiceMapper {
         serviceType.setVoidedBy(Context.getAuthenticatedUser());
     }
 
-    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentServiceDefinition appointmentServiceDefinition) {
+    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityDescription avb, AppointmentServiceDefinition appointmentServiceDefinition) {
         ServiceWeeklyAvailability availability;
         if(avb.getUuid() != null)
             availability = getAvailabilityByUuid(appointmentServiceDefinition.getWeeklyAvailability(), avb.getUuid());

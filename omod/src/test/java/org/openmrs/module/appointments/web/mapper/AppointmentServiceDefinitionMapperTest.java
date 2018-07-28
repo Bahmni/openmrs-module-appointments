@@ -60,29 +60,29 @@ public class AppointmentServiceDefinitionMapperTest {
 
     @Test
     public void shouldGetAppointmentServiceFromPayloadWithoutWeeklyAvailability() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentServiceDefinition.getName(),appointmentServicePayload.getName());
-        assertEquals(appointmentServiceDefinition.getDurationMins(),appointmentServicePayload.getDurationMins());
-        assertEquals(appointmentServiceDefinition.getStartTime(),appointmentServicePayload.getStartTime());
-        assertEquals(appointmentServiceDefinition.getEndTime(),appointmentServicePayload.getEndTime());
-        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
+        assertEquals(appointmentServiceDefinition.getName(), appointmentServiceDescription.getName());
+        assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServiceDescription.getDurationMins());
+        assertEquals(appointmentServiceDefinition.getStartTime(), appointmentServiceDescription.getStartTime());
+        assertEquals(appointmentServiceDefinition.getEndTime(), appointmentServiceDescription.getEndTime());
+        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceDescription.getMaxAppointmentsLimit());
         assertEquals(0, appointmentServiceDefinition.getWeeklyAvailability().size());
     }
 
     @Test
     public void shouldGetAppointmentServiceFromPayload() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        ServiceWeeklyAvailabilityPayload mondayMorning = createServiceWeeklyAvailabilityPayload(DayOfWeek.MONDAY,Time.valueOf("09:00:00"),Time.valueOf("13:00:00"),20,null, false);
-        appointmentServicePayload.setWeeklyAvailability(Collections.singletonList(mondayMorning));
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        ServiceWeeklyAvailabilityDescription mondayMorning = createServiceWeeklyAvailabilityDescription(DayOfWeek.MONDAY,Time.valueOf("09:00:00"),Time.valueOf("13:00:00"),20,null, false);
+        appointmentServiceDescription.setWeeklyAvailability(Collections.singletonList(mondayMorning));
         when(locationService.getLocationByUuid("locUuid")).thenReturn(location);
         when(specialityService.getSpecialityByUuid("specUuid")).thenReturn(speciality);
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentServiceDefinition.getName(),appointmentServicePayload.getName());
-        assertEquals(appointmentServiceDefinition.getDurationMins(),appointmentServicePayload.getDurationMins());
-        assertEquals(appointmentServiceDefinition.getStartTime(),appointmentServicePayload.getStartTime());
-        assertEquals(appointmentServiceDefinition.getEndTime(),appointmentServicePayload.getEndTime());
-        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
+        assertEquals(appointmentServiceDefinition.getName(), appointmentServiceDescription.getName());
+        assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServiceDescription.getDurationMins());
+        assertEquals(appointmentServiceDefinition.getStartTime(), appointmentServiceDescription.getStartTime());
+        assertEquals(appointmentServiceDefinition.getEndTime(), appointmentServiceDescription.getEndTime());
+        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceDescription.getMaxAppointmentsLimit());
         assertEquals(location, appointmentServiceDefinition.getLocation());
         assertEquals(speciality, appointmentServiceDefinition.getSpeciality());
         assertNotNull(appointmentServiceDefinition.getWeeklyAvailability());
@@ -100,15 +100,15 @@ public class AppointmentServiceDefinitionMapperTest {
         existingAppointmentServiceDefinition.setName("Chemotherapy");
         existingAppointmentServiceDefinition.setUuid("Uuid");
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("Uuid")).thenReturn(existingAppointmentServiceDefinition);
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setUuid("Uuid");
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setUuid("Uuid");
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
         assertEquals(existingAppointmentServiceDefinition.getUuid(), appointmentServiceDefinition.getUuid());
-        assertEquals(appointmentServiceDefinition.getName(), appointmentServicePayload.getName());
-        assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServicePayload.getDurationMins());
-        assertEquals(appointmentServiceDefinition.getStartTime(), appointmentServicePayload.getStartTime());
-        assertEquals(appointmentServiceDefinition.getEndTime(), appointmentServicePayload.getEndTime());
-        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServicePayload.getMaxAppointmentsLimit());
+        assertEquals(appointmentServiceDefinition.getName(), appointmentServiceDescription.getName());
+        assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServiceDescription.getDurationMins());
+        assertEquals(appointmentServiceDefinition.getStartTime(), appointmentServiceDescription.getStartTime());
+        assertEquals(appointmentServiceDefinition.getEndTime(), appointmentServiceDescription.getEndTime());
+        assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceDescription.getMaxAppointmentsLimit());
         assertEquals(0, appointmentServiceDefinition.getWeeklyAvailability().size());
     }
 
@@ -126,24 +126,24 @@ public class AppointmentServiceDefinitionMapperTest {
         existingAppointmentServiceDefinition.setWeeklyAvailability(existingAvailabilityList);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("Uuid")).thenReturn(existingAppointmentServiceDefinition);
 
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setUuid("Uuid");
-        List<ServiceWeeklyAvailabilityPayload> weeklyAvailability = new ArrayList<>();
-        ServiceWeeklyAvailabilityPayload mondayPayload = createServiceWeeklyAvailabilityPayload(DayOfWeek.MONDAY,Time.valueOf("09:00:00"),Time.valueOf("13:00:00"),20,availabilityUuid, false);
-        ServiceWeeklyAvailabilityPayload saturdayPayload = createServiceWeeklyAvailabilityPayload(DayOfWeek.SATURDAY, Time.valueOf("10:00:00"), Time.valueOf("16:00:00"),10, null, false);
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setUuid("Uuid");
+        List<ServiceWeeklyAvailabilityDescription> weeklyAvailability = new ArrayList<>();
+        ServiceWeeklyAvailabilityDescription mondayPayload = createServiceWeeklyAvailabilityDescription(DayOfWeek.MONDAY,Time.valueOf("09:00:00"),Time.valueOf("13:00:00"),20,availabilityUuid, false);
+        ServiceWeeklyAvailabilityDescription saturdayPayload = createServiceWeeklyAvailabilityDescription(DayOfWeek.SATURDAY, Time.valueOf("10:00:00"), Time.valueOf("16:00:00"),10, null, false);
         weeklyAvailability.add(mondayPayload);
         weeklyAvailability.add(saturdayPayload);
-        appointmentServicePayload.setWeeklyAvailability(weeklyAvailability);
+        appointmentServiceDescription.setWeeklyAvailability(weeklyAvailability);
         when(locationService.getLocationByUuid("locUuid")).thenReturn(location);
         when(specialityService.getSpecialityByUuid("specUuid")).thenReturn(speciality);
 
-        AppointmentServiceDefinition updatedAppointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        AppointmentServiceDefinition updatedAppointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
         assertEquals(updatedAppointmentServiceDefinition.getUuid(), existingAppointmentServiceDefinition.getUuid());
-        assertEquals(updatedAppointmentServiceDefinition.getName(),appointmentServicePayload.getName());
-        assertEquals(updatedAppointmentServiceDefinition.getDurationMins(),appointmentServicePayload.getDurationMins());
-        assertEquals(updatedAppointmentServiceDefinition.getStartTime(),appointmentServicePayload.getStartTime());
-        assertEquals(updatedAppointmentServiceDefinition.getEndTime(),appointmentServicePayload.getEndTime());
-        assertEquals(updatedAppointmentServiceDefinition.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        assertEquals(updatedAppointmentServiceDefinition.getName(), appointmentServiceDescription.getName());
+        assertEquals(updatedAppointmentServiceDefinition.getDurationMins(), appointmentServiceDescription.getDurationMins());
+        assertEquals(updatedAppointmentServiceDefinition.getStartTime(), appointmentServiceDescription.getStartTime());
+        assertEquals(updatedAppointmentServiceDefinition.getEndTime(), appointmentServiceDescription.getEndTime());
+        assertEquals(updatedAppointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceDescription.getMaxAppointmentsLimit());
         assertEquals(location, updatedAppointmentServiceDefinition.getLocation());
         assertEquals(speciality, updatedAppointmentServiceDefinition.getSpeciality());
         assertNotNull(updatedAppointmentServiceDefinition.getWeeklyAvailability());
@@ -168,22 +168,22 @@ public class AppointmentServiceDefinitionMapperTest {
         existingAppointmentServiceDefinition.setWeeklyAvailability(existingAvailabilityList);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("Uuid")).thenReturn(existingAppointmentServiceDefinition);
 
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setUuid("Uuid");
-        List<ServiceWeeklyAvailabilityPayload> weeklyAvailability = new ArrayList<>();
-        ServiceWeeklyAvailabilityPayload mondayPayload = createServiceWeeklyAvailabilityPayload(DayOfWeek.MONDAY, null, null, 0, availabilityUuid, true);
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setUuid("Uuid");
+        List<ServiceWeeklyAvailabilityDescription> weeklyAvailability = new ArrayList<>();
+        ServiceWeeklyAvailabilityDescription mondayPayload = createServiceWeeklyAvailabilityDescription(DayOfWeek.MONDAY, null, null, 0, availabilityUuid, true);
         weeklyAvailability.add(mondayPayload);
-        appointmentServicePayload.setWeeklyAvailability(weeklyAvailability);
+        appointmentServiceDescription.setWeeklyAvailability(weeklyAvailability);
         when(locationService.getLocationByUuid("locUuid")).thenReturn(location);
         when(specialityService.getSpecialityByUuid("specUuid")).thenReturn(speciality);
 
-        AppointmentServiceDefinition updatedAppointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
+        AppointmentServiceDefinition updatedAppointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
         assertEquals(existingAppointmentServiceDefinition.getUuid(), updatedAppointmentServiceDefinition.getUuid());
-        assertEquals(updatedAppointmentServiceDefinition.getName(),appointmentServicePayload.getName());
-        assertEquals(updatedAppointmentServiceDefinition.getDurationMins(),appointmentServicePayload.getDurationMins());
-        assertEquals(updatedAppointmentServiceDefinition.getStartTime(),appointmentServicePayload.getStartTime());
-        assertEquals(updatedAppointmentServiceDefinition.getEndTime(),appointmentServicePayload.getEndTime());
-        assertEquals(updatedAppointmentServiceDefinition.getMaxAppointmentsLimit(),appointmentServicePayload.getMaxAppointmentsLimit());
+        assertEquals(updatedAppointmentServiceDefinition.getName(), appointmentServiceDescription.getName());
+        assertEquals(updatedAppointmentServiceDefinition.getDurationMins(), appointmentServiceDescription.getDurationMins());
+        assertEquals(updatedAppointmentServiceDefinition.getStartTime(), appointmentServiceDescription.getStartTime());
+        assertEquals(updatedAppointmentServiceDefinition.getEndTime(), appointmentServiceDescription.getEndTime());
+        assertEquals(updatedAppointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceDescription.getMaxAppointmentsLimit());
         assertEquals(location, updatedAppointmentServiceDefinition.getLocation());
         assertEquals(speciality, updatedAppointmentServiceDefinition.getSpeciality());
         assertNotNull(updatedAppointmentServiceDefinition.getWeeklyAvailability());
@@ -258,21 +258,21 @@ public class AppointmentServiceDefinitionMapperTest {
 
     @Test
     public void ShouldMapTheVoidedAppointmentServiceTypes() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setName("Service1");
-        appointmentServicePayload.setWeeklyAvailability(new ArrayList<>());
-        Set<AppointmentServiceTypePayload> serviceTypes = new LinkedHashSet<>();
-        AppointmentServiceTypePayload payloadType1 = new AppointmentServiceTypePayload();
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setName("Service1");
+        appointmentServiceDescription.setWeeklyAvailability(new ArrayList<>());
+        Set<AppointmentServiceTypeDescription> serviceTypes = new LinkedHashSet<>();
+        AppointmentServiceTypeDescription payloadType1 = new AppointmentServiceTypeDescription();
         payloadType1.setName("Type1");
         payloadType1.setDuration(15);
         payloadType1.setVoided(true);
         String voidedReason = "web services call";
         payloadType1.setVoidedReason(voidedReason);
         serviceTypes.add(payloadType1);
-        appointmentServicePayload.setServiceTypes(serviceTypes);
+        appointmentServiceDescription.setServiceTypes(serviceTypes);
 
-        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentServicePayload.getName(), mappedAppointmentServiceDefinition.getName());
+        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
+        assertEquals(appointmentServiceDescription.getName(), mappedAppointmentServiceDefinition.getName());
         Set<AppointmentServiceType> mappedServiceTypes = mappedAppointmentServiceDefinition.getServiceTypes(true);
         Iterator<AppointmentServiceType> iterator = mappedServiceTypes.iterator();
         AppointmentServiceType mappedServiceType = iterator.next();
@@ -282,29 +282,29 @@ public class AppointmentServiceDefinitionMapperTest {
         assertEquals(voidedReason, mappedServiceType.getVoidReason());
         assertEquals(authenticatedUser, mappedServiceType.getVoidedBy());
         assertNotNull(mappedServiceType.getDateVoided());
-        assertEquals(appointmentServicePayload.getName(), mappedServiceType.getAppointmentServiceDefinition().getName());
+        assertEquals(appointmentServiceDescription.getName(), mappedServiceType.getAppointmentServiceDefinition().getName());
     }
 
     @Test
     public void ShouldMapTheAppointmentServiceTypes() throws Exception {
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setName("Service1");
-        appointmentServicePayload.setWeeklyAvailability(new ArrayList<>());
-        Set<AppointmentServiceTypePayload> serviceTypes = new LinkedHashSet<>();
-        AppointmentServiceTypePayload payloadType1 = new AppointmentServiceTypePayload();
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setName("Service1");
+        appointmentServiceDescription.setWeeklyAvailability(new ArrayList<>());
+        Set<AppointmentServiceTypeDescription> serviceTypes = new LinkedHashSet<>();
+        AppointmentServiceTypeDescription payloadType1 = new AppointmentServiceTypeDescription();
         payloadType1.setName("Type1");
         payloadType1.setDuration(15);
         serviceTypes.add(payloadType1);
-        appointmentServicePayload.setServiceTypes(serviceTypes);
+        appointmentServiceDescription.setServiceTypes(serviceTypes);
 
-        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentServicePayload.getName(), mappedAppointmentServiceDefinition.getName());
+        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
+        assertEquals(appointmentServiceDescription.getName(), mappedAppointmentServiceDefinition.getName());
         Set<AppointmentServiceType> mappedServiceTypes = mappedAppointmentServiceDefinition.getServiceTypes();
         Iterator<AppointmentServiceType> iterator = mappedServiceTypes.iterator();
         AppointmentServiceType type1 = iterator.next();
         assertEquals(payloadType1.getName(), type1.getName());
         assertEquals(payloadType1.getDuration(), type1.getDuration());
-        assertEquals(appointmentServicePayload.getName(), type1.getAppointmentServiceDefinition().getName());
+        assertEquals(appointmentServiceDescription.getName(), type1.getAppointmentServiceDefinition().getName());
     }
 
     @Test
@@ -332,28 +332,28 @@ public class AppointmentServiceDefinitionMapperTest {
         existingAppointmentServiceDefinition.setServiceTypes(serviceTypes);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("ServiceUuid")).thenReturn(existingAppointmentServiceDefinition);
 
-        AppointmentServicePayload appointmentServicePayload = createAppointmentServicePayload();
-        appointmentServicePayload.setName("Chemotherapy");
-        appointmentServicePayload.setUuid("ServiceUuid");
-        appointmentServicePayload.setWeeklyAvailability(new ArrayList<>());
-        Set<AppointmentServiceTypePayload> serviceTypePayloads = new LinkedHashSet<>();
-        AppointmentServiceTypePayload payloadType1 = new AppointmentServiceTypePayload();
+        AppointmentServiceDescription appointmentServiceDescription = createAppointmentServicePayload();
+        appointmentServiceDescription.setName("Chemotherapy");
+        appointmentServiceDescription.setUuid("ServiceUuid");
+        appointmentServiceDescription.setWeeklyAvailability(new ArrayList<>());
+        Set<AppointmentServiceTypeDescription> serviceTypePayloads = new LinkedHashSet<>();
+        AppointmentServiceTypeDescription payloadType1 = new AppointmentServiceTypeDescription();
         payloadType1.setName("Type1");
         payloadType1.setUuid("type1Uuid");
         payloadType1.setDuration(30);
-        AppointmentServiceTypePayload payloadType3 = new AppointmentServiceTypePayload();
+        AppointmentServiceTypeDescription payloadType3 = new AppointmentServiceTypeDescription();
         payloadType3.setName("Type3");
         payloadType3.setUuid("type3Uuid");
         payloadType3.setVoided(true);
-        AppointmentServiceTypePayload payloadType4 = new AppointmentServiceTypePayload();
+        AppointmentServiceTypeDescription payloadType4 = new AppointmentServiceTypeDescription();
         payloadType4.setName("Type4");
         payloadType4.setDuration(20);
         serviceTypePayloads.add(payloadType1);
         serviceTypePayloads.add(payloadType3);
         serviceTypePayloads.add(payloadType4);
-        appointmentServicePayload.setServiceTypes(serviceTypePayloads);
-        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.getAppointmentServiceFromPayload(appointmentServicePayload);
-        assertEquals(appointmentServicePayload.getName(), mappedAppointmentServiceDefinition.getName());
+        appointmentServiceDescription.setServiceTypes(serviceTypePayloads);
+        AppointmentServiceDefinition mappedAppointmentServiceDefinition = appointmentServiceMapper.fromDescription(appointmentServiceDescription);
+        assertEquals(appointmentServiceDescription.getName(), mappedAppointmentServiceDefinition.getName());
         assertEquals(4, mappedAppointmentServiceDefinition.getServiceTypes(true).size());
         assertEquals(2, mappedAppointmentServiceDefinition.getServiceTypes().size());
 
@@ -490,24 +490,24 @@ public class AppointmentServiceDefinitionMapperTest {
         return appointmentServiceDefinition;
     }
 
-    private AppointmentServicePayload createAppointmentServicePayload() {
-        AppointmentServicePayload appointmentServicePayload = new AppointmentServicePayload();
-        appointmentServicePayload.setName("Cardiology-OPD");
-        appointmentServicePayload.setDurationMins(20);
-        appointmentServicePayload.setStartTime(Time.valueOf("09:00:00"));
-        appointmentServicePayload.setMaxAppointmentsLimit(30);
+    private AppointmentServiceDescription createAppointmentServicePayload() {
+        AppointmentServiceDescription appointmentServiceDescription = new AppointmentServiceDescription();
+        appointmentServiceDescription.setName("Cardiology-OPD");
+        appointmentServiceDescription.setDurationMins(20);
+        appointmentServiceDescription.setStartTime(Time.valueOf("09:00:00"));
+        appointmentServiceDescription.setMaxAppointmentsLimit(30);
         location = new Location();
         location.setUuid("locUuid");
         speciality = new Speciality();
         speciality.setUuid("specUuid");
-        appointmentServicePayload.setLocationUuid("locUuid");
-        appointmentServicePayload.setSpecialityUuid("specUuid");
-        appointmentServicePayload.setDescription("OPD ward for cardiology");
-        return appointmentServicePayload;
+        appointmentServiceDescription.setLocationUuid("locUuid");
+        appointmentServiceDescription.setSpecialityUuid("specUuid");
+        appointmentServiceDescription.setDescription("OPD ward for cardiology");
+        return appointmentServiceDescription;
     }
 
-    private ServiceWeeklyAvailabilityPayload createServiceWeeklyAvailabilityPayload(DayOfWeek dayOfWeek, Time startTime, Time endTime, Integer maxAppointmentsLimit, String uuid, Boolean voided){
-        ServiceWeeklyAvailabilityPayload availabilityPayload = new ServiceWeeklyAvailabilityPayload();
+    private ServiceWeeklyAvailabilityDescription createServiceWeeklyAvailabilityDescription(DayOfWeek dayOfWeek, Time startTime, Time endTime, Integer maxAppointmentsLimit, String uuid, Boolean voided){
+        ServiceWeeklyAvailabilityDescription availabilityPayload = new ServiceWeeklyAvailabilityDescription();
         availabilityPayload.setDayOfWeek(dayOfWeek);
         availabilityPayload.setStartTime(startTime);
         availabilityPayload.setEndTime(endTime);

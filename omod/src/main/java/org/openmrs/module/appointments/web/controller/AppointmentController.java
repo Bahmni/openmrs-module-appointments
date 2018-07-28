@@ -2,7 +2,11 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -61,9 +65,9 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
+    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
-            Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
+            Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         }catch (RuntimeException e) {

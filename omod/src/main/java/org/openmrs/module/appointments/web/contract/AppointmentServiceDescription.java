@@ -7,7 +7,7 @@ import javax.validation.constraints.Size;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AppointmentServicePayload {
+public class AppointmentServiceDescription {
     @Size(min = 1)
     private String name;
     private String description;
@@ -19,14 +19,14 @@ public class AppointmentServicePayload {
     private String locationUuid;
     private String uuid;
     private String color;
-    private List<ServiceWeeklyAvailabilityPayload> weeklyAvailability;
-    private Set<AppointmentServiceTypePayload> serviceTypes;
+    private List<ServiceWeeklyAvailabilityDescription> weeklyAvailability;
+    private Set<AppointmentServiceTypeDescription> serviceTypes;
 
-    public Set<AppointmentServiceTypePayload> getServiceTypes() {
+    public Set<AppointmentServiceTypeDescription> getServiceTypes() {
         return serviceTypes;
     }
 
-    public void setServiceTypes(Set<AppointmentServiceTypePayload> serviceTypes) {
+    public void setServiceTypes(Set<AppointmentServiceTypeDescription> serviceTypes) {
         this.serviceTypes = serviceTypes;
     }
 
@@ -103,11 +103,11 @@ public class AppointmentServicePayload {
         this.description = description;
     }
 
-    public List<ServiceWeeklyAvailabilityPayload> getWeeklyAvailability() {
+    public List<ServiceWeeklyAvailabilityDescription> getWeeklyAvailability() {
         return weeklyAvailability;
     }
 
-    public void setWeeklyAvailability(List<ServiceWeeklyAvailabilityPayload> weeklyAvailability) {
+    public void setWeeklyAvailability(List<ServiceWeeklyAvailabilityDescription> weeklyAvailability) {
         this.weeklyAvailability = weeklyAvailability;
     }
 
