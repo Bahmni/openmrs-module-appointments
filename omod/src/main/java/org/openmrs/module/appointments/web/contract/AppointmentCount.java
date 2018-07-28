@@ -3,6 +3,8 @@ package org.openmrs.module.appointments.web.contract;
 import java.util.Date;
 
 public class AppointmentCount {
+    //TODO: rename to DailyServiceSummary
+    //is this class necessary at all? its part of AppointmentsSummary
     private Integer allAppointmentsCount;
     private Integer missedAppointmentsCount;
     private Date appointmentDate;

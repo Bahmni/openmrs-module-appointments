@@ -165,7 +165,7 @@ public class AppointmentControllerTest {
     @Test
     public void shouldThrowExceptionIfPatientUuidIsBlankWhileCreatingAppointment() throws Exception {
         when(appointmentsService.validateAndSave(any(Appointment.class))).thenThrow(new APIException("Exception Msg"));
-        ResponseEntity<Object> responseEntity = appointmentController.createAppointment(new AppointmentPayload());
+        ResponseEntity<Object> responseEntity = appointmentController.createAppointment(new AppointmentRequest());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
@@ -264,19 +264,19 @@ public class AppointmentControllerTest {
 
     @Test
     public void shouldSaveAnAppointment() throws Exception{
-        AppointmentPayload appointmentPayload = new AppointmentPayload();
-        appointmentPayload.setPatientUuid("somePatientUuid");
-        appointmentPayload.setUuid("someUuid");
-        appointmentPayload.setServiceUuid("someServiceUuid");
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setPatientUuid("somePatientUuid");
+        appointmentRequest.setUuid("someUuid");
+        appointmentRequest.setServiceUuid("someServiceUuid");
 
         Appointment appointment = new Appointment();
         appointment.setUuid("appointmentUuid");
 
-        when(appointmentMapper.getAppointmentFromPayload(appointmentPayload)).thenReturn(appointment);
+        when(appointmentMapper.getAppointmentFromRequest(appointmentRequest)).thenReturn(appointment);
         when(appointmentsService.validateAndSave(appointment)).thenReturn(appointment);
 
-        appointmentController.createAppointment(appointmentPayload);
-        Mockito.verify(appointmentMapper, times(1)).getAppointmentFromPayload(appointmentPayload);
+        appointmentController.createAppointment(appointmentRequest);
+        Mockito.verify(appointmentMapper, times(1)).getAppointmentFromRequest(appointmentRequest);
         Mockito.verify(appointmentsService, times(1)).validateAndSave(appointment);
     }
 }

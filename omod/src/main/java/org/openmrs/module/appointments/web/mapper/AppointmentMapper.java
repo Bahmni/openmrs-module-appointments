@@ -1,7 +1,5 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import java.util.*;
-
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -9,18 +7,30 @@ import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
+import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Component
@@ -54,28 +64,28 @@ public class AppointmentMapper {
         return this.mapToDefaultResponse(appointment, new AppointmentDefaultResponse());
     }
 
-    public Appointment getAppointmentFromPayload(AppointmentPayload appointmentPayload) {
+    public Appointment getAppointmentFromRequest(AppointmentRequest appointmentRequest) {
         Appointment appointment;
-        if (!StringUtils.isBlank(appointmentPayload.getUuid())) {
-            appointment = appointmentsService.getAppointmentByUuid(appointmentPayload.getUuid());
+        if (!StringUtils.isBlank(appointmentRequest.getUuid())) {
+            appointment = appointmentsService.getAppointmentByUuid(appointmentRequest.getUuid());
         } else {
             appointment = new Appointment();
-            appointment.setPatient(patientService.getPatientByUuid(appointmentPayload.getPatientUuid()));
+            appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
         }
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentPayload.getServiceUuid());
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
-        if(appointmentPayload.getServiceTypeUuid() != null) {
-            appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentPayload.getServiceTypeUuid());
+        if(appointmentRequest.getServiceTypeUuid() != null) {
+            appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
-        appointment.setProvider(providerService.getProviderByUuid(appointmentPayload.getProviderUuid()));
-        appointment.setLocation(locationService.getLocationByUuid(appointmentPayload.getLocationUuid()));
-        appointment.setStartDateTime(appointmentPayload.getStartDateTime());
-        appointment.setEndDateTime(appointmentPayload.getEndDateTime());
-        appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentPayload.getAppointmentKind()));
-        appointment.setComments(appointmentPayload.getComments());
-        mapProvidersForAppointment(appointment, appointmentPayload.getProviders());
+        appointment.setProvider(providerService.getProviderByUuid(appointmentRequest.getProviderUuid()));
+        appointment.setLocation(locationService.getLocationByUuid(appointmentRequest.getLocationUuid()));
+        appointment.setStartDateTime(appointmentRequest.getStartDateTime());
+        appointment.setEndDateTime(appointmentRequest.getEndDateTime());
+        appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
+        appointment.setComments(appointmentRequest.getComments());
+        mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
         return appointment;
     }
 
@@ -106,6 +116,7 @@ public class AppointmentMapper {
                     appointment.getProviders().add(newAppointmentProvider);
                 } else {
                     providers.forEach(p -> {
+                        //TODO: if currentUser is same person as provider, set ACCEPTED
                         p.setResponse(withResponse(providerDetail.getResponse()));
                     });
                 }
@@ -171,18 +182,18 @@ public class AppointmentMapper {
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
-        List<AppointmentProviderDetail> providerDetailList = new ArrayList<>();
+        List<AppointmentProviderDetail> providerList = new ArrayList<>();
         if (providers != null) {
             for (AppointmentProvider apptProviderAssociation : providers) {
-                AppointmentProviderDetail apptProvider = new AppointmentProviderDetail();
-                apptProvider.setUuid(apptProviderAssociation.getProvider().getUuid());
-                apptProvider.setComments(apptProviderAssociation.getComments());
-                apptProvider.setResponse(apptProviderAssociation.getResponse().toString());
-                apptProvider.setName(apptProviderAssociation.getProvider().getName());
-                providerDetailList.add(apptProvider);
+                AppointmentProviderDetail providerDetail = new AppointmentProviderDetail();
+                providerDetail.setUuid(apptProviderAssociation.getProvider().getUuid());
+                providerDetail.setComments(apptProviderAssociation.getComments());
+                providerDetail.setResponse(apptProviderAssociation.getResponse().toString());
+                providerDetail.setName(apptProviderAssociation.getProvider().getName());
+                providerList.add(providerDetail);
             }
         }
-        return providerDetailList;
+        return providerList;
     }
 
     private Map createServiceTypeMap(AppointmentServiceType s) {
@@ -224,11 +235,11 @@ public class AppointmentMapper {
         return map;
     }
 
-    public AppointmentProvider mapAppointmentProvider(AppointmentProviderDetail providerResponse) {
+    public AppointmentProvider mapAppointmentProvider(AppointmentProviderDetail providerDetail) {
         AppointmentProvider appointmentProvider = new AppointmentProvider();
-        appointmentProvider.setProvider(providerService.getProviderByUuid(providerResponse.getUuid()));
-        appointmentProvider.setResponse(withResponse(providerResponse.getResponse()));
-        appointmentProvider.setComments(providerResponse.getComments());
+        appointmentProvider.setProvider(providerService.getProviderByUuid(providerDetail.getUuid()));
+        appointmentProvider.setResponse(withResponse(providerDetail.getResponse()));
+        appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
     }
 }
