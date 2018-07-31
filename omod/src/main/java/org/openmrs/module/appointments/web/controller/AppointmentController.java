@@ -67,7 +67,7 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
-            Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         }catch (RuntimeException e) {

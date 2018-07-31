@@ -116,7 +116,7 @@ public class AppointmentMapperTest {
     @Test
     public void shouldGetAppointmentFromPayload() throws Exception {
         AppointmentRequest appointmentRequest = createAppointmentPayload();
-        Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         assertNotNull(appointment);
         verify(patientService, times(1)).getPatientByUuid(appointmentRequest.getPatientUuid());
         assertEquals(patient, appointment.getPatient());
@@ -138,7 +138,7 @@ public class AppointmentMapperTest {
     public void shouldNotSearchForExistingAppointmentWhenPayLoadUuidIsNull() throws Exception {
         AppointmentRequest appointmentRequest = createAppointmentPayload();
         appointmentRequest.setUuid(null);
-        appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, never()).getAppointmentByUuid(anyString());
     }
 
@@ -150,7 +150,7 @@ public class AppointmentMapperTest {
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
         AppointmentRequest appointmentRequest = createAppointmentPayload();
         appointmentRequest.setUuid(appointmentUuid);
-        Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
         assertNotNull(appointment);
         assertEquals(appointmentUuid, appointment.getUuid());
@@ -174,7 +174,7 @@ public class AppointmentMapperTest {
         AppointmentRequest appointmentRequest = createAppointmentPayload();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setServiceTypeUuid(serviceType2.getUuid());
-        Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
         assertNotNull(appointment);
         assertEquals(appointmentUuid, appointment.getUuid());
@@ -198,7 +198,7 @@ public class AppointmentMapperTest {
         AppointmentRequest appointmentRequest = createAppointmentPayload();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setServiceTypeUuid(null);
-        Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
         assertNotNull(appointment);
         assertEquals(existingAppointment.getUuid(), appointment.getUuid());
@@ -214,7 +214,7 @@ public class AppointmentMapperTest {
         AppointmentRequest appointmentRequest = createAppointmentPayload();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setPatientUuid("newPatientUuid");
-        Appointment appointment = appointmentMapper.getAppointmentFromRequest(appointmentRequest);
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         verify(patientService, never()).getPatientByUuid(appointmentRequest.getPatientUuid());
         assertEquals(existingAppointment.getPatient(), appointment.getPatient());
     }

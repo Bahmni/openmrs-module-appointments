@@ -272,11 +272,11 @@ public class AppointmentControllerTest {
         Appointment appointment = new Appointment();
         appointment.setUuid("appointmentUuid");
 
-        when(appointmentMapper.getAppointmentFromRequest(appointmentRequest)).thenReturn(appointment);
+        when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointment);
         when(appointmentsService.validateAndSave(appointment)).thenReturn(appointment);
 
         appointmentController.createAppointment(appointmentRequest);
-        Mockito.verify(appointmentMapper, times(1)).getAppointmentFromRequest(appointmentRequest);
+        Mockito.verify(appointmentMapper, times(1)).fromRequest(appointmentRequest);
         Mockito.verify(appointmentsService, times(1)).validateAndSave(appointment);
     }
 }
