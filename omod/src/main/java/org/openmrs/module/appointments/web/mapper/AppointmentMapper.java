@@ -123,9 +123,9 @@ public class AppointmentMapper {
                     newAppointmentProvider.setAppointment(appointment);
                     appointment.getProviders().add(newAppointmentProvider);
                 } else {
-                    providers.forEach(p -> {
+                    providers.forEach(existingAppointmentProvider -> {
                         //TODO: if currentUser is same person as provider, set ACCEPTED
-                        p.setResponse(withResponse(providerDetail.getResponse()));
+                        existingAppointmentProvider.setResponse(withResponse(providerDetail.getResponse()));
                     });
                 }
             }

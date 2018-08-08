@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class AppointmentsSummary {
     private AppointmentServiceDefaultResponse appointmentService;
-    private Map<String, AppointmentCount> appointmentCountMap;
+    private Map<String, DailyAppointmentServiceSummary> appointmentCountMap;
 
     @JsonCreator
     public AppointmentsSummary(@JsonProperty("appointmentService")AppointmentServiceDefaultResponse appointmentService,
@@ -23,11 +23,11 @@ public class AppointmentsSummary {
         this.appointmentService = appointmentService;
     }
 
-    public Map<String, AppointmentCount> getAppointmentCountMap() {
+    public Map<String, DailyAppointmentServiceSummary> getAppointmentCountMap() {
         return appointmentCountMap;
     }
 
-    public void setAppointmentCountMap(Map<String, AppointmentCount> appointmentCountMap) {
+    public void setAppointmentCountMap(Map<String, DailyAppointmentServiceSummary> appointmentCountMap) {
         this.appointmentCountMap = appointmentCountMap;
     }
 }
