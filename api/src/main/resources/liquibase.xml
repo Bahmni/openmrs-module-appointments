@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog/1.9"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog/1.9
-                  http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-1.9.xsd">
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-2.0.xsd">
 
     <changeSet id="create-appointment_speciality_table-201707031130" author="Shruthi,Pushpa">
         <preConditions onFail="MARK_RAN">
@@ -346,4 +346,65 @@
             "org.openmrs.customdatatype.datatype.BooleanDatatype", 0, 8, NOW(), 0, UUID());
         </sql>
     </changeSet>
+
+    <changeSet id="201806261146" author="Suman">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.publish.eventsForAppointmentService';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to act as switch for raising appointment service events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.publish.eventsForAppointmentService"/>
+            <column name="property_value" value="true"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="If set true, events related to appointment service changes are published"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="201806261149" author="Suman">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.event.urlPatternForAppointmentService';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to specify the URL pattern for published appointment service events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.event.urlPatternForAppointmentService"/>
+            <column name="property_value" value="/openmrs/ws/rest/v1/appointmentService?uuid={uuid}"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="URL pattern to use for published program events. Default is /openmrs/ws/rest/v1/appointmentService?uuid={uuid}"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="201806261612" author="Suman">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.publish.eventsForAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to act as switch for raising appointment events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.publish.eventsForAppointments"/>
+            <column name="property_value" value="true"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="If set true, events related to appointment changes are published"/>
+        </insert>
+    </changeSet>
+
+    <changeSet id="201806261614" author="Suman">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.event.urlPatternForAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to specify the URL pattern for published appointment events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.event.urlPatternForAppointments"/>
+            <column name="property_value" value="/openmrs/ws/rest/v1/appointment?uuid={uuid}"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="URL pattern to use for published program events. Default is /openmrs/ws/rest/v1/appointment?uuid={uuid}"/>
+        </insert>
+    </changeSet>
+
 </databaseChangeLog>

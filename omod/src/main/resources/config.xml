@@ -13,6 +13,7 @@
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
+		<require_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</require_module>
 	</require_modules>
 
 	<mappingFiles>
@@ -39,6 +40,16 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
+
+	<advice>
+		<point>org.openmrs.module.appointments.service.AppointmentServiceService</point>
+		<class>org.openmrs.module.appointments.advice.AppointmentServiceAdvice</class>
+	</advice>
+
+	<advice>
+		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
+		<class>org.openmrs.module.appointments.advice.AppointmentAdvice</class>
+	</advice>
 
 	<globalProperty>
 		<property>disableDefaultAppointmentValidations</property>

@@ -23,6 +23,8 @@
 		<mockitoVersion>1.10.19</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.7.9</jacocoVersion>
+		<openmrsAtomfeedVersion>2.5.6</openmrsAtomfeedVersion>
+		<atomfeed.version>1.9.4</atomfeed.version>
 	</properties>
 
 	<build>
