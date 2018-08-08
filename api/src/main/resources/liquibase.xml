@@ -380,7 +380,8 @@
         <comment>Migrating appointment provider to appointment_provider table</comment>
         <sql>
             insert into patient_appointment_provider (patient_appointment_id, provider_id, response, date_created, creator, uuid)
-            select a.patient_appointment_id, a.provider_id, 'ACCEPTED', now(), 1, uuid() from patient_appointment a where a.provider_id is not null;
+            select a.patient_appointment_id, a.provider_id, 'ACCEPTED', a.date_created, a.creator, uuid()
+            from patient_appointment a where a.provider_id is not null;
         </sql>
     </changeSet>
 

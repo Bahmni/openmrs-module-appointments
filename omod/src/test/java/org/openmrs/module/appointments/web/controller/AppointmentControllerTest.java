@@ -155,17 +155,17 @@ public class AppointmentControllerTest {
         assertEquals(1, allAppointmentsSummary.size());
         assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
         assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountMap().size());
-        AppointmentCount appointmentCount = (AppointmentCount)allAppointmentsSummary.get(0).getAppointmentCountMap().get("2017-08-15");
-        assertEquals(1, appointmentCount.getAllAppointmentsCount(), 0);
-        assertEquals(0, appointmentCount.getMissedAppointmentsCount(), 0);
-        assertEquals(simpleDateFormat.parse(startDateString), appointmentCount.getAppointmentDate());
-        assertEquals("someUuid", appointmentCount.getAppointmentServiceUuid());
+        DailyAppointmentServiceSummary dailyAppointmentServiceSummary = (DailyAppointmentServiceSummary)allAppointmentsSummary.get(0).getAppointmentCountMap().get("2017-08-15");
+        assertEquals(1, dailyAppointmentServiceSummary.getAllAppointmentsCount(), 0);
+        assertEquals(0, dailyAppointmentServiceSummary.getMissedAppointmentsCount(), 0);
+        assertEquals(simpleDateFormat.parse(startDateString), dailyAppointmentServiceSummary.getAppointmentDate());
+        assertEquals("someUuid", dailyAppointmentServiceSummary.getAppointmentServiceUuid());
     }
 
     @Test
     public void shouldThrowExceptionIfPatientUuidIsBlankWhileCreatingAppointment() throws Exception {
         when(appointmentsService.validateAndSave(any(Appointment.class))).thenThrow(new APIException("Exception Msg"));
-        ResponseEntity<Object> responseEntity = appointmentController.createAppointment(new AppointmentRequest());
+        ResponseEntity<Object> responseEntity = appointmentController.saveAppointment(new AppointmentRequest());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
@@ -275,7 +275,7 @@ public class AppointmentControllerTest {
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointment);
         when(appointmentsService.validateAndSave(appointment)).thenReturn(appointment);
 
-        appointmentController.createAppointment(appointmentRequest);
+        appointmentController.saveAppointment(appointmentRequest);
         Mockito.verify(appointmentMapper, times(1)).fromRequest(appointmentRequest);
         Mockito.verify(appointmentsService, times(1)).validateAndSave(appointment);
     }

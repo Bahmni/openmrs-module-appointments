@@ -2,6 +2,8 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIException;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
+
+    private Log log = LogFactory.getLog(this.getClass());
 
     AppointmentDao appointmentDao;
 
@@ -60,6 +64,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                 throw new APIException(message);
             }
         }
+        checkAndAssignAppointmentNumber(appointment);
         appointmentDao.save(appointment);
 	    try {
 		    createEventInAppointmentAudit(appointment, getAppointmentAsJsonString(appointment));
@@ -70,6 +75,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 	    return appointment;
     }
 
+    //TODO refactor throwing of IOExeption. Its forcing everywhere the exception to be caught and rethrown
     private String getAppointmentAsJsonString(Appointment appointment) throws IOException {
         Map appointmentJson = new HashMap<String,String>();
         String serviceUuid = appointment.getService().getUuid();
@@ -166,6 +172,42 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         throw new NotYetImplementedException("This feature is not yet implemented");
     }
 
+    @Override
+    public Appointment reschedule(String originalAppointmentUuid, Appointment newAppointment, boolean retainAppointmentNumber) {
+        Appointment prevAppointment = getAppointmentByUuid(originalAppointmentUuid);
+        if (prevAppointment == null) {
+            //TODO: should we match the new appointment uuid as well?
+            String msg = String.format("Can not identify appointment for rescheduling with %s", originalAppointmentUuid);
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+
+
+        try {
+            //cancel the previous appointment
+            changeStatus(prevAppointment, AppointmentStatus.Cancelled.toString(), new Date());
+            createEventInAppointmentAudit(prevAppointment, getAppointmentAsJsonString(prevAppointment));
+
+            //create a new appointment
+            newAppointment.setUuid(null);
+            newAppointment.setDateCreated(null);
+            newAppointment.setCreator(null);
+            newAppointment.setDateChanged(null);
+            newAppointment.setChangedBy(null);
+
+            //TODO: should we copy the original appointment
+            //newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
+            checkAndAssignAppointmentNumber(newAppointment);
+
+            newAppointment.setStatus(AppointmentStatus.Scheduled);
+            validateAndSave(newAppointment);
+
+            return newAppointment;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void createEventInAppointmentAudit(Appointment appointment,
             String notes) {
         AppointmentAudit appointmentAuditEvent = new AppointmentAudit();
@@ -183,4 +225,16 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             }
         }
     }
+
+    private void checkAndAssignAppointmentNumber(Appointment appointment) {
+        if(appointment.getAppointmentNumber() == null) {
+            appointment.setAppointmentNumber(generateAppointmentNumber(appointment));
+        }
+    }
+
+    //TODO: extract this out to a pluggable strategy
+    private String generateAppointmentNumber(Appointment appointment) {
+        return "0000";
+    }
+
 }
