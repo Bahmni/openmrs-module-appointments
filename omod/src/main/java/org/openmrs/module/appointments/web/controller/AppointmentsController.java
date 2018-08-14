@@ -62,5 +62,20 @@ public class AppointmentsController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/undoStatusChange")
+    @ResponseBody
+    public ResponseEntity<Object> undoStatusChange(@PathVariable("uuid") String appointmentUuid) throws ParseException {
+        try {
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if (appointment == null) {
+                throw new RuntimeException("Appointment does not exist");
+            }
+            appointmentsService.undoStatusChange(appointment);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 
 }
