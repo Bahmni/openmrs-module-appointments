@@ -10,11 +10,17 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
+import org.openmrs.module.appointments.web.contract.AppointmentCount;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -104,7 +110,6 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(appointment, historyForAppointment.get(0).getAppointment());
         assertNotNull(historyForAppointment.get(0).getNotes());
     }
-
 
 
     @Test
@@ -242,6 +247,30 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertNotNull(response);
         assertEquals(400, response.getStatus());
         assertTrue(response.getContentAsString().contains("No status change actions to undo"));
+    }
+
+    @Test
+    public void shouldGetCountOfAppointmentsForAllServicesInAGivenDateRange() throws Exception {
+        MockHttpServletRequest getRequest = newGetRequest(BASE_URL + "/summary", new Parameter("startDate", "2108-08-15T00:00:00.0Z"),
+                new Parameter("endDate", "2108-08-22T00:00:00.0Z"));
+        List<AppointmentsSummary> appointmentsSummaries
+                = deserialize(handle(getRequest), new TypeReference<List<AppointmentsSummary>>() {
+        });
+        AppointmentsSummary appointmentsSummary = appointmentsSummaries.get(0);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        Date appointmentDate = simpleDateFormat.parse("2108-08-15");
+        assertEquals(2, appointmentsSummaries.size());
+        assertNotNull(appointmentsSummary);
+        assertEquals(1, appointmentsSummary.getAppointmentService().getAppointmentServiceId(), 0);
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentsSummary.getAppointmentService().getUuid());
+        assertEquals(1, appointmentsSummary.getAppointmentCountMap().size());
+        Map<String, AppointmentCount> appointmentCountMap = appointmentsSummary.getAppointmentCountMap();
+        Map appointmentCount = (Map) appointmentCountMap.get("2108-08-15");
+        assertNotNull(appointmentCount);
+        assertEquals(4, appointmentCount.get("allAppointmentsCount"));
+        assertEquals(1, appointmentCount.get("missedAppointmentsCount"));
+        assertEquals(appointmentDate.getTime(), appointmentCount.get("appointmentDate"));
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentCount.get("appointmentServiceUuid"));
     }
 
 }

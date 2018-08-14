@@ -5,7 +5,9 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentPayload;
+import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.service.AppointmentSummaryService;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,9 @@ public class AppointmentsController {
 
     @Autowired
     private AppointmentsService appointmentsService;
+
+    @Autowired
+    private AppointmentSummaryService appointmentSummaryService;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -45,11 +51,10 @@ public class AppointmentsController {
             Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-
 
 
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
@@ -94,5 +99,12 @@ public class AppointmentsController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.GET, value = "/summary")
+    @ResponseBody
+    public List<AppointmentsSummary> getAllAppointmentsSummary(@RequestParam(value = "startDate") String startDateString, @RequestParam(value = "endDate") String endDateString) throws ParseException {
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
 
+        return appointmentSummaryService.getSummaries(new SimpleDateFormat("yyyy-MM-dd"), startDate, endDate);
+    }
 }
