@@ -15,15 +15,25 @@ import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 import java.util.Date;
+import java.util.List;
 import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointments")
 public class AppointmentsController {
+
     @Autowired
     private AppointmentsService appointmentsService;
+
     @Autowired
     private AppointmentMapper appointmentMapper;
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
+        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+        return appointmentMapper.constructResponse(appointments);
+    }
 
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
     @ResponseBody
