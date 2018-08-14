@@ -4,6 +4,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentPayload;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
@@ -13,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
@@ -34,6 +37,20 @@ public class AppointmentsController {
         List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
         return appointmentMapper.constructResponse(appointments);
     }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/new")
+    @ResponseBody
+    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
+        try {
+            Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
+            appointmentsService.validateAndSave(appointment);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+        }catch (RuntimeException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+
 
     @RequestMapping(method = RequestMethod.GET, value = "/{uuid}")
     @ResponseBody

@@ -55,6 +55,59 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldThrowErrorWhenAppointmentDoesNotHavePatientInIT() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/new", content));
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldThrowErrorWhenAppointmentDoesNotHaveServiceInIT() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/new", content));
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldCreateAuditEventsWhenDetailsChangesOnEditAppointment() throws Exception {
+        String content = "{ \"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/new", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        Appointment appointment = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        List<AppointmentAudit> historyForAppointment = appointmentAuditDao
+                .getAppointmentHistoryForAppointment(appointment);
+        assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getDateCreated());
+        assertNotNull(historyForAppointment.get(0).getCreator());
+        assertEquals(appointment, historyForAppointment.get(0).getAppointment());
+        assertNotNull(historyForAppointment.get(0).getNotes());
+    }
+
+
+
+    @Test
     public void shouldGetASpecificAppointment() throws Exception {
         AppointmentDefaultResponse response = deserialize(
                 handle(newGetRequest(BASE_URL + "/75504r42-3ca8-11e3-bf2b-0800271c13346")),
@@ -132,8 +185,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
                 "\"endDateTime\": \"2017-07-20\",  " +
                 "\"appointmentKind\": \"WalkIn\"}";
 
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
-//        TODO: Have to introduce new API (POST /appointments/new) and modify the above URL
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/new", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
         AppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<AppointmentDefaultResponse>() {
@@ -179,7 +231,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
                 "\"appointmentKind\": \"WalkIn\"}";
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/new", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
         AppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<AppointmentDefaultResponse>() {
