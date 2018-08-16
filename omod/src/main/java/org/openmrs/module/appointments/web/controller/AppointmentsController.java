@@ -21,7 +21,7 @@ public class AppointmentsController {
     @ResponseBody
     public AppointmentDefaultResponse getAppointmentByUuid(@PathVariable(value = "uuid") String uuid)  {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        if(appointment == null){
+        if (appointment == null) {
             throw new RuntimeException("Appointment does not exist");
         }
         return appointmentMapper.constructResponse(appointment);

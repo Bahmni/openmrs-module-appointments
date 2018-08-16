@@ -5,11 +5,11 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
-import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 
 import static org.junit.Assert.assertEquals;
 
-public class AppointmentsControllerIT extends BaseIntegrationTest {
+public class AppointmentServicesControllerIT extends BaseIntegrationTest {
 
     @Before
     public void setUp() throws Exception {
@@ -18,13 +18,12 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldGetASpecificAppointment() throws Exception {
-        AppointmentDefaultResponse response = deserialize(
-                    handle(newGetRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13346")),
-                    new TypeReference<AppointmentDefaultResponse>() {
+    public void shouldGetASpecificAppointmentService() throws Exception {
+        AppointmentServiceFullResponse response = deserialize(
+                handle(newGetRequest("/rest/v1/appointment-services/c36006e5-9fbb-4f20-866b-0ece245615a6")),
+                new TypeReference<AppointmentServiceFullResponse>() {
                 });
-        assertEquals("GAN200000", response.getPatient().get("identifier"));
+        assertEquals("Consultation", response.getName());
     }
-
 
 }
