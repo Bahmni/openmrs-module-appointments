@@ -371,9 +371,9 @@
         <comment>Adding global property to specify the URL pattern for published appointment service events</comment>
         <insert tableName="global_property">
             <column name="property" value="atomfeed.event.urlPatternForAppointmentService"/>
-            <column name="property_value" value="/openmrs/ws/rest/v1/appointmentService?uuid={uuid}"/>
+            <column name="property_value" value="/openmrs/ws/rest/v1/appointment-services/{uuid}"/>
             <column name="uuid" valueComputed="UUID()"/>
-            <column name="description" value="URL pattern to use for published appointment service events. Default is /openmrs/ws/rest/v1/appointmentService?uuid={uuid}. If you change default value, please add your custom implementation for the given URL"/>
+            <column name="description" value="URL pattern to use for published appointment service events. Default is /openmrs/ws/rest/v1/appointment-services/{uuid}. If you change default value, please add your custom implementation for the given URL"/>
         </insert>
     </changeSet>
 
