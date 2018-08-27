@@ -444,5 +444,17 @@
             from patient_appointment a where a.provider_id is not null;
         </sql>
     </changeSet>
-
+    <changeSet id="201808241255" author="Saikumar, Neha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM privilege WHERE privilege = 'app:appointments:manageSelfAppointmentsOnly';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add manageSelfAppointmentsOnly privilege to manage self appointments only.</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="app:appointments:manageSelfAppointmentsOnly"/>
+            <column name="description" value="With this privilege, providers can book/edit appointments only for themselves."/>
+            <column name="uuid" valueComputed="UUID()"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
