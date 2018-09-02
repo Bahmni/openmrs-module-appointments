@@ -457,4 +457,17 @@
             <column name="uuid" valueComputed="UUID()"/>
         </insert>
     </changeSet>
+    <changeSet id="201809021606" author="Saikumar, Neha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM privilege WHERE privilege = 'Manage Self Appointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add Manage Self Appointments backend privilege to manage self appointments.</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Manage Self Appointments"/>
+            <column name="description" value="With this privilege, providers can book/edit appointments only for themselves."/>
+            <column name="uuid" valueComputed="UUID()"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
