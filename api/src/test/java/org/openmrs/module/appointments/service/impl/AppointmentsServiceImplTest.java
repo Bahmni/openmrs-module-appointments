@@ -10,9 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.Person;
+import org.openmrs.Provider;
+import org.openmrs.User;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.*;
@@ -20,7 +25,10 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
@@ -37,8 +45,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
 
     @Rule
@@ -62,19 +73,46 @@ public class AppointmentsServiceImplTest {
     @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
+    @Mock
+    private User user;
+
+    @Mock
+    private Appointment appointment;
+
+    @Mock
+    private Provider provider;
+
+    @Mock
+    private MessageSourceService messageSourceService;
+
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    private String exceptionCode = "error.privilegesRequired";;
 
+    @Before
+    public void init() throws NoSuchFieldException, IllegalAccessException {
+        MockitoAnnotations.initMocks(this);
+        mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
+        setValuesForMemberFields(appointmentsService, "appointmentValidators", appointmentValidators);
+        setValuesForMemberFields(appointmentsService, "statusChangeValidators", statusChangeValidators);
+    }
+
+    public static void setValuesForMemberFields(Object classInstance, String fieldName, Object valueForMemberField)
+            throws NoSuchFieldException, IllegalAccessException {
+        setField(classInstance, valueForMemberField, classInstance.getClass().getDeclaredField(fieldName));
+    }
+
+    private static void setField(Object classInstance, Object valueForMemberField, Field field)
+            throws IllegalAccessException {
+        field.setAccessible(true);
+        field.set(classInstance, valueForMemberField);
     }
 
     @Test
-    public void testCreateAppointment() throws Exception {
+    public void testCreateAppointment() {
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
         appointment.setService(new AppointmentServiceDefinition());
@@ -364,6 +402,58 @@ public class AppointmentsServiceImplTest {
         appointmentsService.undoStatusChange(appointment);
         verify(appointmentAuditDao, times(0)).getPriorStatusChangeEvent(appointment);
         verify(appointmentDao, times(0)).save(appointment);
+    }
+
+    @Test(expected = APIAuthenticationException.class)
+    public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForSelfPrivilegeAccess(exceptionCode);
+
+        appointmentsService.validateAndSave(appointment);
+
+        verifyHelperForSelfPrivilegeTest();
+    }
+
+    @Test(expected = APIAuthenticationException.class)
+    public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForSelfPrivilegeAccess(exceptionCode);
+
+        appointmentsService.changeStatus(appointment,null,null);
+
+        verifyHelperForSelfPrivilegeTest();
+    }
+
+    @Test(expected = APIAuthenticationException.class)
+    public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForSelfPrivilegeAccess(exceptionCode);
+
+        appointmentsService.undoStatusChange(appointment);
+
+        verifyHelperForSelfPrivilegeTest();
+    }
+
+    private void setupForSelfPrivilegeAccess(String exceptionCode) {
+        String exceptionMessage = "Exception message";
+        when(Context.hasPrivilege("Self Appointments")).thenReturn(true);
+        when(messageSourceService.getMessage(exceptionCode, null, null)).thenReturn(exceptionMessage);
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        when(user.getPerson()).thenReturn(new Person());
+        when(Context.getAuthenticatedUser()).thenReturn(user);
+        when(provider.getPerson()).thenReturn(new Person());
+        when(appointment.getProvider()).thenReturn(provider);
+    }
+
+    private void verifyHelperForSelfPrivilegeTest() {
+        verify(appointmentDao, never()).save(appointment);
+        verifyStatic();
+        Context.hasPrivilege("Manage Appointments");
+        verifyStatic();
+        Context.getMessageSourceService();
+        verifyStatic();
+        Context.getAuthenticatedUser();
+        messageSourceService.getMessage(exceptionCode, null, null);
+        verify(user).getPerson();
+        verify(provider).getPerson();
+        verify(appointment).getProvider();
     }
 
 }
