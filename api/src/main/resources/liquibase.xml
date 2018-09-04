@@ -470,4 +470,27 @@
             <column name="uuid" valueComputed="UUID()"/>
         </insert>
     </changeSet>
+    <changeSet id="201809041507" author="Saikumar, Neha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM role WHERE role = 'Appointments:ManageSelfAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add Manage Self Appointments role to manage self appointments.</comment>
+        <insert tableName="role">
+            <column name="role" value="Appointments:ManageSelfAppointments"/>
+            <column name="description" value="With this role, providers can book/edit appointments only for themselves."/>
+            <column name="uuid" valueComputed="UUID()"/>
+        </insert>
+    </changeSet>
+    <changeSet id="201809041510" author="Saikumar, Neha">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM role_privilege WHERE role = 'Appointments:ManageSelfAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add privileges to Manage Self Appointments role</comment>
+        <sqlFile path="addPrivilegesToManageSelfAppointmentsRole.sql"/>
+    </changeSet>
+
 </databaseChangeLog>
