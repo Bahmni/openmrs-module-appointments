@@ -8,6 +8,7 @@ import org.hibernate.sql.JoinType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentSearch;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -115,6 +116,15 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (endDate != null) {
             criteria.add(Restrictions.lt("endDateTime", endDate));
         }
+        return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> search(AppointmentSearch appointmentSearch) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        Date maxEndDate = new Date(appointmentSearch.getEndDate().getTime() + TimeUnit.DAYS.toMillis(1));
+        criteria.add(Restrictions.between("startDateTime", appointmentSearch.getStartDate(), maxEndDate));
         return criteria.list();
     }
 }

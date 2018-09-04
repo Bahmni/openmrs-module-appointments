@@ -7,6 +7,7 @@ import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentSearch;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -38,7 +39,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
         assertEquals(9, allAppointmentServices.size());
     }
-    
+
     @Test
     public void shouldGetAllNonVoidedAppointmentsForDate() throws Exception {
         Date forDate = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
@@ -158,5 +159,18 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
         assertEquals(1, searchedAppointmentList.size());
+    }
+
+    @Test
+    public void shouldReturnAllAppointmentsBetweenGivenDates() throws ParseException {
+        AppointmentSearch appointmentSearch = new AppointmentSearch();
+        Date startDate = DateUtil.convertToDate("2108-08-13T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-15T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearch.setStartDate(startDate);
+        appointmentSearch.setEndDate(endDate);
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearch);
+
+        assertEquals(5, appointments.size());
     }
 }
