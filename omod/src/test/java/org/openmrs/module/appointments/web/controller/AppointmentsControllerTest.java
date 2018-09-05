@@ -3,15 +3,19 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.Patient;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentSearch;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -23,11 +27,21 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AppointmentsControllerTest {
 
     @Mock
@@ -35,7 +49,6 @@ public class AppointmentsControllerTest {
 
     @Mock
     private AppointmentMapper appointmentMapper;
-
 
     @InjectMocks
     private AppointmentsController appointmentsController;
@@ -136,5 +149,30 @@ public class AppointmentsControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
+    @Test
+    public void shouldGetAppointmentsBetweenGivenDateRange() {
+        AppointmentSearch appointmentSearch = new AppointmentSearch();
+        ArrayList<Appointment> appointments = new ArrayList<>();
+        ArrayList<AppointmentDefaultResponse> expectedResponse = new ArrayList<>();
+        when(appointmentsService.search(appointmentSearch)).thenReturn(appointments);
+        when(appointmentMapper.constructResponse(appointments)).thenReturn(expectedResponse);
+
+        List<AppointmentDefaultResponse> actualResponse = appointmentsController.search(appointmentSearch);
+
+        verify(appointmentsService, times(1)).search(appointmentSearch);
+        verify(appointmentMapper, times(1)).constructResponse(appointments);
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenAppointmentsServiceSearchMethodReturnsNull() {
+        AppointmentSearch appointmentSearch = new AppointmentSearch();
+        when(appointmentsService.search(appointmentSearch)).thenReturn(null);
+
+        appointmentsController.search(appointmentSearch);
+
+        verify(appointmentsService, times(1)).search(appointmentSearch);
+        verify(appointmentMapper, never()).constructResponse(anyListOf(Appointment.class));
+    }
 
 }

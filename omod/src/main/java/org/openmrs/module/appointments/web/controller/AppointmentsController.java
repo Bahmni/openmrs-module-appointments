@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentSearch;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -14,6 +15,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.validation.Valid;
+import java.util.List;
+
+import static java.util.Objects.isNull;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -70,4 +81,13 @@ public class AppointmentsController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.POST, value = "search")
+    @ResponseBody
+    public List<AppointmentDefaultResponse> search(@Valid @RequestBody AppointmentSearch appointmentSearch) {
+        List<Appointment> appointments = appointmentsService.search(appointmentSearch);
+        if(isNull(appointments)){
+            throw new RuntimeException("Either StartDate or EndDate not provided");
+        }
+        return appointmentMapper.constructResponse(appointments);
+    }
 }
