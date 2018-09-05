@@ -11,6 +11,11 @@ import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentSearch;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
@@ -29,6 +34,8 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+
+import static java.util.Objects.isNull;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
@@ -206,6 +213,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
         } else
             throw new APIException("No status change actions to undo");
+    }
+
+    @Override
+    public List<Appointment> search(AppointmentSearch appointmentSearch) {
+        if(isNull(appointmentSearch.getStartDate()) || isNull(appointmentSearch.getEndDate())){
+            return null;
+        }
+        return appointmentDao.search(appointmentSearch);
     }
 
     @Override
