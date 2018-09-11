@@ -103,7 +103,7 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 	}
 
 	@Test
-	public void shouldNotChangeStatusFromScheduledToScheduled() throws Exception {
+	public void shouldNotChangeStatusFromScheduledToScheduled() {
 		appointment.setStatus(AppointmentStatus.Scheduled);
 		List<String> errors = new ArrayList<>();
 		validator.validate(appointment, AppointmentStatus.Scheduled, errors);
@@ -113,13 +113,11 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 	}
 
 	@Test
-	public void shouldNotChangeStatusFromCheckedInToScheduled() throws Exception {
+	public void shouldChangeStatusFromCheckedInToScheduled() {
 		appointment.setStatus(AppointmentStatus.CheckedIn);
 		List<String> errors = new ArrayList<>();
 		validator.validate(appointment, AppointmentStatus.Scheduled, errors);
-		assertEquals(1, errors.size());
-		String message = "Appointment status can not be changed from " + appointment.getStatus() + " to "+ AppointmentStatus.Scheduled;
-		assertEquals(message, errors.get(0));
+		assertEquals(0, errors.size());
 	}
 
 	@Test
@@ -133,13 +131,11 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 	}
 
 	@Test
-	public void shouldNotChangeStatusFromCompletedToScheduled() throws Exception {
+	public void shouldChangeStatusFromCompletedToScheduled() {
 		appointment.setStatus(AppointmentStatus.Completed);
 		List<String> errors = new ArrayList<>();
 		validator.validate(appointment, AppointmentStatus.Scheduled, errors);
-		assertEquals(1, errors.size());
-		String message = "Appointment status can not be changed from " + appointment.getStatus() + " to "+ AppointmentStatus.Scheduled;
-		assertEquals(message, errors.get(0));
+		assertEquals(0, errors.size());
 	}
 
 	@Test
@@ -183,13 +179,11 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 	}
 
 	@Test
-	public void shouldNotChangeStatusFromCancelledToScheduled() throws Exception {
+	public void shouldChangeStatusFromCancelledToScheduled() throws Exception {
 		appointment.setStatus(AppointmentStatus.Cancelled);
 		List<String> errors = new ArrayList<>();
 		validator.validate(appointment, AppointmentStatus.Scheduled, errors);
-		assertEquals(1, errors.size());
-		String message = "Appointment status can not be changed from " + appointment.getStatus() + " to "+ AppointmentStatus.Scheduled;
-		assertEquals(message, errors.get(0));
+		assertEquals(0, errors.size());
 	}
 
 	@Test
@@ -233,13 +227,11 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 	}
 
 	@Test
-	public void shouldNotChangeStatusFromMissedToScheduled() throws Exception {
+	public void shouldChangeStatusFromMissedToScheduled() throws Exception {
 		appointment.setStatus(AppointmentStatus.Missed);
 		List<String> errors = new ArrayList<>();
 		validator.validate(appointment, AppointmentStatus.Scheduled, errors);
-		assertEquals(1, errors.size());
-		String message = "Appointment status can not be changed from " + appointment.getStatus() + " to "+ AppointmentStatus.Scheduled;
-		assertEquals(message, errors.get(0));
+		assertEquals(0, errors.size());
 	}
 
 	@Test
