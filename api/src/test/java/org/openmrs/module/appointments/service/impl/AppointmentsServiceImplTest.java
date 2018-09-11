@@ -52,17 +52,18 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
 
+    private static final String RESET_APPOINTMENT_STATUS_PRIVILEGE = "Reset Appointment Status";
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -480,6 +481,7 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, never()).search(appointmentSearchRequest);
         assertNull(actualAppointments);
     }
+
     @Test
     public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenEndDateIsNull() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
@@ -491,5 +493,25 @@ public class AppointmentsServiceImplTest {
 
         verify(appointmentDao, never()).search(appointmentSearchRequest);
         assertNull(actualAppointments);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserWithoutResetAppointmentStatusPrivilegeTriesToFromMissedToScheduled() {
+        String exceptionMessage = "exception message";
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Missed);
+        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS_PRIVILEGE)).thenReturn(false);
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        when(messageSourceService.getMessage(any(), any(), any())).thenReturn(exceptionMessage);
+
+        try {
+            expectedException.expect(APIAuthenticationException.class);
+            expectedException.expectMessage(exceptionMessage);
+            appointmentsService.changeStatus(appointment, "Scheduled", null);
+        } finally {
+            verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS_PRIVILEGE}, null);
+            verifyStatic();
+            Context.hasPrivilege(RESET_APPOINTMENT_STATUS_PRIVILEGE);
+        }
     }
 }

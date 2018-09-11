@@ -40,6 +40,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final int EMPTY_SET_SIZE = 0;
     private Log log = LogFactory.getLog(this.getClass());
+    private static final String RESET_APPOINTMENT_STATUS = "Reset Appointment Status";
+    private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
 
     AppointmentDao appointmentDao;
 
@@ -172,21 +174,24 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
-                    new Object[] { MANAGE_APPOINTMENTS }, null));
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{MANAGE_APPOINTMENTS}, null));
+        }
+        AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
+        if (appointmentStatus == AppointmentStatus.Scheduled && !Context.hasPrivilege(RESET_APPOINTMENT_STATUS)) {
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{RESET_APPOINTMENT_STATUS}, null));
         }
         List<String> errors = new ArrayList<>();
-        AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         validateStatusChange(appointment, appointmentStatus, errors);
-        if(errors.isEmpty()) {
+        if (errors.isEmpty()) {
             appointment.setStatus(appointmentStatus);
             appointmentDao.save(appointment);
-            String notes = onDate != null ? onDate.toInstant().toString(): null;
+            String notes = onDate != null ? onDate.toInstant().toString() : null;
             createEventInAppointmentAudit(appointment, notes);
-        }
-        else {
+        } else {
             String message = StringUtils.join(errors, "\n");
             throw new APIException(message);
         }
