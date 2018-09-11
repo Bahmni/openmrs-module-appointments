@@ -22,10 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -51,7 +48,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 });
         assertEquals(7, asResponses.size());
     }
-    
+
     @Test
     public void should_GetAllAppointmentsForDate() throws Exception {
         List<AppointmentDefaultResponse> asResponses
@@ -301,6 +298,17 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertNotNull(response);
         assertEquals(400, response.getStatus());
         assertTrue(response.getContentAsString().contains("No status change actions to undo"));
+    }
+
+    @Test
+    public void shouldResetMissedAppointmentToScheduledStateWhenUserHasResetAppointmentStatusPrivilege() throws Exception {
+        String appointmentUuid = "75504r42-3ca8-11e3-bf2b-0800271c13555";
+        String content = "{ \"toStatus\": \"Scheduled\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/" + appointmentUuid + "/changeStatus", content));
+
+        assertEquals(200, response.getStatus());
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals(appointmentByUuid.getStatus().toString(), "Scheduled");
     }
 
 }
