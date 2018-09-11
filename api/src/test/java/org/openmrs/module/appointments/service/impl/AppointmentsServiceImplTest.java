@@ -427,7 +427,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
         expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.changeStatus(appointment, null, null);
+        appointmentsService.changeStatus(appointment, "Scheduled", null);
     }
 
     @Test
