@@ -19,6 +19,9 @@
     <person person_id="5" uuid="5631b434-78aa-102b-91a0-001e378e0012" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
     <person_name person_name_id="5" preferred="true" person_id="5" given_name="Manage" middle_name="Own" family_name="User" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915154444"/>
 
+    <person person_id="6" uuid="5631b434-78aa-102b-91a0-001e378e0013" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
+    <person_name person_name_id="6" preferred="true" person_id="6" given_name="Reset" middle_name="Appointment" family_name="Status" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915155554"/>
+
     <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module"/>
     <privilege privilege="Manage Appointments" description="Able to manage Appointments in Appointments module"/>
     <privilege privilege="View Appointment Services" description="Able to view Services in Appointments module"/>
@@ -26,12 +29,14 @@
     <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module"/>
     <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
     <privilege privilege="Get Providers" description="Able to view Providers"/>
+    <privilege privilege="Reset Appointment Status" description="Able to reset the status of appointments back to scheduled"/>
 
 
     <role role="Appointment: FullAccess" description="To allow full access to Appointments module" uuid="3480cb6d-c551-46c8-8d3a-96dc33d109fb"/>
     <role role="Appointment: ReadOnly" description="To allow only view access to Appointments module" uuid="3480cb6d-c121-46c8-8d3a-96dc33d109fb"/>
     <role role="Appointment: Manage" description="To allow managing of appointments in Appointments module" uuid="3480cb6d-c121-46c8-8d3a-96dc33d109fc"/>
     <role role="Appointment: Own" description="To allow managing of own appointments in Appointments module" uuid="3480cb6d-c121-46c8-8d3a-96dc33d109fd"/>
+    <role role="Appointment: Reset" description="To allow resetting status of appointments" uuid="3480cb6d-d121-46c8-8d3a-96dc33d109fd"/>
     <role_privilege role="Appointment: FullAccess" privilege="View Appointments"/>
     <role_privilege role="Appointment: FullAccess" privilege="Manage Appointments"/>
     <role_privilege role="Appointment: FullAccess" privilege="View Appointment Services"/>
@@ -42,6 +47,7 @@
     <role_privilege role="Appointment: Manage" privilege="View Appointments"/>
     <role_privilege role="Appointment: Manage" privilege="View Appointment Services"/>
     <role_privilege role="Appointment: Own" privilege="Manage Own Appointments"/>
+    <role_privilege role="Appointment: Reset" privilege="Reset Appointment Status"/>
 
     <role_privilege role="Appointment: FullAccess" privilege="Get Providers"/>
     <role_privilege role="Appointment: Manage" privilege="Get Providers"/>
@@ -60,6 +66,11 @@
     <user_role user_id="102" role="Appointment: ReadOnly"/>
 
     <users user_id="103" person_id="4" system_id="1-8" username="no-privilege-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1299d442-e137-11de-babe-001e378eb670"/>
+
+    <users user_id="105" person_id="6" system_id="1-8" username="reset-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1010d432-e136-11de-babe-001e378ev672"/>
+    <user_role user_id="105" role="Appointment: Reset"/>
+    <user_role user_id="105" role="Appointment: Manage"/>
+
 </dataset>
 
 
