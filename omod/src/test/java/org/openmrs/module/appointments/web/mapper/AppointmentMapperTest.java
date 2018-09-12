@@ -5,6 +5,8 @@ import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+
+import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,8 +24,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.*;
 
 import static org.junit.Assume.assumeTrue;
 import static org.mockito.Matchers.anyString;
@@ -32,8 +33,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.openmrs.module.appointments.web.contract.AppointmentQuery;
-import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -115,7 +114,7 @@ public class AppointmentMapperTest {
 
     @Test
     public void shouldGetAppointmentFromPayload() throws Exception {
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         assertNotNull(appointment);
         verify(patientService, times(1)).getPatientByUuid(appointmentRequest.getPatientUuid());
@@ -124,7 +123,7 @@ public class AppointmentMapperTest {
         assertEquals(service, appointment.getService());
         assertEquals(serviceType, appointment.getServiceType());
         verify(providerService, times(1)).getProviderByUuid(appointmentRequest.getProviderUuid());
-        assertEquals(provider, appointment.getProvider());
+        assertEquals(provider, appointment.getProviders().iterator().next().getProvider());
         verify(locationService, times(1)).getLocationByUuid(appointmentRequest.getLocationUuid());
         assertEquals(location, appointment.getLocation());
         assertEquals(appointmentRequest.getStartDateTime(), appointment.getStartDateTime());
@@ -136,7 +135,7 @@ public class AppointmentMapperTest {
 
     @Test
     public void shouldNotSearchForExistingAppointmentWhenPayLoadUuidIsNull() throws Exception {
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setUuid(null);
         appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, never()).getAppointmentByUuid(anyString());
@@ -148,7 +147,7 @@ public class AppointmentMapperTest {
         Appointment existingAppointment = createAppointment();
         existingAppointment.setUuid(appointmentUuid);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setUuid(appointmentUuid);
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
@@ -156,7 +155,7 @@ public class AppointmentMapperTest {
         assertEquals(appointmentUuid, appointment.getUuid());
         assertEquals(service, appointment.getService());
         assertEquals(serviceType, appointment.getServiceType());
-        assertEquals(provider, appointment.getProvider());
+        assertEquals(provider, appointment.getProviders().iterator().next().getProvider());
         assertEquals(location, appointment.getLocation());
         assertEquals(appointmentRequest.getStartDateTime(), appointment.getStartDateTime());
         assertEquals(appointmentRequest.getEndDateTime(), appointment.getEndDateTime());
@@ -171,7 +170,7 @@ public class AppointmentMapperTest {
         existingAppointment.setUuid(appointmentUuid);
         existingAppointment.setServiceType(serviceType2);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setServiceTypeUuid(serviceType2.getUuid());
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
@@ -180,7 +179,7 @@ public class AppointmentMapperTest {
         assertEquals(appointmentUuid, appointment.getUuid());
         assertEquals(service, appointment.getService());
         assertEquals(serviceType2, appointment.getServiceType());
-        assertEquals(provider, appointment.getProvider());
+        assertEquals(provider, appointment.getProviders().iterator().next().getProvider());
         assertEquals(location, appointment.getLocation());
         assertEquals(appointmentRequest.getStartDateTime(), appointment.getStartDateTime());
         assertEquals(appointmentRequest.getEndDateTime(), appointment.getEndDateTime());
@@ -195,7 +194,7 @@ public class AppointmentMapperTest {
         existingAppointment.setUuid(appointmentUuid);
         existingAppointment.setServiceType(serviceType2);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setServiceTypeUuid(null);
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
@@ -211,7 +210,7 @@ public class AppointmentMapperTest {
         Appointment existingAppointment = createAppointment();
         existingAppointment.setUuid(appointmentUuid);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
-        AppointmentRequest appointmentRequest = createAppointmentPayload();
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setUuid(appointmentUuid);
         appointmentRequest.setPatientUuid("newPatientUuid");
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
@@ -241,8 +240,8 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
         assertEquals(appointment.getServiceType().getDuration(), response.getServiceType().get("duration"));
-        assertEquals(appointment.getProvider().getName(), response.getProvider().get("name"));
-        assertEquals(appointment.getProvider().getUuid(), response.getProvider().get("uuid"));
+        assertEquals(appointment.getProviders().iterator().next().getProvider().getName(), response.getProviders().iterator().next().getName());
+        assertEquals(appointment.getProviders().iterator().next().getProvider().getUuid(), response.getProviders().iterator().next().getUuid());
         assertEquals(appointment.getLocation().getName(), response.getLocation().get("name"));
         assertEquals(appointment.getLocation().getUuid(), response.getLocation().get("uuid"));
         assertEquals(appointment.getStartDateTime(), response.getStartDateTime());
@@ -269,8 +268,8 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
         assertEquals(appointment.getServiceType().getDuration(), response.getServiceType().get("duration"));
-        assertEquals(appointment.getProvider().getName(), response.getProvider().get("name"));
-        assertEquals(appointment.getProvider().getUuid(), response.getProvider().get("uuid"));
+        assertEquals(appointment.getProviders().iterator().next().getProvider().getName(), response.getProviders().iterator().next().getName());
+        assertEquals(appointment.getProviders().iterator().next().getProvider().getUuid(), response.getProviders().iterator().next().getUuid());
         assertEquals(appointment.getLocation().getName(), response.getLocation().get("name"));
         assertEquals(appointment.getLocation().getUuid(), response.getLocation().get("uuid"));
         assertEquals(appointment.getStartDateTime(), response.getStartDateTime());
@@ -323,7 +322,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getComments(), response.getComments());
     }
     
-    private AppointmentRequest createAppointmentPayload() throws ParseException {
+    private AppointmentRequest createAppointmentRequest() throws ParseException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
         appointmentRequest.setPatientUuid("patientUuid");
         appointmentRequest.setServiceUuid("serviceUuid");
@@ -338,6 +337,13 @@ public class AppointmentMapperTest {
         appointmentRequest.setEndDateTime(endDate);
         appointmentRequest.setAppointmentKind("Scheduled");
         appointmentRequest.setComments("Initial Consultation");
+
+        List<AppointmentProviderDetail> providerDetails = new ArrayList<>();
+        AppointmentProviderDetail providerDetail = new AppointmentProviderDetail();
+        providerDetail.setUuid("providerUuid");
+        providerDetail.setResponse("ACCEPTED");
+        providerDetails.add(providerDetail);
+        appointmentRequest.setProviders(providerDetails);
         
         return appointmentRequest;
     }
@@ -358,7 +364,17 @@ public class AppointmentMapperTest {
         appointment.setService(service);
         appointment.setServiceType(serviceType);
         appointment.setLocation(location);
-        appointment.setProvider(provider);
+
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        appointment.setProviders(appProviders);
+
+        appointment.getProviders().add(appointmentProvider);
+
         String startDateTime = "2017-03-15T16:57:09.0Z";
         Date startDate = DateUtil.convertToDate(startDateTime, DateUtil.DateFormatType.UTC);
         appointment.setStartDateTime(startDate);
@@ -402,5 +418,68 @@ public class AppointmentMapperTest {
         assertEquals("patientUuid", appointment.getPatient().getUuid());
         assertEquals("providerUuid", appointment.getProvider().getUuid());
         assertEquals("Completed", appointment.getStatus().toString());
+    }
+
+    @Test
+    public void shouldMapAppointmentProvider() {
+        AppointmentProviderDetail providerDetail = new AppointmentProviderDetail();
+        providerDetail.setResponse("ACCEPTED");
+        providerDetail.setUuid("providerUuid");
+
+        Provider provider = new Provider();
+        provider.setUuid("providerUuid");
+        when(providerService.getProviderByUuid("providerUuid")).thenReturn(provider);
+
+        AppointmentProvider appointmentProvider = appointmentMapper.mapAppointmentProvider(providerDetail);
+        assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentProvider.getResponse());
+    }
+
+    @Test
+    public void shouldMapResponses() {
+        assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentMapper.mapProviderResponse("ACCEPTED"));
+        assertEquals(AppointmentProviderResponse.AWAITING, appointmentMapper.mapProviderResponse("AWAITING"));
+        assertEquals(AppointmentProviderResponse.CANCELLED, appointmentMapper.mapProviderResponse("CANCELLED"));
+        assertEquals(AppointmentProviderResponse.REJECTED, appointmentMapper.mapProviderResponse("REJECTED"));
+        assertEquals(AppointmentProviderResponse.TENTATIVE, appointmentMapper.mapProviderResponse("TENTATIVE"));
+    }
+
+
+    @Test
+    public void shouldMapProviderDetailsForAppointment() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertNotNull(appointment);
+        verify(patientService, times(1)).getPatientByUuid(appointmentRequest.getPatientUuid());
+        assertEquals(this.patient, appointment.getPatient());
+        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
+        assertEquals(service, appointment.getService());
+        assertEquals(serviceType, appointment.getServiceType());
+
+        AppointmentProvider appointmentProvider = appointment.getProviders().iterator().next();
+        assertEquals(provider.getUuid(), appointmentProvider.getProvider().getUuid());
+        assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentProvider.getResponse());
+    }
+
+    @Test
+    public void shouldCancelProvidersOfExistingAppointment() throws Exception {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+        existingAppointment.setServiceType(serviceType2);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        //removing existing providers
+        appointmentRequest.setProviders(Collections.EMPTY_LIST);
+        appointmentRequest.setUuid(appointmentUuid);
+        appointmentRequest.setServiceTypeUuid(serviceType2.getUuid());
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        AppointmentProvider appointmentProvider = appointment.getProviders().iterator().next();
+        assertEquals(provider.getUuid(), appointmentProvider.getProvider().getUuid());
+        assertEquals(AppointmentProviderResponse.CANCELLED, appointmentProvider.getResponse());
+
     }
 }

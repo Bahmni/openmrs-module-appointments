@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.openmrs.module.appointments.model.AppointmentService;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 public class AppointmentServicesController {
 
     @Autowired
-    private AppointmentServiceService appointmentServiceService;
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
@@ -25,11 +25,11 @@ public class AppointmentServicesController {
     @RequestMapping(method = RequestMethod.GET, value="/{uuid}")
     @ResponseBody
     public AppointmentServiceFullResponse getAppointmentServiceByUuid(@PathVariable("uuid") String uuid)  {
-        AppointmentService appointmentService = appointmentServiceService.getAppointmentServiceByUuid(uuid);
-        if (appointmentService == null) {
+        AppointmentServiceDefinition appointmentServiceDef = appointmentServiceDefinitionService.getAppointmentServiceByUuid(uuid);
+        if (appointmentServiceDef == null) {
             throw new RuntimeException("Appointment Service does not exist");
         }
-        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentService);
+        AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDef);
         return appointmentServiceFullResponse;
     }
 }

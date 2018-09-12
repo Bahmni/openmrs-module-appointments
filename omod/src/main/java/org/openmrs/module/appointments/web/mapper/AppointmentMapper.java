@@ -79,7 +79,7 @@ public class AppointmentMapper {
         }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
-        appointment.setProvider(identifyAppointmentProvider(appointmentRequest.getProviderUuid()));
+        //appointment.setProvider(identifyAppointmentProvider(appointmentRequest.getProviderUuid()));
         appointment.setLocation(identifyAppointmentLocation(appointmentRequest.getLocationUuid()));
         appointment.setStartDateTime(appointmentRequest.getStartDateTime());
         appointment.setEndDateTime(appointmentRequest.getEndDateTime());
@@ -125,7 +125,7 @@ public class AppointmentMapper {
                 } else {
                     providers.forEach(existingAppointmentProvider -> {
                         //TODO: if currentUser is same person as provider, set ACCEPTED
-                        existingAppointmentProvider.setResponse(withResponse(providerDetail.getResponse()));
+                        existingAppointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
                     });
                 }
             }
@@ -140,12 +140,12 @@ public class AppointmentMapper {
         }
         AppointmentProvider appointmentProvider = new AppointmentProvider();
         appointmentProvider.setProvider(provider);
-        appointmentProvider.setResponse(withResponse(providerDetail.getResponse()));
+        appointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
     }
 
-    private AppointmentProviderResponse withResponse(String response) {
+    public AppointmentProviderResponse mapProviderResponse(String response) {
         String namedEnum = StringUtils.isEmpty(response) ? AppointmentProviderResponse.ACCEPTED.toString()  : response.toUpperCase();
         //TODO: validation if not valid enum string
         return AppointmentProviderResponse.valueOf(namedEnum);
@@ -176,7 +176,7 @@ public class AppointmentMapper {
         response.setPatient(createPatientMap(a.getPatient()));
         response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
-        response.setProvider(createProviderMap(a.getProvider()));
+        //response.setProvider(createProviderMap(a.getProvider()));
         response.setLocation(createLocationMap(a.getLocation()));
         response.setStartDateTime(a.getStartDateTime());
         response.setEndDateTime(a.getEndDateTime());
@@ -214,16 +214,6 @@ public class AppointmentMapper {
         }
         return serviceTypeMap;
     }
-    
-    private Map createProviderMap(Provider p) {
-        Map providerMap = null;
-        if (p != null) {
-            providerMap = new HashMap();
-            providerMap.put("name", p.getName());
-            providerMap.put("uuid", p.getUuid());
-        }
-        return providerMap;
-    }
 
     private Map createLocationMap(Location l) {
         Map locationMap = null;
@@ -246,7 +236,7 @@ public class AppointmentMapper {
     public AppointmentProvider mapAppointmentProvider(AppointmentProviderDetail providerDetail) {
         AppointmentProvider appointmentProvider = new AppointmentProvider();
         appointmentProvider.setProvider(identifyAppointmentProvider(providerDetail.getUuid()));
-        appointmentProvider.setResponse(withResponse(providerDetail.getResponse()));
+        appointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
     }

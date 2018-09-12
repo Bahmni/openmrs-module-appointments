@@ -154,7 +154,6 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         Appointment appointment = new Appointment();
         appointment.setPatient(allAppointments.get(0).getPatient());
         appointment.setLocation(allAppointments.get(0).getLocation());
-        appointment.setProvider(allAppointments.get(0).getProvider());
         appointment.setService(allAppointments.get(0).getService());
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);

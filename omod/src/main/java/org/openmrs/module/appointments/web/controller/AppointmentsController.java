@@ -40,13 +40,13 @@ public class AppointmentsController {
     private Log log = LogFactory.getLog(this.getClass());
 
     @RequestMapping(method = RequestMethod.GET, value="/{uuid}")
-    @ResponseBody
-    public AppointmentDefaultResponse getAppointmentByUuid(@PathVariable(value = "uuid") String uuid)  {
+    public ResponseEntity<AppointmentDefaultResponse> getAppointmentByUuid(@PathVariable(value = "uuid") String uuid)  {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
         if (appointment == null) {
-            throw new RuntimeException("Appointment does not exist");
+            log.error("Could not identify appointment with uuid:" + uuid);
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return appointmentMapper.constructResponse(appointment);
+        return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
     }
 
     @RequestMapping(method = RequestMethod.GET)
@@ -69,44 +69,5 @@ public class AppointmentsController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-
-    @RequestMapping(method = RequestMethod.POST, value= "/{uuid}/changeStatus")
-    @ResponseBody
-    public ResponseEntity<Object> transitionAppointment(
-            @PathVariable("uuid")String appointmentUuid,
-            @RequestBody Map<String, String> statusDetails) throws ParseException {
-        try {
-            String toStatus = statusDetails.get("toStatus");
-            Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
-            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment != null){
-                appointmentsService.changeStatus(appointment, toStatus, onDate);
-                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-            }else
-                throw new RuntimeException("Appointment does not exist");
-        } catch (RuntimeException e) {
-            log.error("Runtime error while trying to update appointment status", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/undoStatusChange")
-    @ResponseBody
-    public ResponseEntity<Object> undoStatusChange(@PathVariable("appointmentUuid")String appointmentUuid) throws ParseException {
-        try{
-            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment == null){
-                throw new RuntimeException("Appointment does not exist");
-            }
-            appointmentsService.undoStatusChange(appointment);
-            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        } catch (RuntimeException e) {
-            log.error("Runtime error while trying to undo appointment status", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-
-
 
 }

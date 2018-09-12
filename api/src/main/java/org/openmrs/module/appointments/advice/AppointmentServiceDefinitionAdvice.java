@@ -1,12 +1,12 @@
 package org.openmrs.module.appointments.advice;
 
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class AppointmentServiceAdvice extends AbstractBaseAdvice {
+public class AppointmentServiceDefinitionAdvice extends AbstractBaseAdvice {
 
     private static final String TITLE = "Appointment Service";
     private static final String CATEGORY = "appointmentservice";
@@ -18,7 +18,7 @@ public class AppointmentServiceAdvice extends AbstractBaseAdvice {
     @Override
     protected String getContents(Object returnValue) {
         return getUrlPattern(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)
-                .replace("{uuid}", ((AppointmentService) returnValue).getUuid());
+                .replace("{uuid}", ((AppointmentServiceDefinition) returnValue).getUuid());
     }
 
     @Override

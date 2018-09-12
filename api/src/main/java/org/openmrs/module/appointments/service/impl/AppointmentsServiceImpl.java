@@ -82,6 +82,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentJson.put("serviceUuid", serviceUuid);
         String serviceTypeUuid = appointment.getServiceType() != null ? appointment.getServiceType().getUuid() : null;
         appointmentJson.put("serviceTypeUuid", serviceTypeUuid);
+        //TODO: Should check appointment.getProviders() instead
         String providerUuid = appointment.getProvider() != null ? appointment.getProvider().getUuid() : null;
         appointmentJson.put("providerUuid", providerUuid);
         String locationUuid = appointment.getLocation() != null ? appointment.getLocation().getUuid() : null;
@@ -105,6 +106,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
     }
 
+    /**
+     * TODO: refactor. How can a search by an appointment return a list of appointments?
+     * @param appointment
+     * @return
+     */
     @Override
     public List<Appointment> search(Appointment appointment) {
         List<Appointment> appointments = appointmentDao.search(appointment);
