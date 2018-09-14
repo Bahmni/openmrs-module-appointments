@@ -103,16 +103,6 @@ public class DefaultAppointmentStatusChangeValidatorTest {
     }
 
     @Test
-    public void shouldNotChangeStatusFromScheduledToScheduled() {
-        appointment.setStatus(AppointmentStatus.Scheduled);
-        List<String> errors = new ArrayList<>();
-        validator.validate(appointment, AppointmentStatus.Scheduled, errors);
-        assertEquals(1, errors.size());
-        String message = "Appointment status can not be changed from " + appointment.getStatus() + " to " + AppointmentStatus.Scheduled;
-        assertEquals(message, errors.get(0));
-    }
-
-    @Test
     public void shouldChangeStatusFromCheckedInToScheduled() {
         appointment.setStatus(AppointmentStatus.CheckedIn);
         List<String> errors = new ArrayList<>();

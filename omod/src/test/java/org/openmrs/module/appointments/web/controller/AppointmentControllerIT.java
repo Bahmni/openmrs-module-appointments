@@ -186,8 +186,8 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_throwExceptionForInvalidStatusChange() throws Exception {
-        String content = "{ \"toStatus\": \"Scheduled\"}";
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
+        String content = "{ \"toStatus\": \"Missed\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/75504r42-3ca8-11e3-bf2b-0800271c13555/changeStatus", content));
         assertNotNull(response);
         assertEquals(400, response.getStatus());
     }
