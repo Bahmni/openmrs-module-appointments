@@ -174,7 +174,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
-        throwAuthenticationExceptionIfNoProperPrivileges(appointment, appointmentStatus);
+        throwExceptionIfNoProperPrivileges(appointment, appointmentStatus);
         List<String> errors = new ArrayList<>();
         validateStatusChange(appointment, appointmentStatus, errors);
         if (errors.isEmpty()) {
@@ -188,15 +188,19 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }
     }
 
-    private void throwAuthenticationExceptionIfNoProperPrivileges(Appointment appointment, AppointmentStatus appointmentStatus) {
+    private void throwExceptionIfNoProperPrivileges(Appointment appointment, AppointmentStatus appointmentStatus) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[]{MANAGE_APPOINTMENTS}, null));
         }
-        if (appointmentStatus == AppointmentStatus.Scheduled && !Context.hasPrivilege(RESET_APPOINTMENT_STATUS_PRIVILEGE)) {
+        if (!isUserAllowedToResetStatus(appointmentStatus)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[]{RESET_APPOINTMENT_STATUS_PRIVILEGE}, null));
         }
+    }
+
+    private boolean isUserAllowedToResetStatus(AppointmentStatus appointmentStatus) {
+        return appointmentStatus != AppointmentStatus.Scheduled || Context.hasPrivilege(RESET_APPOINTMENT_STATUS_PRIVILEGE);
     }
 
     @Override
