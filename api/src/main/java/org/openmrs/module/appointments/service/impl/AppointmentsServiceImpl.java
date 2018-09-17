@@ -56,20 +56,24 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.appointmentAuditDao = appointmentAuditDao;
     }
 
-    private boolean validateUserAccess(Appointment appointment) {
-        if (Context.hasPrivilege(MANAGE_APPOINTMENTS_PRIVILEGE)) {
-            return true;
-        }
-        if (appointment.getProvider() != null && appointment.getProvider().getPerson() != null &&
-                !appointment.getProvider().getPerson().equals(Context.getAuthenticatedUser().getPerson())) {
-            return false;
-        }
-        return true;
+    private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
+        return Context.hasPrivilege(MANAGE_APPOINTMENTS_PRIVILEGE) ||
+                isAppointmentForNoProvider(appointment) ||
+                isCurrentUserSamePersonAsAppointmentProvider(appointment);
+    }
+
+    private boolean isAppointmentForNoProvider(Appointment appointment) {
+        return appointment.getProvider() == null || appointment.getProvider().getPerson() == null;
+    }
+
+    private boolean isCurrentUserSamePersonAsAppointmentProvider(Appointment appointment) {
+        return appointment.getProvider() != null && appointment.getProvider().getPerson() != null &&
+                appointment.getProvider().getPerson().equals(Context.getAuthenticatedUser().getPerson());
     }
 
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
-        if (!validateUserAccess(appointment)) {
+        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
                     new Object[] { MANAGE_APPOINTMENTS_PRIVILEGE }, null));
         }
@@ -159,7 +163,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
-        if (!validateUserAccess(appointment)) {
+        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
                     new Object[] { MANAGE_APPOINTMENTS_PRIVILEGE }, null));
         }
@@ -186,7 +190,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public void undoStatusChange(Appointment appointment) throws APIException{
-        if (!validateUserAccess(appointment)) {
+        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
                     new Object[] { MANAGE_APPOINTMENTS_PRIVILEGE }, null));
         }
