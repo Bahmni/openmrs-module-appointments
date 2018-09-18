@@ -36,8 +36,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     private String adminUserPassword;
     private String manageUser;
     private String manageUserPassword;
-    private String manageSelfUser;
-    private String manageSelfUserPassword;
+    private String manageOwnUser;
+    private String manageOwnUserPassword;
     private String readOnlyUser;
     private String readOnlyUserPassword;
     private String noPrivilegeUser;
@@ -62,8 +62,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         adminUserPassword = "P@ssw0rd";
         manageUser = "manage-user";
         manageUserPassword = "P@ssw0rd";
-        manageSelfUser = "manage-self-user";
-        manageSelfUserPassword = "test";
+        manageOwnUser = "manage-own-user";
+        manageOwnUserPassword = "test";
         readOnlyUser = "read-only-user";
         readOnlyUserPassword = "P@ssw0rd";
         noPrivilegeUser = "no-privilege-user";
@@ -73,8 +73,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test
-    public void shouldSaveAppointmentsOnlyIfUserHasManageSelfPrivilege() throws Exception {
-        Context.authenticate(manageSelfUser, manageSelfUserPassword);
+    public void shouldSaveAppointmentsOnlyIfUserHasManageOwnPrivilege() throws Exception {
+        Context.authenticate(manageOwnUser, manageOwnUserPassword);
         Appointment appointment = getSampleAppointment();
         assertNotNull(appointmentsService.validateAndSave(appointment));
     }
@@ -227,8 +227,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test
-    public void shouldBeAbleToChangeStatusIfUserHasManageSelfPrivilege() {
-        Context.authenticate(manageSelfUser, manageSelfUserPassword);
+    public void shouldBeAbleToChangeStatusIfUserHasManageOwnPrivilege() {
+        Context.authenticate(manageOwnUser, manageOwnUserPassword);
         appointmentsService.changeStatus(new Appointment(), "Completed", null);
     }
 
@@ -259,8 +259,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test(expected = APIException.class)
-    public void shouldBeAbleToUndoStatusChangeIfUserHasManageSelfPrivilege() {
-        Context.authenticate(manageSelfUser, manageSelfUserPassword);
+    public void shouldBeAbleToUndoStatusChangeIfUserHasManageOwnPrivilege() {
+        Context.authenticate(manageOwnUser, manageOwnUserPassword);
         Appointment appointment = new Appointment();
         appointment.setId(1);
         appointmentsService.undoStatusChange(appointment);

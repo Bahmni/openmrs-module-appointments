@@ -406,29 +406,29 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test(expected = APIAuthenticationException.class)
-    public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
-        setupForSelfPrivilegeAccess(exceptionCode);
+    public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
 
         appointmentsService.validateAndSave(appointment);
     }
 
     @Test(expected = APIAuthenticationException.class)
-    public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
-        setupForSelfPrivilegeAccess(exceptionCode);
+    public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
 
         appointmentsService.changeStatus(appointment, null, null);
     }
 
     @Test(expected = APIAuthenticationException.class)
-    public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlySelfPrivilegeAndProviderAndUserIsNotTheSamePerson() {
-        setupForSelfPrivilegeAccess(exceptionCode);
+    public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
 
         appointmentsService.undoStatusChange(appointment);
     }
 
-    private void setupForSelfPrivilegeAccess(String exceptionCode) {
+    private void setupForOwnPrivilegeAccess(String exceptionCode) {
         String exceptionMessage = "Exception message";
-        when(Context.hasPrivilege("Self Appointments")).thenReturn(true);
+        when(Context.hasPrivilege("manageOwnAppointments")).thenReturn(true);
         when(messageSourceService.getMessage(exceptionCode, null, null)).thenReturn(exceptionMessage);
         when(Context.getMessageSourceService()).thenReturn(messageSourceService);
         when(user.getPerson()).thenReturn(new Person());
