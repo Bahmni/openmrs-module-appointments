@@ -31,7 +31,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllAppointmentsInGivenDateRange() throws Exception {
         String responseBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
-                "\"endDate\":\"2108-08-14T18:30:00.000Z\"}";
+                "\"endDate\":\"2108-08-15T18:29:59.000Z\"}";
 
 
         List<AppointmentDefaultResponse> response = deserialize(

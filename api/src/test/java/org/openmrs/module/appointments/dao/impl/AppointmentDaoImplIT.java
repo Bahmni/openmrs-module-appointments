@@ -165,7 +165,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     public void shouldReturnAllAppointmentsBetweenGivenDates() throws ParseException {
         AppointmentSearch appointmentSearch = new AppointmentSearch();
         Date startDate = DateUtil.convertToDate("2108-08-13T18:30:00.0Z", DateUtil.DateFormatType.UTC);
-        Date endDate = DateUtil.convertToDate("2108-08-15T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
         appointmentSearch.setStartDate(startDate);
         appointmentSearch.setEndDate(endDate);
 
