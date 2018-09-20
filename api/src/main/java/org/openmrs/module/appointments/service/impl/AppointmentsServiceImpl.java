@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 
 @Transactional
@@ -63,11 +66,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     private boolean isAppointmentForNoProvider(Appointment appointment) {
-        return appointment.getProvider() == null || appointment.getProvider().getPerson() == null;
+        return isNull(appointment.getProvider()) || isNull(appointment.getProvider().getPerson());
     }
 
     private boolean isCurrentUserSamePersonAsAppointmentProvider(Appointment appointment) {
-        return appointment.getProvider() != null && appointment.getProvider().getPerson() != null &&
+        return nonNull(appointment.getProvider()) && nonNull(appointment.getProvider().getPerson()) &&
                 appointment.getProvider().getPerson().equals(Context.getAuthenticatedUser().getPerson());
     }
 
@@ -123,7 +126,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
-    
+
     private boolean isServiceOrServiceTypeVoided(Appointment appointment){
         return (appointment.getService() != null && appointment.getService().getVoided()) ||
                (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
@@ -256,7 +259,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
 
     private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
-        if(!CollectionUtils.isEmpty(statusChangeValidators)) {
+        if (!CollectionUtils.isEmpty(statusChangeValidators)) {
             for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
                 validator.validate(appointment, status, errors);
             }
