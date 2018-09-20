@@ -4,11 +4,11 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,56 +27,56 @@ public class AppointmentServiceMapper {
     SpecialityService specialityService;
 
     @Autowired
-    AppointmentServiceService appointmentServiceService;
+    AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    public AppointmentService getAppointmentServiceFromPayload(AppointmentServicePayload appointmentServicePayload) {
-        AppointmentService appointmentService;
-        if (!StringUtils.isBlank(appointmentServicePayload.getUuid())) {
-            appointmentService = appointmentServiceService.getAppointmentServiceByUuid(appointmentServicePayload.getUuid());
+    public AppointmentServiceDefinition fromDescription(AppointmentServiceDescription appointmentServiceDescription) {
+        AppointmentServiceDefinition appointmentServiceDefinition;
+        if (!StringUtils.isBlank(appointmentServiceDescription.getUuid())) {
+            appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentServiceDescription.getUuid());
         }else{
-            appointmentService = new AppointmentService();
+            appointmentServiceDefinition = new AppointmentServiceDefinition();
         }
-        appointmentService.setName(appointmentServicePayload.getName());
-        appointmentService.setDescription(appointmentServicePayload.getDescription());
-        appointmentService.setDurationMins(appointmentServicePayload.getDurationMins());
-        appointmentService.setStartTime(appointmentServicePayload.getStartTime());
-        appointmentService.setEndTime(appointmentServicePayload.getEndTime());
-        appointmentService.setMaxAppointmentsLimit(appointmentServicePayload.getMaxAppointmentsLimit());
-        appointmentService.setColor(appointmentServicePayload.getColor());
+        appointmentServiceDefinition.setName(appointmentServiceDescription.getName());
+        appointmentServiceDefinition.setDescription(appointmentServiceDescription.getDescription());
+        appointmentServiceDefinition.setDurationMins(appointmentServiceDescription.getDurationMins());
+        appointmentServiceDefinition.setStartTime(appointmentServiceDescription.getStartTime());
+        appointmentServiceDefinition.setEndTime(appointmentServiceDescription.getEndTime());
+        appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServiceDescription.getMaxAppointmentsLimit());
+        appointmentServiceDefinition.setColor(appointmentServiceDescription.getColor());
 
-        String locationUuid = appointmentServicePayload.getLocationUuid();
+        String locationUuid = appointmentServiceDescription.getLocationUuid();
         Location location = locationService.getLocationByUuid(locationUuid);
-        appointmentService.setLocation(location);
+        appointmentServiceDefinition.setLocation(location);
 
-        String specialityUuid = appointmentServicePayload.getSpecialityUuid();
+        String specialityUuid = appointmentServiceDescription.getSpecialityUuid();
         Speciality speciality = specialityService.getSpecialityByUuid(specialityUuid);
-        appointmentService.setSpeciality(speciality);
+        appointmentServiceDefinition.setSpeciality(speciality);
 
-        List<ServiceWeeklyAvailabilityPayload> availabilityPayload = appointmentServicePayload.getWeeklyAvailability();
+        List<ServiceWeeklyAvailabilityDescription> weeklyAvailabilities = appointmentServiceDescription.getWeeklyAvailability();
 
-        if(availabilityPayload != null) {
-            Set<ServiceWeeklyAvailability> availabilityList = availabilityPayload.stream()
-                    .map(avb -> constructServiceWeeklyAvailability(avb, appointmentService)).collect(Collectors.toSet());
-            appointmentService.setWeeklyAvailability(availabilityList);
+        if(weeklyAvailabilities != null) {
+            Set<ServiceWeeklyAvailability> availabilityList = weeklyAvailabilities.stream()
+                    .map(avb -> constructServiceWeeklyAvailability(avb, appointmentServiceDefinition)).collect(Collectors.toSet());
+            appointmentServiceDefinition.setWeeklyAvailability(availabilityList);
         }
         
-        if(appointmentServicePayload.getServiceTypes() != null) {
-            appointmentServicePayload.getServiceTypes()
-                    .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentService));
+        if(appointmentServiceDescription.getServiceTypes() != null) {
+            appointmentServiceDescription.getServiceTypes()
+                    .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentServiceDefinition));
         }
-        return appointmentService;
+        return appointmentServiceDefinition;
     }
 
-    private void constructAppointmentServiceTypes(AppointmentServiceTypePayload ast, AppointmentService appointmentService) {
+    private void constructAppointmentServiceTypes(AppointmentServiceTypeDescription ast, AppointmentServiceDefinition appointmentServiceDefinition) {
         AppointmentServiceType serviceType;
-        Set<AppointmentServiceType> existingServiceTypes = appointmentService.getServiceTypes(true);
+        Set<AppointmentServiceType> existingServiceTypes = appointmentServiceDefinition.getServiceTypes(true);
         if(ast.getUuid() != null)
             serviceType = getServiceTypeByUuid(existingServiceTypes, ast.getUuid());
         else
             serviceType = new AppointmentServiceType();
         serviceType.setName(ast.getName());
         serviceType.setDuration(ast.getDuration());
-        serviceType.setAppointmentService(appointmentService);
+        serviceType.setAppointmentServiceDefinition(appointmentServiceDefinition);
         if (ast.getVoided() != null) {
             setVoidedInfo(serviceType, ast.getVoidedReason());
         }
@@ -90,17 +90,17 @@ public class AppointmentServiceMapper {
         serviceType.setVoidedBy(Context.getAuthenticatedUser());
     }
 
-    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityPayload avb, AppointmentService appointmentService) {
+    private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityDescription avb, AppointmentServiceDefinition appointmentServiceDefinition) {
         ServiceWeeklyAvailability availability;
         if(avb.getUuid() != null)
-            availability = getAvailabilityByUuid(appointmentService.getWeeklyAvailability(), avb.getUuid());
+            availability = getAvailabilityByUuid(appointmentServiceDefinition.getWeeklyAvailability(), avb.getUuid());
         else
             availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(avb.getDayOfWeek());
         availability.setStartTime(avb.getStartTime());
         availability.setEndTime(avb.getEndTime());
         availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
-        availability.setService(appointmentService);
+        availability.setService(appointmentServiceDefinition);
         availability.setVoided(avb.isVoided());
 
         return availability;
@@ -116,8 +116,8 @@ public class AppointmentServiceMapper {
                 .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
-    public List<AppointmentServiceDefaultResponse> constructDefaultResponseForServiceList(List<AppointmentService> appointmentServices) {
-        return appointmentServices.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
+    public List<AppointmentServiceDefaultResponse> constructDefaultResponseForServiceList(List<AppointmentServiceDefinition> appointmentServiceDefinitions) {
+        return appointmentServiceDefinitions.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentServiceDefaultResponse())).collect(Collectors.toList());
     }
 
     private Map constructServiceTypeResponse(AppointmentServiceType serviceType) {
@@ -128,11 +128,11 @@ public class AppointmentServiceMapper {
         return serviceTypeMap;
     }
 
-    public List<AppointmentServiceFullResponse> constructFullResponseForServiceList(List<AppointmentService> appointmentServices) {
-        return appointmentServices.stream().map(as -> this.constructResponse(as)).collect(Collectors.toList());
+    public List<AppointmentServiceFullResponse> constructFullResponseForServiceList(List<AppointmentServiceDefinition> appointmentServiceDefinitions) {
+        return appointmentServiceDefinitions.stream().map(as -> this.constructResponse(as)).collect(Collectors.toList());
     }
 
-    public AppointmentServiceFullResponse constructResponse(AppointmentService service) {
+    public AppointmentServiceFullResponse constructResponse(AppointmentServiceDefinition service) {
         AppointmentServiceFullResponse response = new AppointmentServiceFullResponse();
         mapToDefaultResponse(service, response);
         Set<ServiceWeeklyAvailability> serviceWeeklyAvailability = service.getWeeklyAvailability();
@@ -146,11 +146,11 @@ public class AppointmentServiceMapper {
         return response;
     }
 
-    public AppointmentServiceDefaultResponse constructDefaultResponse(AppointmentService appointmentService){
-        return mapToDefaultResponse(appointmentService, new AppointmentServiceDefaultResponse());
+    public AppointmentServiceDefaultResponse constructDefaultResponse(AppointmentServiceDefinition appointmentServiceDefinition){
+        return mapToDefaultResponse(appointmentServiceDefinition, new AppointmentServiceDefaultResponse());
     }
     
-    private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentService as, AppointmentServiceDefaultResponse asResponse) {
+    private AppointmentServiceDefaultResponse mapToDefaultResponse(AppointmentServiceDefinition as, AppointmentServiceDefaultResponse asResponse) {
         asResponse.setUuid(as.getUuid());
         asResponse.setAppointmentServiceId(as.getAppointmentServiceId());
         asResponse.setName(as.getName());

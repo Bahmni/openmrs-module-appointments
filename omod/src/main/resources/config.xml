@@ -18,11 +18,12 @@
 
 	<mappingFiles>
 		Speciality.hbm.xml
-		AppointmentService.hbm.xml
+		AppointmentServiceDefinition.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
 		Appointment.hbm.xml
 		AppointmentAudit.hbm.xml
 		AppointmentServiceType.hbm.xml
+		AppointmentProvider.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -43,7 +44,7 @@
 
 	<advice>
 		<point>org.openmrs.module.appointments.service.AppointmentServiceService</point>
-		<class>org.openmrs.module.appointments.advice.AppointmentServiceAdvice</class>
+		<class>org.openmrs.module.appointments.advice.AppointmentServiceDefinitionAdvice</class>
 	</advice>
 
 	<advice>

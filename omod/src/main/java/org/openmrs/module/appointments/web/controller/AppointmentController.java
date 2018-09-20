@@ -1,10 +1,13 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.service.AppointmentServiceService;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
@@ -29,11 +32,13 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointment")
 public class AppointmentController {
 
+    private Log log = LogFactory.getLog(this.getClass());
+
     @Autowired
     private AppointmentsService appointmentsService;
 
     @Autowired
-    private AppointmentServiceService appointmentServiceService;
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -60,12 +65,13 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> createAppointment(@Valid @RequestBody AppointmentPayload appointmentPayload) throws IOException {
+    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
-            Appointment appointment = appointmentMapper.getAppointmentFromPayload(appointmentPayload);
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -73,7 +79,7 @@ public class AppointmentController {
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody
     public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(@RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
-        AppointmentServiceType appointmentServiceType = appointmentServiceService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        AppointmentServiceType appointmentServiceType = appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
         List<Appointment> appointments = appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         return appointmentMapper.constructResponse(appointments);
     }
@@ -85,11 +91,11 @@ public class AppointmentController {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        List<AppointmentService> appointmentServices = appointmentServiceService.getAllAppointmentServices(false);
-        for (AppointmentService appointmentService : appointmentServices) {
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        for (AppointmentServiceDefinition appointmentServiceDefinition : appointmentServiceDefinitions) {
             List<Appointment> appointmentsForService =
                     appointmentsService.getAppointmentsForService(
-                appointmentService, startDate, endDate,
+                            appointmentServiceDefinition, startDate, endDate,
                             Arrays.asList(
                                     AppointmentStatus.Completed,
                                     AppointmentStatus.Scheduled,
@@ -99,16 +105,16 @@ public class AppointmentController {
             Map<Date, List<Appointment>> appointmentsGroupedByDate =
                     appointmentsForService.stream().collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime));
 
-            Map<String, AppointmentCount> appointmentCountMap = new LinkedHashMap<>();
+            Map<String, DailyAppointmentServiceSummary> appointmentCountMap = new LinkedHashMap<>();
             for (Map.Entry<Date, List<Appointment>> appointmentDateMap : appointmentsGroupedByDate.entrySet()) {
                 List<Appointment> appointments = appointmentDateMap.getValue();
                 Long missedAppointmentsCount = appointments.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
-                AppointmentCount appointmentCount = new AppointmentCount(
-                        appointments.size(),Math.toIntExact(missedAppointmentsCount), appointmentDateMap.getKey(), appointmentService.getUuid());
-                appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), appointmentCount);
+                DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
+                        appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid(), appointments.size(),Math.toIntExact(missedAppointmentsCount));
+                appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), dailyAppointmentServiceSummary);
             }
 
-            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentService), appointmentCountMap);
+            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition), appointmentCountMap);
             appointmentsSummaryList.add(appointmentsSummary);
         }
         return appointmentsSummaryList;
@@ -126,7 +132,8 @@ public class AppointmentController {
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             }else
                 throw new RuntimeException("Appointment does not exist");
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to update appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -141,7 +148,8 @@ public class AppointmentController {
             }
             appointmentsService.undoStatusChange(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to undo appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
@@ -150,10 +158,46 @@ public class AppointmentController {
     @ResponseBody
     public AppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        if(appointment == null){
+        if(appointment == null) {
+            log.error("Invalid. Appointment does not exist. UUID - " + uuid);
             throw new RuntimeException("Appointment does not exist");
         }
         return appointmentMapper.constructResponse(appointment);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/providerResponse")
+    @ResponseBody
+    public ResponseEntity<Object> updateAppointmentProviderResponse(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
+        try {
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if(appointment == null){
+                throw new RuntimeException("Appointment does not exist");
+            }
+            AppointmentProvider appointmentProviderProvider = appointmentMapper.mapAppointmentProvider(providerResponse);
+            appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (RuntimeException e) {
+            log.error("Runtime error while trying to update appointment provider response", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    //TODO write test
+    @RequestMapping(method = RequestMethod.POST, value="/{uuid}/reschedule")
+    @ResponseBody
+    public ResponseEntity<Object> rescheduleAppointment(@PathVariable("uuid") String prevAppointmentUuid,
+                                                        @Valid @RequestBody AppointmentRequest appointmentRequest,
+                                                        @RequestParam(value = "retainNumber", required = false, defaultValue = "false") boolean retainAppointmentNumber)
+            throws ParseException {
+        try {
+            appointmentRequest.setUuid(null);
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            Appointment rescheduledAppointment = appointmentsService.reschedule(prevAppointmentUuid, appointment, false);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(rescheduledAppointment), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to create new appointment", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 
 }

@@ -10,7 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
-import org.openmrs.module.appointments.web.contract.AppointmentCount;
+import org.openmrs.module.appointments.web.contract.DailyAppointmentServiceSummary;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +70,12 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
                 "\"startDateTime\": \"2017-07-20\", " +
                 "\"endDateTime\": \"2017-07-20\",  " +
-                "\"appointmentKind\": \"WalkIn\"}";
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": [ {" +
+                    "\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\"," +
+                    "\"comments\":\"available\"," +
+                    "\"response\":\"ACCEPTED\"" +
+                "} ] }";
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
         assertNotNull(response);
@@ -103,7 +108,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertEquals(1, appointmentsSummary.getAppointmentService().getAppointmentServiceId(), 0);
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentsSummary.getAppointmentService().getUuid());
         assertEquals(1, appointmentsSummary.getAppointmentCountMap().size());
-        Map<String, AppointmentCount> appointmentCountMap = appointmentsSummary.getAppointmentCountMap();
+        Map<String, DailyAppointmentServiceSummary> appointmentCountMap = appointmentsSummary.getAppointmentCountMap();
         Map appointmentCount = (Map)appointmentCountMap.get("2108-08-15");
         assertNotNull(appointmentCount);
         assertEquals(4, appointmentCount.get("allAppointmentsCount"));

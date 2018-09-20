@@ -11,7 +11,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 
-public class AppointmentService extends BaseOpenmrsData implements Serializable {
+public class AppointmentServiceDefinition extends BaseOpenmrsData implements Serializable {
 
     private Integer appointmentServiceId;
     private String name;

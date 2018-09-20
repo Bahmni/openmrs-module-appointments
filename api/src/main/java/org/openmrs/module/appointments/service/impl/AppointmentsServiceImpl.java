@@ -2,7 +2,10 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -10,8 +13,6 @@ import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -24,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
+
+    private Log log = LogFactory.getLog(this.getClass());
 
     AppointmentDao appointmentDao;
 
@@ -61,6 +64,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                 throw new APIException(message);
             }
         }
+        checkAndAssignAppointmentNumber(appointment);
         appointmentDao.save(appointment);
 	    try {
 		    createEventInAppointmentAudit(appointment, getAppointmentAsJsonString(appointment));
@@ -71,12 +75,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 	    return appointment;
     }
 
+    //TODO refactor throwing of IOExeption. Its forcing everywhere the exception to be caught and rethrown
     private String getAppointmentAsJsonString(Appointment appointment) throws IOException {
         Map appointmentJson = new HashMap<String,String>();
         String serviceUuid = appointment.getService().getUuid();
         appointmentJson.put("serviceUuid", serviceUuid);
         String serviceTypeUuid = appointment.getServiceType() != null ? appointment.getServiceType().getUuid() : null;
         appointmentJson.put("serviceTypeUuid", serviceTypeUuid);
+        //TODO: Should check appointment.getProviders() instead
         String providerUuid = appointment.getProvider() != null ? appointment.getProvider().getUuid() : null;
         appointmentJson.put("providerUuid", providerUuid);
         String locationUuid = appointment.getLocation() != null ? appointment.getLocation().getUuid() : null;
@@ -100,6 +106,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
     }
 
+    /**
+     * TODO: refactor. How can a search by an appointment return a list of appointments?
+     * @param appointment
+     * @return
+     */
     @Override
     public List<Appointment> search(Appointment appointment) {
         List<Appointment> appointments = appointmentDao.search(appointment);
@@ -107,8 +118,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> getAllFutureAppointmentsForService(AppointmentService appointmentService) {
-        return appointmentDao.getAllFutureAppointmentsForService(appointmentService);
+    public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
+        return appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
     }
 
     @Override
@@ -117,8 +128,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> getAppointmentsForService(AppointmentService appointmentService, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
-        return appointmentDao.getAppointmentsForService(appointmentService, startDate, endDate, appointmentStatusList);
+    public List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
+        return appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatusList);
     }
 
     @Override
@@ -161,6 +172,48 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             throw new APIException("No status change actions to undo");
     }
 
+    @Override
+    public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
+        //TODO
+        throw new NotYetImplementedException("This feature is not yet implemented");
+    }
+
+    @Override
+    public Appointment reschedule(String originalAppointmentUuid, Appointment newAppointment, boolean retainAppointmentNumber) {
+        Appointment prevAppointment = getAppointmentByUuid(originalAppointmentUuid);
+        if (prevAppointment == null) {
+            //TODO: should we match the new appointment uuid as well?
+            String msg = String.format("Can not identify appointment for rescheduling with %s", originalAppointmentUuid);
+            log.error(msg);
+            throw new RuntimeException(msg);
+        }
+
+
+        try {
+            //cancel the previous appointment
+            changeStatus(prevAppointment, AppointmentStatus.Cancelled.toString(), new Date());
+            createEventInAppointmentAudit(prevAppointment, getAppointmentAsJsonString(prevAppointment));
+
+            //create a new appointment
+            newAppointment.setUuid(null);
+            newAppointment.setDateCreated(null);
+            newAppointment.setCreator(null);
+            newAppointment.setDateChanged(null);
+            newAppointment.setChangedBy(null);
+
+            //TODO: should we copy the original appointment
+            //newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
+            checkAndAssignAppointmentNumber(newAppointment);
+
+            newAppointment.setStatus(AppointmentStatus.Scheduled);
+            validateAndSave(newAppointment);
+
+            return newAppointment;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     private void createEventInAppointmentAudit(Appointment appointment,
             String notes) {
         AppointmentAudit appointmentAuditEvent = new AppointmentAudit();
@@ -178,4 +231,16 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             }
         }
     }
+
+    private void checkAndAssignAppointmentNumber(Appointment appointment) {
+        if(appointment.getAppointmentNumber() == null) {
+            appointment.setAppointmentNumber(generateAppointmentNumber(appointment));
+        }
+    }
+
+    //TODO: extract this out to a pluggable strategy
+    private String generateAppointmentNumber(Appointment appointment) {
+        return "0000";
+    }
+
 }

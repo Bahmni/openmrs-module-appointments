@@ -10,7 +10,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.AppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -32,9 +32,9 @@ import static org.powermock.api.mockito.PowerMockito.spy;
 import static org.powermock.api.mockito.PowerMockito.verifyNew;
 import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-@PrepareForTest({Context.class, AppointmentServiceAdvice.class})
+@PrepareForTest({Context.class, AppointmentServiceDefinitionAdvice.class})
 @RunWith(PowerMockRunner.class)
-public class AppointmentServiceAdviceTest {
+public class AppointmentServiceDefinitionAdviceTest {
 
     private static final String UUID = "5631b434-78aa-102b-91a0-001e378eb17e";
     private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointmentService?uuid={uuid}";
@@ -42,7 +42,7 @@ public class AppointmentServiceAdviceTest {
     private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointmentService";
 
     @Mock
-    private AppointmentService appointmentService;
+    private AppointmentServiceDefinition appointmentServiceDefinition;
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
@@ -59,7 +59,7 @@ public class AppointmentServiceAdviceTest {
     private AdministrationService administrationService;
     @Mock
     private Event event;
-    private AppointmentServiceAdvice appointmentServiceAdvice;
+    private AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice;
 
     @Before
     public void setUp() throws Exception {
@@ -76,15 +76,15 @@ public class AppointmentServiceAdviceTest {
         whenNew(AllEventRecordsQueueJdbcImpl.class).withArguments(this.atomFeedSpringTransactionManager).thenReturn(allEventRecordsQueue);
         whenNew(EventServiceImpl.class).withArguments(allEventRecordsQueue).thenReturn(eventService);
         whenNew(Event.class).withAnyArguments().thenReturn(event);
-        when(appointmentService.getUuid()).thenReturn(UUID);
+        when(appointmentServiceDefinition.getUuid()).thenReturn(UUID);
         doNothing().when(eventService).notify(any());
 
-        appointmentServiceAdvice = new AppointmentServiceAdvice();
+        appointmentServiceDefinitionAdvice = new AppointmentServiceDefinitionAdvice();
     }
 
     @Test
     public void shouldRaiseAppointmentServiceChangeEventToEventRecordsTable() throws Throwable {
-        appointmentServiceAdvice.afterReturning(appointmentService, this.getClass().getMethod("save"), null, null);
+        appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("save"), null, null);
 
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(1)).notify(any(Event.class));
@@ -95,7 +95,7 @@ public class AppointmentServiceAdviceTest {
 
     @Test
     public void shouldRaiseAppointmentServiceVoidChangeEventToEventRecordsTable() throws Throwable {
-        appointmentServiceAdvice.afterReturning(appointmentService, this.getClass().getMethod("voidAppointmentService"), null, null);
+        appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("voidAppointmentService"), null, null);
 
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(1)).notify(any(Event.class));
@@ -108,7 +108,7 @@ public class AppointmentServiceAdviceTest {
     public void shouldNotRaiseAppointmentServiceChangeEventToEventRecordsTableIfTheGlobalPropertyIsSetToFalse() throws Throwable {
         when(administrationService.getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY)).thenReturn("false");
 
-        appointmentServiceAdvice.afterReturning(appointmentService, this.getClass().getMethod("save"), null, null);
+        appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("save"), null, null);
 
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
@@ -119,7 +119,7 @@ public class AppointmentServiceAdviceTest {
 
     @Test
     public void shouldNotRaiseAppointmentServiceChangeEventToEventRecordsTableIfTheMethodIsNotSaveOrVoidAppointmentService() throws Throwable {
-        appointmentServiceAdvice.afterReturning(appointmentService, this.getClass().getMethod("dummy"), null, null);
+        appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("dummy"), null, null);
 
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
@@ -130,14 +130,14 @@ public class AppointmentServiceAdviceTest {
 
     @Test
     public void shouldRaiseEventWithCustomUrlPatternGivenInGlobalProperty() throws Throwable {
-        when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)).thenReturn("/openmrs/ws/rest/v1/appointmentService/test/{uuid}");
+        when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)).thenReturn("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/{uuid}");
 
-        appointmentServiceAdvice.afterReturning(appointmentService, this.getClass().getMethod("save"), null, null);
+        appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("save"), null, null);
 
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService/test/%s", UUID)), eq("appointmentservice"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/%s", UUID)), eq("appointmentservice"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }

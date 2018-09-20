@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.web.contract;
 import java.sql.Time;
 import java.time.DayOfWeek;
 
-public class ServiceWeeklyAvailabilityPayload {
+public class ServiceWeeklyAvailabilityDescription {
 	private String uuid;
 	private Time startTime;
 	private Time endTime;
