@@ -5,9 +5,6 @@ import org.openmrs.Provider;
 
 import java.io.Serializable;
 
-/**
- * Created by angshus on 25/07/18.
- */
 public class AppointmentProvider extends BaseOpenmrsData implements Serializable {
 
     private Integer appointmentProviderId;
