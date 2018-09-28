@@ -2,7 +2,9 @@ package org.openmrs.module.appointments.web.controller;
 
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -58,6 +60,9 @@ public class AppointmentsControllerTest {
 
     @InjectMocks
     private AppointmentsController appointmentsController;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -207,6 +212,9 @@ public class AppointmentsControllerTest {
         Map<String, String> statusDetails = new HashMap();
         statusDetails.put("toStatus", "Completed");
         when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment does not exist");
 
         appointmentsController.transitionAppointment("appointmentUuid", statusDetails);
 

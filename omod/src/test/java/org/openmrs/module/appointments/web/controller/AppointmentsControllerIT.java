@@ -3,7 +3,10 @@ package org.openmrs.module.appointments.web.controller;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -33,6 +36,9 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -168,22 +174,22 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_throwExceptionForInvalidStatusChange() throws Exception {
-        String content = "{ \"toStatus\": \"Missed\"}";
+        String content = "{ \"toStatus\": \"Completed\"}";
+
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment status can not be changed from Missed to Completed");
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13555/status-change", content));
-
-        assertNotNull(response);
-        assertEquals(400, response.getStatus());
     }
 
     @Test
     public void should_throwExceptionForInvalidAppointment() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"}";
 
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/status-change", content));
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment does not exist");
 
-        assertNotNull(response);
-        assertEquals(400, response.getStatus());
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/status-change", content));
     }
 
     @Test

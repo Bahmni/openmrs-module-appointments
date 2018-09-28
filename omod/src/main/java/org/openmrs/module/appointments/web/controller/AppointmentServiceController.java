@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentServiceDescriptio
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +22,7 @@ import java.util.List;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentService")
-public class AppointmentServiceController {
+public class AppointmentServiceController extends BaseRestController {
 
     @Autowired
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
