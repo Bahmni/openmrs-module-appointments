@@ -33,9 +33,12 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -434,7 +437,10 @@ public class AppointmentsServiceImplTest {
         when(user.getPerson()).thenReturn(new Person());
         when(Context.getAuthenticatedUser()).thenReturn(user);
         when(provider.getPerson()).thenReturn(new Person());
-        when(appointment.getProvider()).thenReturn(provider);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        Set<AppointmentProvider> appointmentProviders = new HashSet<>(Arrays.asList(appointmentProvider));
+        when(appointment.getProviders()).thenReturn(appointmentProviders);
     }
 
 }

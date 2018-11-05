@@ -23,16 +23,18 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.model.AppointmentProviderResponse.ACCEPTED;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
+    private static final int EMPTY_SET_SIZE = 0;
     private Log log = LogFactory.getLog(this.getClass());
 
     AppointmentDao appointmentDao;
@@ -62,16 +64,17 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
                 isAppointmentForNoProvider(appointment) ||
-                isCurrentUserSamePersonAsAppointmentProvider(appointment);
+                isCurrentUserSamePersonAsOneOfTheAppointmentProviders(appointment.getProviders());
     }
 
     private boolean isAppointmentForNoProvider(Appointment appointment) {
-        return isNull(appointment.getProvider()) || isNull(appointment.getProvider().getPerson());
+        return isNull(appointment.getProviders()) || appointment.getProviders().size() == EMPTY_SET_SIZE;
     }
 
-    private boolean isCurrentUserSamePersonAsAppointmentProvider(Appointment appointment) {
-        return nonNull(appointment.getProvider()) && nonNull(appointment.getProvider().getPerson()) &&
-                appointment.getProvider().getPerson().equals(Context.getAuthenticatedUser().getPerson());
+    private boolean isCurrentUserSamePersonAsOneOfTheAppointmentProviders(Set<AppointmentProvider> providers) {
+        return providers.stream()
+                .anyMatch(provider -> provider.getResponse() == ACCEPTED && provider.getProvider().getPerson().
+                equals(Context.getAuthenticatedUser().getPerson()));
     }
 
     @Override
