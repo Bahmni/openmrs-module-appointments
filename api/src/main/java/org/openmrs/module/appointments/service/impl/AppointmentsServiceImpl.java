@@ -73,7 +73,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private boolean isCurrentUserSamePersonAsOneOfTheAppointmentProviders(Set<AppointmentProvider> providers) {
         return providers.stream()
-                .anyMatch(provider -> provider.getResponse() == ACCEPTED && provider.getProvider().getPerson().
+                .anyMatch(provider -> provider.getProvider().getPerson().
                 equals(Context.getAuthenticatedUser().getPerson()));
     }
 
