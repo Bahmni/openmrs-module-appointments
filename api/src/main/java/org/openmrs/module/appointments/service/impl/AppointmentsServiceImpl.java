@@ -62,11 +62,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
-                isAppointmentForNoProvider(appointment) ||
+                isAppointmentNotAssignedToAnyProvider(appointment) ||
                 isCurrentUserSamePersonAsOneOfTheAppointmentProviders(appointment.getProviders());
     }
 
-    private boolean isAppointmentForNoProvider(Appointment appointment) {
+    private boolean isAppointmentNotAssignedToAnyProvider(Appointment appointment) {
         return isNull(appointment.getProviders()) || appointment.getProviders().size() == EMPTY_SET_SIZE;
     }
 

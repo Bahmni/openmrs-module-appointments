@@ -372,7 +372,6 @@ public class AppointmentsServiceImplTest {
         appointmentsService.undoStatusChange(appointment);
         verify(appointmentAuditDao, times(1)).getPriorStatusChangeEvent(appointment);
         ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);
-        ;
         verify(appointmentDao, times(1)).save(captor.capture());
         assertEquals(appointmentAudit.getStatus(), captor.getValue().getStatus());
     }
@@ -388,7 +387,6 @@ public class AppointmentsServiceImplTest {
         when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(appointmentAudit);
         appointmentsService.undoStatusChange(appointment);
         ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
-        ;
         verify(appointmentAuditDao, times(1)).save(captor.capture());
         AppointmentAudit savedEvent = captor.getValue();
         assertEquals(appointmentAudit.getNotes(), savedEvent.getNotes());
@@ -408,24 +406,24 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, times(0)).save(appointment);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-
+        expectedException.expect(APIAuthenticationException.class);
         appointmentsService.validateAndSave(appointment);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-
+        expectedException.expect(APIAuthenticationException.class);
         appointmentsService.changeStatus(appointment, null, null);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-
+        expectedException.expect(APIAuthenticationException.class);
         appointmentsService.undoStatusChange(appointment);
     }
 
