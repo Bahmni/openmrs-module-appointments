@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
-import static org.openmrs.module.appointments.model.AppointmentProviderResponse.ACCEPTED;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
