@@ -9,6 +9,7 @@ import org.openmrs.Provider;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
@@ -27,6 +28,13 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public Set<AppointmentProvider> getProviders() {
         return providers;
+    }
+
+    public Set<AppointmentProvider> getProvidersWithResponse(AppointmentProviderResponse providerResponse)
+    {
+        return providers.stream()
+            .filter(provider -> provider.getResponse().equals(providerResponse))
+                .collect(Collectors.toSet());
     }
 
     public void setProviders(Set<AppointmentProvider> providers) {

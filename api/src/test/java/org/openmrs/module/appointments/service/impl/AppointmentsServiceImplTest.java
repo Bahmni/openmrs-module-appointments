@@ -440,6 +440,7 @@ public class AppointmentsServiceImplTest {
         appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
         Set<AppointmentProvider> appointmentProviders = new HashSet<>(Arrays.asList(appointmentProvider));
         when(appointment.getProviders()).thenReturn(appointmentProviders);
+        when(appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED)).thenReturn(appointmentProviders);
     }
 
 }
