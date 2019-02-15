@@ -10,9 +10,14 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.Person;
+import org.openmrs.Provider;
+import org.openmrs.User;
+import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.*;
@@ -20,14 +25,20 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -37,8 +48,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(MockitoJUnitRunner.class)
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
 
     @Rule
@@ -62,19 +75,46 @@ public class AppointmentsServiceImplTest {
     @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
+    @Mock
+    private User user;
+
+    @Mock
+    private Appointment appointment;
+
+    @Mock
+    private Provider provider;
+
+    @Mock
+    private MessageSourceService messageSourceService;
+
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
-    @Before
-    public void init() {
-        MockitoAnnotations.initMocks(this);
+    private String exceptionCode = "error.privilegesRequired";
 
+    @Before
+    public void init() throws NoSuchFieldException, IllegalAccessException {
+        MockitoAnnotations.initMocks(this);
+        mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
+        setValuesForMemberFields(appointmentsService, "appointmentValidators", appointmentValidators);
+        setValuesForMemberFields(appointmentsService, "statusChangeValidators", statusChangeValidators);
+    }
+
+    public static void setValuesForMemberFields(Object classInstance, String fieldName, Object valueForMemberField)
+            throws NoSuchFieldException, IllegalAccessException {
+        setField(classInstance, valueForMemberField, classInstance.getClass().getDeclaredField(fieldName));
+    }
+
+    private static void setField(Object classInstance, Object valueForMemberField, Field field)
+            throws IllegalAccessException {
+        field.setAccessible(true);
+        field.set(classInstance, valueForMemberField);
     }
 
     @Test
-    public void testCreateAppointment() throws Exception {
+    public void testCreateAppointment() {
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
         appointment.setService(new AppointmentServiceDefinition());
@@ -103,22 +143,22 @@ public class AppointmentsServiceImplTest {
         ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
         verify(appointmentAuditDao, times(1)).save(captor.capture());
         List<AppointmentAudit> auditEvents = captor.getAllValues();
-        assertEquals(appointment.getStatus(),auditEvents.get(0).getStatus());
-        assertEquals(appointment,auditEvents.get(0).getAppointment());
-        String notes = "{\"serviceTypeUuid\":\""+ serviceType.getUuid() +"\",\"startDateTime\":\""+ startDateTime.toInstant().toString()
-                +"\",\"locationUuid\":null,\"appointmentKind\":\"Scheduled\",\"providerUuid\":null,\"endDateTime\":\""+ endDateTime.toInstant().toString()
-                +"\",\"serviceUuid\":\""+ service.getUuid() +"\",\"appointmentNotes\":null}";
+        assertEquals(appointment.getStatus(), auditEvents.get(0).getStatus());
+        assertEquals(appointment, auditEvents.get(0).getAppointment());
+        String notes = "{\"serviceTypeUuid\":\"" + serviceType.getUuid() + "\",\"startDateTime\":\"" + startDateTime.toInstant().toString()
+                + "\",\"locationUuid\":null,\"appointmentKind\":\"Scheduled\",\"providerUuid\":null,\"endDateTime\":\"" + endDateTime.toInstant().toString()
+                + "\",\"serviceUuid\":\"" + service.getUuid() + "\",\"appointmentNotes\":null}";
         assertEquals(notes, auditEvents.get(0).getNotes());
     }
 
     @Test
-    public void testGetAllAppointments() throws Exception {
+    public void testGetAllAppointments() {
         appointmentsService.getAllAppointments(null);
         verify(appointmentDao, times(1)).getAllAppointments(null);
     }
 
     @Test
-    public void shouldNotGetAppointmentsWithVoidedService() throws Exception {
+    public void shouldNotGetAppointmentsWithVoidedService() {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();
         AppointmentServiceDefinition appointmentServiceDefinition1 = new AppointmentServiceDefinition();
@@ -133,9 +173,9 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, times(1)).getAllAppointments(null);
         assertEquals(appointmentList.size(), 1);
     }
-    
+
     @Test
-    public void shouldNotGetAppointmentsWithVoidedServiceType() throws Exception {
+    public void shouldNotGetAppointmentsWithVoidedServiceType() {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();
         AppointmentServiceDefinition appointmentServiceDefinition1 = new AppointmentServiceDefinition();
@@ -153,7 +193,7 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, times(1)).getAllAppointments(null);
         assertEquals(appointmentList.size(), 1);
     }
-    
+
     @Test
     public void shouldGetAllFutureAppointmentsForTheGivenAppointmentService() throws Exception {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
@@ -166,7 +206,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldGetAllFutureAppointmentsForTheGivenAppointmentServiceType() throws Exception {
+    public void shouldGetAllFutureAppointmentsForTheGivenAppointmentServiceType() {
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
         appointmentServiceType.setUuid("typeUuid");
         when(appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType)).thenReturn(new ArrayList<>());
@@ -207,7 +247,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldRunDefaultAppointmentValidatorsOnSave(){
+    public void shouldRunDefaultAppointmentValidatorsOnSave() {
         Appointment appointment = new Appointment();
         appointment.setPatient(new Patient());
         appointment.setService(new AppointmentServiceDefinition());
@@ -219,7 +259,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfValidationFailsOnAppointmentSave(){
+    public void shouldThrowExceptionIfValidationFailsOnAppointmentSave() {
         String errorMessage = "Appointment cannot be created without Patient";
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
@@ -235,7 +275,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldRunDefaultValidatorOnStatusChange(){
+    public void shouldRunDefaultValidatorOnStatusChange() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Scheduled);
         appointmentsService.changeStatus(appointment, "CheckedIn", null);
@@ -243,7 +283,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldThrowExceptionIfValidationFailsOnStatusChange(){
+    public void shouldThrowExceptionIfValidationFailsOnStatusChange() {
         String errorMessage = "Appointment status cannot be changed from Completed to Missed";
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();
@@ -261,15 +301,15 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldCreateAuditEventOnStatusChangeWithOutDate(){
+    public void shouldCreateAuditEventOnStatusChangeWithOutDate() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Scheduled);
         appointmentsService.changeStatus(appointment, "CheckedIn", null);
         ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
         verify(appointmentAuditDao, times(1)).save(captor.capture());
         List<AppointmentAudit> auditEvents = captor.getAllValues();
-        assertEquals(appointment.getStatus(),auditEvents.get(0).getStatus());
-        assertEquals(appointment,auditEvents.get(0).getAppointment());
+        assertEquals(appointment.getStatus(), auditEvents.get(0).getStatus());
+        assertEquals(appointment, auditEvents.get(0).getAppointment());
         assertEquals(null, auditEvents.get(0).getNotes());
     }
 
@@ -282,8 +322,8 @@ public class AppointmentsServiceImplTest {
         ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
         verify(appointmentAuditDao, times(1)).save(captor.capture());
         List<AppointmentAudit> auditEvents = captor.getAllValues();
-        assertEquals(appointment.getStatus(),auditEvents.get(0).getStatus());
-        assertEquals(appointment,auditEvents.get(0).getAppointment());
+        assertEquals(appointment.getStatus(), auditEvents.get(0).getStatus());
+        assertEquals(appointment, auditEvents.get(0).getAppointment());
         assertEquals(onDate.toInstant().toString(), auditEvents.get(0).getNotes());
     }
 
@@ -321,7 +361,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldUndoStatusChange() throws ParseException {
+    public void shouldUndoStatusChange() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Completed);
         AppointmentAudit appointmentAudit = new AppointmentAudit();
@@ -331,13 +371,13 @@ public class AppointmentsServiceImplTest {
         when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(appointmentAudit);
         appointmentsService.undoStatusChange(appointment);
         verify(appointmentAuditDao, times(1)).getPriorStatusChangeEvent(appointment);
-        ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);;
+        ArgumentCaptor<Appointment> captor = ArgumentCaptor.forClass(Appointment.class);
         verify(appointmentDao, times(1)).save(captor.capture());
         assertEquals(appointmentAudit.getStatus(), captor.getValue().getStatus());
     }
 
     @Test
-    public void shouldCreateStatusChangeAuditEventOnUndoStatusChange() throws ParseException {
+    public void shouldCreateStatusChangeAuditEventOnUndoStatusChange() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Completed);
         AppointmentAudit appointmentAudit = new AppointmentAudit();
@@ -346,7 +386,7 @@ public class AppointmentsServiceImplTest {
         appointmentAudit.setNotes("2108-08-15T11:30:00.0Z");
         when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(appointmentAudit);
         appointmentsService.undoStatusChange(appointment);
-        ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);;
+        ArgumentCaptor<AppointmentAudit> captor = ArgumentCaptor.forClass(AppointmentAudit.class);
         verify(appointmentAuditDao, times(1)).save(captor.capture());
         AppointmentAudit savedEvent = captor.getValue();
         assertEquals(appointmentAudit.getNotes(), savedEvent.getNotes());
@@ -355,7 +395,7 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenThereIsNoPriorStatusChangeExists() throws ParseException {
+    public void shouldThrowExceptionWhenThereIsNoPriorStatusChangeExists() {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Scheduled);
         when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(null);
@@ -364,6 +404,43 @@ public class AppointmentsServiceImplTest {
         appointmentsService.undoStatusChange(appointment);
         verify(appointmentAuditDao, times(0)).getPriorStatusChangeEvent(appointment);
         verify(appointmentDao, times(0)).save(appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
+        expectedException.expect(APIAuthenticationException.class);
+        appointmentsService.validateAndSave(appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
+        expectedException.expect(APIAuthenticationException.class);
+        appointmentsService.changeStatus(appointment, null, null);
+    }
+
+    @Test
+    public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
+        setupForOwnPrivilegeAccess(exceptionCode);
+        expectedException.expect(APIAuthenticationException.class);
+        appointmentsService.undoStatusChange(appointment);
+    }
+
+    private void setupForOwnPrivilegeAccess(String exceptionCode) {
+        String exceptionMessage = "Exception message";
+        when(Context.hasPrivilege("manageOwnAppointments")).thenReturn(true);
+        when(messageSourceService.getMessage(exceptionCode, null, null)).thenReturn(exceptionMessage);
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        when(user.getPerson()).thenReturn(new Person());
+        when(Context.getAuthenticatedUser()).thenReturn(user);
+        when(provider.getPerson()).thenReturn(new Person());
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        Set<AppointmentProvider> appointmentProviders = new HashSet<>(Arrays.asList(appointmentProvider));
+        when(appointment.getProviders()).thenReturn(appointmentProviders);
+        when(appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED)).thenReturn(appointmentProviders);
     }
 
 }
