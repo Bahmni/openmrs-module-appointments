@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <module configVersion="1.2">
-	
+
 	<!-- Base Module Properties -->
 	<id>${project.parent.artifactId}</id>
 	<name>${project.parent.name}</name>
@@ -24,6 +24,7 @@
 		AppointmentAudit.hbm.xml
 		AppointmentServiceType.hbm.xml
 		AppointmentProvider.hbm.xml
+		AppointmentRecurringPattern.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -67,6 +68,6 @@
 		<defaultValue>false</defaultValue>
 		<description>Scheduler marks scheduled appointments as missed when it is turned on</description>
 	</globalProperty>
-	
+
 </module>
 
