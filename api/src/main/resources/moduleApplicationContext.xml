@@ -96,6 +96,12 @@
         </property>
     </bean>
 
+    <bean id="appointmentRecurringPatternDao" class="org.openmrs.module.appointments.dao.impl.AppointmentRecurringPatternDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
     <bean parent="serviceContext">
         <property name="moduleService">
             <list merge="true">
