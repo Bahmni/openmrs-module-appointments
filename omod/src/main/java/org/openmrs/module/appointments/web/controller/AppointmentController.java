@@ -4,13 +4,16 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.service.RecurringAppointmentService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
+import org.openmrs.module.appointments.web.helper.RecurringAppointmentsHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -38,6 +41,9 @@ public class AppointmentController {
     private AppointmentsService appointmentsService;
 
     @Autowired
+    private RecurringAppointmentService recurringAppointmentService;
+
+    @Autowired
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
@@ -45,6 +51,9 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
+
+    @Autowired
+    private RecurringAppointmentsHelper recurringAppointmentsHelper;
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
@@ -67,10 +76,27 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
-            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            appointmentsService.validateAndSave(appointment);
-            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        } catch (RuntimeException e) {
+            RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
+            if (recurringPattern == null) {
+                Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+                appointmentsService.validateAndSave(appointment);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+            }
+            else {
+                AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
+                        .fromRecurrenceRequest(recurringPattern);
+
+                List<Date> recurringDates = recurringAppointmentService
+                        .getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
+
+                List<Appointment> appointments = recurringAppointmentsHelper
+                        .generateAppointments(recurringDates, appointmentRequest);
+
+                recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern, appointments);
+
+                return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
+            }
+        } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
