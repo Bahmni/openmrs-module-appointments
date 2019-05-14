@@ -70,10 +70,10 @@
                                   voided="false" void_reason="" uuid="f716177b-82ca-49e7-8394-cfe7c8d21f80"/>
 
     <patient_appointment patient_appointment_id="14" patient_id ="1" appointment_service_id="1" start_date_time="2019-05-14 12:00:00.00"
-                         end_date_time="2019-05-14 13:00:00.00" status="Scheduled" creator="1" date_created="2019-05-13 12:00:00.00"
+                         end_date_time="2019-04-14 13:00:00.00" status="Scheduled" creator="1" date_created="2019-05-13 12:00:00.00"
                          voided="false" void_reason="" uuid="91c62b6b-d7ef-49b4-9a8b-164b2aa55edf"/>
     <patient_appointment patient_appointment_id="15" patient_id ="1" appointment_service_id="1" start_date_time="2019-05-16 12:00:00.00"
-                         end_date_time="2019-05-16 13:00:00.00" status="Scheduled" creator="1" date_created="2019-05-13 12:00:00.00"
+                         end_date_time="2019-04-16 13:00:00.00" status="Scheduled" creator="1" date_created="2019-05-13 12:00:00.00"
                          voided="false" void_reason="" uuid="638180c8-98f3-4fe4-b14a-9196da665bc6"/>
 
 </dataset>

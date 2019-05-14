@@ -63,7 +63,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         List<Appointment> allAppointments = appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
         assertNotNull(allAppointments);
-        assertEquals(4, allAppointments.size());
+        assertEquals(2, allAppointments.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c1111", allAppointments.get(0).getUuid());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c12222", allAppointments.get(1).getUuid());
     }
