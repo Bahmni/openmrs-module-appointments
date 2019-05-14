@@ -11,6 +11,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
@@ -18,8 +19,9 @@ import org.openmrs.module.appointments.service.AppointmentServiceDefinitionServi
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -87,6 +89,18 @@ public class AppointmentMapper {
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
         return appointment;
+    }
+
+    public AppointmentRecurringPattern fromRecurrenceRequest(RecurringPattern recurringPattern) {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+
+        appointmentRecurringPattern.setDaysOfWeek(String.join(", ", recurringPattern
+                .getDaysOfWeek()));
+        appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
+        appointmentRecurringPattern.setFrequency(recurringPattern.getFrequency());
+        appointmentRecurringPattern.setType(recurringPattern.getType());
+        appointmentRecurringPattern.setEndDate(recurringPattern.getEndDate());
+        return appointmentRecurringPattern;
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {

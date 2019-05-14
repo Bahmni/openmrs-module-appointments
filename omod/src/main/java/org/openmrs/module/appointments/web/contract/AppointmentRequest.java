@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.web.contract;
 
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,9 +21,7 @@ public class AppointmentRequest {
     private String appointmentKind;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
-
-    @JsonProperty(value = "recurringPattern")
-    private AppointmentRecurringPattern appointmentRecurringPattern;
+    private RecurringPattern recurringPattern;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -122,11 +119,11 @@ public class AppointmentRequest {
         this.providers = providers;
     }
 
-    public AppointmentRecurringPattern getAppointmentRecurringPattern() {
-        return appointmentRecurringPattern;
+    public RecurringPattern getRecurringPattern() {
+        return recurringPattern;
     }
 
-    public void setAppointmentRecurringPattern(AppointmentRecurringPattern appointmentRecurringPattern) {
-        this.appointmentRecurringPattern = appointmentRecurringPattern;
+    public void setRecurringPattern(RecurringPattern recurringPattern) {
+        this.recurringPattern = recurringPattern;
     }
 }

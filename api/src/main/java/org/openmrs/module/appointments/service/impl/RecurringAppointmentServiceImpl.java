@@ -20,9 +20,9 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     private final String DATE_FORMAT = "yyyy-MM-dd";
 
-    private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
+    AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
-    private AppointmentsService appointmentsService;
+    AppointmentsService appointmentsService;
 
     public void setAppointmentRecurringPatternDao(AppointmentRecurringPatternDao appointmentRecurringPatternDao) {
         this.appointmentRecurringPatternDao = appointmentRecurringPatternDao;

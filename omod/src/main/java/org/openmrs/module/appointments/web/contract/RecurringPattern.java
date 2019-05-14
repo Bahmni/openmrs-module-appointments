@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.web.contract;
 import java.util.Date;
 import java.util.List;
 
-public class AppointmentRecurringPattern {
+public class RecurringPattern {
 
     private Integer id;
     private Integer frequency;
