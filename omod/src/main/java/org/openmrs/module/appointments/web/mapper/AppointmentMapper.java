@@ -94,12 +94,9 @@ public class AppointmentMapper {
     public AppointmentRecurringPattern fromRecurrenceRequest(RecurringPattern recurringPattern) {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
-        appointmentRecurringPattern.setDaysOfWeek(String.join(", ", recurringPattern
-                .getDaysOfWeek()));
         appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
         appointmentRecurringPattern.setFrequency(recurringPattern.getFrequency());
         appointmentRecurringPattern.setType(recurringPattern.getType());
-        appointmentRecurringPattern.setEndDate(recurringPattern.getEndDate());
         return appointmentRecurringPattern;
     }
 
