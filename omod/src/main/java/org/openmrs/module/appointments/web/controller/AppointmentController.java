@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
@@ -85,6 +86,10 @@ public class AppointmentController {
             else {
                 AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
                         .fromRecurrenceRequest(recurringPattern);
+                if(!validateRecurringPattern(recurringPattern)) {
+                    //TODO id should be removed from recurringPattern
+                    return new ResponseEntity<>(recurringPattern, HttpStatus.BAD_REQUEST);
+                }
 
                 List<Date> recurringDates = recurringAppointmentService
                         .getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
@@ -100,6 +105,11 @@ public class AppointmentController {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private boolean validateRecurringPattern(RecurringPattern appointmentRecurringPattern) {
+        return StringUtils.isNotBlank(appointmentRecurringPattern.getType()) &&
+                appointmentRecurringPattern.getPeriod() > 0 && appointmentRecurringPattern.getFrequency() > 0;
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
