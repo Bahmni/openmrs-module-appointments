@@ -40,16 +40,16 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
-    
+
     @Mock
     private PatientService patientService;
-    
+
     @Mock
     private LocationService locationService;
-    
+
     @Mock
     private ProviderService providerService;
-    
+
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
@@ -131,6 +131,21 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
         assertEquals(AppointmentStatus.Scheduled, appointment.getStatus());
         assertEquals(appointmentRequest.getComments(), appointment.getComments());
+    }
+
+    @Test
+    public void shouldGetRecurringPatternFromPayload() {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setPeriod(1);
+        recurringPattern.setType("DAY");
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRecurrenceRequest(recurringPattern);
+        assertEquals(recurringPattern.getPeriod(),appointmentRecurringPattern.getPeriod());
+        assertEquals(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
+        assertEquals(recurringPattern.getType(), appointmentRecurringPattern.getType());
+        assertEquals(recurringPattern.getDaysOfWeek(), appointmentRecurringPattern.getDaysOfWeek());
+        assertEquals(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
+
     }
 
     @Test
@@ -217,7 +232,7 @@ public class AppointmentMapperTest {
         verify(patientService, never()).getPatientByUuid(appointmentRequest.getPatientUuid());
         assertEquals(existingAppointment.getPatient(), appointment.getPatient());
     }
-    
+
     @Test
     public void shouldCreateDefaultResponse() throws Exception {
         Appointment appointment = createAppointment();
@@ -289,7 +304,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getUuid(), response.getUuid());
         assertNull(response.getAdditionalInfo());
     }
-    
+
     @Test
     public void shouldReturnNullIfNoProviderInDefaultResponse() throws Exception {
         Appointment appointment = createAppointment();
@@ -321,7 +336,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());
     }
-    
+
     private AppointmentRequest createAppointmentRequest() throws ParseException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
         appointmentRequest.setPatientUuid("patientUuid");
@@ -344,10 +359,10 @@ public class AppointmentMapperTest {
         providerDetail.setResponse("ACCEPTED");
         providerDetails.add(providerDetail);
         appointmentRequest.setProviders(providerDetails);
-        
+
         return appointmentRequest;
     }
-    
+
     private Appointment createAppointment() throws ParseException {
         Appointment appointment = new Appointment();
         PersonName name = new PersonName();
