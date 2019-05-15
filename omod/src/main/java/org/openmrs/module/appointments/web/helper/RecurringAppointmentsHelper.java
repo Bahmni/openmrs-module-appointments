@@ -1,8 +1,10 @@
 package org.openmrs.module.appointments.web.helper;
 
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -58,4 +60,8 @@ public class RecurringAppointmentsHelper {
         return formattedDateTime;
     }
 
+    public boolean validateRecurringPattern(RecurringPattern recurringPattern) {
+        return StringUtils.isNotBlank(recurringPattern.getType()) &&
+                recurringPattern.getPeriod() > 0 && recurringPattern.getFrequency() > 0;
+    }
 }

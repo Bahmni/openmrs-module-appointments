@@ -86,7 +86,7 @@ public class AppointmentController {
             else {
                 AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
                         .fromRecurrenceRequest(recurringPattern);
-                if(!validateRecurringPattern(recurringPattern)) {
+                if(!recurringAppointmentsHelper.validateRecurringPattern(recurringPattern)) {
                     //TODO id should be removed from recurringPattern
                     return new ResponseEntity<>(recurringPattern, HttpStatus.BAD_REQUEST);
                 }
@@ -105,11 +105,6 @@ public class AppointmentController {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private boolean validateRecurringPattern(RecurringPattern appointmentRecurringPattern) {
-        return StringUtils.isNotBlank(appointmentRecurringPattern.getType()) &&
-                appointmentRecurringPattern.getPeriod() > 0 && appointmentRecurringPattern.getFrequency() > 0;
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
