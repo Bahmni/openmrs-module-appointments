@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.DAY;
 
 public class AppointmentRecurringPatternDaoIT extends BaseIntegrationTest {
 
@@ -36,7 +37,7 @@ public class AppointmentRecurringPatternDaoIT extends BaseIntegrationTest {
         Appointment recurringAppointmentTwo = appointmentDao
                 .getAppointmentByUuid("638180c8-98f3-4fe4-b14a-9196da665bc6");
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setType("DAY");
+        appointmentRecurringPattern.setType(DAY);
         appointmentRecurringPattern.setFrequency(2);
         appointmentRecurringPattern.setPeriod(2);
         appointmentRecurringPattern.setAppointments(new HashSet<>(Arrays
@@ -57,6 +58,5 @@ public class AppointmentRecurringPatternDaoIT extends BaseIntegrationTest {
         assertNull(actualAppointmentRecurringPattern.getEndDate());
         assertNull(actualAppointmentRecurringPattern.getDaysOfWeek());
 
-        //TODO assertions for patient_appointment_occurence
     }
 }

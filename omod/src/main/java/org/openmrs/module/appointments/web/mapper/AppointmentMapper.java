@@ -35,6 +35,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.DAY;
+import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.WEEK;
+import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.valueOf;
+
 @Component
 public class AppointmentMapper {
     @Autowired
@@ -91,12 +95,17 @@ public class AppointmentMapper {
         return appointment;
     }
 
-    public AppointmentRecurringPattern fromRecurrenceRequest(RecurringPattern recurringPattern) {
+    public AppointmentRecurringPattern fromRequestRecurringPattern(RecurringPattern recurringPattern) {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
         appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
         appointmentRecurringPattern.setFrequency(recurringPattern.getFrequency());
-        appointmentRecurringPattern.setType(recurringPattern.getType());
+        String recurringPatternType = recurringPattern.getType();
+        if (recurringPatternType == null) {
+            throw new IllegalArgumentException(String
+                    .format("Valid recurrence type should be provided. Valid types are %s and %s",  DAY, WEEK));
+        }
+        appointmentRecurringPattern.setType(valueOf(recurringPatternType.toUpperCase()));
         return appointmentRecurringPattern;
     }
 
@@ -250,5 +259,15 @@ public class AppointmentMapper {
         appointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
+    }
+
+    public Object constructResponse(RecurringPattern inputRecurringPattern) {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setType(inputRecurringPattern.getType());
+        recurringPattern.setPeriod(inputRecurringPattern.getPeriod());
+        recurringPattern.setFrequency(inputRecurringPattern.getFrequency());
+        recurringPattern.setEndDate(inputRecurringPattern.getEndDate());
+        recurringPattern.setDaysOfWeek(inputRecurringPattern.getDaysOfWeek());
+        return recurringPattern;
     }
 }

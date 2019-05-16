@@ -7,7 +7,6 @@ import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
-import static org.mockito.Matchers.any;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
@@ -32,6 +31,7 @@ import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -285,17 +285,16 @@ public class AppointmentControllerTest {
         appointmentOne.setUuid("appointmentUuid");
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
-        when(appointmentMapper.fromRecurrenceRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
+        when(appointmentMapper.fromRequestRecurringPattern(recurringPattern)).thenReturn(appointmentRecurringPattern);
         when(recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern,
                 Arrays.asList(appointmentOne,appointmentTwo))).thenReturn(Arrays.asList(appointmentOne,appointmentTwo));
         when(recurringAppointmentService.getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern))
                 .thenReturn(new ArrayList<Date>());
         when(recurringAppointmentsHelper.generateAppointments(new ArrayList<Date>(),appointmentRequest))
                 .thenReturn(Arrays.asList(appointmentOne,appointmentTwo));
-        when(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern)).thenReturn(true);
 
         appointmentController.saveAppointment(appointmentRequest);
-        Mockito.verify(appointmentMapper, times(1)).fromRecurrenceRequest(recurringPattern);
+        Mockito.verify(appointmentMapper, times(1)).fromRequestRecurringPattern(recurringPattern);
         Mockito.verify(recurringAppointmentService, times(1)).getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
         Mockito.verify(recurringAppointmentService, times(1)).saveRecurringAppointments(appointmentRecurringPattern,
                 Arrays.asList(appointmentOne,appointmentTwo));

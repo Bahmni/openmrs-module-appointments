@@ -31,7 +31,7 @@ public class RecurringAppointmentServiceImplTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setFrequency(3);
         appointmentRecurringPattern.setPeriod(1);
-        appointmentRecurringPattern.setType("DAY");
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
 
         List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
                 appointmentRecurringPattern);
@@ -55,7 +55,7 @@ public class RecurringAppointmentServiceImplTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setFrequency(4);
         appointmentRecurringPattern.setPeriod(15);
-        appointmentRecurringPattern.setType("DAY");
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
 
         List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
                 appointmentRecurringPattern);
@@ -81,7 +81,7 @@ public class RecurringAppointmentServiceImplTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setFrequency(4);
         appointmentRecurringPattern.setPeriod(100);
-        appointmentRecurringPattern.setType("DAY");
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
 
         List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
                 appointmentRecurringPattern);
@@ -97,17 +97,10 @@ public class RecurringAppointmentServiceImplTest {
 
     }
 
-    public static Date getDate(int year, int month, int day) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day);
-        return calendar.getTime();
-    }
-
-    public static Date getDate(int year, int month, int day, int hour, int minute, int second) {
+    private static Date getDate(int year, int month, int day, int hour, int minute, int second) {
         Calendar calendar = Calendar.getInstance();
         calendar.set(year, month, day, hour, minute, second);
         return calendar.getTime();
     }
-
 
 }

@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.helper;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
@@ -51,16 +52,20 @@ public class RecurringAppointmentsHelper {
 
     private Date getFormattedDateTime(String formattedDate, String time) throws ParseException {
         SimpleDateFormat dateTimeFormat = new SimpleDateFormat(DATE_FORMAT + " " + TIME_FORMAT);
-        Date formattedDateTime = null;
-        try {
-            formattedDateTime = dateTimeFormat.parse(formattedDate + " " + time);
-        } catch (ParseException e) {
-            throw new APIException(e);
-        }
-        return formattedDateTime;
+        return dateTimeFormat.parse(formattedDate + " " + time);
     }
 
-    public boolean validateRecurringPattern(RecurringPattern recurringPattern) {
+    public void validateRecurringPattern(RecurringPattern recurringPattern) {
+        boolean isValidRecurringPattern = isValidDailyRecurringAppointmentsPattern(recurringPattern);
+        if(!isValidRecurringPattern) {
+            throw new APIException(String.format("type should be %s/%s\n" +
+                    "period and frequency/endDate are mandatory if type is DAY\n" +
+                    "daysOfWeek and frequency/endDate are mandatory if type is WEEK",
+                    RecurringAppointmentType.DAY, RecurringAppointmentType.WEEK));
+        }
+    }
+
+    private boolean isValidDailyRecurringAppointmentsPattern(RecurringPattern recurringPattern) {
         return StringUtils.isNotBlank(recurringPattern.getType()) &&
                 recurringPattern.getPeriod() > 0 && recurringPattern.getFrequency() > 0;
     }
