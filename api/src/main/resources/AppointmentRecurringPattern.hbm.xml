@@ -9,7 +9,12 @@
                 <param name="sequence">patient_appointment_timings_id</param>
             </generator>
         </id>
-        <property name="type" type="java.lang.String" column="recurrence_type"/>
+        <property name="type" column="recurrence_type">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.service.impl.RecurringAppointmentType</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
         <property name="period" type="java.lang.Integer" column="period"/>
         <property name="frequency" type="java.lang.Integer" column="frequency"/>
         <property name="endDate" type="java.util.Date" column="end_date"/>

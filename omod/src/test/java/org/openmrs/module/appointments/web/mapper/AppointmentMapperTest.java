@@ -1,16 +1,13 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import java.text.ParseException;
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -21,50 +18,63 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.openmrs.module.appointments.web.contract.*;
+import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
+import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
+import org.openmrs.module.appointments.web.contract.RecurringPattern;
+import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assume.assumeTrue;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
 
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
     @Mock
     private PatientService patientService;
-
     @Mock
     private LocationService locationService;
-
     @Mock
     private ProviderService providerService;
-
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
-
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
-
     @Mock
     private AppointmentsService appointmentsService;
-
     @Mock
     private AppointmentResponseExtension extension;
-
     @InjectMocks
     private AppointmentMapper appointmentMapper;
-
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -134,18 +144,25 @@ public class AppointmentMapperTest {
     }
 
     @Test
-    public void shouldGetRecurringPatternFromPayload() {
+    public void shouldGetRecurringPatternFromPayloadForDayWithFrequency() {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(3);
         recurringPattern.setPeriod(1);
         recurringPattern.setType("DAY");
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRecurrenceRequest(recurringPattern);
-        assertEquals(recurringPattern.getPeriod(),appointmentRecurringPattern.getPeriod());
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRequestRecurringPattern(recurringPattern);
+        assertEquals(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
         assertEquals(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
-        assertEquals(recurringPattern.getType(), appointmentRecurringPattern.getType());
-        assertEquals(recurringPattern.getDaysOfWeek(), appointmentRecurringPattern.getDaysOfWeek());
-        assertEquals(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
+        assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
+    }
 
+    @Test
+    public void shouldThrowIllegalArgumentExceptionWhenRecurringTypeIsNull() {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setPeriod(1);
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Valid recurrence type should be provided. Valid types are DAY and WEEK");
+        appointmentMapper.fromRequestRecurringPattern(recurringPattern);
     }
 
     @Test

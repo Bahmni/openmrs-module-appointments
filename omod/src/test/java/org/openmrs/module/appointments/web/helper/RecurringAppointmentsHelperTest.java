@@ -1,8 +1,11 @@
 package org.openmrs.module.appointments.web.helper;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
@@ -15,8 +18,6 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
 public class RecurringAppointmentsHelperTest {
@@ -24,6 +25,9 @@ public class RecurringAppointmentsHelperTest {
     private RecurringAppointmentsHelper recurringAppointmentsHelper;
 
     private AppointmentMapper appointmentMapperMock;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() {
@@ -60,59 +64,53 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldReturnFalseWhenTypeIsNullInAppointmentRequest() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+    public void shouldThrowExceptionWhenTypeIsNullInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType(null);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
     }
 
-    @Test
-    public void shouldReturnTrueWhenRecurringPatternHavingAllData() {
+    private RecurringPattern getRecurringPattern() {
         RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(1);
-        recurringPattern.setPeriod(1);
         recurringPattern.setType("DAY");
-        assertTrue(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+        recurringPattern.setPeriod(1);
+        recurringPattern.setFrequency(1);
+        return recurringPattern;
     }
 
     @Test
-    public void shouldReturnFalseWhenPeriodAndFrequencyIsLessThanOneOrNullInAppointmentRequest() {
-        RecurringPattern recurringPatternOne = new RecurringPattern();
-        recurringPatternOne.setPeriod(0);
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPatternOne));
-
-        RecurringPattern recurringPatternTwo = new RecurringPattern();
-        recurringPatternTwo.setFrequency(0);
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPatternTwo));
-
-        RecurringPattern recurringPatternThree = new RecurringPattern();
-        recurringPatternThree.setType("");
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPatternThree));
-    }
-
-    @Test
-    public void shouldReturnFalseWhenTypeIsBlankThanOneInAppointmentRequest() {
-        RecurringPattern recurringPattern = new RecurringPattern();
+    public void shouldThrowExceptionWhenTypeIsEmptyInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
         recurringPattern.setType("");
-        recurringPattern.setPeriod(1);
-        recurringPattern.setFrequency(1);
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
-    public void shouldReturnFalseWhenFrequencyIsLessThanOneInAppointmentRequest() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType("DAY");
-        recurringPattern.setPeriod(1);
-        recurringPattern.setFrequency(0);
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
-    }
-
-    @Test
-    public void shouldReturnFalseWhenPeriodIsLessThanOneInAppointmentRequest() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType("WEEK");
+    public void shouldThrowExceptionWhenPeriodIsLessThanOneInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
         recurringPattern.setPeriod(0);
-        recurringPattern.setFrequency(1);
-        assertFalse(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
     }
+
+    private String getExceptionMessage() {
+        return "type should be DAY/WEEK\n" +
+                "period and frequency/endDate are mandatory if type is DAY\n" +
+                "daysOfWeek and frequency/endDate are mandatory if type is WEEK";
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenFrequencyIsLessThanOneInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setFrequency(0);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
 }

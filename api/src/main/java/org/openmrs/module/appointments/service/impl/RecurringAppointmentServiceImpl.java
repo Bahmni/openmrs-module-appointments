@@ -18,8 +18,6 @@ import java.util.List;
 public class RecurringAppointmentServiceImpl implements RecurringAppointmentService {
 
 
-    private final String DATE_FORMAT = "yyyy-MM-dd";
-
     AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
     AppointmentsService appointmentsService;
@@ -44,8 +42,10 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     @Override
+    //todo Use strategy for day, week and month logics
     public List<Date> getRecurringDates(Date appointmentStartDateTime,
                                         AppointmentRecurringPattern appointmentRecurringPattern) throws Exception {
+        String DATE_FORMAT = "yyyy-MM-dd";
         SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(appointmentStartDateTime);
@@ -53,8 +53,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         Date endDate = null;
 
         if (appointmentRecurringPattern.getEndDate() == null) {
-            switch (appointmentRecurringPattern.getType().toUpperCase()) {
-                case "DAY":
+            switch (appointmentRecurringPattern.getType()) {
+                case DAY:
                 default:
                     endDate = getEndDateForDayType(calendar, appointmentRecurringPattern);
                     break;

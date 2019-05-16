@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
@@ -84,12 +83,9 @@ public class AppointmentController {
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             }
             else {
+                recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
                 AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
-                        .fromRecurrenceRequest(recurringPattern);
-                if(!recurringAppointmentsHelper.validateRecurringPattern(recurringPattern)) {
-                    //TODO id should be removed from recurringPattern
-                    return new ResponseEntity<>(recurringPattern, HttpStatus.BAD_REQUEST);
-                }
+                        .fromRequestRecurringPattern(recurringPattern);
 
                 List<Date> recurringDates = recurringAppointmentService
                         .getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);

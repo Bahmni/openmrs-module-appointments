@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.model;
 
+import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
+
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -10,7 +12,7 @@ public class AppointmentRecurringPattern {
     private Integer frequency;
     private Integer period;
     private Date endDate;
-    private String type;
+    private RecurringAppointmentType type;
     private String daysOfWeek;
     private Set<Appointment> appointments = new HashSet<>();
 
@@ -46,11 +48,11 @@ public class AppointmentRecurringPattern {
         this.endDate = endDate;
     }
 
-    public String getType() {
+    public RecurringAppointmentType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(RecurringAppointmentType type) {
         this.type = type;
     }
 
