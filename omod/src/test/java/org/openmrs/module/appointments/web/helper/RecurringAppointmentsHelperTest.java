@@ -7,12 +7,13 @@ import org.junit.rules.ExpectedException;
 import org.mockito.Mockito;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
+import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 
 import java.text.ParseException;
-import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -22,12 +23,10 @@ import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
 public class RecurringAppointmentsHelperTest {
 
-    private RecurringAppointmentsHelper recurringAppointmentsHelper;
-
-    private AppointmentMapper appointmentMapperMock;
-
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+    private RecurringAppointmentsHelper recurringAppointmentsHelper;
+    private AppointmentMapper appointmentMapperMock;
 
     @Before
     public void setUp() {
@@ -36,9 +35,7 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldReturnAppointmentsForGivenDatesAndAppointmentRequest() throws ParseException {
-        Date appointmentDateOne = getDate(2019, Calendar.MAY, 13);
-        Date appointmentDateTwo = getDate(2019, Calendar.MAY, 16);
+    public void shouldReturnAppointmentsForGivenRecurringPatternAndAppointmentRequest() throws ParseException {
 
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
@@ -47,10 +44,14 @@ public class RecurringAppointmentsHelperTest {
         appointmentRequest.setStartDateTime(appointmentStartDateTime);
         appointmentRequest.setEndDateTime(appointmentEndDateTime);
 
+        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(3);
+        recurringPattern.setType(RecurringAppointmentType.DAY);
+
         Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = recurringAppointmentsHelper.generateAppointments(Arrays.asList(appointmentDateOne,
-                appointmentDateTwo), appointmentRequest);
+        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
 
         assertEquals(2, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
@@ -61,6 +62,68 @@ public class RecurringAppointmentsHelperTest {
         assertEquals(getDate(2019, Calendar.MAY, 16, 16, 30, 00).toString(),
                 appointments.get(1).getEndDateTime().toString());
 
+    }
+
+    @Test
+    public void shouldReturnAppointmentsAcrossDaysForGivenRecurringPatternAndAppointmentRequest() throws ParseException {
+
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
+
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setStartDateTime(appointmentStartDateTime);
+        appointmentRequest.setEndDateTime(appointmentEndDateTime);
+
+        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(3);
+        recurringPattern.setType(RecurringAppointmentType.DAY);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
+
+        assertEquals(2, appointments.size());
+        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
+        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
+
+        assertEquals(getDate(2019, Calendar.MAY, 19, 23, 45, 0).toString(),
+                appointments.get(1).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 20, 0, 15, 0).toString(),
+                appointments.get(1).getEndDateTime().toString());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsForGivenRecurringPatternWithEndDateAndAppointmentRequest() throws ParseException {
+
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
+
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setStartDateTime(appointmentStartDateTime);
+        appointmentRequest.setEndDateTime(appointmentEndDateTime);
+
+        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
+        recurringPattern.setPeriod(3);
+        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25));
+        recurringPattern.setType(RecurringAppointmentType.DAY);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
+
+        assertEquals(3, appointments.size());
+        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
+        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
+
+         assertEquals(getDate(2019, Calendar.MAY, 19, 23, 45, 0).toString(),
+                appointments.get(1).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 20, 0, 15, 0).toString(),
+                appointments.get(1).getEndDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 22, 23, 45, 0).toString(),
+                appointments.get(2).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 23, 0, 15, 0).toString(),
+                appointments.get(2).getEndDateTime().toString());
     }
 
     @Test

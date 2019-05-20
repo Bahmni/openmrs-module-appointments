@@ -4,7 +4,6 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 public interface RecurringAppointmentService {
@@ -13,6 +12,4 @@ public interface RecurringAppointmentService {
     List<Appointment> saveRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                 List<Appointment> appointments);
 
-    List<Date> getRecurringDates(Date appointmentStartDateTime,
-                                 AppointmentRecurringPattern appointmentRecurringPattern) throws Exception;
 }

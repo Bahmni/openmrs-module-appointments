@@ -282,22 +282,18 @@ public class AppointmentControllerTest {
         Appointment appointmentOne = new Appointment();
         appointmentOne.setUuid("appointmentUuid");
         Appointment appointmentTwo = new Appointment();
-        appointmentOne.setUuid("appointmentUuid");
+        appointmentTwo.setUuid("appointmentUuid");
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
         when(appointmentMapper.fromRequestRecurringPattern(recurringPattern)).thenReturn(appointmentRecurringPattern);
         when(recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern,
                 Arrays.asList(appointmentOne,appointmentTwo))).thenReturn(Arrays.asList(appointmentOne,appointmentTwo));
-        when(recurringAppointmentService.getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern))
-                .thenReturn(new ArrayList<Date>());
-        when(recurringAppointmentsHelper.generateAppointments(new ArrayList<Date>(),appointmentRequest))
-                .thenReturn(Arrays.asList(appointmentOne,appointmentTwo));
+        when(recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<Appointment>());
 
         appointmentController.saveAppointment(appointmentRequest);
         Mockito.verify(appointmentMapper, times(1)).fromRequestRecurringPattern(recurringPattern);
-        Mockito.verify(recurringAppointmentService, times(1)).getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
         Mockito.verify(recurringAppointmentService, times(1)).saveRecurringAppointments(appointmentRecurringPattern,
-                Arrays.asList(appointmentOne,appointmentTwo));
-        Mockito.verify(recurringAppointmentsHelper, times(1)).generateAppointments(new ArrayList<Date>(),appointmentRequest);
+                Collections.emptyList());
+        Mockito.verify(recurringAppointmentsHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern,appointmentRequest);
     }
 }
