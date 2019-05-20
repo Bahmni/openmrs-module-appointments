@@ -86,16 +86,11 @@ public class AppointmentController {
                 recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
                 AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
                         .fromRequestRecurringPattern(recurringPattern);
+                List<Appointment> appointmentsList = recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern,
+                        appointmentRequest);
 
-                List<Date> recurringDates = recurringAppointmentService
-                        .getRecurringDates(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
-
-                List<Appointment> appointments = recurringAppointmentsHelper
-                        .generateAppointments(recurringDates, appointmentRequest);
-
-                recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern, appointments);
-
-                return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
+                recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern, appointmentsList);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(appointmentsList), HttpStatus.OK);
             }
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);

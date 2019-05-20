@@ -1,106 +1,86 @@
 package org.openmrs.module.appointments.service.impl;
 
 
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.openmrs.Patient;
+import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.service.RecurringAppointmentService;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.service.AppointmentsService;
 
-import java.util.Calendar;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.*;
 
+@RunWith(MockitoJUnitRunner.class)
 public class RecurringAppointmentServiceImplTest {
 
-    private RecurringAppointmentService recurringAppointmentService;
+    private RecurringAppointmentServiceImpl recurringAppointmentServiceImpl;
+
+    @Mock
+    private AppointmentsService appointmentsService;
+
+    @Mock
+    private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
     @Before
     public void setUp() throws Exception {
-        recurringAppointmentService = new RecurringAppointmentServiceImpl();
+        recurringAppointmentServiceImpl = new RecurringAppointmentServiceImpl();
     }
 
     @Test
-    public void shouldReturnThreeAppointmentsForGivenRecurringPatternAndStartDateTime() throws Exception {
-        Calendar calendar = Calendar.getInstance();
+    public void shouldSaveRecurringAppointmentsForGivenRecurringPatternAndAppointment() {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setFrequency(3);
+        appointmentRecurringPattern.setPeriod(1);
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        List<Appointment> appointments = Collections.singletonList(appointment);
+        recurringAppointmentServiceImpl.setAppointmentsService(appointmentsService);
+        recurringAppointmentServiceImpl.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
+        for (Appointment app : appointments) {
+            when(appointmentsService.validateAndSave(app)).thenReturn(app);
+        }
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+        List<Appointment> appointmentsList = recurringAppointmentServiceImpl.saveRecurringAppointments(appointmentRecurringPattern, appointments);
 
-        calendar.set(2019, Calendar.MAY, 14, 18, 20, 00);
-        Date appointmentStartDateTime = calendar.getTime();
+        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
+        verify(appointmentsService).validateAndSave(any(Appointment.class));
+        Assert.assertEquals(1, appointmentsList.size());
+    }
 
+    @Test
+    public void shouldNotSaveEmptyRecurringAppointmentsForGivenRecurringPatternAndAppointment() {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setFrequency(3);
         appointmentRecurringPattern.setPeriod(1);
         appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
 
-        List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
-                appointmentRecurringPattern);
-        assertEquals(3, recurringDates.size());
-        assertEquals(getDate(2019, Calendar.MAY, 14, 00, 00, 00).toString(),
-                recurringDates.get(0).toString());
-        assertEquals(getDate(2019, Calendar.MAY, 15, 00, 00, 00).toString(),
-                recurringDates.get(1).toString());
-        assertEquals(getDate(2019, Calendar.MAY, 16, 00, 00, 00).toString(),
-                recurringDates.get(2).toString());
+        List<Appointment> appointments = Collections.emptyList();
+        recurringAppointmentServiceImpl.setAppointmentsService(appointmentsService);
+        recurringAppointmentServiceImpl.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
 
-    }
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+        List<Appointment> appointmentsList = recurringAppointmentServiceImpl.saveRecurringAppointments(appointmentRecurringPattern, appointments);
 
-    @Test
-    public void shouldReturnFourAppointmentsAcrossMonths() throws Exception {
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.set(2019, Calendar.MAY, 14, 18, 20, 00);
-        Date appointmentStartDateTime = calendar.getTime();
-
-        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setFrequency(4);
-        appointmentRecurringPattern.setPeriod(15);
-        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
-
-        List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
-                appointmentRecurringPattern);
-        assertEquals(4, recurringDates.size());
-        assertEquals(getDate(2019, Calendar.MAY, 14, 00, 00, 00).toString(),
-                recurringDates.get(0).toString());
-        assertEquals(getDate(2019, Calendar.MAY, 29, 00, 00, 00).toString(),
-                recurringDates.get(1).toString());
-        assertEquals(getDate(2019, Calendar.JUNE, 13, 00, 00, 00).toString(),
-                recurringDates.get(2).toString());
-        assertEquals(getDate(2019, Calendar.JUNE, 28, 00, 00, 00).toString(),
-                recurringDates.get(3).toString());
-
-    }
-
-    @Test
-    public void shouldReturnFourAppointmentsAcrossTwoYears() throws Exception {
-        Calendar calendar = Calendar.getInstance();
-
-        calendar.set(2019, Calendar.MAY, 14, 18, 20, 00);
-        Date appointmentStartDateTime = calendar.getTime();
-
-        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setFrequency(4);
-        appointmentRecurringPattern.setPeriod(100);
-        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
-
-        List<Date> recurringDates = recurringAppointmentService.getRecurringDates(appointmentStartDateTime,
-                appointmentRecurringPattern);
-        assertEquals(4, recurringDates.size());
-        assertEquals(getDate(2019, Calendar.MAY, 14, 00, 00, 00).toString(),
-                recurringDates.get(0).toString());
-        assertEquals(getDate(2019, Calendar.AUGUST, 22, 00, 00, 00).toString(),
-                recurringDates.get(1).toString());
-        assertEquals(getDate(2019, Calendar.NOVEMBER, 30, 00, 00, 00).toString(),
-                recurringDates.get(2).toString());
-        assertEquals(getDate(2020, Calendar.MARCH, 9, 00, 00, 00).toString(),
-                recurringDates.get(3).toString());
-
-    }
-
-    private static Date getDate(int year, int month, int day, int hour, int minute, int second) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(year, month, day, hour, minute, second);
-        return calendar.getTime();
+        verify(appointmentsService, never()).validateAndSave(any(Appointment.class));
+        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
+        Assert.assertEquals(0, appointmentsList.size());
     }
 
 }
