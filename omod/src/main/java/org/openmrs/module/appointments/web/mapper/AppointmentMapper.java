@@ -97,7 +97,7 @@ public class AppointmentMapper {
 
     public AppointmentRecurringPattern fromRequestRecurringPattern(RecurringPattern recurringPattern) {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-
+        appointmentRecurringPattern.setEndDate(recurringPattern.getEndDate());
         appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
         appointmentRecurringPattern.setFrequency(recurringPattern.getFrequency());
         String recurringPatternType = recurringPattern.getType();

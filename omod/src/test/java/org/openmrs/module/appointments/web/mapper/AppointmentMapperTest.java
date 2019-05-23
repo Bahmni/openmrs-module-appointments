@@ -125,8 +125,21 @@ public class AppointmentMapperTest {
         recurringPattern.setPeriod(1);
         recurringPattern.setType("DAY");
         AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRequestRecurringPattern(recurringPattern);
-        assertEquals(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
-        assertEquals(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
+        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
+        assertSame(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
+        assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
+    }
+
+    @Test
+    public void shouldGetRecurringPatternFromPayloadForDayWithEndDate() throws ParseException {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setPeriod(1);
+        recurringPattern.setType("DAY");
+        String endDate = "2017-03-15T00:00:00.0Z";
+        recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRequestRecurringPattern(recurringPattern);
+        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
+        assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
         assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
     }
 

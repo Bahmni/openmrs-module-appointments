@@ -94,7 +94,7 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldReturnAppointmentsForGivenRecurringPatternWithEndDateAndAppointmentRequest() throws ParseException {
+    public void shouldReturnAppointmentsWithSlotStartsAndEndsOnDifferentDatesForGivenRecurringPatternWithEndDate() {
 
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
@@ -105,14 +105,14 @@ public class RecurringAppointmentsHelperTest {
 
         AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
         recurringPattern.setPeriod(3);
-        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25));
+        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25, 23, 45, 00));
         recurringPattern.setType(RecurringAppointmentType.DAY);
 
         Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
 
         List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
 
-        assertEquals(3, appointments.size());
+        assertEquals(4, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
         assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
 
@@ -124,6 +124,55 @@ public class RecurringAppointmentsHelperTest {
                 appointments.get(2).getStartDateTime().toString());
         assertEquals(getDate(2019, Calendar.MAY, 23, 0, 15, 0).toString(),
                 appointments.get(2).getEndDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 25, 23, 45, 0).toString(),
+                appointments.get(3).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 26, 0, 15, 0).toString(),
+                appointments.get(3).getEndDateTime().toString());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsForGivenRecurringPatternWithEndDate() {
+
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 8, 45, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 16, 9, 15, 00);
+
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setStartDateTime(appointmentStartDateTime);
+        appointmentRequest.setEndDateTime(appointmentEndDateTime);
+
+        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
+        recurringPattern.setPeriod(3);
+        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25, 8,45,00));
+        recurringPattern.setType(RecurringAppointmentType.DAY);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
+
+        assertEquals(4, appointments.size());
+        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
+        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
+
+        assertEquals(getDate(2019, Calendar.MAY, 19, 8, 45, 0).toString(),
+                appointments.get(1).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 19, 9, 15, 0).toString(),
+                appointments.get(1).getEndDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 22, 8, 45, 0).toString(),
+                appointments.get(2).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 22, 9, 15, 0).toString(),
+                appointments.get(2).getEndDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 25, 8, 45, 0).toString(),
+                appointments.get(3).getStartDateTime().toString());
+        assertEquals(getDate(2019, Calendar.MAY, 25, 9, 15, 0).toString(),
+                appointments.get(3).getEndDateTime().toString());
+    }
+
+    private RecurringPattern getRecurringPattern() {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setType("DAY");
+        recurringPattern.setPeriod(1);
+        recurringPattern.setFrequency(1);
+        return recurringPattern;
     }
 
     @Test
@@ -133,14 +182,6 @@ public class RecurringAppointmentsHelperTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
         recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
-    }
-
-    private RecurringPattern getRecurringPattern() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType("DAY");
-        recurringPattern.setPeriod(1);
-        recurringPattern.setFrequency(1);
-        return recurringPattern;
     }
 
     @Test
@@ -161,6 +202,15 @@ public class RecurringAppointmentsHelperTest {
         recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
     }
 
+    @Test
+    public void shouldThrowExceptionWhenFrequencyIsLessThanOneInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setFrequency(0);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
     private String getExceptionMessage() {
         return "type should be DAY/WEEK\n" +
                 "period and frequency/endDate are mandatory if type is DAY\n" +
@@ -168,8 +218,9 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenFrequencyIsLessThanOneInRecurringPattern() {
+    public void shouldThrowExceptionWhenEndDateIsNull() {
         RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setEndDate(null);
         recurringPattern.setFrequency(0);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());

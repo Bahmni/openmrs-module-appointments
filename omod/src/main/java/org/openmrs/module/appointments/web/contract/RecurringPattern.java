@@ -6,8 +6,8 @@ import java.util.List;
 public class RecurringPattern {
 
     private Integer id;
-    private Integer frequency;
-    private Integer period;
+    private int frequency;
+    private int period;
     private Date endDate;
     private String type;
     private List<String> daysOfWeek;
@@ -20,19 +20,19 @@ public class RecurringPattern {
         this.id = id;
     }
 
-    public Integer getFrequency() {
+    public int getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(Integer frequency) {
+    public void setFrequency(int frequency) {
         this.frequency = frequency;
     }
 
-    public Integer getPeriod() {
+    public int getPeriod() {
         return period;
     }
 
-    public void setPeriod(Integer period) {
+    public void setPeriod(int period) {
         this.period = period;
     }
 

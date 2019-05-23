@@ -38,14 +38,18 @@ public class RecurringAppointmentsHelper {
 
     private boolean isValidDailyRecurringAppointmentsPattern(RecurringPattern recurringPattern) {
         return StringUtils.isNotBlank(recurringPattern.getType()) &&
-                recurringPattern.getPeriod() > 0 && recurringPattern.getFrequency() > 0;
+                recurringPattern.getPeriod() > 0 && (hasValidFrequencyOrEndDate(recurringPattern.getFrequency(), recurringPattern.getEndDate()));
+    }
+
+    private boolean hasValidFrequencyOrEndDate(int frequency, Date endDate) {
+        return frequency > 0 || endDate != null;
     }
 
     //todo Use strategy for day, week and month logics
     public List<Appointment> generateRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
         List<Appointment> appointments;
-        Date endDate = null;
-        if (appointmentRecurringPattern.getEndDate() == null || StringUtils.isBlank(appointmentRecurringPattern.getEndDate().toString())) {
+        Date endDate;
+        if (appointmentRecurringPattern.getEndDate() == null) {
             switch (appointmentRecurringPattern.getType()) {
                 case DAY:
                 default:
