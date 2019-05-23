@@ -333,4 +333,65 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
     }
 
+    @Test
+    public void shouldSaveRecurringAppointmentsWithEndDate() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2019-05-19T23:45:00.000Z\", " +
+                "\"endDateTime\": \"2019-05-20T00:15:00.000Z\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": []," +
+                "\"recurringPattern\":{" +
+                "\"period\":2," +
+                "\"daysOfWeek\":[]," +
+                "\"endDate\":\"2019-05-25T23:45:00.000Z\"," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenSaveRecurringAppointmentsWithNoFrequencyAndNoEndDate() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2019-05-19T23:45:00.000Z\", " +
+                "\"endDateTime\": \"2019-05-20T00:15:00.000Z\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": []," +
+                "\"recurringPattern\":{" +
+                "\"period\":2," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenSaveRecurringAppointmentsWithInvalidEndDate() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2019-05-19T23:45:00.000Z\", " +
+                "\"endDateTime\": \"2019-05-20T00:15:00.000Z\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": []," +
+                "\"recurringPattern\":{" +
+                "\"period\":2," +
+                "\"daysOfWeek\":[]," +
+                "\"endDate\":\"\"," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
 }
