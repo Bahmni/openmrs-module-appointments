@@ -106,6 +106,10 @@ public class AppointmentMapper {
                     .format("Valid recurrence type should be provided. Valid types are %s and %s",  DAY, WEEK));
         }
         appointmentRecurringPattern.setType(valueOf(recurringPatternType.toUpperCase()));
+        if (appointmentRecurringPattern.getType() == WEEK) {
+            appointmentRecurringPattern.setDaysOfWeek(recurringPattern.getDaysOfWeek().stream().map(String::toUpperCase)
+                    .collect(Collectors.joining(",")));
+        }
         return appointmentRecurringPattern;
     }
 
