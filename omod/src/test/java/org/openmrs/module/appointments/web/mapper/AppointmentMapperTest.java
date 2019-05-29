@@ -144,6 +144,21 @@ public class AppointmentMapperTest {
     }
 
     @Test
+    public void shouldGetRecurringPatternFromPayloadForWeekWithEndDate() throws ParseException {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setPeriod(1);
+        recurringPattern.setType("WEEk");
+        recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
+        String endDate = "2017-03-15T00:00:00.0Z";
+        recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper.fromRequestRecurringPattern(recurringPattern);
+        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
+        assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
+        assertEquals("SUNDAY,MONDAY", appointmentRecurringPattern.getDaysOfWeek());
+        assertEquals(RecurringAppointmentType.WEEK, appointmentRecurringPattern.getType());
+    }
+
+    @Test
     public void shouldThrowIllegalArgumentExceptionWhenRecurringTypeIsNull() {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(3);
