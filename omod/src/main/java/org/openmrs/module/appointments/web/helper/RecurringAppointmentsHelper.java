@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.web.helper;
 
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -12,9 +12,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.valueOf;
 
 @Component
 public class RecurringAppointmentsHelper {
@@ -26,19 +30,47 @@ public class RecurringAppointmentsHelper {
         this.appointmentMapper = appointmentMapper;
     }
 
-    public void validateRecurringPattern(RecurringPattern recurringPattern) {
-        boolean isValidRecurringPattern = isValidDailyRecurringAppointmentsPattern(recurringPattern);
+    public boolean validateRecurringPattern(RecurringPattern recurringPattern) {
+        boolean isValidRecurringPattern = isValidRecurringAppointmentsPattern(recurringPattern);
         if (!isValidRecurringPattern) {
             throw new APIException(String.format("type should be %s/%s\n" +
                             "period and frequency/endDate are mandatory if type is DAY\n" +
-                            "daysOfWeek and frequency/endDate are mandatory if type is WEEK",
+                            "daysOfWeek, period and frequency/endDate are mandatory if type is WEEK",
                     RecurringAppointmentType.DAY, RecurringAppointmentType.WEEK));
         }
+        return isValidRecurringPattern;
+    }
+
+    private boolean isValidRecurringAppointmentsPattern(RecurringPattern recurringPattern) {
+        boolean isValidRecurringPattern = false;
+        try {
+            switch (valueOf(recurringPattern.getType().toUpperCase())) {
+                case WEEK:
+                    isValidRecurringPattern = isValidWeeklyRecurringAppointmentsPattern(recurringPattern);
+                    break;
+                case DAY:
+                    isValidRecurringPattern = isValidDailyRecurringAppointmentsPattern(recurringPattern);
+                    break;
+            }
+        } catch (Exception e) {
+        }
+        return isValidRecurringPattern;
     }
 
     private boolean isValidDailyRecurringAppointmentsPattern(RecurringPattern recurringPattern) {
-        return StringUtils.isNotBlank(recurringPattern.getType()) &&
-                recurringPattern.getPeriod() > 0 && (hasValidFrequencyOrEndDate(recurringPattern.getFrequency(), recurringPattern.getEndDate()));
+        return recurringPattern.getPeriod() > 0
+                && (hasValidFrequencyOrEndDate(recurringPattern.getFrequency(), recurringPattern.getEndDate()));
+    }
+
+    private boolean isValidWeeklyRecurringAppointmentsPattern(RecurringPattern recurringPattern) {
+        return areValidDays(recurringPattern.getDaysOfWeek())
+                && isValidDailyRecurringAppointmentsPattern(recurringPattern);
+    }
+
+    private boolean areValidDays(List<String> daysOfWeek) {
+        List<String> WEEK_DAYS = Arrays.asList("SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY");
+        return CollectionUtils.isNotEmpty(daysOfWeek)
+                && WEEK_DAYS.containsAll(daysOfWeek.stream().map(String::toUpperCase).collect(Collectors.toList()));
     }
 
     private boolean hasValidFrequencyOrEndDate(int frequency, Date endDate) {
