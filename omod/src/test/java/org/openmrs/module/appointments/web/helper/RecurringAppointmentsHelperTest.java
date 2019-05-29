@@ -13,12 +13,16 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 
-import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
 public class RecurringAppointmentsHelperTest {
@@ -35,7 +39,7 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldReturnAppointmentsForGivenRecurringPatternAndAppointmentRequest() throws ParseException {
+    public void shouldReturnAppointmentsForGivenRecurringPatternAndAppointmentRequest() {
 
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
@@ -65,7 +69,7 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
-    public void shouldReturnAppointmentsAcrossDaysForGivenRecurringPatternAndAppointmentRequest() throws ParseException {
+    public void shouldReturnAppointmentsAcrossDaysForGivenRecurringPatternAndAppointmentRequest() {
 
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
@@ -194,6 +198,16 @@ public class RecurringAppointmentsHelperTest {
     }
 
     @Test
+    public void shouldThrowExceptionWhenInvalidType() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("TEXT");
+        recurringPattern.setDaysOfWeek(null);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
     public void shouldThrowExceptionWhenPeriodIsLessThanOneInRecurringPattern() {
         RecurringPattern recurringPattern = getRecurringPattern();
         recurringPattern.setPeriod(0);
@@ -214,7 +228,7 @@ public class RecurringAppointmentsHelperTest {
     private String getExceptionMessage() {
         return "type should be DAY/WEEK\n" +
                 "period and frequency/endDate are mandatory if type is DAY\n" +
-                "daysOfWeek and frequency/endDate are mandatory if type is WEEK";
+                "daysOfWeek, period and frequency/endDate are mandatory if type is WEEK";
     }
 
     @Test
@@ -225,6 +239,74 @@ public class RecurringAppointmentsHelperTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
         recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenWeekTypeWithEmptyDays() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("WEEk");
+        recurringPattern.setEndDate(null);
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(Arrays.asList());
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenWeekTypeWithNoDays() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("WEEk");
+        recurringPattern.setEndDate(null);
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(null);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenWeekTypeWithInvalidDays() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("WEEk");
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(Arrays.asList("TEXT", "MISC"));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenWeekTypeWithNoPeriod() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("WEEk");
+        recurringPattern.setFrequency(2);
+        recurringPattern.setPeriod(0);
+        recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenWeekTypeWithNoFrequency() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setType("WEEk");
+        recurringPattern.setFrequency(0);
+        recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
+    @Test
+    public void shouldNotThrowAnExceptionForValidData() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        assertTrue(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
     }
 
 }
