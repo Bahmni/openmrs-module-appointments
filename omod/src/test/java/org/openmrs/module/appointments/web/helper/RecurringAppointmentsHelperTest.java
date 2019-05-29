@@ -38,139 +38,6 @@ public class RecurringAppointmentsHelperTest {
         recurringAppointmentsHelper = new RecurringAppointmentsHelper(appointmentMapperMock);
     }
 
-    @Test
-    public void shouldReturnAppointmentsForGivenRecurringPatternAndAppointmentRequest() {
-
-        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
-        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-
-        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
-        recurringPattern.setFrequency(2);
-        recurringPattern.setPeriod(3);
-        recurringPattern.setType(RecurringAppointmentType.DAY);
-
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
-        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
-
-        assertEquals(2, appointments.size());
-        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
-        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
-
-        assertEquals(getDate(2019, Calendar.MAY, 16, 16, 00, 00).toString(),
-                appointments.get(1).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 16, 16, 30, 00).toString(),
-                appointments.get(1).getEndDateTime().toString());
-
-    }
-
-    @Test
-    public void shouldReturnAppointmentsAcrossDaysForGivenRecurringPatternAndAppointmentRequest() {
-
-        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
-        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
-
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-
-        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
-        recurringPattern.setFrequency(2);
-        recurringPattern.setPeriod(3);
-        recurringPattern.setType(RecurringAppointmentType.DAY);
-
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
-        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
-
-        assertEquals(2, appointments.size());
-        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
-        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
-
-        assertEquals(getDate(2019, Calendar.MAY, 19, 23, 45, 0).toString(),
-                appointments.get(1).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 20, 0, 15, 0).toString(),
-                appointments.get(1).getEndDateTime().toString());
-    }
-
-    @Test
-    public void shouldReturnAppointmentsWithSlotStartsAndEndsOnDifferentDatesForGivenRecurringPatternWithEndDate() {
-
-        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 23, 45, 00);
-        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 00, 15, 00);
-
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-
-        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
-        recurringPattern.setPeriod(3);
-        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25, 23, 45, 00));
-        recurringPattern.setType(RecurringAppointmentType.DAY);
-
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
-        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
-
-        assertEquals(4, appointments.size());
-        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
-        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
-
-         assertEquals(getDate(2019, Calendar.MAY, 19, 23, 45, 0).toString(),
-                appointments.get(1).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 20, 0, 15, 0).toString(),
-                appointments.get(1).getEndDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 22, 23, 45, 0).toString(),
-                appointments.get(2).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 23, 0, 15, 0).toString(),
-                appointments.get(2).getEndDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 25, 23, 45, 0).toString(),
-                appointments.get(3).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 26, 0, 15, 0).toString(),
-                appointments.get(3).getEndDateTime().toString());
-    }
-
-    @Test
-    public void shouldReturnAppointmentsForGivenRecurringPatternWithEndDate() {
-
-        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 16, 8, 45, 00);
-        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 16, 9, 15, 00);
-
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-
-        AppointmentRecurringPattern recurringPattern = new AppointmentRecurringPattern();
-        recurringPattern.setPeriod(3);
-        recurringPattern.setEndDate(getDate(2019,Calendar.MAY, 25, 8,45,00));
-        recurringPattern.setType(RecurringAppointmentType.DAY);
-
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
-        List<Appointment> appointments = recurringAppointmentsHelper.generateRecurringAppointments(recurringPattern, appointmentRequest);
-
-        assertEquals(4, appointments.size());
-        assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
-        assertEquals(appointmentEndDateTime.toString(), appointments.get(0).getEndDateTime().toString());
-
-        assertEquals(getDate(2019, Calendar.MAY, 19, 8, 45, 0).toString(),
-                appointments.get(1).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 19, 9, 15, 0).toString(),
-                appointments.get(1).getEndDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 22, 8, 45, 0).toString(),
-                appointments.get(2).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 22, 9, 15, 0).toString(),
-                appointments.get(2).getEndDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 25, 8, 45, 0).toString(),
-                appointments.get(3).getStartDateTime().toString());
-        assertEquals(getDate(2019, Calendar.MAY, 25, 9, 15, 0).toString(),
-                appointments.get(3).getEndDateTime().toString());
-    }
-
     private RecurringPattern getRecurringPattern() {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setType("DAY");
@@ -307,6 +174,115 @@ public class RecurringAppointmentsHelperTest {
     public void shouldNotThrowAnExceptionForValidData() {
         RecurringPattern recurringPattern = getRecurringPattern();
         assertTrue(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+    }
+
+    private AppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setStartDateTime(appointmentStartDateTime);
+        appointmentRequest.setEndDateTime(appointmentEndDateTime);
+        return appointmentRequest;
+    }
+
+    private AppointmentRecurringPattern getAppointmentRecurringPattern(int period, int frequency, Date endDate) {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setPeriod(period);
+        appointmentRecurringPattern.setFrequency(frequency);
+        appointmentRecurringPattern.setEndDate(endDate);
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        return appointmentRecurringPattern;
+    }
+
+    @Test
+    public void shouldReturnDailyRecurringAppointmentsForDayType() {
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 1, null);
+        appointmentRecurringPattern.setPeriod(1);
+        appointmentRecurringPattern.setFrequency(2);
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
+        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
+        Map<String, Date> appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 14, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 14, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+
+        List<Appointment> appointments = recurringAppointmentsHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+
+        assertEquals(appointments.size(), appointments.size());
+
+        for (int i = 0; i < appointments.size(); i++) {
+            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
+                    appointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
+                    appointments.get(i).getEndDateTime().toString());
+        }
+    }
+
+    @Test
+    public void shouldReturnDailyRecurringAppointmentsForWeekType() {
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 1, null);
+        appointmentRecurringPattern.setPeriod(1);
+        appointmentRecurringPattern.setFrequency(2);
+        appointmentRecurringPattern.setType(RecurringAppointmentType.WEEK);
+        appointmentRecurringPattern.setDaysOfWeek("SUNDAY,MONDAY");
+
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
+        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
+        Map<String, Date> appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 19, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 19, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 20, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 20, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, 4, 26, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, 4, 26, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+
+        List<Appointment> appointments = recurringAppointmentsHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+
+        assertEquals(appointments.size(), appointments.size());
+
+        for (int i = 0; i < appointments.size(); i++) {
+            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
+                    appointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
+                    appointments.get(i).getEndDateTime().toString());
+        }
+    }
+
+    @Test
+    public void shouldReturnDailyRecurringAppointmentsForNullType() {
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 1, null);
+        appointmentRecurringPattern.setType(null);
+
+        AppointmentRequest appointmentRequest = getAppointmentRequest(null, null);
+
+        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+
+        List<Appointment> appointments = recurringAppointmentsHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        assertTrue(appointments.isEmpty());
     }
 
 }

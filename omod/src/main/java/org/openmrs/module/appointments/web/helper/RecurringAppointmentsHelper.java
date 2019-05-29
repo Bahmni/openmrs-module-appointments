@@ -8,6 +8,8 @@ import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,47 +80,24 @@ public class RecurringAppointmentsHelper {
     }
 
     //todo Use strategy for day, week and month logics
-    public List<Appointment> generateRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
-        List<Appointment> appointments;
-        Date endDate;
-        if (appointmentRecurringPattern.getEndDate() == null) {
+    public List<Appointment> generateRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                                           AppointmentRequest appointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        try {
             switch (appointmentRecurringPattern.getType()) {
+                case WEEK:
+                    appointments = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).getAppointments();
+                    break;
                 case DAY:
-                default:
-                    endDate = getEndDateForDayType(appointmentRequest.getStartDateTime(), appointmentRecurringPattern);
+
+                    appointments = new DailyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).getAppointments();
                     break;
             }
-        } else {
-            endDate = appointmentRecurringPattern.getEndDate();
-        }
-
-        appointments = generateAppointmentsForDayType(appointmentRecurringPattern, appointmentRequest, endDate);
-        return appointments;
-    }
-
-    private List<Appointment> generateAppointmentsForDayType(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest, Date endDate) {
-        List<Appointment> appointments = new ArrayList<>();
-        Calendar startCalender = Calendar.getInstance();
-        Calendar endCalender = Calendar.getInstance();
-        startCalender.setTime(appointmentRequest.getStartDateTime());
-        endCalender.setTime(appointmentRequest.getEndDateTime());
-        Date currentAppointmentDate = appointmentRequest.getStartDateTime();
-        while (!currentAppointmentDate.after(endDate)) {
-            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            appointment.setStartDateTime(startCalender.getTime());
-            appointment.setEndDateTime(endCalender.getTime());
-            startCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
-            endCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
-            appointments.add(appointment);
-            currentAppointmentDate = startCalender.getTime();
+        } catch (Exception e) {
         }
         return appointments;
     }
 
-    private Date getEndDateForDayType(Date startDate, AppointmentRecurringPattern recurringPattern) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(startDate);
-        calendar.add(Calendar.DAY_OF_MONTH, recurringPattern.getPeriod() * (recurringPattern.getFrequency() - 1));
-        return calendar.getTime();
-    }
 }
