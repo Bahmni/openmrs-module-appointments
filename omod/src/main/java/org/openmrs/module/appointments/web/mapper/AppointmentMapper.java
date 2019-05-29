@@ -260,14 +260,4 @@ public class AppointmentMapper {
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
     }
-
-    public Object constructResponse(RecurringPattern inputRecurringPattern) {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType(inputRecurringPattern.getType());
-        recurringPattern.setPeriod(inputRecurringPattern.getPeriod());
-        recurringPattern.setFrequency(inputRecurringPattern.getFrequency());
-        recurringPattern.setEndDate(inputRecurringPattern.getEndDate());
-        recurringPattern.setDaysOfWeek(inputRecurringPattern.getDaysOfWeek());
-        return recurringPattern;
-    }
 }
