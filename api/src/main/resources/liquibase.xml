@@ -504,7 +504,7 @@
             period INT NOT NULL,
             frequency INT,
             end_date DATETIME,
-            days_of_week VARCHAR(50),
+            days_of_week VARCHAR(100),
             PRIMARY KEY (patient_appointment_timings_id));
         </sql>
     </changeSet>
