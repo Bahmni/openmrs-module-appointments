@@ -38,22 +38,31 @@ public class AppointmentMapperTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
     @Mock
     private PatientService patientService;
+
     @Mock
     private LocationService locationService;
+
     @Mock
     private ProviderService providerService;
+
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
+
     @Mock
     private AppointmentsService appointmentsService;
+
     @Mock
     private AppointmentResponseExtension extension;
+
     @InjectMocks
     private AppointmentMapper appointmentMapper;
+
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -660,5 +669,100 @@ public class AppointmentMapperTest {
         AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
 
         assertNull(appointmentDefaultResponse.getRecurringPattern());
+    }
+
+    @Test
+    public void shouldReturnOnlyNonVoidedProvidersForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        Provider anotherProvider = new Provider();
+        anotherProvider.setUuid("anotherProviderUuid");
+        when(providerService.getProviderByUuid("anotherProviderUuid")).thenReturn(anotherProvider);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        AppointmentProvider anotherAppointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        anotherAppointmentProvider.setProvider(anotherProvider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        anotherAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+        appointmentProvider.setVoided(false);
+        anotherAppointmentProvider.setVoided(true);
+
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        appProviders.add(anotherAppointmentProvider);
+        appointment.setProviders(appProviders);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(1, appointmentDefaultResponse.getProviders().size());
+        assertEquals("providerUuid", appointmentDefaultResponse.getProviders().get(0).getUuid());
+    }
+
+    @Test
+    public void shouldReturnOnlyNonVoidedProvidersForListOfAppointments() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        String anotherAppointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e56";
+        Appointment anotherAppointment = createAppointment();
+        anotherAppointment.setUuid(anotherAppointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        when(appointmentsService.getAppointmentByUuid(anotherAppointmentUuid)).thenReturn(anotherAppointment);
+        Provider anotherProvider = new Provider();
+        anotherProvider.setUuid("anotherProviderUuid");
+        when(providerService.getProviderByUuid("anotherProviderUuid")).thenReturn(anotherProvider);
+
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        appointmentProvider.setVoided(false);
+        AppointmentProvider anotherAppointmentProvider = new AppointmentProvider();
+        anotherAppointmentProvider.setProvider(anotherProvider);
+        anotherAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+        anotherAppointmentProvider.setVoided(true);
+
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        appointment.setProviders(appProviders);
+        Set<AppointmentProvider> anotherAppProviders = new HashSet<>();
+        anotherAppProviders.add(anotherAppointmentProvider);
+        anotherAppointment.setProviders(anotherAppProviders);
+        List<Appointment> appointments = Arrays.asList(appointment, anotherAppointment);
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponses = appointmentMapper.constructResponse(appointments);
+
+        assertEquals(1, appointmentDefaultResponses.get(0).getProviders().size());
+        assertEquals(0, appointmentDefaultResponses.get(1).getProviders().size());
+        assertEquals("providerUuid", appointmentDefaultResponses.get(0).getProviders().get(0).getUuid());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenProvidersAreNullForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        appointment.setProvider(null);
+        appointment.setProviders(null);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenProvidersListIsEmptyForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        appointment.setProvider(null);
+        appointment.setProviders(Collections.EMPTY_SET);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
     }
 }
