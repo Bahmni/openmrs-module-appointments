@@ -191,6 +191,7 @@ public class AppointmentMapper {
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
         List<AppointmentProviderDetail> providerList = new ArrayList<>();
+        providers = getNonVoidedProviders(providers);
         if (providers != null) {
             for (AppointmentProvider apptProviderAssociation : providers) {
                 AppointmentProviderDetail providerDetail = new AppointmentProviderDetail();
@@ -202,6 +203,16 @@ public class AppointmentMapper {
             }
         }
         return providerList;
+    }
+
+    private Set<AppointmentProvider> getNonVoidedProviders(Set<AppointmentProvider> providers) {
+        if(providers == null || providers.isEmpty()) {
+            return providers;
+        }
+        providers = providers
+                .stream()
+                .filter(provider -> provider.getVoided() != Boolean.TRUE).collect(Collectors.toSet());
+        return providers;
     }
 
     private Map createServiceTypeMap(AppointmentServiceType s) {
