@@ -22,7 +22,8 @@
 
         <set name="appointments" cascade="save-update" table="patient_appointment_occurrence">
             <key column="patient_appointment_timings_id"/>
-            <many-to-many column = "patient_appointment_id" class="org.openmrs.module.appointments.model.Appointment"/>
+            <many-to-many column = "patient_appointment_id" class="org.openmrs.module.appointments.model.Appointment"
+                unique="true"/>
         </set>
     </class>
 </hibernate-mapping>
