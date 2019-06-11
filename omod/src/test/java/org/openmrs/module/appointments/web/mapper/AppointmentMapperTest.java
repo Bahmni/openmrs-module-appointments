@@ -765,4 +765,28 @@ public class AppointmentMapperTest {
 
         assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
     }
+
+    @Test
+    public void shouldChangeTheResponseAndVoidedDataWhenProviderIsVoidedAndAddedAgain() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        existingAppointment.setProviders(appProviders);
+        appointmentProvider.setVoided(true);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setUuid(appointmentUuid);
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided(), false);
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse(),
+                AppointmentProviderResponse.ACCEPTED);
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoidReason(), null);
+    }
 }
