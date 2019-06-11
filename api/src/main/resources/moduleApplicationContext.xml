@@ -80,6 +80,11 @@
                         <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
                     </list>
                 </property>
+                <property name="appointmentServiceHelper">
+                    <list>
+                        <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+                    </list>
+                </property>
             </bean>
         </property>
         <property name="preInterceptors">
