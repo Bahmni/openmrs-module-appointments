@@ -4,7 +4,6 @@ import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -50,6 +48,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     AppointmentAuditDao appointmentAuditDao;
 
+    AppointmentServiceHelper appointmentServiceHelper;
+
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
     }
@@ -65,6 +65,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public void setAppointmentAuditDao(AppointmentAuditDao appointmentAuditDao) {
         this.appointmentAuditDao = appointmentAuditDao;
     }
+
+	public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
+		this.appointmentServiceHelper = appointmentServiceHelper;
+	}
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
@@ -252,7 +256,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         try {
             //cancel the previous appointment
             changeStatus(prevAppointment, AppointmentStatus.Cancelled.toString(), new Date());
-            createEventInAppointmentAudit(prevAppointment, getAppointmentAsJsonString(prevAppointment));
+            createEventInAppointmentAudit(prevAppointment,
+                    appointmentServiceHelper.getAppointmentAsJsonString(prevAppointment));
 
             //create a new appointment
             newAppointment.setUuid(null);
@@ -263,7 +268,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
             //TODO: should we copy the original appointment
             //newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
-            checkAndAssignAppointmentNumber(newAppointment);
+            appointmentServiceHelper.checkAndAssignAppointmentNumber(newAppointment);
 
             newAppointment.setStatus(AppointmentStatus.Scheduled);
             validateAndSave(newAppointment);
@@ -291,16 +296,4 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             }
         }
     }
-
-    private void checkAndAssignAppointmentNumber(Appointment appointment) {
-        if (appointment.getAppointmentNumber() == null) {
-            appointment.setAppointmentNumber(generateAppointmentNumber(appointment));
-        }
-    }
-
-    //TODO: extract this out to a pluggable strategy
-    private String generateAppointmentNumber(Appointment appointment) {
-        return "0000";
-    }
-
 }
