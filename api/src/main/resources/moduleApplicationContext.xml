@@ -96,7 +96,8 @@
     </bean>
 
 
-    <bean id="recurringAppointmentService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <bean id="recurringAppointmentService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
         </property>
@@ -105,8 +106,13 @@
                 <property name="appointmentRecurringPatternDao">
                     <ref bean="appointmentRecurringPatternDao"/>
                 </property>
-                <property name="appointmentsService">
-                    <ref bean="appointmentsService"/>
+                <property name="appointmentServiceHelper">
+                    <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+                </property>
+                <property name="appointmentValidators">
+                    <list>
+                        <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
+                    </list>
                 </property>
             </bean>
         </property>

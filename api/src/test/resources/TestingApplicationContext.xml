@@ -55,6 +55,38 @@
         </property>
     </bean>
 
+    <bean id="recurringAppointmentService"
+          class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.RecurringAppointmentServiceImpl">
+                <property name="appointmentRecurringPatternDao">
+                    <bean class="org.openmrs.module.appointments.dao.impl.AppointmentRecurringPatternDaoImpl">
+                        <property name="sessionFactory">
+                            <ref bean="sessionFactory"/>
+                        </property>
+                    </bean>
+                </property>
+                <property name="appointmentValidators">
+                    <list>
+                        <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
+                    </list>
+                </property>
+                <property name="appointmentServiceHelper">
+                    <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+                </property>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>

@@ -81,15 +81,14 @@ public class AppointmentController {
                 Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
                 appointmentsService.validateAndSave(appointment);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-            }
-            else {
+            } else {
                 recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
                 AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
                         .fromRequestRecurringPattern(recurringPattern);
                 List<Appointment> appointmentsList = recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern,
                         appointmentRequest);
 
-                recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern, appointmentsList);
+                recurringAppointmentService.validateAndSave(appointmentRecurringPattern, appointmentsList);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointmentsList), HttpStatus.OK);
             }
         } catch (Exception e) {

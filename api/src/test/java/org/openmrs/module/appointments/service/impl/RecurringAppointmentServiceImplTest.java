@@ -1,86 +1,119 @@
 package org.openmrs.module.appointments.service.impl;
 
 
-import org.junit.Assert;
-import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.openmrs.Patient;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
+import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.validator.AppointmentValidator;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyListOf;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecurringAppointmentServiceImplTest {
 
-    private RecurringAppointmentServiceImpl recurringAppointmentServiceImpl;
-
-    @Mock
-    private AppointmentsService appointmentsService;
+    @InjectMocks
+    private RecurringAppointmentServiceImpl recurringAppointmentService;
 
     @Mock
     private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
-    @Before
-    public void setUp() throws Exception {
-        recurringAppointmentServiceImpl = new RecurringAppointmentServiceImpl();
-    }
+    @Mock
+    private AppointmentServiceHelper appointmentServiceHelper;
+
+    @Spy
+    private List<AppointmentValidator> appointmentValidators = new ArrayList<>();
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Test
-    public void shouldSaveRecurringAppointmentsForGivenRecurringPatternAndAppointment() {
+    public void shouldSaveRecurringAppointmentsForGivenRecurringPatternAndAppointment() throws IOException {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setFrequency(3);
-        appointmentRecurringPattern.setPeriod(1);
-        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
         Appointment appointment = new Appointment();
-        appointment.setPatient(new Patient());
-        appointment.setService(new AppointmentServiceDefinition());
-        appointment.setStartDateTime(new Date());
-        appointment.setEndDateTime(new Date());
-        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
         List<Appointment> appointments = Collections.singletonList(appointment);
-        recurringAppointmentServiceImpl.setAppointmentsService(appointmentsService);
-        recurringAppointmentServiceImpl.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
-        for (Appointment app : appointments) {
-            when(appointmentsService.validateAndSave(app)).thenReturn(app);
-        }
-        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
-        List<Appointment> appointmentsList = recurringAppointmentServiceImpl.saveRecurringAppointments(appointmentRecurringPattern, appointments);
+        List<String> errors = new ArrayList<>();
 
-        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
-        verify(appointmentsService).validateAndSave(any(Appointment.class));
-        Assert.assertEquals(1, appointmentsList.size());
+        doNothing().when(appointmentServiceHelper).validate(appointment, appointmentValidators, errors);
+        String notes = "Notes";
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        List<Appointment> appointmentsList = recurringAppointmentService
+                .validateAndSave(appointmentRecurringPattern, appointments);
+
+        assertEquals(1, appointmentsList.size());
+        verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+        verify(appointmentServiceHelper).validate(appointment, appointmentValidators, errors);
+        verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
+        verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
+        verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
+        assertEquals(1, appointmentRecurringPattern.getAppointments().size());
+        assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
     }
 
     @Test
-    public void shouldNotSaveEmptyRecurringAppointmentsForGivenRecurringPatternAndAppointment() {
-        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setFrequency(3);
-        appointmentRecurringPattern.setPeriod(1);
-        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
-
-        List<Appointment> appointments = Collections.emptyList();
-        recurringAppointmentServiceImpl.setAppointmentsService(appointmentsService);
-        recurringAppointmentServiceImpl.setAppointmentRecurringPatternDao(appointmentRecurringPatternDao);
-
-        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
-        List<Appointment> appointmentsList = recurringAppointmentServiceImpl.saveRecurringAppointments(appointmentRecurringPattern, appointments);
-
-        verify(appointmentsService, never()).validateAndSave(any(Appointment.class));
-        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
-        Assert.assertEquals(0, appointmentsList.size());
+    public void shouldReturnNullWhenAppointsAreNull() {
+        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(
+                mock(AppointmentRecurringPattern.class), Collections.emptyList());
+        assertEquals(0, appointmentsList.size());
+        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
     }
 
+    @Test
+    public void shouldReturnEmptyAppointmentsWithoutSavingWhenAppointmentsAreEmpty() {
+        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(
+                mock(AppointmentRecurringPattern.class), null);
+        assertNull(appointmentsList);
+        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAppointmentValidationFails() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        String errorMessage = "Appointment cannot be created without Patient";
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            List<String> errors = (List) args[2];
+            errors.add(errorMessage);
+            return null;
+        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
+                anyListOf(String.class));
+
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern,
+                Collections.singletonList(new Appointment()));
+        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
+        verify(appointmentServiceHelper, never()).validate(any(), any(), any());
+        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any());
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
+        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
+    }
 }
