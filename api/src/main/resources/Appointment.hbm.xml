@@ -48,5 +48,15 @@
         <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
         <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
 
+        <set name="appointmentAudits" cascade="save-update" table="patient_appointment_audit" lazy="true">
+            <key foreign-key="patient_appointment_id" column="appointment_id"/>
+            <one-to-many class="AppointmentAudit"/>
+        </set>
+
+        <join table="patient_appointment_occurrence" inverse="true">
+            <key column="patient_appointment_id"/>
+            <many-to-one name="appointmentRecurringPattern" column="patient_appointment_timings_id"/>
+        </join>
+
     </class>
 </hibernate-mapping>

@@ -26,6 +26,24 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private AppointmentStatus status;
     private String comments;
     private Set<AppointmentProvider> providers;
+    private AppointmentRecurringPattern appointmentRecurringPattern;
+    private Set<AppointmentAudit> appointmentAudits;
+
+    public Set<AppointmentAudit> getAppointmentAudits() {
+        return appointmentAudits;
+    }
+
+    public void setAppointmentAudits(Set<AppointmentAudit> appointmentAudits) {
+        this.appointmentAudits = appointmentAudits;
+    }
+
+    public AppointmentRecurringPattern getAppointmentRecurringPattern() {
+        return appointmentRecurringPattern;
+    }
+
+    public void setAppointmentRecurringPattern(AppointmentRecurringPattern appointmentRecurringPattern) {
+        this.appointmentRecurringPattern = appointmentRecurringPattern;
+    }
 
     public Set<AppointmentProvider> getProviders() {
         return providers;

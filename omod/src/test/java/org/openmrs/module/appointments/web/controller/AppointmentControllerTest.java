@@ -286,14 +286,14 @@ public class AppointmentControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
         when(appointmentMapper.fromRequestRecurringPattern(recurringPattern)).thenReturn(appointmentRecurringPattern);
-        when(recurringAppointmentService.saveRecurringAppointments(appointmentRecurringPattern,
-                Arrays.asList(appointmentOne,appointmentTwo))).thenReturn(Arrays.asList(appointmentOne,appointmentTwo));
+        when(recurringAppointmentService.validateAndSave(appointmentRecurringPattern,
+                Arrays.asList(appointmentOne, appointmentTwo))).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
         when(recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<Appointment>());
 
         appointmentController.saveAppointment(appointmentRequest);
         Mockito.verify(appointmentMapper, times(1)).fromRequestRecurringPattern(recurringPattern);
-        Mockito.verify(recurringAppointmentService, times(1)).saveRecurringAppointments(appointmentRecurringPattern,
+        Mockito.verify(recurringAppointmentService, times(1)).validateAndSave(appointmentRecurringPattern,
                 Collections.emptyList());
-        Mockito.verify(recurringAppointmentsHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern,appointmentRequest);
+        Mockito.verify(recurringAppointmentsHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
     }
 }
