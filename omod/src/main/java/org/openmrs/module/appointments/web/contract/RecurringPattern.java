@@ -6,7 +6,7 @@ import java.util.List;
 public class RecurringPattern {
 
     private Integer id;
-    private int frequency;
+    private Integer frequency;
     private int period;
     private Date endDate;
     private String type;
@@ -20,11 +20,11 @@ public class RecurringPattern {
         this.id = id;
     }
 
-    public int getFrequency() {
+    public Integer getFrequency() {
         return frequency;
     }
 
-    public void setFrequency(int frequency) {
+    public void setFrequency(Integer frequency) {
         this.frequency = frequency;
     }
 
