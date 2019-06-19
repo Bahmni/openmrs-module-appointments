@@ -92,6 +92,15 @@ public class RecurringAppointmentsHelperTest {
         recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
     }
 
+    @Test
+    public void shouldThrowExceptionWhenFrequencyAndEndDateAreNullInRecurringPattern() {
+        RecurringPattern recurringPattern = getRecurringPattern();
+        recurringPattern.setFrequency(null);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(getExceptionMessage());
+        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+    }
+
     private String getExceptionMessage() {
         return "type should be DAY/WEEK\n" +
                 "period and frequency/endDate are mandatory if type is DAY\n" +

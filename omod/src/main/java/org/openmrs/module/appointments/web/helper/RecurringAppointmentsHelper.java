@@ -75,8 +75,8 @@ public class RecurringAppointmentsHelper {
                 && WEEK_DAYS.containsAll(daysOfWeek.stream().map(String::toUpperCase).collect(Collectors.toList()));
     }
 
-    private boolean hasValidFrequencyOrEndDate(int frequency, Date endDate) {
-        return frequency > 0 || endDate != null;
+    private boolean hasValidFrequencyOrEndDate(Integer frequency, Date endDate) {
+        return (frequency != null && frequency > 0) || endDate != null;
     }
 
     //todo Use strategy for day, week and month logics
