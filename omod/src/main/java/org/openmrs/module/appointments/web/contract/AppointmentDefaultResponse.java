@@ -19,6 +19,15 @@ public class AppointmentDefaultResponse {
 	private String comments;
 	private Map additionalInfo;
 	private List<AppointmentProviderDetail> providers;
+	private RecurringPattern recurringPattern;
+
+	public RecurringPattern getRecurringPattern() {
+		return recurringPattern;
+	}
+
+	public void setRecurringPattern(RecurringPattern recurringPattern) {
+		this.recurringPattern = recurringPattern;
+	}
 
 	public String getUuid() {
 		return uuid;
