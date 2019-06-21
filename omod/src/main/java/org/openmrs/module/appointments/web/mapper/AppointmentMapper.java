@@ -28,6 +28,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -210,7 +212,27 @@ public class AppointmentMapper {
         if(appointmentResponseExtension!=null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
+        response.setRecurringPattern(mapRecurringPattern(a.getAppointmentRecurringPattern()));
         return response;
+    }
+
+    private RecurringPattern mapRecurringPattern(AppointmentRecurringPattern appointmentRecurringPattern) {
+        if (appointmentRecurringPattern == null) {
+            return null;
+        }
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setType(appointmentRecurringPattern.getType().toString());
+        recurringPattern.setPeriod(appointmentRecurringPattern.getPeriod());
+        Date endDate = appointmentRecurringPattern.getEndDate();
+        if (endDate != null) {
+            recurringPattern.setEndDate(endDate);
+        } else {
+            recurringPattern.setFrequency(appointmentRecurringPattern.getFrequency());
+        }
+        List<String> daysOfWeek = appointmentRecurringPattern.getDaysOfWeek() != null ?
+                Arrays.asList(appointmentRecurringPattern.getDaysOfWeek().split(",")) : null;
+        recurringPattern.setDaysOfWeek(daysOfWeek);
+        return recurringPattern;
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
