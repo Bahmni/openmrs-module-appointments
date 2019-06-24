@@ -19,7 +19,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -255,6 +257,21 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public Appointment update(Appointment appointment) {
+        AppointmentAudit appointmentAudit;
+        try {
+            appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment,
+                    appointmentServiceHelper.getAppointmentAsJsonString(appointment));
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
+        appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singleton(appointmentAudit)));
+        appointmentDao.save(appointment);
+
+        return appointment;
     }
 
     private void createEventInAppointmentAudit(Appointment appointment,

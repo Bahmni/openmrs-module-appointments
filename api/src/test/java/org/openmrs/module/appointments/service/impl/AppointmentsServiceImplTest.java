@@ -501,4 +501,21 @@ public class AppointmentsServiceImplTest {
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
     }
+    @Test
+    public void shouldCallSaveMethodFromDaoAndGetAppointmentAuditFromServiceHelper() throws IOException {
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentAudits(new HashSet<>());
+        String anyString = any(String.class);
+        when(appointmentServiceHelper.getAppointmentAsJsonString(appointment)).thenReturn(anyString);
+        AppointmentAudit appointmentAudit = mock(AppointmentAudit.class);
+        when(appointmentServiceHelper.getAppointmentAuditEvent(appointment, anyString)).thenReturn(appointmentAudit);
+
+        Appointment actual = appointmentsService.update(appointment);
+
+        verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
+        verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, anyString);
+        verify(appointmentDao).save(appointment);
+        assertEquals(1, actual.getAppointmentAudits().size());
+        assertEquals(appointment, actual);
+    }
 }
