@@ -89,6 +89,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
 		List<String> errors = new ArrayList<>();
+        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
 		if (!errors.isEmpty()) {
 			String message = StringUtils.join(errors, "\n");
 			throw new APIException(message);
