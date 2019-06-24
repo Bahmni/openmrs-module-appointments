@@ -33,6 +33,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -295,5 +296,29 @@ public class AppointmentControllerTest {
         Mockito.verify(recurringAppointmentService, times(1)).validateAndSave(appointmentRecurringPattern,
                 Collections.emptyList());
         Mockito.verify(recurringAppointmentsHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+    }
+
+    @Test
+    public void shouldCallUpdateOfAppointmentsServiceWhenApplyForAllIsFalseForUpdateOfAppointment() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
+
+        appointmentController.editAppointment(appointmentRequest, false);
+
+        verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
+        verify(appointmentsService).update(appointmentMock);
+    }
+
+    @Test
+    public void shouldNotCallUpdateOfAppointmentsServiceWhenApplyForAllIsTrueForUpdateOfAppointment() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
+
+        appointmentController.editAppointment(appointmentRequest, true);
+
+        verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
+        verify(appointmentsService, never()).update(appointmentMock);
     }
 }

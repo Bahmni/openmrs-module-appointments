@@ -203,4 +203,21 @@ public class AppointmentController {
         }
     }
 
+    @RequestMapping(method = RequestMethod.PUT, value="/{appointmentUuid}")
+    @ResponseBody
+    public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest,
+                                                  @RequestParam(value = "applyForAll") boolean applyForAll) {
+        try {
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            Appointment updatedAppointment = null;
+            if (!applyForAll) {
+                updatedAppointment = appointmentsService.update(appointment);
+            }
+            return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to update an appointment", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }
