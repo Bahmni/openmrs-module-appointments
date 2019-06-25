@@ -6,6 +6,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @JsonIgnoreProperties
 public class AppointmentRequest {
@@ -22,6 +23,7 @@ public class AppointmentRequest {
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
     private RecurringPattern recurringPattern;
+    private Optional<Boolean> applyForAll;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -125,5 +127,13 @@ public class AppointmentRequest {
 
     public void setRecurringPattern(RecurringPattern recurringPattern) {
         this.recurringPattern = recurringPattern;
+    }
+
+    public Optional<Boolean> getApplyForAll() {
+        return applyForAll;
+    }
+
+    public void setApplyForAll(Optional<Boolean> applyForAll) {
+        this.applyForAll = applyForAll;
     }
 }

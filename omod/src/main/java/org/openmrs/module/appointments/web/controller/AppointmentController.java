@@ -205,10 +205,11 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.PUT, value="/{appointmentUuid}")
     @ResponseBody
-    public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest,
-                                                  @RequestParam(value = "applyForAll") boolean applyForAll) {
+    public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            boolean applyForAll = appointmentRequest.getApplyForAll().isPresent() ?
+                    appointmentRequest.getApplyForAll().get() : false;
             if (applyForAll) {
                 List<Appointment> updatedAppointments = recurringAppointmentService.update(appointment);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
