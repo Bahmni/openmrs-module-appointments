@@ -321,4 +321,17 @@ public class AppointmentControllerTest {
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
         verify(appointmentsService, never()).update(appointmentMock);
     }
+
+    @Test
+    public void shouldCallUpdateOfRecurringAppointmentServiceWhenApplyForAllIsTrue() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
+
+        appointmentController.editAppointment(appointmentRequest, true);
+
+        verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
+        verify(appointmentsService, never()).update(appointmentMock);
+        verify(recurringAppointmentService).update(appointmentMock);
+    }
 }

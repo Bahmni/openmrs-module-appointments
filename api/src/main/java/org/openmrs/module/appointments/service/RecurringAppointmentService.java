@@ -12,4 +12,6 @@ public interface RecurringAppointmentService {
     List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern,
                                       List<Appointment> appointments);
 
+    @Transactional
+    List<Appointment> update(Appointment appointment);
 }

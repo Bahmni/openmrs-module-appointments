@@ -209,11 +209,13 @@ public class AppointmentController {
                                                   @RequestParam(value = "applyForAll") boolean applyForAll) {
         try {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            Appointment updatedAppointment = null;
-            if (!applyForAll) {
-                updatedAppointment = appointmentsService.update(appointment);
+            if (applyForAll) {
+                List<Appointment> updatedAppointments = recurringAppointmentService.update(appointment);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
+            } else {
+                Appointment updatedAppointment = appointmentsService.update(appointment);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
             }
-            return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to update an appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
