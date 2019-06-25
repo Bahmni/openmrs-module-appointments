@@ -114,6 +114,9 @@
                         <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
                     </list>
                 </property>
+                <property name="appointmentDao">
+                    <ref bean="appointmentDao"/>
+                </property>
             </bean>
         </property>
         <property name="preInterceptors">
