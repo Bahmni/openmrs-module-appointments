@@ -96,6 +96,12 @@
         </property>
     </bean>
 
+    <bean id="defaultEditAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator">
+        <property name="appointmentDao">
+            <ref bean="appointmentDao"/>
+        </property>
+    </bean>
+
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>

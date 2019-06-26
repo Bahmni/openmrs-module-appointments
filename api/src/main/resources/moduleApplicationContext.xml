@@ -133,6 +133,12 @@
         </property>
     </bean>
 
+    <bean id="defaultEditAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator">
+        <property name="appointmentDao">
+            <ref bean="appointmentDao"/>
+        </property>
+    </bean>
+
     <bean id="appointmentRecurringPatternDao" class="org.openmrs.module.appointments.dao.impl.AppointmentRecurringPatternDaoImpl">
         <property name="sessionFactory">
             <ref bean="sessionFactory"/>
