@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -66,6 +65,9 @@ public class RecurringAppointmentServiceImplTest {
 
     @Spy
     private List<AppointmentValidator> appointmentValidators = new ArrayList<>();
+
+    @Spy
+    private List<AppointmentValidator> editAppointmentValidators = new ArrayList<>();
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -195,18 +197,43 @@ public class RecurringAppointmentServiceImplTest {
         oldAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        List<String> errors = new ArrayList<>();
+        doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
 
-        List<Appointment> appointmentList = recurringAppointmentService.update(newAppointmentTwo);
+        List<Appointment> appointmentList = recurringAppointmentService.validateAndUpdate(newAppointmentTwo);
 
         assertEquals(2, appointmentList.size());
         assertEquals(newStartTimeCalendar.getTime(), appointmentList.get(0).getStartDateTime());
         assertEquals(newEndTimeCalendar.getTime(), appointmentList.get(0).getEndDateTime());
         assertEquals(DateUtils.addDays(newStartTimeCalendar.getTime(), 2), appointmentList.get(1).getStartDateTime());
         assertEquals(DateUtils.addDays(newEndTimeCalendar.getTime(), 2), appointmentList.get(1).getEndDateTime());
+        verify(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAuditEvent(any(Appointment.class),any(String.class));
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentDao, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
+        Appointment appointment = new Appointment();
+        appointment.setService(null);
+        String errorMessage = "Appointment cannot be updated without Service";
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            List<String> errors = (List) args[2];
+            errors.add(errorMessage);
+            return null;
+        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
+                anyListOf(String.class));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+
+        recurringAppointmentService.validateAndUpdate(appointment);
+
+        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
+        verify(appointmentDao, never()).save(any(Appointment.class));
     }
 }

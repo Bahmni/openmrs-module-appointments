@@ -69,7 +69,7 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
-    Appointment update(Appointment appointment);
+    Appointment validateAndUpdate(Appointment appointment);
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})

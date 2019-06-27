@@ -510,12 +510,33 @@ public class AppointmentsServiceImplTest {
         AppointmentAudit appointmentAudit = mock(AppointmentAudit.class);
         when(appointmentServiceHelper.getAppointmentAuditEvent(appointment, anyString)).thenReturn(appointmentAudit);
 
-        Appointment actual = appointmentsService.update(appointment);
+        Appointment actual = appointmentsService.validateAndUpdate(appointment);
 
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, anyString);
         verify(appointmentDao).save(appointment);
         assertEquals(1, actual.getAppointmentAudits().size());
         assertEquals(appointment, actual);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
+        appointment.setService(null);
+        String errorMessage = "Appointment cannot be updated without Service";
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            List<String> errors = (List) args[2];
+            errors.add(errorMessage);
+            return null;
+        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
+                anyListOf(String.class));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+
+        appointmentsService.validateAndUpdate(appointment);
+
+        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
+        verify(appointmentDao, never()).save(any(Appointment.class));
     }
 }

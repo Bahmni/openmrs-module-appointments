@@ -44,6 +44,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     List<AppointmentValidator> appointmentValidators;
 
+    List<AppointmentValidator> editAppointmentValidators;
+
     AppointmentAuditDao appointmentAuditDao;
 
     AppointmentServiceHelper appointmentServiceHelper;
@@ -68,6 +70,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 		this.appointmentServiceHelper = appointmentServiceHelper;
 	}
 
+    public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
+        this.editAppointmentValidators = editAppointmentValidators;
+    }
+
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
                 isAppointmentNotAssignedToAnyProvider(appointment) ||
@@ -90,12 +96,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
-		List<String> errors = new ArrayList<>();
-        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
-		if (!errors.isEmpty()) {
-			String message = StringUtils.join(errors, "\n");
-			throw new APIException(message);
-		}
+        validate(appointment, appointmentValidators);
 		appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
 		appointmentDao.save(appointment);
 		try {
@@ -260,7 +261,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public Appointment update(Appointment appointment) {
+    public Appointment validateAndUpdate(Appointment appointment) {
+        validate(appointment, editAppointmentValidators);
         AppointmentAudit appointmentAudit;
         try {
             appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment,
@@ -286,6 +288,15 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
                 validator.validate(appointment, status, errors);
             }
+        }
+    }
+
+    private void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
+        List<String> errors = new ArrayList<>();
+        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
+        if (!errors.isEmpty()) {
+            String message = StringUtils.join(errors, "\n");
+            throw new APIException(message);
         }
     }
 }
