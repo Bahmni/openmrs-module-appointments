@@ -23,7 +23,7 @@ public class AppointmentRequest {
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
     private RecurringPattern recurringPattern;
-    private Optional<Boolean> applyForAll;
+    private Boolean applyForAll;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -129,11 +129,11 @@ public class AppointmentRequest {
         this.recurringPattern = recurringPattern;
     }
 
-    public Optional<Boolean> getApplyForAll() {
+    public Boolean getApplyForAll() {
         return applyForAll;
     }
 
-    public void setApplyForAll(Optional<Boolean> applyForAll) {
+    public void setApplyForAll(Boolean applyForAll) {
         this.applyForAll = applyForAll;
     }
 }

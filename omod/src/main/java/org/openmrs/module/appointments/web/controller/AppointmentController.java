@@ -226,8 +226,8 @@ public class AppointmentController {
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            boolean applyForAll = appointmentRequest.getApplyForAll().isPresent() ?
-                    appointmentRequest.getApplyForAll().get() : false;
+            boolean applyForAll = appointmentRequest.getApplyForAll() == null
+                    ? false : appointmentRequest.getApplyForAll();
             if (applyForAll) {
                 List<Appointment> updatedAppointments = recurringAppointmentService.validateAndUpdate(appointment);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
