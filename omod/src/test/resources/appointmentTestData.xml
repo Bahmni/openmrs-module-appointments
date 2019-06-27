@@ -41,6 +41,10 @@
     <patient_appointment patient_appointment_id="7" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2108-08-15 17:00:00.0" end_date_time="2108-08-20 18:00:00.0" appointment_kind="Scheduled" status="CheckedIn" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13545"/>
     <patient_appointment patient_appointment_id="8" patient_id ="1" appointment_service_id="3" appointment_service_type_id="1" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-866b-0ece245615a7"/>
 
+    <patient_appointment_recurring_time patient_appointment_timings_id="1" recurrence_type="DAY" period="1" frequency="2"/>
+
+    <patient_appointment_occurrence patient_appointment_timings_id="1" patient_appointment_id="7"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="1" patient_appointment_id="8"/>
 
     <person person_id="220" gender="M" dead="false" creator="1" birthdate_estimated="0"
             date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""
