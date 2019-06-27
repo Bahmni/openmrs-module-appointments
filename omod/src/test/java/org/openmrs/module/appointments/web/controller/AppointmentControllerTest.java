@@ -303,7 +303,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(Optional.of(false));
+        when(appointmentRequest.getApplyForAll()).thenReturn(false);
 
         appointmentController.editAppointment(appointmentRequest);
 
@@ -316,7 +316,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(Optional.of(true));
+        when(appointmentRequest.getApplyForAll()).thenReturn(true);
 
         appointmentController.editAppointment(appointmentRequest);
 
@@ -329,7 +329,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(Optional.of(true));
+        when(appointmentRequest.getApplyForAll()).thenReturn(true);
 
         appointmentController.editAppointment(appointmentRequest);
 
@@ -343,7 +343,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(Optional.empty());
+        when(appointmentRequest.getApplyForAll()).thenReturn(null);
 
         appointmentController.editAppointment(appointmentRequest);
 
