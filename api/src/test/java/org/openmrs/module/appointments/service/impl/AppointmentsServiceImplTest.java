@@ -507,4 +507,25 @@ public class AppointmentsServiceImplTest {
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
     }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
+        appointment.setService(null);
+        String errorMessage = "Appointment cannot be updated without Service";
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            List<String> errors = (List) args[2];
+            errors.add(errorMessage);
+            return null;
+        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
+                anyListOf(String.class));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+
+        appointmentsService.validateAndUpdate(appointment);
+
+        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
+        verify(appointmentDao, never()).save(any(Appointment.class));
+    }
 }

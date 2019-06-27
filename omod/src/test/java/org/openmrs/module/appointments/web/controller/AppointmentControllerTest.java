@@ -308,7 +308,7 @@ public class AppointmentControllerTest {
         appointmentController.editAppointment(appointmentRequest);
 
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
-        verify(appointmentsService).update(appointmentMock);
+        verify(appointmentsService).validateAndUpdate(appointmentMock);
     }
 
     @Test
@@ -321,7 +321,7 @@ public class AppointmentControllerTest {
         appointmentController.editAppointment(appointmentRequest);
 
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
-        verify(appointmentsService, never()).update(appointmentMock);
+        verify(appointmentsService, never()).validateAndUpdate(appointmentMock);
     }
 
     @Test
@@ -334,8 +334,8 @@ public class AppointmentControllerTest {
         appointmentController.editAppointment(appointmentRequest);
 
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
-        verify(appointmentsService, never()).update(appointmentMock);
-        verify(recurringAppointmentService).update(appointmentMock);
+        verify(appointmentsService, never()).validateAndUpdate(appointmentMock);
+        verify(recurringAppointmentService).validateAndUpdate(appointmentMock);
     }
 
     @Test
@@ -348,6 +348,6 @@ public class AppointmentControllerTest {
         appointmentController.editAppointment(appointmentRequest);
 
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
-        verify(appointmentsService).update(appointmentMock);
+        verify(appointmentsService).validateAndUpdate(appointmentMock);
     }
 }

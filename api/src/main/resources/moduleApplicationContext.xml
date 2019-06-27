@@ -80,6 +80,11 @@
                         <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
                     </list>
                 </property>
+                <property name="editAppointmentValidators">
+                    <list>
+                        <ref bean="defaultEditAppointmentValidator"/>
+                    </list>
+                </property>
                 <property name="appointmentServiceHelper">
                     <list>
                         <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
@@ -112,6 +117,11 @@
                 <property name="appointmentValidators">
                     <list>
                         <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
+                    </list>
+                </property>
+                <property name="editAppointmentValidators">
+                    <list>
+                        <ref bean="defaultEditAppointmentValidator"/>
                     </list>
                 </property>
                 <property name="appointmentDao">

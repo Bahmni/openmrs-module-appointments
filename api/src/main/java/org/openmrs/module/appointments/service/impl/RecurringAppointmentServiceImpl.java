@@ -31,6 +31,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     List<AppointmentValidator> appointmentValidators;
 
+    List<AppointmentValidator> editAppointmentValidators;
+
     AppointmentDao appointmentDao;
 
     public void setAppointmentRecurringPatternDao(AppointmentRecurringPatternDao appointmentRecurringPatternDao) {
@@ -49,6 +51,10 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         this.appointmentDao = appointmentDao;
     }
 
+    public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
+        this.editAppointmentValidators = editAppointmentValidators;
+    }
+
     @Override
     public List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern,
                                              List<Appointment> appointments) {
@@ -56,7 +62,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
             return appointments;
         }
         appointments.forEach(appointment -> {
-            validate(appointment);
+            validate(appointment, appointmentValidators);
             appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
@@ -67,7 +73,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     @Override
-    public List<Appointment> update(Appointment appointment) {
+    public List<Appointment> validateAndUpdate(Appointment appointment) {
+        validate(appointment, editAppointmentValidators);
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment);
         return pendingAppointments
                 .stream()
@@ -144,7 +151,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         }
     }
 
-    private void validate(Appointment appointment) {
+    private void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         List<String> errors = new ArrayList<>();
         appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
         if (!errors.isEmpty()) {
