@@ -13,5 +13,5 @@ public interface RecurringAppointmentService {
                                       List<Appointment> appointments);
 
     @Transactional
-    List<Appointment> validateAndUpdate(Appointment appointment);
+    List<Appointment> validateAndUpdate(Appointment appointment, String clientTimeZone);
 }

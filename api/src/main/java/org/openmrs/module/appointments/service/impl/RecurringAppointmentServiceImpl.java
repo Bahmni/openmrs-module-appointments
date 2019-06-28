@@ -19,6 +19,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Transactional
@@ -73,13 +74,18 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     @Override
-    public List<Appointment> validateAndUpdate(Appointment appointment) {
+    public List<Appointment> validateAndUpdate(Appointment appointment, String clientTimeZone) {
         validate(appointment, editAppointmentValidators);
-        List<Appointment> pendingAppointments = getPendingOccurrences(appointment);
+        String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
+        TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
+        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid());
+        TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return pendingAppointments
                 .stream()
                 .map(pendingAppointment -> {
+                    TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
                     updateMetadata(pendingAppointment, appointment);
+                    TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
                     setAppointmentAudit(pendingAppointment);
                     appointmentDao.save(pendingAppointment);
                     return pendingAppointment;
@@ -120,8 +126,9 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         return getUpdatedTimeStamp(startHours, startMinutes, pendingAppointment.getStartDateTime());
     }
 
-    private List<Appointment> getPendingOccurrences(Appointment appointment) {
+    private List<Appointment> getPendingOccurrences(String appointmentUuid) {
         Date startOfDay = getStartOfDay();
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         return appointment.getAppointmentRecurringPattern().getAppointments()
                 .stream()
                 .filter(appointmentInList -> appointmentInList.getStartDateTime().after(startOfDay))

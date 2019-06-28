@@ -35,6 +35,7 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.doAnswer;
@@ -44,6 +45,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RecurringAppointmentServiceImplTest {
@@ -198,9 +200,10 @@ public class RecurringAppointmentServiceImplTest {
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         List<String> errors = new ArrayList<>();
+        when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(oldAppointmentTwo);
         doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
 
-        List<Appointment> appointmentList = recurringAppointmentService.validateAndUpdate(newAppointmentTwo);
+        List<Appointment> appointmentList = recurringAppointmentService.validateAndUpdate(newAppointmentTwo, "");
 
         assertEquals(2, appointmentList.size());
         assertEquals(newStartTimeCalendar.getTime(), appointmentList.get(0).getStartDateTime());
@@ -212,6 +215,7 @@ public class RecurringAppointmentServiceImplTest {
                 .getAppointmentAuditEvent(any(Appointment.class),any(String.class));
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAsJsonString(any(Appointment.class));
+        verify(appointmentDao).getAppointmentByUuid(anyString());
         verify(appointmentDao, times(2)).save(any(Appointment.class));
     }
 
@@ -230,7 +234,7 @@ public class RecurringAppointmentServiceImplTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
-        recurringAppointmentService.validateAndUpdate(appointment);
+        recurringAppointmentService.validateAndUpdate(appointment, "");
 
         verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
