@@ -200,7 +200,7 @@ public class AppointmentController {
             appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (RuntimeException e) {
-            log.error("Runtime error while trying to validateAndUpdate appointment provider response", e);
+            log.error("Runtime error while trying to update appointment provider response", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
