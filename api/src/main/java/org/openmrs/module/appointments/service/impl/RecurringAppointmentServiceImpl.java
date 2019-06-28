@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.RecurringAppointmentService;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
@@ -131,7 +132,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         return appointment.getAppointmentRecurringPattern().getAppointments()
                 .stream()
-                .filter(appointmentInList -> appointmentInList.getStartDateTime().after(startOfDay))
+                .filter(appointmentInList -> appointmentInList.getStartDateTime().after(startOfDay)
+                        && appointmentInList.getStatus().equals(AppointmentStatus.Scheduled))
                 .collect(Collectors.toList());
     }
 
