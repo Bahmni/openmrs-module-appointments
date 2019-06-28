@@ -24,6 +24,7 @@ public class AppointmentRequest {
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
     private RecurringPattern recurringPattern;
     private Boolean applyForAll;
+    private String timeZone;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -135,5 +136,13 @@ public class AppointmentRequest {
 
     public void setApplyForAll(Boolean applyForAll) {
         this.applyForAll = applyForAll;
+    }
+
+    public String getTimeZone() {
+        return timeZone;
+    }
+
+    public void setTimeZone(String timeZone) {
+        this.timeZone = timeZone;
     }
 }

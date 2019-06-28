@@ -317,6 +317,7 @@ public class AppointmentControllerTest {
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.getApplyForAll()).thenReturn(true);
+        when(appointmentRequest.getTimeZone()).thenReturn("UTC");
 
         appointmentController.editAppointment(appointmentRequest);
 
@@ -330,12 +331,13 @@ public class AppointmentControllerTest {
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.getApplyForAll()).thenReturn(true);
+        when(appointmentRequest.getTimeZone()).thenReturn("UTC");
 
         appointmentController.editAppointment(appointmentRequest);
 
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
         verify(appointmentsService, never()).validateAndUpdate(appointmentMock);
-        verify(recurringAppointmentService).validateAndUpdate(appointmentMock);
+        verify(recurringAppointmentService).validateAndUpdate(appointmentMock, "UTC");
     }
 
     @Test
@@ -350,4 +352,17 @@ public class AppointmentControllerTest {
         verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
         verify(appointmentsService).validateAndUpdate(appointmentMock);
     }
+
+    @Test
+    public void shouldThrowExceptionIfAppointmentTimeZoneIsNull() throws Exception {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        when(appointmentRequest.getApplyForAll()).thenReturn(true);
+
+        ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
+
+        Mockito.verify(recurringAppointmentService, never()).validateAndUpdate(any(), any());
+        Mockito.verify(appointmentMapper, never()).fromRequest(any());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+    }
+
 }

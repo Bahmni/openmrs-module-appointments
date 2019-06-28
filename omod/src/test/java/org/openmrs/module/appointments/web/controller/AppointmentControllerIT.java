@@ -535,6 +535,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 "\"comments\": \"Some notes\",  " +
                 "\"appointmentKind\": \"WalkIn\"," +
                 "\"applyForAll\": true," +
+                "\"timeZone\": \"UTC\"," +
                 "\"providers\": []," +
                 "\"recurringPattern\":{" +
                 "\"frequency\":2," +

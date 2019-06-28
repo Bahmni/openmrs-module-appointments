@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -22,6 +23,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -225,13 +227,21 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
-            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             boolean applyForAll = appointmentRequest.getApplyForAll() == null
                     ? false : appointmentRequest.getApplyForAll();
             if (applyForAll) {
-                List<Appointment> updatedAppointments = recurringAppointmentService.validateAndUpdate(appointment);
+                String clientTimeZone = appointmentRequest.getTimeZone();
+                if (!StringUtils.hasText(clientTimeZone)) {
+                    throw new APIException("Time Zone is missing");
+                }
+                String appointmentUid = appointmentRequest.getUuid();
+                appointmentRequest.setUuid(null);
+                Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+                appointment.setUuid(appointmentUid);
+                List<Appointment> updatedAppointments = recurringAppointmentService.validateAndUpdate(appointment, clientTimeZone);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
+                Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
                 Appointment updatedAppointment = appointmentsService.validateAndUpdate(appointment);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
             }
