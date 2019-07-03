@@ -21,6 +21,7 @@ import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.AppointmentBuilder;
+import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 
 import java.io.IOException;
@@ -28,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -58,6 +60,9 @@ public class RecurringAppointmentServiceImplTest {
 
     @Mock
     private AppointmentDao appointmentDao;
+
+    @Mock
+    private AppointmentStatusChangeValidator statusChangeValidator;
 
     @Mock
     private AppointmentServiceHelper appointmentServiceHelper;
@@ -317,4 +322,134 @@ public class RecurringAppointmentServiceImplTest {
         verify(appointmentDao).getAppointmentByUuid(anyString());
         verify(appointmentDao, times(1)).save(any(Appointment.class));
     }
+
+    @Test
+    public void shouldUpdateStatusOfScheduledFutureOccurrences() {
+        Calendar startTimeCalendar = Calendar.getInstance();
+        Calendar endTimeCalendar = Calendar.getInstance();
+        Calendar newStartTimeCalendar = Calendar.getInstance();
+        Calendar newEndTimeCalendar = Calendar.getInstance();
+        int year = startTimeCalendar.get(Calendar.YEAR);
+        int month = startTimeCalendar.get(Calendar.MONTH);
+        int day = startTimeCalendar.get(Calendar.DATE);
+        startTimeCalendar.set(year, month, day, 10, 00, 00);
+        endTimeCalendar.set(year, month, day, 10, 30, 00);
+        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        appointmentRecurringPattern.setFrequency(3);
+        appointmentRecurringPattern.setPeriod(2);
+        Appointment appointmentOne = getAppointment("uuid1", patient,
+                AppointmentStatus.Scheduled,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), -2),
+                DateUtils.addDays(endTimeCalendar.getTime(), -2));
+        Appointment appointmentTwo = getAppointment("uuid2", patient,
+                AppointmentStatus.CheckedIn,
+                AppointmentKind.Scheduled,
+                startTimeCalendar.getTime(),
+                endTimeCalendar.getTime());
+        appointmentTwo.setAppointmentAudits(new HashSet<>());
+        Appointment appointmentThree = getAppointment("uuid3", patient,
+                AppointmentStatus.Scheduled,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        appointmentThree.setAppointmentAudits(new HashSet<>());
+        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree));
+        appointmentRecurringPattern.setAppointments(appointments);
+        appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
+        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators, new ArrayList<>());
+
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        appointmentAudit.setNotes(null);
+        appointmentAudit.setAppointment(appointmentTwo);
+        appointmentAudit.setStatus(AppointmentStatus.CheckedIn);
+        when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
+
+        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", new Date(), "");
+        verify(appointmentDao, times(2)).save(any(Appointment.class));
+        verify(appointmentServiceHelper, times(1)).getAppointmentAuditEvent(appointmentThree, null);
+    }
+
+    @Test
+    public void shouldUpdateStatusOfScheduledCurrentAndFutureOccurrences() throws IOException {
+        Calendar startTimeCalendar = Calendar.getInstance();
+        Calendar endTimeCalendar = Calendar.getInstance();
+        Calendar newStartTimeCalendar = Calendar.getInstance();
+        Calendar newEndTimeCalendar = Calendar.getInstance();
+        int year = startTimeCalendar.get(Calendar.YEAR);
+        int month = startTimeCalendar.get(Calendar.MONTH);
+        int day = startTimeCalendar.get(Calendar.DATE);
+        startTimeCalendar.set(year, month, day, 10, 00, 00);
+        endTimeCalendar.set(year, month, day, 10, 30, 00);
+        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        appointmentRecurringPattern.setFrequency(3);
+        appointmentRecurringPattern.setPeriod(2);
+        Appointment appointmentOne = getAppointment("uuid1", patient,
+                AppointmentStatus.Scheduled,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), -2),
+                DateUtils.addDays(endTimeCalendar.getTime(), -2));
+        Appointment appointmentTwo = getAppointment("uuid2", patient,
+                AppointmentStatus.Scheduled,
+                AppointmentKind.Scheduled,
+                startTimeCalendar.getTime(),
+                endTimeCalendar.getTime());
+        appointmentTwo.setAppointmentAudits(new HashSet<>());
+        Appointment appointmentThree = getAppointment("uuid3", patient,
+                AppointmentStatus.Scheduled,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        appointmentThree.setAppointmentAudits(new HashSet<>());
+        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree));
+        appointmentRecurringPattern.setAppointments(appointments);
+        appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
+        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators, new ArrayList<>());
+
+        doAnswer(invocation -> {
+            Object[] args = invocation.getArguments();
+            return null;
+        }).when(statusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
+
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        appointmentAudit.setNotes(null);
+        appointmentAudit.setAppointment(appointmentTwo);
+        appointmentAudit.setStatus(AppointmentStatus.CheckedIn);
+        when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
+
+        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", new Date(), "");
+        verify(appointmentDao, times(2)).save(any(Appointment.class));
+        verify(appointmentServiceHelper, times(2))
+                .getAppointmentAuditEvent(any(Appointment.class),any(String.class));
+        verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
+    }
+
+
+    private Appointment getAppointment(String uuid, Patient patient, AppointmentStatus appointmentStatus,
+                                       AppointmentKind appointmentKind, Date start, Date end) {
+        return new AppointmentBuilder().withUuid(uuid)
+                .withPatient(patient)
+                .withStatus(appointmentStatus)
+                .withAppointmentKind(appointmentKind)
+                .withStartDateTime(start)
+                .withEndDateTime(end)
+                .build();
+    }
+
 }

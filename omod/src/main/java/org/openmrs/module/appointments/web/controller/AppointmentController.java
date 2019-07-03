@@ -147,14 +147,24 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
         try {
+            boolean applyForAll = statusDetails.get("applyForAll") != null && Boolean.parseBoolean(statusDetails.get("applyForAll"));
             String toStatus = statusDetails.get("toStatus");
             Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment != null){
-                appointmentsService.changeStatus(appointment, toStatus, onDate);
+            if (appointment != null) {
+                if (applyForAll) {
+                    String clientTimeZone = statusDetails.get("timeZone");
+                    if (!StringUtils.hasText(clientTimeZone)) {
+                        throw new APIException("Time Zone is missing");
+                    }
+                    recurringAppointmentService.changeStatus(appointment, toStatus, onDate, clientTimeZone);
+                } else {
+                    appointmentsService.changeStatus(appointment, toStatus, onDate);
+                }
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-            }else
+            } else {
                 throw new RuntimeException("Appointment does not exist");
+            }
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
