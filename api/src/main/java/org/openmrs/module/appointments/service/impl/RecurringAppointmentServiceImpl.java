@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -10,6 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.RecurringAppointmentService;
+import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +31,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
+    List<AppointmentStatusChangeValidator> statusChangeValidators;
+
     AppointmentServiceHelper appointmentServiceHelper;
 
     List<AppointmentValidator> appointmentValidators;
@@ -39,6 +43,10 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     public void setAppointmentRecurringPatternDao(AppointmentRecurringPatternDao appointmentRecurringPatternDao) {
         this.appointmentRecurringPatternDao = appointmentRecurringPatternDao;
+    }
+
+    public void setStatusChangeValidators(List<AppointmentStatusChangeValidator> statusChangeValidators) {
+        this.statusChangeValidators = statusChangeValidators;
     }
 
     public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
@@ -79,7 +87,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         validate(appointment, editAppointmentValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid());
+        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(), AppointmentStatus.Scheduled.getSequence());
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return pendingAppointments
                 .stream()
@@ -92,6 +100,31 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
                     return pendingAppointment;
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
+        List<String> errors = new ArrayList<>();
+        AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
+        validateStatusChange(appointment, appointmentStatus, errors);
+        if (errors.isEmpty()) {
+            String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
+            TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
+            List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(), AppointmentStatus.CheckedIn.getSequence());
+            TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
+            pendingAppointments
+                    .stream()
+                    .map(pendingAppointment -> {
+                        pendingAppointment.setStatus(appointmentStatus);
+                        setAppointmentAudit(pendingAppointment);
+                        appointmentDao.save(pendingAppointment);
+                        return pendingAppointment;
+                    })
+                    .collect(Collectors.toList());
+        } else {
+            String message = StringUtils.join(errors, "\n");
+            throw new APIException(message);
+        }
     }
 
     private Appointment updateMetadata(Appointment pendingAppointment, Appointment appointment) {
@@ -127,13 +160,14 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         return getUpdatedTimeStamp(startHours, startMinutes, pendingAppointment.getStartDateTime());
     }
 
-    private List<Appointment> getPendingOccurrences(String appointmentUuid) {
+    private List<Appointment> getPendingOccurrences(String appointmentUuid, int highestStatusSequence) {
         Date startOfDay = getStartOfDay();
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         return appointment.getAppointmentRecurringPattern().getAppointments()
                 .stream()
-                .filter(appointmentInList -> appointmentInList.getStartDateTime().after(startOfDay)
-                        && appointmentInList.getStatus().equals(AppointmentStatus.Scheduled))
+                .filter(appointmentInList -> (appointmentInList.getStartDateTime().after(startOfDay)
+                        || startOfDay.equals(appointmentInList.getStartDateTime()))
+                        && appointmentInList.getStatus().getSequence() <= highestStatusSequence)
                 .collect(Collectors.toList());
     }
 
@@ -157,6 +191,14 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
+        if (!CollectionUtils.isEmpty(statusChangeValidators)) {
+            for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
+                validator.validate(appointment, status, errors);
+            }
         }
     }
 

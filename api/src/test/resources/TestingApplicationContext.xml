@@ -69,6 +69,11 @@
                         </property>
                     </bean>
                 </property>
+                <property name="statusChangeValidators">
+                    <list>
+                        <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
+                    </list>
+                </property>
                 <property name="appointmentValidators">
                     <list>
                         <bean class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
