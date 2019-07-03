@@ -89,7 +89,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
-                Collections.singletonList(AppointmentStatus.Scheduled.getSequence()));
+                Collections.singletonList(AppointmentStatus.Scheduled));
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return pendingAppointments
                 .stream()
@@ -113,7 +113,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
             String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
             TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
             List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
-                    Arrays.asList(AppointmentStatus.Scheduled.getSequence(), AppointmentStatus.CheckedIn.getSequence()));
+                    Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
             TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
             pendingAppointments
                     .stream()
@@ -163,14 +163,14 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         return getUpdatedTimeStamp(startHours, startMinutes, pendingAppointment.getStartDateTime());
     }
 
-    private List<Appointment> getPendingOccurrences(String appointmentUuid, List<Integer> applicableStatusList) {
+    private List<Appointment> getPendingOccurrences(String appointmentUuid, List<AppointmentStatus> applicableStatusList) {
         Date startOfDay = getStartOfDay();
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         return appointment.getAppointmentRecurringPattern().getAppointments()
                 .stream()
                 .filter(appointmentInList -> (appointmentInList.getStartDateTime().after(startOfDay)
                         || startOfDay.equals(appointmentInList.getStartDateTime()))
-                        && applicableStatusList.contains(appointmentInList.getStatus().getSequence()))
+                        && applicableStatusList.contains(appointmentInList.getStatus()))
                 .collect(Collectors.toList());
     }
 
