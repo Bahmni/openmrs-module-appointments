@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
@@ -87,7 +88,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         validate(appointment, editAppointmentValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(), AppointmentStatus.Scheduled.getSequence());
+        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
+                Collections.singletonList(AppointmentStatus.Scheduled.getSequence()));
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return pendingAppointments
                 .stream()
@@ -110,7 +112,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         if (errors.isEmpty()) {
             String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
             TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-            List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(), AppointmentStatus.CheckedIn.getSequence());
+            List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
+                    Arrays.asList(AppointmentStatus.Scheduled.getSequence(), AppointmentStatus.CheckedIn.getSequence()));
             TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
             pendingAppointments
                     .stream()
@@ -160,14 +163,14 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         return getUpdatedTimeStamp(startHours, startMinutes, pendingAppointment.getStartDateTime());
     }
 
-    private List<Appointment> getPendingOccurrences(String appointmentUuid, int highestStatusSequence) {
+    private List<Appointment> getPendingOccurrences(String appointmentUuid, List<Integer> applicableStatusList) {
         Date startOfDay = getStartOfDay();
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         return appointment.getAppointmentRecurringPattern().getAppointments()
                 .stream()
                 .filter(appointmentInList -> (appointmentInList.getStartDateTime().after(startOfDay)
                         || startOfDay.equals(appointmentInList.getStartDateTime()))
-                        && appointmentInList.getStatus().getSequence() <= highestStatusSequence)
+                        && applicableStatusList.contains(appointmentInList.getStatus().getSequence()))
                 .collect(Collectors.toList());
     }
 
