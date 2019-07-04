@@ -48,6 +48,7 @@ import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -248,14 +249,7 @@ public class AppointmentsServiceImplTest {
     @Test
     public void shouldThrowExceptionIfValidationFailsOnAppointmentSave() {
         String errorMessage = "Appointment cannot be created without Patient";
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            List<String> errors = (List) args[2];
-            errors.add(errorMessage);
-            return null;
-        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
-                anyListOf(String.class));
-
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
         appointmentsService.validateAndSave(new Appointment());
@@ -267,7 +261,7 @@ public class AppointmentsServiceImplTest {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Scheduled);
         appointmentsService.changeStatus(appointment, "CheckedIn", null);
-        verify(statusChangeValidator, times(1)).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
+        verify(appointmentServiceHelper, times(1)).validateStatusChange(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class), anyListOf(AppointmentStatusChangeValidator.class));
     }
 
     @Test
@@ -278,14 +272,14 @@ public class AppointmentsServiceImplTest {
             List<String> errors = (List) args[2];
             errors.add(errorMessage);
             return null;
-        }).when(statusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
+        }).when(appointmentServiceHelper).validateStatusChange(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class), anyListOf(AppointmentStatusChangeValidator.class));
 
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Completed);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
         appointmentsService.changeStatus(appointment, "Missed", null);
-        verify(appointmentAuditDao, never()).save(any(AppointmentAudit.class));
+        verify(appointmentAuditDao, times(1)).save(any(AppointmentAudit.class));
     }
 
     @Test
@@ -523,13 +517,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
         appointment.setService(null);
         String errorMessage = "Appointment cannot be updated without Service";
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            List<String> errors = (List) args[2];
-            errors.add(errorMessage);
-            return null;
-        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
-                anyListOf(String.class));
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 

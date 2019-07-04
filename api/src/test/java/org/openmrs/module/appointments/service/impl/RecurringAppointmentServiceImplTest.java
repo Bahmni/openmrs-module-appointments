@@ -36,13 +36,13 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -85,9 +85,8 @@ public class RecurringAppointmentServiceImplTest {
         Appointment appointment = new Appointment();
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         List<Appointment> appointments = Collections.singletonList(appointment);
-        List<String> errors = new ArrayList<>();
 
-        doNothing().when(appointmentServiceHelper).validate(appointment, appointmentValidators, errors);
+        doNothing().when(appointmentServiceHelper).validate(appointment, appointmentValidators);
         String notes = "Notes";
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
@@ -98,7 +97,7 @@ public class RecurringAppointmentServiceImplTest {
 
         assertEquals(1, appointmentsList.size());
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
-        verify(appointmentServiceHelper).validate(appointment, appointmentValidators, errors);
+        verify(appointmentServiceHelper).validate(appointment, appointmentValidators);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
@@ -126,20 +125,13 @@ public class RecurringAppointmentServiceImplTest {
     public void shouldThrowExceptionIfAppointmentValidationFails() throws IOException {
         AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         String errorMessage = "Appointment cannot be created without Patient";
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            List<String> errors = (List) args[2];
-            errors.add(errorMessage);
-            return null;
-        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
-                anyListOf(String.class));
-
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
         recurringAppointmentService.validateAndSave(appointmentRecurringPattern,
                 Collections.singletonList(new Appointment()));
         verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
-        verify(appointmentServiceHelper, never()).validate(any(), any(), any());
+        verify(appointmentServiceHelper, never()).validate(any(), any());
         verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any());
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
         verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
@@ -206,7 +198,7 @@ public class RecurringAppointmentServiceImplTest {
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         List<String> errors = new ArrayList<>();
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(oldAppointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
+        doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
 
         List<Appointment> appointmentList = recurringAppointmentService.validateAndUpdate(newAppointmentTwo, "");
 
@@ -215,7 +207,7 @@ public class RecurringAppointmentServiceImplTest {
         assertEquals(newEndTimeCalendar.getTime(), appointmentList.get(0).getEndDateTime());
         assertEquals(DateUtils.addDays(newStartTimeCalendar.getTime(), 2), appointmentList.get(1).getStartDateTime());
         assertEquals(DateUtils.addDays(newEndTimeCalendar.getTime(), 2), appointmentList.get(1).getEndDateTime());
-        verify(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
+        verify(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAuditEvent(any(Appointment.class),any(String.class));
         verify(appointmentServiceHelper, times(2))
@@ -227,15 +219,13 @@ public class RecurringAppointmentServiceImplTest {
     @Test
     public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
         Appointment appointment = new Appointment();
+        Patient patient = new Patient();
+        patient.setUuid("p1");
+        appointment.setPatient(patient);
         appointment.setService(null);
+        appointment.setUuid("1");
         String errorMessage = "Appointment cannot be updated without Service";
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            List<String> errors = (List) args[2];
-            errors.add(errorMessage);
-            return null;
-        }).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class),
-                anyListOf(String.class));
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
@@ -307,14 +297,14 @@ public class RecurringAppointmentServiceImplTest {
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         List<String> errors = new ArrayList<>();
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(oldAppointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
+        doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
 
         List<Appointment> appointmentList = recurringAppointmentService.validateAndUpdate(newAppointmentTwo, "");
 
         assertEquals(1, appointmentList.size());
         assertEquals(newStartTimeCalendar.getTime(), appointmentList.get(0).getStartDateTime());
         assertEquals(newEndTimeCalendar.getTime(), appointmentList.get(0).getEndDateTime());
-        verify(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators, errors);
+        verify(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
         verify(appointmentServiceHelper, times(1))
                 .getAppointmentAuditEvent(any(Appointment.class), any(String.class));
         verify(appointmentServiceHelper, times(1))
@@ -365,7 +355,7 @@ public class RecurringAppointmentServiceImplTest {
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators, new ArrayList<>());
+        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
 
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentAudit.setNotes(null);
@@ -420,7 +410,7 @@ public class RecurringAppointmentServiceImplTest {
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators, new ArrayList<>());
+        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
 
         doAnswer(invocation -> {
             Object[] args = invocation.getArguments();

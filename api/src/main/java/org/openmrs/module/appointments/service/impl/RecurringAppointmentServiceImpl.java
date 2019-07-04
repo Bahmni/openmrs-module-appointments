@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -73,7 +72,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
             return appointments;
         }
         appointments.forEach(appointment -> {
-            validate(appointment, appointmentValidators);
+            appointmentServiceHelper.validate(appointment, appointmentValidators);
             appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
@@ -85,7 +84,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     @Override
     public List<Appointment> validateAndUpdate(Appointment appointment, String clientTimeZone) {
-        validate(appointment, editAppointmentValidators);
+        appointmentServiceHelper.validate(appointment, editAppointmentValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
@@ -108,7 +107,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
         List<String> errors = new ArrayList<>();
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
-        validateStatusChange(appointment, appointmentStatus, errors);
+        appointmentServiceHelper.validateStatusChange(appointment, appointmentStatus, errors, statusChangeValidators);
         if (errors.isEmpty()) {
             String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
             TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
@@ -194,23 +193,6 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
             }
         } catch (IOException e) {
             e.printStackTrace();
-        }
-    }
-
-    private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
-        if (!CollectionUtils.isEmpty(statusChangeValidators)) {
-            for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
-                validator.validate(appointment, status, errors);
-            }
-        }
-    }
-
-    private void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
-        List<String> errors = new ArrayList<>();
-        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
-        if (!errors.isEmpty()) {
-            String message = StringUtils.join(errors, "\n");
-            throw new APIException(message);
         }
     }
 }
