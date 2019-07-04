@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -30,8 +29,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.isNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
@@ -289,7 +286,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public Appointment validateAndUpdate(Appointment appointment) {
-        validate(appointment, editAppointmentValidators);
+        appointmentServiceHelper.validate(appointment, editAppointmentValidators);
         AppointmentAudit appointmentAudit;
         try {
             appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment,
@@ -310,23 +307,5 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentAuditEvent.setStatus(appointment.getStatus());
         appointmentAuditEvent.setNotes(notes);
         appointmentAuditDao.save(appointmentAuditEvent);
-    }
-
-
-    private void validateStatusChange(Appointment appointment, AppointmentStatus status, List<String> errors) {
-        if (!CollectionUtils.isEmpty(statusChangeValidators)) {
-            for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
-                validator.validate(appointment, status, errors);
-            }
-        }
-    }
-
-    private void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
-        List<String> errors = new ArrayList<>();
-        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
-        if (!errors.isEmpty()) {
-            String message = StringUtils.join(errors, "\n");
-            throw new APIException(message);
-        }
     }
 }

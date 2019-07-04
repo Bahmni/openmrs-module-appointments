@@ -1,26 +1,22 @@
 package org.openmrs.module.appointments.helper;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.codehaus.jackson.map.ObjectMapper;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AppointmentServiceHelper {
-
-    public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators,
-                         List<String> errors) {
-        if(!CollectionUtils.isEmpty(appointmentValidators)) {
-            for (AppointmentValidator validator : appointmentValidators) {
-                validator.validate(appointment, errors);
-            }
-        }
-    }
 
     public void checkAndAssignAppointmentNumber(Appointment appointment) {
         if (appointment.getAppointmentNumber() == null) {
@@ -59,5 +55,33 @@ public class AppointmentServiceHelper {
         appointmentJson.put("appointmentNotes", appointment.getComments());
         ObjectMapper mapperObj = new ObjectMapper();
         return String.format("%s", mapperObj.writeValueAsString(appointmentJson));
+    }
+
+    private void validateAppointment(Appointment appointment, List<AppointmentValidator> appointmentValidators,
+                                     List<String> errors) {
+        if(!CollectionUtils.isEmpty(appointmentValidators)) {
+            for (AppointmentValidator validator : appointmentValidators) {
+                validator.validate(appointment, errors);
+            }
+        }
+    }
+
+    public void validateStatusChange(Appointment appointment, AppointmentStatus status,
+                                      List<String> errors,
+                                      List<AppointmentStatusChangeValidator> statusChangeValidators) {
+        if (!CollectionUtils.isEmpty(statusChangeValidators)) {
+            for (AppointmentStatusChangeValidator validator : statusChangeValidators) {
+                validator.validate(appointment, status, errors);
+            }
+        }
+    }
+
+    public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
+        List<String> errors = new ArrayList<>();
+        validateAppointment(appointment, appointmentValidators, errors);
+        if (!errors.isEmpty()) {
+            String message = StringUtils.join(errors, "\n");
+            throw new APIException(message);
+        }
     }
 }

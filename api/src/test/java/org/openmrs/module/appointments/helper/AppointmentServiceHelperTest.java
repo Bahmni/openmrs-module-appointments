@@ -49,7 +49,7 @@ public class AppointmentServiceHelperTest {
         List<String> errors = new ArrayList<>();
         List<AppointmentValidator> appointmentValidators = Collections.singletonList(appointmentValidator);
 
-        appointmentServiceHelper.validate(appointment, appointmentValidators, errors);
+        appointmentServiceHelper.validate(appointment, appointmentValidators);
 
         verify(appointmentValidator, times(1)).validate(any(Appointment.class),
                 anyListOf(String.class));
@@ -65,7 +65,7 @@ public class AppointmentServiceHelperTest {
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         List<String> errors = new ArrayList<>();
 
-        appointmentServiceHelper.validate(appointment, null, errors);
+        appointmentServiceHelper.validate(appointment, null);
 
         verify(appointmentValidator, never()).validate(any(Appointment.class),
                 anyListOf(String.class));
