@@ -1,7 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
-import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -15,7 +13,6 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
@@ -105,28 +102,22 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     @Override
     public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
-        List<String> errors = new ArrayList<>();
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
-        appointmentServiceHelper.validateStatusChange(appointment, appointmentStatus, errors, statusChangeValidators);
-        if (errors.isEmpty()) {
-            String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
-            TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-            List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
-                    Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
-            TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-            pendingAppointments
-                    .stream()
-                    .map(pendingAppointment -> {
-                        pendingAppointment.setStatus(appointmentStatus);
-                        setAppointmentAudit(pendingAppointment);
-                        appointmentDao.save(pendingAppointment);
-                        return pendingAppointment;
-                    })
-                    .collect(Collectors.toList());
-        } else {
-            String message = StringUtils.join(errors, "\n");
-            throw new APIException(message);
-        }
+        appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
+        String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
+        TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
+        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
+                Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
+        TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
+        pendingAppointments
+                .stream()
+                .map(pendingAppointment -> {
+                    pendingAppointment.setStatus(appointmentStatus);
+                    setAppointmentAuditForStatusChange(pendingAppointment, onDate);
+                    appointmentDao.save(pendingAppointment);
+                    return pendingAppointment;
+                })
+                .collect(Collectors.toList());
     }
 
     private Appointment updateMetadata(Appointment pendingAppointment, Appointment appointment) {
@@ -185,14 +176,23 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     private void setAppointmentAudit(Appointment appointment) {
         try {
             String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
-            AppointmentAudit appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
-            if (appointment.getAppointmentAudits() != null) {
-                appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singletonList(appointmentAudit)));
-            } else {
-                appointment.setAppointmentAudits(new HashSet<>(Collections.singletonList(appointmentAudit)));
-            }
+            updaateAppointmentAudits(appointment, notes);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void setAppointmentAuditForStatusChange(Appointment appointment, Date onDate) {
+        String notes = onDate != null ? onDate.toInstant().toString() : null;
+        updaateAppointmentAudits(appointment, notes);
+    }
+
+    private void updaateAppointmentAudits(Appointment appointment, String notes) {
+        AppointmentAudit appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
+        if (appointment.getAppointmentAudits() != null) {
+            appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singletonList(appointmentAudit)));
+        } else {
+            appointment.setAppointmentAudits(new HashSet<>(Collections.singletonList(appointmentAudit)));
         }
     }
 }

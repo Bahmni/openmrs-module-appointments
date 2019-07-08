@@ -66,7 +66,7 @@ public class AppointmentServiceHelper {
         }
     }
 
-    public void validateStatusChange(Appointment appointment, AppointmentStatus status,
+    private void validateStatusChange(Appointment appointment, AppointmentStatus status,
                                       List<String> errors,
                                       List<AppointmentStatusChangeValidator> statusChangeValidators) {
         if (!CollectionUtils.isEmpty(statusChangeValidators)) {
@@ -79,6 +79,17 @@ public class AppointmentServiceHelper {
     public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         List<String> errors = new ArrayList<>();
         validateAppointment(appointment, appointmentValidators, errors);
+        if (!errors.isEmpty()) {
+            String message = StringUtils.join(errors, "\n");
+            throw new APIException(message);
+        }
+    }
+
+    public void validateStatusChangeAndGetErrors(Appointment appointment,
+                                     AppointmentStatus appointmentStatus,
+                                     List<AppointmentStatusChangeValidator> statusChangeValidators) {
+        List<String> errors = new ArrayList<>();
+        validateStatusChange(appointment, appointmentStatus, errors, statusChangeValidators);
         if (!errors.isEmpty()) {
             String message = StringUtils.join(errors, "\n");
             throw new APIException(message);

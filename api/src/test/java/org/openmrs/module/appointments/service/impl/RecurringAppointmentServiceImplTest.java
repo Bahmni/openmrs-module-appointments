@@ -365,7 +365,6 @@ public class RecurringAppointmentServiceImplTest {
 
         recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", new Date(), "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
-        verify(appointmentServiceHelper, times(1)).getAppointmentAuditEvent(appointmentThree, null);
     }
 
     @Test
@@ -427,7 +426,6 @@ public class RecurringAppointmentServiceImplTest {
         verify(appointmentDao, times(2)).save(any(Appointment.class));
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAuditEvent(any(Appointment.class),any(String.class));
-        verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
     }
 
 
