@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.hibernate.cfg.NotYetImplementedException;
@@ -10,19 +9,23 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -149,25 +152,18 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
-                    new Object[] { MANAGE_APPOINTMENTS }, null));
+                    new Object[]{MANAGE_APPOINTMENTS}, null));
         }
-        List<String> errors = new ArrayList<>();
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
-        appointmentServiceHelper.validateStatusChange(appointment, appointmentStatus, errors, statusChangeValidators);
-        if (errors.isEmpty()) {
+        appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         validateUserPrivilege(appointment, appointmentStatus);
-        if(errors.isEmpty()) {
-            appointment.setStatus(appointmentStatus);
-            appointmentDao.save(appointment);
-            String notes = onDate != null ? onDate.toInstant().toString(): null;
-            createEventInAppointmentAudit(appointment, notes);
-        } else {
-            String message = StringUtils.join(errors, "\n");
-            throw new APIException(message);
-        }
+        appointment.setStatus(appointmentStatus);
+        appointmentDao.save(appointment);
+        String notes = onDate != null ? onDate.toInstant().toString() : null;
+        createEventInAppointmentAudit(appointment, notes);
     }
 
     private void validateUserPrivilege(Appointment appointment, AppointmentStatus appointmentStatus) {
