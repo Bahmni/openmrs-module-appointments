@@ -5,6 +5,8 @@ import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.RecurringAppointmentService;
@@ -13,12 +15,14 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -26,17 +30,17 @@ import java.util.stream.Collectors;
 public class RecurringAppointmentServiceImpl implements RecurringAppointmentService {
 
 
-    AppointmentRecurringPatternDao appointmentRecurringPatternDao;
+    private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
-    List<AppointmentStatusChangeValidator> statusChangeValidators;
+    private List<AppointmentStatusChangeValidator> statusChangeValidators;
 
-    AppointmentServiceHelper appointmentServiceHelper;
+    private AppointmentServiceHelper appointmentServiceHelper;
 
-    List<AppointmentValidator> appointmentValidators;
+    private List<AppointmentValidator> appointmentValidators;
 
-    List<AppointmentValidator> editAppointmentValidators;
+    private List<AppointmentValidator> editAppointmentValidators;
 
-    AppointmentDao appointmentDao;
+    private AppointmentDao appointmentDao;
 
     public void setAppointmentRecurringPatternDao(AppointmentRecurringPatternDao appointmentRecurringPatternDao) {
         this.appointmentRecurringPatternDao = appointmentRecurringPatternDao;
@@ -109,8 +113,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
                 Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-        pendingAppointments
-                .stream()
+        pendingAppointments.stream()
                 .map(pendingAppointment -> {
                     pendingAppointment.setStatus(appointmentStatus);
                     setAppointmentAuditForStatusChange(pendingAppointment, onDate);
@@ -120,12 +123,73 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
                 .collect(Collectors.toList());
     }
 
-    private Appointment updateMetadata(Appointment pendingAppointment, Appointment appointment) {
+    private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {
         Date startTime = getStartTime(pendingAppointment, appointment);
         Date endTime = getEndTime(pendingAppointment, appointment);
         pendingAppointment.setStartDateTime(startTime);
         pendingAppointment.setEndDateTime(endTime);
-        return pendingAppointment;
+        pendingAppointment.setService(appointment.getService());
+        pendingAppointment.setServiceType(appointment.getServiceType());
+        pendingAppointment.setLocation(appointment.getLocation());
+        pendingAppointment.setComments(appointment.getComments());
+        if (appointment.getProviders() != null) {
+            mapProvidersForAppointment(pendingAppointment,
+                    getDeepCloneOfProviders(new ArrayList<>(appointment.getProviders())));
+        }
+    }
+
+    private List<AppointmentProvider> getDeepCloneOfProviders(List<AppointmentProvider> appointmentProviders) {
+        return appointmentProviders
+                .stream()
+                .map(AppointmentProvider::new)
+                .collect(Collectors.toList());
+    }
+
+    private void mapProvidersForAppointment(Appointment appointment, List<AppointmentProvider> newProviders) {
+        Set<AppointmentProvider> existingProviders = appointment.getProviders();
+        setRemovedProvidersToCancel(newProviders, existingProviders);
+        createNewAppointmentProviders(appointment, newProviders);
+    }
+
+    private void createNewAppointmentProviders(Appointment appointment, List<AppointmentProvider> newProviders) {
+        if (newProviders != null && !newProviders.isEmpty()) {
+            if (appointment.getProviders() == null) {
+                appointment.setProviders(new HashSet<>());
+            }
+            for (AppointmentProvider appointmentProvider : newProviders) {
+                List<AppointmentProvider> oldProviders = appointment.getProviders()
+                        .stream()
+                        .filter(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()))
+                        .collect(Collectors.toList());
+                if (oldProviders.isEmpty()) {
+                    AppointmentProvider newAppointmentProvider = appointmentProvider;
+                    newAppointmentProvider.setAppointment(appointment);
+                    appointment.getProviders().add(newAppointmentProvider);
+                } else {
+                    oldProviders.forEach(existingAppointmentProvider -> {
+                        //TODO: if currentUser is same person as provider, set ACCEPTED
+                        existingAppointmentProvider.setResponse(appointmentProvider.getResponse());
+                        existingAppointmentProvider.setVoided(Boolean.FALSE);
+                        existingAppointmentProvider.setVoidReason(null);
+                    });
+                }
+            }
+        }
+    }
+
+    private void setRemovedProvidersToCancel(List<AppointmentProvider> newProviders,
+                                             Set<AppointmentProvider> existingProviders) {
+        if (existingProviders != null) {
+            for (AppointmentProvider appointmentProvider : existingProviders) {
+                boolean exists = newProviders != null && newProviders.stream()
+                        .anyMatch(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()));
+                if (!exists) {
+                    appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+                    appointmentProvider.setVoided(true);
+                    appointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
+                }
+            }
+        }
     }
 
     private Date getUpdatedTimeStamp(int endHours, int endMinutes, Date endDateTime) {
@@ -176,7 +240,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     private void setAppointmentAudit(Appointment appointment) {
         try {
             String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
-            updaateAppointmentAudits(appointment, notes);
+            updateAppointmentAudits(appointment, notes);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -184,10 +248,10 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     private void setAppointmentAuditForStatusChange(Appointment appointment, Date onDate) {
         String notes = onDate != null ? onDate.toInstant().toString() : null;
-        updaateAppointmentAudits(appointment, notes);
+        updateAppointmentAudits(appointment, notes);
     }
 
-    private void updaateAppointmentAudits(Appointment appointment, String notes) {
+    private void updateAppointmentAudits(Appointment appointment, String notes) {
         AppointmentAudit appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
         if (appointment.getAppointmentAudits() != null) {
             appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singletonList(appointmentAudit)));

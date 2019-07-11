@@ -128,8 +128,7 @@ public class AppointmentMapper {
 
         if (existingProviders != null) {
             for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders == null ? false :
-                        newProviders.stream().anyMatch(p -> p.getUuid().equals(appointmentProvider.getProvider().getUuid()));
+                boolean exists = newProviders != null && newProviders.stream().anyMatch(p -> p.getUuid().equals(appointmentProvider.getProvider().getUuid()));
                 if (!exists) {
                     appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
                     appointmentProvider.setVoided(true);
