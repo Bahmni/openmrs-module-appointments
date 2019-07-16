@@ -136,6 +136,8 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         if (appointment.getProviders() != null) {
             mapProvidersForAppointment(pendingAppointment,
                     getDeepCloneOfProviders(new ArrayList<>(appointment.getProviders())));
+        } else {
+            setRemovedProvidersToCancel(null, pendingAppointment.getProviders());
         }
     }
 
