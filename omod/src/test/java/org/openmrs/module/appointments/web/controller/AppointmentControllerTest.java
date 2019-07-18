@@ -19,7 +19,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.RecurringAppointmentService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
-import org.openmrs.module.appointments.web.helper.RecurringAppointmentsHelper;
+import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
@@ -51,7 +51,7 @@ public class AppointmentControllerTest {
     private RecurringAppointmentService recurringAppointmentService;
 
     @Mock
-    private RecurringAppointmentsHelper recurringAppointmentsHelper;
+    private RecurringPatternHelper recurringPatternHelper;
 
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -336,17 +336,17 @@ public class AppointmentControllerTest {
         Appointment appointmentTwo = new Appointment();
         appointmentTwo.setUuid("appointmentUuid");
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setAppointments(new HashSet<>( Arrays.asList(appointmentOne, appointmentTwo)));
 
-        when(appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern)).thenReturn(appointmentRecurringPattern);
-        when(recurringAppointmentService.validateAndSave(appointmentRecurringPattern,
-                Arrays.asList(appointmentOne, appointmentTwo))).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
-        when(recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<Appointment>());
+        when(appointmentRecurringPatternMapper.fromRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
+        when(recurringAppointmentService.validateAndSave(appointmentRecurringPattern)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
+        when(recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<>());
 
+        appointmentRecurringPattern.setAppointments(Collections.emptySet());
         appointmentController.saveAppointment(appointmentRequest);
-        Mockito.verify(appointmentRecurringPatternMapper, times(1)).fromRequestRecurringPattern(recurringPattern);
-        Mockito.verify(recurringAppointmentService, times(1)).validateAndSave(appointmentRecurringPattern,
-                Collections.emptyList());
-        Mockito.verify(recurringAppointmentsHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        Mockito.verify(appointmentRecurringPatternMapper, times(1)).fromRequest(recurringPattern);
+        Mockito.verify(recurringAppointmentService, times(1)).validateAndSave(appointmentRecurringPattern);
+        Mockito.verify(recurringPatternHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
     }
 
     @Test

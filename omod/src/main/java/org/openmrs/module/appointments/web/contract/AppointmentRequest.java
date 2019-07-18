@@ -23,7 +23,7 @@ public class AppointmentRequest {
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
     private RecurringPattern recurringPattern;
-    private Boolean applyForAll= false;
+    private Boolean applyForAll;
     private String timeZone;
 
     public String getAppointmentNumber() {
@@ -145,7 +145,6 @@ public class AppointmentRequest {
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
-
     public Boolean isRecurringAppointment(){
         return this.recurringPattern != null;
     }
