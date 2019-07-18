@@ -28,6 +28,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
     private Set<AppointmentAudit> appointmentAudits;
+    private Appointment relatedAppointment;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
         return appointmentAudits;
@@ -80,27 +81,27 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     public Integer getAppointmentId() {
         return appointmentId;
     }
-    
+
     public void setAppointmentId(Integer appointmentId) {
         this.appointmentId = appointmentId;
     }
-    
+
     public String getAppointmentNumber() {
         return appointmentNumber;
     }
-    
+
     public void setAppointmentNumber(String appointmentNumber) {
         this.appointmentNumber = appointmentNumber;
     }
-    
+
     public Patient getPatient() {
         return patient;
     }
-    
+
     public void setPatient(Patient patient) {
         this.patient = patient;
     }
-    
+
     public AppointmentServiceDefinition getService() {
         return service;
     }
@@ -116,65 +117,73 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     public void setServiceType(AppointmentServiceType serviceType) {
         this.serviceType = serviceType;
     }
-    
+
     public Provider getProvider() {
         return provider;
     }
-    
+
     public void setProvider(Provider provider) {
         this.provider = provider;
     }
-    
+
     public Location getLocation() {
         return location;
     }
-    
+
     public void setLocation(Location location) {
         this.location = location;
     }
-    
+
     public Date getStartDateTime() {
         return startDateTime;
     }
-    
+
     public void setStartDateTime(Date startDateTime) {
         this.startDateTime = startDateTime;
     }
-    
+
     public Date getEndDateTime() {
         return endDateTime;
     }
-    
+
     public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
     }
-    
+
     public AppointmentKind getAppointmentKind() {
         return appointmentKind;
     }
-    
+
     public void setAppointmentKind(AppointmentKind appointmentKind) {
         this.appointmentKind = appointmentKind;
     }
-    
+
     public AppointmentStatus getStatus() {
         return status;
     }
-    
+
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
-    
+
     public String getComments() {
         return comments;
     }
-    
+
     public void setComments(String comments) {
         this.comments = comments;
     }
 
     public Date getDateFromStartDateTime() {
         return DateUtils.truncate(getStartDateTime(), java.util.Calendar.DAY_OF_MONTH);
+    }
+
+    public Appointment getRelatedAppointment() {
+        return relatedAppointment;
+    }
+
+    public void setRelatedAppointment(Appointment relatedAppointment) {
+        this.relatedAppointment = relatedAppointment;
     }
 }
 
