@@ -10,8 +10,7 @@ import java.util.List;
 public interface RecurringAppointmentService {
 
     @Transactional
-    List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern,
-                                      List<Appointment> appointments);
+    List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern);
 
     @Transactional
     List<Appointment> validateAndUpdate(Appointment appointment, String clientTimeZone);

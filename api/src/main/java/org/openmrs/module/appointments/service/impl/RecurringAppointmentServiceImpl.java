@@ -68,20 +68,23 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     @Override
-    public List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern,
-                                             List<Appointment> appointments) {
-        if (appointments == null || appointments.isEmpty()) {
-            return appointments;
+    public List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern) {
+        if (appointmentRecurringPattern.isAppointmentsEmptyOrNull()) {
+            return Collections.emptyList();
         }
+        List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
+        appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
         appointments.forEach(appointment -> {
-            appointmentServiceHelper.validate(appointment, appointmentValidators);
             appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
         });
-        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
-        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        save(appointmentRecurringPattern);
         return appointments;
+    }
+
+    public void save(AppointmentRecurringPattern appointmentRecurringPattern) {
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
     }
 
     @Override

@@ -72,4 +72,8 @@ public class AppointmentRecurringPattern {
         this.appointments = appointments;
     }
 
+    public Boolean isAppointmentsEmptyOrNull (){
+        return this.appointments == null || this.appointments.isEmpty();
+    }
+
 }

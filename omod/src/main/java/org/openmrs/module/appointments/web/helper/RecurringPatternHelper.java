@@ -17,18 +17,19 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.valueOf;
 
 @Component
-public class RecurringAppointmentsHelper {
+public class RecurringPatternHelper {
 
     private AppointmentMapper appointmentMapper;
 
     @Autowired
-    public RecurringAppointmentsHelper(AppointmentMapper appointmentMapper) {
+    public RecurringPatternHelper(AppointmentMapper appointmentMapper) {
         this.appointmentMapper = appointmentMapper;
     }
 

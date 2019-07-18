@@ -14,7 +14,7 @@ import static org.openmrs.module.appointments.service.impl.RecurringAppointmentT
 @Component
 public class AppointmentRecurringPatternMapper {
 
-    public AppointmentRecurringPattern fromRequestRecurringPattern(RecurringPattern recurringPattern) {
+    public AppointmentRecurringPattern fromRequest(RecurringPattern recurringPattern) {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setEndDate(recurringPattern.getEndDate());
         appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
