@@ -92,20 +92,29 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
+        validate(appointment);
+        appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        save(appointment);
+        return appointment;
+    }
+
+    private void save(Appointment appointment) {
+        appointmentDao.save(appointment);
+        try {
+            createEventInAppointmentAudit(appointment,
+                    appointmentServiceHelper.getAppointmentAsJsonString(appointment));
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
+    }
+
+    @Override
+    public void validate(Appointment appointment) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
         appointmentServiceHelper.validate(appointment, appointmentValidators);
-		appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
-		appointmentDao.save(appointment);
-		try {
-			createEventInAppointmentAudit(appointment,
-					appointmentServiceHelper.getAppointmentAsJsonString(appointment));
-		} catch (IOException e) {
-			throw new APIException(e);
-		}
-		return appointment;
     }
 
     @Override
