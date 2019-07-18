@@ -25,6 +25,10 @@ public interface AppointmentsService {
     Appointment validateAndSave(Appointment appointment);
 
     @Transactional
+    @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
+    void validate(Appointment appointment);
+
+    @Transactional
     @Authorized({VIEW_APPOINTMENTS})
     List<Appointment> getAllAppointments(Date forDate);
 

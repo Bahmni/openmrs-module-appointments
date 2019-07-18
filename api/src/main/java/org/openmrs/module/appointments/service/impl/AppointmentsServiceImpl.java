@@ -30,25 +30,25 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
-import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
+    private static final int EMPTY_SET_SIZE = 0;
     private Log log = LogFactory.getLog(this.getClass());
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
 
-    private AppointmentDao appointmentDao;
+    AppointmentDao appointmentDao;
 
-    private List<AppointmentStatusChangeValidator> statusChangeValidators;
+    List<AppointmentStatusChangeValidator> statusChangeValidators;
 
-    private List<AppointmentValidator> appointmentValidators;
+    List<AppointmentValidator> appointmentValidators;
 
-    private List<AppointmentValidator> editAppointmentValidators;
+    List<AppointmentValidator> editAppointmentValidators;
 
-    private AppointmentAuditDao appointmentAuditDao;
+    AppointmentAuditDao appointmentAuditDao;
 
-    private AppointmentServiceHelper appointmentServiceHelper;
+    AppointmentServiceHelper appointmentServiceHelper;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -92,28 +92,26 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
-        validate(appointment, appointmentValidators );
+        validate(appointment);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         save(appointment);
         return appointment;
     }
 
-    @Override
-    public Appointment validateAndUpdate(Appointment appointment) throws APIException {
-        validate(appointment, editAppointmentValidators );
-        save(appointment);
-        return appointment;
-    }
-
     private void save(Appointment appointment) {
-        createAndSetAppointmentAudit(appointment);
         appointmentDao.save(appointment);
+        try {
+            createEventInAppointmentAudit(appointment,
+                    appointmentServiceHelper.getAppointmentAsJsonString(appointment));
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
     }
 
     @Override
-    public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
+    public void validate(Appointment appointment) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
         appointmentServiceHelper.validate(appointment, appointmentValidators);
@@ -270,17 +268,5 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                                                String notes) {
         AppointmentAudit appointmentAuditEvent = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
         appointmentAuditDao.save(appointmentAuditEvent);
-    }
-
-    private void createAndSetAppointmentAudit(Appointment appointment) {
-        AppointmentAudit appointmentAudit;
-        try {
-            String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
-            appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
-        } catch (IOException e) {
-            throw new APIException(e);
-        }
-        Set<AppointmentAudit> appointmentAudits = appointment.getAppointmentAudits();
-        appointmentAudits.addAll(new HashSet<>(Collections.singleton(appointmentAudit)));
     }
 }
