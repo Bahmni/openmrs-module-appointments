@@ -47,6 +47,8 @@
         <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
         <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
         <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
+        <many-to-one name="relatedAppointment" class="org.openmrs.module.appointments.model.Appointment"
+                    column="related_appointment_id" unique="true"/>
 
         <set name="appointmentAudits" cascade="save-update" table="patient_appointment_audit" lazy="true">
             <key foreign-key="patient_appointment_id" column="appointment_id"/>

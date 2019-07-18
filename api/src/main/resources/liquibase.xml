@@ -525,5 +525,19 @@
             REFERENCES patient_appointment(patient_appointment_id));
         </sql>
     </changeSet>
+    <changeSet id="add_related_appointment_id_patient_appointment_20190718" author="Sneha, Alekhya">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="related_appointment_id" tableName="patient_appointment"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE patient_appointment
+            ADD COLUMN related_appointment_id INT NULL,
+            ADD CONSTRAINT patient_appointment_id_fk FOREIGN KEY(related_appointment_id) REFERENCES patient_appointment(patient_appointment_id);
+        </sql>
+
+    </changeSet>
 
 </databaseChangeLog>
+
