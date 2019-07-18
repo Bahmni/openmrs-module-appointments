@@ -9,6 +9,7 @@ import org.openmrs.Provider;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +28,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private String comments;
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
-    private Set<AppointmentAudit> appointmentAudits;
+    private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
