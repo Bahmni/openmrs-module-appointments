@@ -16,6 +16,7 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.helper.RecurringAppointmentsHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
@@ -52,6 +53,9 @@ public class AppointmentController {
     private AppointmentMapper appointmentMapper;
 
     @Autowired
+    private AppointmentRecurringPatternMapper appointmentRecurringPatternMapper;
+
+    @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
 
     @Autowired
@@ -85,8 +89,7 @@ public class AppointmentController {
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             } else {
                 recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
-                AppointmentRecurringPattern appointmentRecurringPattern = appointmentMapper
-                        .fromRequestRecurringPattern(recurringPattern);
+                AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
                 List<Appointment> appointmentsList = recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern,
                         appointmentRequest);
 
