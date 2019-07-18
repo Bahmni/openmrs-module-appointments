@@ -145,4 +145,8 @@ public class AppointmentRequest {
     public void setTimeZone(String timeZone) {
         this.timeZone = timeZone;
     }
+
+    public Boolean isRecurringAppointment(){
+        return this.recurringPattern != null;
+    }
 }

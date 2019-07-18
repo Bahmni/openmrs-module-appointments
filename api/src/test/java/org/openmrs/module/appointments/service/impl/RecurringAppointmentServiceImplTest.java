@@ -21,7 +21,6 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
@@ -41,19 +40,8 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyListOf;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.openmrs.module.appointments.model.AppointmentProviderResponse.*;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Cancelled;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
@@ -96,19 +84,17 @@ public class RecurringAppointmentServiceImplTest {
         Appointment appointment = new Appointment();
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         List<Appointment> appointments = Collections.singletonList(appointment);
-
-        doNothing().when(appointmentServiceHelper).validate(appointment, appointmentValidators);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
         String notes = "Notes";
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         List<Appointment> appointmentsList = recurringAppointmentService
-                .validateAndSave(appointmentRecurringPattern, appointments);
+                .validateAndSave(appointmentRecurringPattern);
 
         assertEquals(1, appointmentsList.size());
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
-        verify(appointmentServiceHelper).validate(appointment, appointmentValidators);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
@@ -117,35 +103,13 @@ public class RecurringAppointmentServiceImplTest {
     }
 
     @Test
-    public void shouldReturnNullWhenAppointsAreNull() {
-        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(
-                mock(AppointmentRecurringPattern.class), Collections.emptyList());
+    public void shouldReturnEmptyAppointmentsWithoutSavingWhenAppointmentsAreEmpty() {
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>());
+        when(appointmentRecurringPattern.isAppointmentsEmptyOrNull()).thenReturn(true);
+        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
         assertEquals(0, appointmentsList.size());
         verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
-    }
-
-    @Test
-    public void shouldReturnEmptyAppointmentsWithoutSavingWhenAppointmentsAreEmpty() {
-        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(
-                mock(AppointmentRecurringPattern.class), null);
-        assertNull(appointmentsList);
-        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
-    }
-
-    @Test
-    public void shouldThrowExceptionIfAppointmentValidationFails() throws IOException {
-        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
-        String errorMessage = "Appointment cannot be created without Patient";
-        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
-        recurringAppointmentService.validateAndSave(appointmentRecurringPattern,
-                Collections.singletonList(new Appointment()));
-        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
-        verify(appointmentServiceHelper, never()).validate(any(), any());
-        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any());
-        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
-        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
     }
 
     @Test
@@ -485,7 +449,6 @@ public class RecurringAppointmentServiceImplTest {
         oldAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
-        List<String> errors = new ArrayList<>();
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(oldAppointmentTwo);
         doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
 

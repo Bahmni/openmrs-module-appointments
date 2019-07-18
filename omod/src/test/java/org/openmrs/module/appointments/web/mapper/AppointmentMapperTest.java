@@ -148,7 +148,7 @@ public class AppointmentMapperTest {
         recurringPattern.setFrequency(3);
         recurringPattern.setPeriod(1);
         recurringPattern.setType("DAY");
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
         assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
         assertSame(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
         assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
@@ -161,7 +161,7 @@ public class AppointmentMapperTest {
         recurringPattern.setType("DAY");
         String endDate = "2017-03-15T00:00:00.0Z";
         recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
         assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
         assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
         assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
@@ -175,7 +175,7 @@ public class AppointmentMapperTest {
         recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
         String endDate = "2017-03-15T00:00:00.0Z";
         recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
         assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
         assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
         assertEquals("SUNDAY,MONDAY", appointmentRecurringPattern.getDaysOfWeek());
@@ -189,7 +189,7 @@ public class AppointmentMapperTest {
         recurringPattern.setPeriod(1);
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Valid recurrence type should be provided. Valid types are DAY and WEEK");
-        appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
+        appointmentRecurringPatternMapper.fromRequest(recurringPattern);
     }
 
     @Test

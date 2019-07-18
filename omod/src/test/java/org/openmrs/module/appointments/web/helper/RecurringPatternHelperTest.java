@@ -25,17 +25,17 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
-public class RecurringAppointmentsHelperTest {
+public class RecurringPatternHelperTest {
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
-    private RecurringAppointmentsHelper recurringAppointmentsHelper;
+    private RecurringPatternHelper recurringPatternHelper;
     private AppointmentMapper appointmentMapperMock;
 
     @Before
     public void setUp() {
         appointmentMapperMock = Mockito.mock(AppointmentMapper.class);
-        recurringAppointmentsHelper = new RecurringAppointmentsHelper(appointmentMapperMock);
+        recurringPatternHelper = new RecurringPatternHelper(appointmentMapperMock);
     }
 
     private RecurringPattern getRecurringPattern() {
@@ -52,7 +52,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setType(null);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -61,7 +61,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setType("");
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -71,7 +71,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(null);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -80,7 +80,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setPeriod(0);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -89,7 +89,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setFrequency(0);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -98,7 +98,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setFrequency(null);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     private String getExceptionMessage() {
@@ -114,7 +114,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setFrequency(0);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -127,7 +127,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(Arrays.asList());
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -140,7 +140,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(null);
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -152,7 +152,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(Arrays.asList("TEXT", "MISC"));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -164,7 +164,7 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
@@ -176,13 +176,13 @@ public class RecurringAppointmentsHelperTest {
         recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
         expectedException.expect(APIException.class);
         expectedException.expectMessage(getExceptionMessage());
-        recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
     }
 
     @Test
     public void shouldNotThrowAnExceptionForValidData() {
         RecurringPattern recurringPattern = getRecurringPattern();
-        assertTrue(recurringAppointmentsHelper.validateRecurringPattern(recurringPattern));
+        assertTrue(recurringPatternHelper.validateRecurringPattern(recurringPattern));
     }
 
     private AppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
@@ -222,8 +222,8 @@ public class RecurringAppointmentsHelperTest {
         appointmentInstance.put("endDateTime", getDate(2019, 4, 14, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = recurringAppointmentsHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
 
         assertEquals(appointments.size(), appointments.size());
 
@@ -267,8 +267,8 @@ public class RecurringAppointmentsHelperTest {
         appointmentInstance.put("endDateTime", getDate(2019, 4, 26, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = recurringAppointmentsHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
 
         assertEquals(appointments.size(), appointments.size());
 
@@ -289,8 +289,8 @@ public class RecurringAppointmentsHelperTest {
 
         Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = recurringAppointmentsHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
+                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
         assertTrue(appointments.isEmpty());
     }
 

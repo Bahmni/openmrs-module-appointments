@@ -14,7 +14,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.RecurringAppointmentService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
-import org.openmrs.module.appointments.web.helper.RecurringAppointmentsHelper;
+import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
@@ -59,7 +59,7 @@ public class AppointmentController {
     private AppointmentServiceMapper appointmentServiceMapper;
 
     @Autowired
-    private RecurringAppointmentsHelper recurringAppointmentsHelper;
+    private RecurringPatternHelper recurringPatternHelper;
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
@@ -80,26 +80,34 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
+    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
         try {
-            RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
-            if (recurringPattern == null) {
-                Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-                appointmentsService.validateAndSave(appointment);
-                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+            if (appointmentRequest.isRecurringAppointment()) {
+                return recurringAppointmentSave(appointmentRequest);
             } else {
-                recurringAppointmentsHelper.validateRecurringPattern(recurringPattern);
-                AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequestRecurringPattern(recurringPattern);
-                List<Appointment> appointmentsList = recurringAppointmentsHelper.generateRecurringAppointments(appointmentRecurringPattern,
-                        appointmentRequest);
-
-                recurringAppointmentService.validateAndSave(appointmentRecurringPattern, appointmentsList);
-                return new ResponseEntity<>(appointmentMapper.constructResponse(appointmentsList), HttpStatus.OK);
+                return normalAppointmentSave(appointmentRequest);
             }
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    private ResponseEntity<Object> recurringAppointmentSave(AppointmentRequest appointmentRequest) {
+        RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
+        recurringPatternHelper.validateRecurringPattern(recurringPattern);
+        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
+        List<Appointment> appointmentsList = recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern,
+                appointmentRequest);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
+        return new ResponseEntity<>(appointmentMapper.constructResponse(new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
+    }
+
+    private ResponseEntity<Object> normalAppointmentSave(AppointmentRequest appointmentRequest) {
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+        appointmentsService.validateAndSave(appointment);
+        return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
