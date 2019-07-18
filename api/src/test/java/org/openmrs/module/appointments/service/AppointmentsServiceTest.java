@@ -13,6 +13,7 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
+import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
@@ -28,6 +29,10 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
@@ -53,7 +58,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     PatientService patientService;
 
     @Mock
-    private AppointmentAuditDao appointmentAuditDao;
+    private AppointmentAudit appointmentAudit;
 
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;

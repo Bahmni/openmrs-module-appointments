@@ -131,6 +131,7 @@ public class AppointmentsServiceImplTest {
         appointment.setStartDateTime(new Date());
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
         appointmentsService.validateAndSave(appointment);
         verify(appointmentDao, times(1)).save(appointment);
     }
@@ -138,6 +139,7 @@ public class AppointmentsServiceImplTest {
     @Test
     public void shouldCallCreateAuditEventOnSaveOfAppointment() throws IOException {
         Appointment appointment = new Appointment();
+        appointment.setAppointmentAudits(mock(HashSet.class));
         String notes = "";
         AppointmentAudit appointmentAuditMock = mock(AppointmentAudit.class);
         when(appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes))
@@ -147,7 +149,8 @@ public class AppointmentsServiceImplTest {
         appointmentsService.validateAndSave(appointment);
 
         verify(appointmentServiceHelper, times(1)).getAppointmentAuditEvent(appointment, notes);
-        verify(appointmentAuditDao, times(1)).save(appointmentAuditMock);
+        verify(appointmentDao, times(1)).save(appointment);
+        verify(appointmentAuditDao, times(0)).save(appointmentAuditMock);
     }
 
     @Test
@@ -504,7 +507,7 @@ public class AppointmentsServiceImplTest {
         AppointmentAudit appointmentAudit = mock(AppointmentAudit.class);
         when(appointmentServiceHelper.getAppointmentAuditEvent(appointment, anyString)).thenReturn(appointmentAudit);
 
-        Appointment actual = appointmentsService.validateAndUpdate(appointment);
+        Appointment actual = appointmentsService.validateAndSave(appointment);
 
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, anyString);
@@ -521,7 +524,7 @@ public class AppointmentsServiceImplTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
-        appointmentsService.validateAndUpdate(appointment);
+        appointmentsService.validateAndSave(appointment);
 
         verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));

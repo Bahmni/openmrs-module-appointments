@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -22,10 +23,6 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndSave(Appointment appointment);
-
-    @Transactional
-    @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
-    void validate(Appointment appointment);
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
@@ -74,6 +71,10 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndUpdate(Appointment appointment);
+
+    @Transactional
+    @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
+    void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators);
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
