@@ -12,7 +12,7 @@ import static org.openmrs.module.appointments.service.impl.RecurringAppointmentT
 import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.valueOf;
 
 @Component
-public class AppointmentRecurringPatternMapper {
+public abstract class AbstractAppointmentRecurringPatternMapper {
 
     public AppointmentRecurringPattern fromRequest(RecurringPattern recurringPattern) {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
@@ -31,4 +31,6 @@ public class AppointmentRecurringPatternMapper {
         }
         return appointmentRecurringPattern;
     }
+
+    public abstract AppointmentRecurringPattern fromRequest(AppointmentRequest appointmentRequest);
 }

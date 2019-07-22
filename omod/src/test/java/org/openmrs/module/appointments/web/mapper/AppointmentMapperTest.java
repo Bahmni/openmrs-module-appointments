@@ -64,7 +64,7 @@ public class AppointmentMapperTest {
     private AppointmentMapper appointmentMapper;
 
     @InjectMocks
-    private AppointmentRecurringPatternMapper appointmentRecurringPatternMapper;
+    private AbstractAppointmentRecurringPatternMapper appointmentRecurringPatternMapper = new AllAppointmentRecurringPatternMapper();
 
     private Patient patient;
     private AppointmentServiceDefinition service;
