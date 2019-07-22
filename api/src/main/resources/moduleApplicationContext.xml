@@ -107,7 +107,7 @@
             <ref bean="transactionManager"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.RecurringAppointmentServiceImpl">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentRecurringPatternServiceImpl">
                 <property name="appointmentRecurringPatternDao">
                     <ref bean="appointmentRecurringPatternDao"/>
                 </property>

@@ -7,7 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 import java.util.List;
 
-public interface RecurringAppointmentService {
+public interface AppointmentRecurringPatternService {
 
     @Transactional
     List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern);
