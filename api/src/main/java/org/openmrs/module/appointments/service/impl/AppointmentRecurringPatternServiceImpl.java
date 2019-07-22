@@ -10,7 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.service.RecurringAppointmentService;
+import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,7 +28,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Transactional
-public class RecurringAppointmentServiceImpl implements RecurringAppointmentService {
+public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurringPatternService {
 
 
     private AppointmentRecurringPatternDao appointmentRecurringPatternDao;

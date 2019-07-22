@@ -49,10 +49,10 @@ import static org.openmrs.module.appointments.model.AppointmentStatus.Completed;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RecurringAppointmentServiceImplTest {
+public class AppointmentRecurringPatternServiceImplTest {
 
     @InjectMocks
-    private RecurringAppointmentServiceImpl recurringAppointmentService;
+    private AppointmentRecurringPatternServiceImpl recurringAppointmentService;
 
     @Mock
     private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
