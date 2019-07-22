@@ -80,6 +80,11 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
         }
+        mapAppointmentRequestToAppointment(appointmentRequest, appointment);
+        return appointment;
+    }
+
+    public void mapAppointmentRequestToAppointment(AppointmentRequest appointmentRequest, Appointment appointment) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
         if(appointmentRequest.getServiceTypeUuid() != null) {
@@ -94,7 +99,6 @@ public class AppointmentMapper {
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
-        return appointment;
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {
