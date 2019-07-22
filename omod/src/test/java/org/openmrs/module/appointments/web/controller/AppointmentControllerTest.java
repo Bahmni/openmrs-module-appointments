@@ -21,8 +21,9 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternMapper;
+import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
@@ -34,10 +35,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -60,7 +58,12 @@ public class AppointmentControllerTest {
     private AppointmentMapper appointmentMapper;
 
     @Mock
-    private AppointmentRecurringPatternMapper appointmentRecurringPatternMapper;
+    @Qualifier("singleAppointmentRecurringPatternMapper")
+    private AbstractAppointmentRecurringPatternMapper singleAppointmentRecurringPatternMapper;
+
+    @Mock
+    @Qualifier("allAppointmentRecurringPatternMapper")
+    private AbstractAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
 
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
@@ -338,13 +341,13 @@ public class AppointmentControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setAppointments(new HashSet<>( Arrays.asList(appointmentOne, appointmentTwo)));
 
-        when(appointmentRecurringPatternMapper.fromRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
+        when(allAppointmentRecurringPatternMapper.fromRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
         when(recurringAppointmentService.validateAndSave(appointmentRecurringPattern)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
         when(recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<>());
 
         appointmentRecurringPattern.setAppointments(Collections.emptySet());
         appointmentController.saveAppointment(appointmentRequest);
-        Mockito.verify(appointmentRecurringPatternMapper, times(1)).fromRequest(recurringPattern);
+        Mockito.verify(allAppointmentRecurringPatternMapper, times(1)).fromRequest(recurringPattern);
         Mockito.verify(recurringAppointmentService, times(1)).validateAndSave(appointmentRecurringPattern);
         Mockito.verify(recurringPatternHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
     }
@@ -367,7 +370,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
 
         appointmentController.editAppointment(appointmentRequest);
@@ -381,7 +384,7 @@ public class AppointmentControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
-        when(appointmentRequest.getApplyForAll()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
 
         appointmentController.editAppointment(appointmentRequest);
@@ -407,7 +410,7 @@ public class AppointmentControllerTest {
     @Test
     public void shouldThrowExceptionIfAppointmentTimeZoneIsNull() throws Exception {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-        when(appointmentRequest.getApplyForAll()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
 
         ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
 
@@ -415,5 +418,33 @@ public class AppointmentControllerTest {
         Mockito.verify(appointmentMapper, never()).fromRequest(any());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
+
+    @Test
+    public void shouldUpdateSingleRecurringAppointmentByCreatingANewAppointmentReferencingTheExisitngAppointment(){
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+
+        when(appointmentRequest.isRecurringAppointment()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
+
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        Appointment appointment = mock(Appointment.class);
+
+        when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
+        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
+        when(recurringAppointmentService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
+        when(appointment.getUuid()).thenReturn("uuid");
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
+
+        final ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
+
+        Mockito.verify(singleAppointmentRecurringPatternMapper, times(1)).fromRequest(appointmentRequest);
+        Mockito.verify(recurringAppointmentService, times(1)).validateAndUpdate(appointmentRecurringPattern);
+
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+
+    }
+
+
 
 }
