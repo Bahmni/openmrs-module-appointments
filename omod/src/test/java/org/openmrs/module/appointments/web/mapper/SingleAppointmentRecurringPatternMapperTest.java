@@ -88,4 +88,22 @@ public class SingleAppointmentRecurringPatternMapperTest {
         singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
     }
 
+    @Test
+    public void shouldVoidTheOldAppointmentWhenNewAppointmentIsCreatedFromAppointmentRequest() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointment = new Appointment();
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointment.setVoided(false);
+
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
+
+        when(appointmentsService.getAppointmentByUuid("uuid")).thenReturn(appointment);
+        doNothing().when(appointmentMapper).mapAppointmentRequestToAppointment(eq(appointmentRequest), any(Appointment.class));
+
+        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
+
+        singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
+        assertEquals(true, appointment.getVoided());
+    }
 }
