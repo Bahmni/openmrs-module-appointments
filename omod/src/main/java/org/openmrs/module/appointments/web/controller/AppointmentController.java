@@ -11,7 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.service.RecurringAppointmentService;
+import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
@@ -45,7 +45,7 @@ public class AppointmentController {
     private AppointmentsService appointmentsService;
 
     @Autowired
-    private RecurringAppointmentService recurringAppointmentService;
+    private AppointmentRecurringPatternService appointmentRecurringPatternService;
 
     @Autowired
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -106,7 +106,7 @@ public class AppointmentController {
         List<Appointment> appointmentsList = recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern,
                 appointmentRequest);
         appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
-        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
+        appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
         return new ResponseEntity<>(appointmentMapper.constructResponse(new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
     }
 
@@ -174,7 +174,7 @@ public class AppointmentController {
                     if (!StringUtils.hasText(clientTimeZone)) {
                         throw new APIException("Time Zone is missing");
                     }
-                    recurringAppointmentService.changeStatus(appointment, toStatus, onDate, clientTimeZone);
+                    appointmentRecurringPatternService.changeStatus(appointment, toStatus, onDate, clientTimeZone);
                 } else {
                     appointmentsService.changeStatus(appointment, toStatus, onDate);
                 }
@@ -264,13 +264,13 @@ public class AppointmentController {
                 appointmentRequest.setUuid(null);
                 Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
                 appointment.setUuid(appointmentUuid);
-                List<Appointment> updatedAppointments = recurringAppointmentService.validateAndUpdate(appointment, clientTimeZone);
+                List<Appointment> updatedAppointments = appointmentRecurringPatternService.validateAndUpdate(appointment, clientTimeZone);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
                 if(appointmentRequest.isRecurringAppointment()){
                     AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
 
-                    AppointmentRecurringPattern updatedAppointmentRecurringPattern = recurringAppointmentService.validateAndUpdate(appointmentRecurringPattern);
+                    AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.validateAndUpdate(appointmentRecurringPattern);
                     Appointment updatedAppointment = updatedAppointmentRecurringPattern.getAppointments()
                             .stream().filter(arp -> arp.getUuid() == appointmentRequest.getUuid()).findFirst().get();
                     return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
