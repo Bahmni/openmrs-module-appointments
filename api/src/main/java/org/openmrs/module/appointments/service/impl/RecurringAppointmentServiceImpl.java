@@ -126,6 +126,11 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public AppointmentRecurringPattern validateAndUpdate(AppointmentRecurringPattern appointmentRecurringPattern) {
+        return null;
+    }
+
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {
         Date startTime = getStartTime(pendingAppointment, appointment);
         Date endTime = getEndTime(pendingAppointment, appointment);

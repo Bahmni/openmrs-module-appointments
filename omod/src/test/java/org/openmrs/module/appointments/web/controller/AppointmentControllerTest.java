@@ -18,7 +18,7 @@ import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternMapper;
+import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.webservices.rest.SimpleObject;
