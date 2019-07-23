@@ -255,12 +255,13 @@ public class AppointmentController {
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
             boolean applyForAll = appointmentRequest.requiresUpdateOfAllRecurringAppointments();
+            final String appointmentRequestUuid = appointmentRequest.getUuid();
             if (applyForAll) {
                 String clientTimeZone = appointmentRequest.getTimeZone();
                 if (!StringUtils.hasText(clientTimeZone)) {
                     throw new APIException("Time Zone is missing");
                 }
-                String appointmentUuid = appointmentRequest.getUuid();
+                String appointmentUuid = appointmentRequestUuid;
                 appointmentRequest.setUuid(null);
                 Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
                 appointment.setUuid(appointmentUuid);
@@ -269,10 +270,19 @@ public class AppointmentController {
             } else {
                 if(appointmentRequest.isRecurringAppointment()){
                     AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
-
                     AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.validateAndUpdate(appointmentRecurringPattern);
-                    Appointment updatedAppointment = updatedAppointmentRecurringPattern.getAppointments()
-                            .stream().filter(arp -> arp.getUuid() == appointmentRequest.getUuid()).findFirst().get();
+                    Appointment updatedAppointment = null;
+                    final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments();
+                    final Iterator<Appointment> iterator = updatedAppointments.iterator();
+                    while(iterator.hasNext()){
+                        final Appointment currentAppointment = iterator.next();
+                        final Appointment relatedAppointment = currentAppointment.getRelatedAppointment();
+                        if ((currentAppointment.getUuid() == appointmentRequestUuid && !currentAppointment.getVoided())
+                                || (relatedAppointment!=null && relatedAppointment.getUuid() == appointmentRequestUuid)) {
+                            updatedAppointment = currentAppointment;
+                            break;
+                        }
+                    }
                     return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
                 }
                 else {
