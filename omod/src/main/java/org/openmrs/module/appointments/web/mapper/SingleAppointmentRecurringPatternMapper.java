@@ -27,12 +27,17 @@ public class SingleAppointmentRecurringPatternMapper extends AbstractAppointment
     public AppointmentRecurringPattern fromRequest(AppointmentRequest appointmentRequest){
         String uuid = appointmentRequest.getUuid();
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
+        Appointment newAppointment;
         if(appointment==null)
             throw new APIException("Appointment does not exist.");
-
-        Appointment newAppointment = getNewAppointmentFrom(appointment);
-        appointment.setVoided(true);
-        newAppointment.setRelatedAppointment(appointment);
+        if(appointment.getRelatedAppointment()!=null){
+            newAppointment = appointment;
+        }
+        else {
+            newAppointment = getNewAppointmentFrom(appointment);
+            appointment.setVoided(true);
+            newAppointment.setRelatedAppointment(appointment);
+        }
         appointmentMapper.mapAppointmentRequestToAppointment(appointmentRequest, newAppointment);
         final AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
         appointmentRecurringPattern.getAppointments().add(newAppointment);

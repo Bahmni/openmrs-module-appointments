@@ -106,4 +106,28 @@ public class SingleAppointmentRecurringPatternMapperTest {
         singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
         assertEquals(true, appointment.getVoided());
     }
+
+    @Test
+    public void shouldNotCreateANewRelatedAppointmentWhenTheAppointmentAlreadyHasARelatedAppointment(){
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointment = mock(Appointment.class);
+        Appointment relatedAppointment = mock(Appointment.class);
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
+
+        when(appointmentsService.getAppointmentByUuid("uuid")).thenReturn(appointment);
+        when(appointment.getRelatedAppointment()).thenReturn(relatedAppointment);
+        when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
+        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, relatedAppointment)));
+        assertEquals(2, appointmentRecurringPattern.getAppointments().size());
+
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
+
+        verify(appointment, times(1)).getRelatedAppointment();
+        verify(appointmentMapper, times(1))
+                .mapAppointmentRequestToAppointment(appointmentRequest,appointment);
+        assertEquals(2, returnedAppointmentRecurringPattern.getAppointments().size());
+
+    }
 }
