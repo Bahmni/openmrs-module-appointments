@@ -9,19 +9,15 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
-import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -445,6 +441,57 @@ public class AppointmentControllerTest {
 
     }
 
+    @Test
+    public void shouldUpdateSingleRecurringAppointmentAndReturnTheNewAppointmentWhenAppointmentInRequestDoesNotHaveARelatedAppointment() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
 
+        when(appointmentRequest.isRecurringAppointment()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
 
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        Appointment appointment = mock(Appointment.class);
+        Appointment newAppointment = mock(Appointment.class);
+
+        when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
+        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
+        when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
+        when(appointment.getUuid()).thenReturn("uuid");
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
+        when(newAppointment.getRelatedAppointment()).thenReturn(appointment);
+        when(newAppointment.getUuid()).thenReturn("newUuid");
+
+        when(appointment.getVoided()).thenReturn(true);
+
+        appointmentController.editAppointment(appointmentRequest);
+
+        verify(appointmentMapper,times(1)).constructResponse(newAppointment);
+
+    }
+
+    @Test
+    public void shouldUpdateRecurringAppointmentAndReturnTheSameAppointmentWhenThisAppointmentHasRelatedAppointment() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+
+        when(appointmentRequest.isRecurringAppointment()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
+
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
+        Appointment appointment = mock(Appointment.class);
+        Appointment oldRecurringAppointment = mock(Appointment.class);
+
+        when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
+        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
+        when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));
+        when(appointment.getUuid()).thenReturn("uuid");
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
+        when(appointment.getRelatedAppointment()).thenReturn(oldRecurringAppointment);
+        when(oldRecurringAppointment.getUuid()).thenReturn("oldUuid");
+        when(appointment.getVoided()).thenReturn(false);
+
+        appointmentController.editAppointment(appointmentRequest);
+
+        verify(appointmentMapper,times(1)).constructResponse(appointment);
+    }
 }
