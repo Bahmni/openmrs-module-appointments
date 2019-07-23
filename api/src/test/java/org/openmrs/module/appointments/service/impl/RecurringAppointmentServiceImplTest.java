@@ -207,7 +207,6 @@ public class RecurringAppointmentServiceImplTest {
         oldAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         newAppointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
-        List<String> errors = new ArrayList<>();
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(oldAppointmentTwo);
         doNothing().when(appointmentServiceHelper).validate(oldAppointmentTwo, editAppointmentValidators);
 
