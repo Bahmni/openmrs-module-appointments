@@ -139,7 +139,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     private List<AppointmentProvider> getDeepCloneOfProviders(Set<AppointmentProvider> appointmentProviders) {
         if (CollectionUtils.isEmpty(appointmentProviders))
-            return null;
+            return new ArrayList<>();
         return appointmentProviders
                 .stream()
                 .map(AppointmentProvider::new)
@@ -153,7 +153,7 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     private void createNewAppointmentProviders(Appointment appointment, List<AppointmentProvider> newProviders) {
-        if (!CollectionUtils.isEmpty(newProviders)) {
+        if (!newProviders.isEmpty()) {
             if (appointment.getProviders() == null) {
                 appointment.setProviders(new HashSet<>());
             }
@@ -181,9 +181,9 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     private void setRemovedProvidersToCancel(List<AppointmentProvider> newProviders,
                                              Set<AppointmentProvider> existingProviders) {
-        if (!CollectionUtils.isEmpty(existingProviders)) {
+        if (CollectionUtils.isNotEmpty(existingProviders)) {
             for (AppointmentProvider existingAppointmentProvider : existingProviders) {
-                boolean appointmentProviderExists = !CollectionUtils.isEmpty(newProviders) && newProviders.stream()
+                boolean appointmentProviderExists = newProviders.stream()
                         .anyMatch(newProvider -> newProvider.getProvider()
                                 .getUuid()
                                 .equals(existingAppointmentProvider.getProvider().getUuid()));
