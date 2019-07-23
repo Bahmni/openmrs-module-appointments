@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -132,15 +133,13 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
         pendingAppointment.setServiceType(appointment.getServiceType());
         pendingAppointment.setLocation(appointment.getLocation());
         pendingAppointment.setComments(appointment.getComments());
-        if (appointment.getProviders() != null) {
-            mapProvidersForAppointment(pendingAppointment,
-                    getDeepCloneOfProviders(new ArrayList<>(appointment.getProviders())));
-        } else {
-            setRemovedProvidersToCancel(null, pendingAppointment.getProviders());
-        }
+        List<AppointmentProvider> cloneOfProviders = getDeepCloneOfProviders(appointment.getProviders());
+        mapProvidersForAppointment(pendingAppointment, cloneOfProviders);
     }
 
-    private List<AppointmentProvider> getDeepCloneOfProviders(List<AppointmentProvider> appointmentProviders) {
+    private List<AppointmentProvider> getDeepCloneOfProviders(Set<AppointmentProvider> appointmentProviders) {
+        if (CollectionUtils.isEmpty(appointmentProviders))
+            return null;
         return appointmentProviders
                 .stream()
                 .map(AppointmentProvider::new)
@@ -154,23 +153,24 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
     }
 
     private void createNewAppointmentProviders(Appointment appointment, List<AppointmentProvider> newProviders) {
-        if (newProviders != null && !newProviders.isEmpty()) {
+        if (!CollectionUtils.isEmpty(newProviders)) {
             if (appointment.getProviders() == null) {
                 appointment.setProviders(new HashSet<>());
             }
-            for (AppointmentProvider appointmentProvider : newProviders) {
+            for (AppointmentProvider newAppointmentProvider : newProviders) {
                 List<AppointmentProvider> oldProviders = appointment.getProviders()
                         .stream()
-                        .filter(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()))
+                        .filter(existingProvider -> existingProvider.getProvider()
+                                .getUuid()
+                                .equals(newAppointmentProvider.getProvider().getUuid()))
                         .collect(Collectors.toList());
                 if (oldProviders.isEmpty()) {
-                    AppointmentProvider newAppointmentProvider = appointmentProvider;
                     newAppointmentProvider.setAppointment(appointment);
                     appointment.getProviders().add(newAppointmentProvider);
                 } else {
                     oldProviders.forEach(existingAppointmentProvider -> {
                         //TODO: if currentUser is same person as provider, set ACCEPTED
-                        existingAppointmentProvider.setResponse(appointmentProvider.getResponse());
+                        existingAppointmentProvider.setResponse(newAppointmentProvider.getResponse());
                         existingAppointmentProvider.setVoided(Boolean.FALSE);
                         existingAppointmentProvider.setVoidReason(null);
                     });
@@ -181,14 +181,16 @@ public class RecurringAppointmentServiceImpl implements RecurringAppointmentServ
 
     private void setRemovedProvidersToCancel(List<AppointmentProvider> newProviders,
                                              Set<AppointmentProvider> existingProviders) {
-        if (existingProviders != null) {
-            for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders != null && newProviders.stream()
-                        .anyMatch(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()));
-                if (!exists) {
-                    appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
-                    appointmentProvider.setVoided(true);
-                    appointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
+        if (!CollectionUtils.isEmpty(existingProviders)) {
+            for (AppointmentProvider existingAppointmentProvider : existingProviders) {
+                boolean appointmentProviderExists = !CollectionUtils.isEmpty(newProviders) && newProviders.stream()
+                        .anyMatch(newProvider -> newProvider.getProvider()
+                                .getUuid()
+                                .equals(existingAppointmentProvider.getProvider().getUuid()));
+                if (!appointmentProviderExists) {
+                    existingAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+                    existingAppointmentProvider.setVoided(true);
+                    existingAppointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
                 }
             }
         }
