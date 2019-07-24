@@ -128,8 +128,9 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public AppointmentRecurringPattern validateAndUpdate(AppointmentRecurringPattern appointmentRecurringPattern) {
-        return null;
+    public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern) {
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        return appointmentRecurringPattern;
     }
 
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {

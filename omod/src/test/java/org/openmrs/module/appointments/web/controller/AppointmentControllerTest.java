@@ -386,7 +386,7 @@ public class AppointmentControllerTest {
         when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
         when(appointment.getUuid()).thenReturn("uuid");
         when(appointmentRequest.getUuid()).thenReturn("uuid");
@@ -394,7 +394,7 @@ public class AppointmentControllerTest {
         final ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
 
         Mockito.verify(singleAppointmentRecurringPatternMapper, times(1)).fromRequest(appointmentRequest);
-        Mockito.verify(appointmentRecurringPatternService, times(1)).validateAndUpdate(appointmentRecurringPattern);
+        Mockito.verify(appointmentRecurringPatternService, times(1)).update(appointmentRecurringPattern);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 
@@ -413,7 +413,7 @@ public class AppointmentControllerTest {
 
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
         when(appointment.getUuid()).thenReturn("uuid");
         when(appointmentRequest.getUuid()).thenReturn("uuid");
@@ -442,7 +442,7 @@ public class AppointmentControllerTest {
 
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
+        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));
         when(appointment.getUuid()).thenReturn("uuid");
         when(appointmentRequest.getUuid()).thenReturn("uuid");
