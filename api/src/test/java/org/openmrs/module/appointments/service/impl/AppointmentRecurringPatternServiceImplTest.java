@@ -833,6 +833,19 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentDao, times(2)).save(any(Appointment.class));
     }
 
+    @Test
+    public void shouldSaveAndReturnTheUpdatedRecurringPatternWhenUpdateIsCalled() {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment appointment = new Appointment();
+        List<Appointment> appointments = Collections.singletonList(appointment);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        AppointmentRecurringPattern updatedRecurringPattern = recurringAppointmentService.update(appointmentRecurringPattern);
+
+        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
+    }
+
     private Appointment createAppointment(String uuid, Patient patient, AppointmentStatus appointmentStatus,
                                           AppointmentKind appointmentKind,
                                           AppointmentServiceDefinition appointmentServiceDefinition,

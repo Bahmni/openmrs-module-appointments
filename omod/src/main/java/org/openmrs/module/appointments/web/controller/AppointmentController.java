@@ -279,7 +279,7 @@ public class AppointmentController {
                         throw new APIException(appointmentRequestEditValidator.getError());
                     AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
 
-                    AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.validateAndUpdate(appointmentRecurringPattern);
+                    AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                     Appointment updatedAppointment = null;
                     final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments();
                     final Iterator<Appointment> iterator = updatedAppointments.iterator();
