@@ -414,7 +414,7 @@ public class AppointmentControllerTest {
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
-        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
+        when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
         when(appointment.getUuid()).thenReturn("uuid");
         when(appointmentRequest.getUuid()).thenReturn("uuid");
         when(newAppointment.getRelatedAppointment()).thenReturn(appointment);
@@ -443,7 +443,7 @@ public class AppointmentControllerTest {
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
-        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));
+        when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));
         when(appointment.getUuid()).thenReturn("uuid");
         when(appointmentRequest.getUuid()).thenReturn("uuid");
         when(appointment.getRelatedAppointment()).thenReturn(oldRecurringAppointment);
