@@ -19,6 +19,8 @@ import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
+import org.openmrs.module.appointments.web.validators.Validator;
+import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -63,6 +65,9 @@ public class AppointmentControllerTest {
 
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
+
+    @Mock
+    Validator<AppointmentRequest> appointmentRequestEditValidator;
 
     @InjectMocks
     private AppointmentController appointmentController;
@@ -416,7 +421,7 @@ public class AppointmentControllerTest {
     }
 
     @Test
-    public void shouldUpdateSingleRecurringAppointmentByCreatingANewAppointmentReferencingTheExisitngAppointment(){
+    public void shouldUpdateSingleRecurringAppointmentByCreatingANewAppointmentReferencingTheExisitngAppointment() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
 
         when(appointmentRequest.isRecurringAppointment()).thenReturn(true);
@@ -425,6 +430,7 @@ public class AppointmentControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         Appointment appointment = mock(Appointment.class);
 
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.validateAndUpdate(any())).thenReturn(updatedRecurringAppointmentPattern);
@@ -462,10 +468,11 @@ public class AppointmentControllerTest {
         when(newAppointment.getUuid()).thenReturn("newUuid");
 
         when(appointment.getVoided()).thenReturn(true);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
 
         appointmentController.editAppointment(appointmentRequest);
 
-        verify(appointmentMapper,times(1)).constructResponse(newAppointment);
+        verify(appointmentMapper, times(1)).constructResponse(newAppointment);
 
     }
 
@@ -489,9 +496,31 @@ public class AppointmentControllerTest {
         when(appointment.getRelatedAppointment()).thenReturn(oldRecurringAppointment);
         when(oldRecurringAppointment.getUuid()).thenReturn("oldUuid");
         when(appointment.getVoided()).thenReturn(false);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
+
 
         appointmentController.editAppointment(appointmentRequest);
 
-        verify(appointmentMapper,times(1)).constructResponse(appointment);
+        verify(appointmentMapper, times(1)).constructResponse(appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenAppointmentRequestValidationFailed() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+
+        when(appointmentRequest.isRecurringAppointment()).thenReturn(true);
+        when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
+
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(false);
+        final String error = "error";
+        when(appointmentRequestEditValidator.getError()).thenReturn(error);
+
+        final ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
+        verify(appointmentRequestEditValidator,times(1)).getError();
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        final String message = (String)((LinkedHashMap) ((SimpleObject) responseEntity.getBody()).get("error")).get("message");
+        assertEquals(error, message);
+
+
     }
 }
