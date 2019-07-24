@@ -18,6 +18,7 @@ import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
+import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,6 +67,10 @@ public class AppointmentController {
 
     @Autowired
     private RecurringPatternHelper recurringPatternHelper;
+
+    @Autowired
+    @Qualifier("appointmentRequestEditValidator")
+    Validator<AppointmentRequest> appointmentRequestEditValidator;
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
@@ -269,7 +274,11 @@ public class AppointmentController {
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
                 if(appointmentRequest.isRecurringAppointment()){
+                    final boolean isValidAppointmentRequest = appointmentRequestEditValidator.validate(appointmentRequest);
+                    if(!isValidAppointmentRequest)
+                        throw new APIException(appointmentRequestEditValidator.getError());
                     AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
+
                     AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.validateAndUpdate(appointmentRecurringPattern);
                     Appointment updatedAppointment = null;
                     final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments();
