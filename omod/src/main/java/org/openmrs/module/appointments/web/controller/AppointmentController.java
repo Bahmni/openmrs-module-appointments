@@ -286,8 +286,8 @@ public class AppointmentController {
                     while(iterator.hasNext()){
                         final Appointment currentAppointment = iterator.next();
                         final Appointment relatedAppointment = currentAppointment.getRelatedAppointment();
-                        if ((currentAppointment.getUuid() == appointmentRequestUuid && !currentAppointment.getVoided())
-                                || (relatedAppointment!=null && relatedAppointment.getUuid() == appointmentRequestUuid)) {
+                        if ((currentAppointment.getUuid().equals(appointmentRequestUuid) && !currentAppointment.getVoided())
+                                || (relatedAppointment!=null && relatedAppointment.getUuid().equals(appointmentRequestUuid))) {
                             updatedAppointment = currentAppointment;
                             break;
                         }
