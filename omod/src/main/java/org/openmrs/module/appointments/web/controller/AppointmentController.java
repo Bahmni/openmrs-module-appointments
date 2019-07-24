@@ -281,7 +281,7 @@ public class AppointmentController {
 
                     AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                     Appointment updatedAppointment = null;
-                    final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments();
+                    final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getActiveAppointments();
                     final Iterator<Appointment> iterator = updatedAppointments.iterator();
                     while(iterator.hasNext()){
                         final Appointment currentAppointment = iterator.next();
