@@ -7,6 +7,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -22,7 +23,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static javafx.beans.binding.Bindings.isNotNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -570,6 +573,38 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPutRequest("/rest/v1/appointment/uuid", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void shouldUpdateRecurringPatternWithNewAppointmentAndOldAppointmentAsRelatedAppointment() throws Exception {
+        String content = "{ \"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"applyForAll\": false," +
+                "\"providers\": []," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":2," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/appointment/uuid", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        AppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<AppointmentDefaultResponse>() {
+        });
+        String appointmentUuid = appointmentDefaultResponse.getUuid();
+
+        Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+        Appointment relatedAppointment = appointment.getRelatedAppointment();
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a7", relatedAppointment.getUuid());
     }
 
     @Test
