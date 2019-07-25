@@ -55,9 +55,6 @@ public class SingleAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid("uuid")).thenReturn(appointment);
         doNothing().when(appointmentMapper).mapAppointmentRequestToAppointment(eq(appointmentRequest), any(Appointment.class));
 
-        when(appointmentServiceHelper.getAppointmentAsJsonString(appointment)).thenReturn(notes);
-        when(appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes))
-                .thenReturn(appointmentAuditMock);
         when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
@@ -65,8 +62,6 @@ public class SingleAppointmentRecurringPatternMapperTest {
 
         verify(appointmentRequest, times(1)).getUuid();
         verify(appointmentsService, times(1)).getAppointmentByUuid("uuid");
-        verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
-        verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment,notes);
         verify(appointment, times(1)).getAppointmentRecurringPattern();
         verify(appointmentRecurringPattern, times(1)).getAppointments();
         verify(appointmentMapper, times(1)).mapAppointmentRequestToAppointment(eq(appointmentRequest), any());
@@ -81,7 +76,6 @@ public class SingleAppointmentRecurringPatternMapperTest {
         assertEquals(2, returnedAppointmentRecurringPattern.getAppointments().size());
         assertEquals(appointment, newAppointment.getRelatedAppointment());
         assertNull(newAppointment.getId());
-        assertEquals(0, newAppointment.getAppointmentAudits().size());
         assertEquals(null, newAppointment.getAppointmentNumber());
         assertEquals(appointment, oldAppointment);
 

@@ -55,7 +55,6 @@ public class SingleAppointmentRecurringPatternMapper extends AbstractAppointment
     private Appointment getNewAppointmentFrom(Appointment oldAppointment){
         Appointment appointment = new Appointment();
         appointment.setService(oldAppointment.getService());
-        appointment.setProviders(oldAppointment.getProviders());
         appointment.setStatus(oldAppointment.getStatus());
         appointment.setEndDateTime(oldAppointment.getEndDateTime());
         appointment.setStartDateTime(oldAppointment.getStartDateTime());
