@@ -36,10 +36,9 @@ public class SingleAppointmentRecurringPatternMapper extends AbstractAppointment
         Appointment newAppointment;
         if(appointment==null)
             throw new APIException("Appointment does not exist.");
-        if(appointment.getRelatedAppointment()!=null){
+        if (appointment.getRelatedAppointment() != null) {
             newAppointment = appointment;
-        }
-        else {
+        } else {
             newAppointment = getNewAppointmentFrom(appointment);
             appointment.setVoided(true);
             newAppointment.setRelatedAppointment(appointment);
