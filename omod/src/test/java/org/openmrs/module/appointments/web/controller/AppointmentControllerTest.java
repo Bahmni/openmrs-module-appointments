@@ -357,6 +357,7 @@ public class AppointmentControllerTest {
     public void shouldCallUpdateOfAppointmentsServiceWhenApplyForAllIsFalseForUpdateOfAppointment() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.getApplyForAll()).thenReturn(false);
 
@@ -370,6 +371,7 @@ public class AppointmentControllerTest {
     public void shouldNotCallUpdateOfAppointmentsServiceWhenApplyForAllIsTrueForUpdateOfAppointment() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
@@ -384,6 +386,7 @@ public class AppointmentControllerTest {
     public void shouldCallUpdateOfRecurringAppointmentServiceWhenApplyForAllIsTrue() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
@@ -401,6 +404,7 @@ public class AppointmentControllerTest {
         Appointment appointmentMock = mock(Appointment.class);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.getApplyForAll()).thenReturn(null);
+        when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
 
         appointmentController.editAppointment(appointmentRequest);
 
