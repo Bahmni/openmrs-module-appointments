@@ -269,11 +269,9 @@ public class AppointmentController {
                 if (!StringUtils.hasText(clientTimeZone)) {
                     throw new APIException("Time Zone is missing");
                 }
-                String appointmentUuid = appointmentRequestUuid;
-                appointmentRequest.setUuid(null);
-                Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-                appointment.setUuid(appointmentUuid);
-                List<Appointment> updatedAppointments = appointmentRecurringPatternService.validateAndUpdate(appointment, clientTimeZone);
+                AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
+                AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(recurringPattern);
+                List<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
                 return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
                 if (appointmentRequest.isRecurringAppointment()) {

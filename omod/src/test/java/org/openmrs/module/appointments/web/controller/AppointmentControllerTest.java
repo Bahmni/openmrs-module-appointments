@@ -371,14 +371,15 @@ public class AppointmentControllerTest {
     public void shouldNotCallUpdateOfAppointmentsServiceWhenApplyForAllIsTrueForUpdateOfAppointment() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
-
+        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>());
+        when(appointmentRecurringPatternService.update(any())).thenReturn(appointmentRecurringPattern);
         appointmentController.editAppointment(appointmentRequest);
 
-        verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
         verify(appointmentsService, never()).validateAndUpdate(appointmentMock);
     }
 
@@ -386,16 +387,18 @@ public class AppointmentControllerTest {
     public void shouldCallUpdateOfRecurringAppointmentServiceWhenApplyForAllIsTrue() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointmentMock = mock(Appointment.class);
+        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRequestEditValidator.validate(appointmentRequest)).thenReturn(true);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
         when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(appointmentRequest.getTimeZone()).thenReturn("UTC");
+        when(allAppointmentRecurringPatternMapper.fromRequest(appointmentRequest)).thenReturn(appointmentRecurringPattern);
+        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointmentMock)));
 
         appointmentController.editAppointment(appointmentRequest);
 
-        verify(appointmentMapper).fromRequest(any(AppointmentRequest.class));
         verify(appointmentsService, never()).validateAndUpdate(appointmentMock);
-        verify(appointmentRecurringPatternService).validateAndUpdate(appointmentMock, "UTC");
+        verify(allAppointmentRecurringPatternMapper).fromRequest(appointmentRequest);
     }
 
     @Test
@@ -416,10 +419,12 @@ public class AppointmentControllerTest {
     public void shouldThrowExceptionIfAppointmentTimeZoneIsNull() throws Exception {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         when(appointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
-
+        when(appointmentRequest.getTimeZone()).thenReturn(null);
+        Appointment appointmentMock = mock(Appointment.class);
+        when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointmentMock);
+        when(appointmentRequestEditValidator.validate(any())).thenReturn(true);
         ResponseEntity<Object> responseEntity = appointmentController.editAppointment(appointmentRequest);
 
-        Mockito.verify(appointmentRecurringPatternService, never()).validateAndUpdate(any(), any());
         Mockito.verify(appointmentMapper, never()).fromRequest(any());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
