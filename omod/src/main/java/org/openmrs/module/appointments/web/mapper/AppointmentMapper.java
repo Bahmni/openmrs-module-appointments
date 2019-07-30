@@ -37,10 +37,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.DAY;
-import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.WEEK;
-import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.valueOf;
-
 @Component
 public class AppointmentMapper {
     @Autowired

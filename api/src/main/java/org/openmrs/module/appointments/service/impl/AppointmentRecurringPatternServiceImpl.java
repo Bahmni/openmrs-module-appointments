@@ -87,27 +87,6 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public List<Appointment> validateAndUpdate(Appointment appointment, String clientTimeZone) {
-        appointmentServiceHelper.validate(appointment, editAppointmentValidators);
-        String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
-        TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-        List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
-                Collections.singletonList(AppointmentStatus.Scheduled));
-        TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-        return pendingAppointments
-                .stream()
-                .map(pendingAppointment -> {
-                    TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-                    updateMetadata(pendingAppointment, appointment);
-                    TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-                    setAppointmentAudit(pendingAppointment);
-                    appointmentDao.save(pendingAppointment);
-                    return pendingAppointment;
-                })
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
@@ -131,102 +110,6 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern) {
         appointmentRecurringPatternDao.save(appointmentRecurringPattern);
         return appointmentRecurringPattern;
-    }
-
-    private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {
-        Date startTime = getStartTime(pendingAppointment, appointment);
-        Date endTime = getEndTime(pendingAppointment, appointment);
-        pendingAppointment.setStartDateTime(startTime);
-        pendingAppointment.setEndDateTime(endTime);
-        pendingAppointment.setService(appointment.getService());
-        pendingAppointment.setServiceType(appointment.getServiceType());
-        pendingAppointment.setLocation(appointment.getLocation());
-        pendingAppointment.setComments(appointment.getComments());
-        if (appointment.getProviders() != null) {
-            mapProvidersForAppointment(pendingAppointment,
-                    getDeepCloneOfProviders(new ArrayList<>(appointment.getProviders())));
-        } else {
-            setRemovedProvidersToCancel(null, pendingAppointment.getProviders());
-        }
-    }
-
-    private List<AppointmentProvider> getDeepCloneOfProviders(List<AppointmentProvider> appointmentProviders) {
-        return appointmentProviders
-                .stream()
-                .map(AppointmentProvider::new)
-                .collect(Collectors.toList());
-    }
-
-    private void mapProvidersForAppointment(Appointment appointment, List<AppointmentProvider> newProviders) {
-        Set<AppointmentProvider> existingProviders = appointment.getProviders();
-        setRemovedProvidersToCancel(newProviders, existingProviders);
-        createNewAppointmentProviders(appointment, newProviders);
-    }
-
-    private void createNewAppointmentProviders(Appointment appointment, List<AppointmentProvider> newProviders) {
-        if (newProviders != null && !newProviders.isEmpty()) {
-            if (appointment.getProviders() == null) {
-                appointment.setProviders(new HashSet<>());
-            }
-            for (AppointmentProvider appointmentProvider : newProviders) {
-                List<AppointmentProvider> oldProviders = appointment.getProviders()
-                        .stream()
-                        .filter(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()))
-                        .collect(Collectors.toList());
-                if (oldProviders.isEmpty()) {
-                    AppointmentProvider newAppointmentProvider = appointmentProvider;
-                    newAppointmentProvider.setAppointment(appointment);
-                    appointment.getProviders().add(newAppointmentProvider);
-                } else {
-                    oldProviders.forEach(existingAppointmentProvider -> {
-                        //TODO: if currentUser is same person as provider, set ACCEPTED
-                        existingAppointmentProvider.setResponse(appointmentProvider.getResponse());
-                        existingAppointmentProvider.setVoided(Boolean.FALSE);
-                        existingAppointmentProvider.setVoidReason(null);
-                    });
-                }
-            }
-        }
-    }
-
-    private void setRemovedProvidersToCancel(List<AppointmentProvider> newProviders,
-                                             Set<AppointmentProvider> existingProviders) {
-        if (existingProviders != null) {
-            for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders != null && newProviders.stream()
-                        .anyMatch(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()));
-                if (!exists) {
-                    appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
-                    appointmentProvider.setVoided(true);
-                    appointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
-                }
-            }
-        }
-    }
-
-    private Date getUpdatedTimeStamp(int endHours, int endMinutes, Date endDateTime) {
-        Calendar pendingAppointmentCalender = Calendar.getInstance();
-        pendingAppointmentCalender.setTime(endDateTime);
-        pendingAppointmentCalender.set(Calendar.HOUR_OF_DAY, endHours);
-        pendingAppointmentCalender.set(Calendar.MINUTE, endMinutes);
-        pendingAppointmentCalender.set(Calendar.MILLISECOND, 0);
-        return pendingAppointmentCalender.getTime();
-    }
-
-    private Date getEndTime(Appointment pendingAppointment, Appointment appointment) {
-        Calendar endCalender = Calendar.getInstance();
-        endCalender.setTime(appointment.getEndDateTime());
-        int endHours = endCalender.get(Calendar.HOUR_OF_DAY);
-        int endMinutes = endCalender.get(Calendar.MINUTE);
-        return getUpdatedTimeStamp(endHours, endMinutes, pendingAppointment.getEndDateTime());
-    }
-
-    private Date getStartTime(Appointment pendingAppointment, Appointment appointment) {
-        Calendar startCalender = Calendar.getInstance();
-        startCalender.setTime(appointment.getStartDateTime());
-        int startHours = startCalender.get(Calendar.HOUR_OF_DAY);
-        int startMinutes = startCalender.get(Calendar.MINUTE);
-        return getUpdatedTimeStamp(startHours, startMinutes, pendingAppointment.getStartDateTime());
     }
 
     private List<Appointment> getPendingOccurrences(String appointmentUuid, List<AppointmentStatus> applicableStatusList) {
