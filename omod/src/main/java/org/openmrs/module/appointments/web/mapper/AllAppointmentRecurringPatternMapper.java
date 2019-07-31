@@ -1,14 +1,10 @@
 package org.openmrs.module.appointments.web.mapper;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,14 +12,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -109,12 +98,8 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         pendingAppointment.setServiceType(appointment.getServiceType());
         pendingAppointment.setLocation(appointment.getLocation());
         pendingAppointment.setComments(appointment.getComments());
-        if (appointment.getProviders() != null) {
-            mapProvidersForAppointment(pendingAppointment,
-                    getDeepCloneOfProviders(new ArrayList<>(appointment.getProviders())));
-        } else {
-            setRemovedProvidersToCancel(null, pendingAppointment.getProviders());
-        }
+        List<AppointmentProvider> cloneOfProviders = getDeepCloneOfProviders(appointment.getProviders());
+        mapProvidersForAppointment(pendingAppointment, cloneOfProviders);
     }
 
     private Date getStartTime(Appointment pendingAppointment, Appointment appointment) {
@@ -142,7 +127,9 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         return pendingAppointmentCalender.getTime();
     }
 
-    private List<AppointmentProvider> getDeepCloneOfProviders(List<AppointmentProvider> appointmentProviders) {
+    private List<AppointmentProvider> getDeepCloneOfProviders(Set<AppointmentProvider> appointmentProviders) {
+        if (CollectionUtils.isEmpty(appointmentProviders))
+            return new ArrayList<>();
         return appointmentProviders
                 .stream()
                 .map(AppointmentProvider::new)
@@ -157,37 +144,40 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
 
     private void setRemovedProvidersToCancel(List<AppointmentProvider> newProviders,
                                              Set<AppointmentProvider> existingProviders) {
-        if (existingProviders != null) {
-            for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders != null && newProviders.stream()
-                        .anyMatch(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()));
-                if (!exists) {
-                    appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
-                    appointmentProvider.setVoided(true);
-                    appointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
+        if (CollectionUtils.isNotEmpty(existingProviders)) {
+            for (AppointmentProvider existingAppointmentProvider : existingProviders) {
+                boolean appointmentProviderExists = newProviders.stream()
+                        .anyMatch(newProvider -> newProvider.getProvider()
+                                .getUuid()
+                                .equals(existingAppointmentProvider.getProvider().getUuid()));
+                if (!appointmentProviderExists) {
+                    existingAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+                    existingAppointmentProvider.setVoided(true);
+                    existingAppointmentProvider.setVoidReason(AppointmentProviderResponse.CANCELLED.toString());
                 }
             }
         }
     }
 
     private void createNewAppointmentProviders(Appointment appointment, List<AppointmentProvider> newProviders) {
-        if (newProviders != null && !newProviders.isEmpty()) {
+        if (!newProviders.isEmpty()) {
             if (appointment.getProviders() == null) {
                 appointment.setProviders(new HashSet<>());
             }
-            for (AppointmentProvider appointmentProvider : newProviders) {
+            for (AppointmentProvider newAppointmentProvider : newProviders) {
                 List<AppointmentProvider> oldProviders = appointment.getProviders()
                         .stream()
-                        .filter(p -> p.getProvider().getUuid().equals(appointmentProvider.getProvider().getUuid()))
+                        .filter(existingProvider -> existingProvider.getProvider()
+                                .getUuid()
+                                .equals(newAppointmentProvider.getProvider().getUuid()))
                         .collect(Collectors.toList());
                 if (oldProviders.isEmpty()) {
-                    AppointmentProvider newAppointmentProvider = appointmentProvider;
                     newAppointmentProvider.setAppointment(appointment);
                     appointment.getProviders().add(newAppointmentProvider);
                 } else {
                     oldProviders.forEach(existingAppointmentProvider -> {
                         //TODO: if currentUser is same person as provider, set ACCEPTED
-                        existingAppointmentProvider.setResponse(appointmentProvider.getResponse());
+                        existingAppointmentProvider.setResponse(newAppointmentProvider.getResponse());
                         existingAppointmentProvider.setVoided(Boolean.FALSE);
                         existingAppointmentProvider.setVoidReason(null);
                     });
