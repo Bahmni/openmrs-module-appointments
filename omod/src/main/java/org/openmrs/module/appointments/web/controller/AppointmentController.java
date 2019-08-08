@@ -265,7 +265,6 @@ public class AppointmentController {
             boolean applyForAll = appointmentRequest.requiresUpdateOfAllRecurringAppointments();
             final String appointmentRequestUuid = appointmentRequest.getUuid();
             if (applyForAll) {
-                String clientTimeZone = appointmentRequest.getTimeZone();
                 AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
                 AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(recurringPattern);
                 List<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
