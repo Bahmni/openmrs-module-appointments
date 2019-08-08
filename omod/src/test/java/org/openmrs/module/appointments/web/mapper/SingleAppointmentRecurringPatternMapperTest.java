@@ -82,18 +82,6 @@ public class SingleAppointmentRecurringPatternMapperTest {
     }
 
     @Test
-
-    public void shouldThrowAnExpectionIfAppointmentInAppointmentRequestNotFound(){
-        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-        when(appointmentRequest.getUuid()).thenReturn("uuid");
-        when(appointmentsService.getAppointmentByUuid("uuid")).thenReturn(null);
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Appointment does not exist.");
-
-        singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
-    }
-
-    @Test
     public void shouldVoidTheOldAppointmentWhenNewAppointmentIsCreatedFromAppointmentRequest() {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         Appointment appointment = new Appointment();

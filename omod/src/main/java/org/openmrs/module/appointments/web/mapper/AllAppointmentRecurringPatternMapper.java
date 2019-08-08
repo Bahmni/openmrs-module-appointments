@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.*;
@@ -35,7 +36,9 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
     public AppointmentRecurringPattern fromRequest(AppointmentRequest appointmentRequest) {
         String clientTimeZone = appointmentRequest.getTimeZone();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
-
+        if (!org.springframework.util.StringUtils.hasText(clientTimeZone)) {
+            throw new APIException("Time Zone is missing");
+        }
         String appointmentUuid = appointmentRequest.getUuid();
 
         Appointment appointment;
