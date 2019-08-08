@@ -266,9 +266,6 @@ public class AppointmentController {
             final String appointmentRequestUuid = appointmentRequest.getUuid();
             if (applyForAll) {
                 String clientTimeZone = appointmentRequest.getTimeZone();
-                if (!StringUtils.hasText(clientTimeZone)) {
-                    throw new APIException("Time Zone is missing");
-                }
                 AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
                 AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(recurringPattern);
                 List<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
