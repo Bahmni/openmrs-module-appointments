@@ -40,8 +40,37 @@ public class WeeklyRecurringAppointmentsGenerationService implements RecurringAp
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(appointmentRequest.getStartDateTime());
-        calendar.add(Calendar.DAY_OF_WEEK, (Calendar.DAY_OF_WEEK * appointmentRecurringPattern.getPeriod() * appointmentRecurringPattern.getFrequency()) - 1);
+        int startDayCode = calendar.get(Calendar.DAY_OF_WEEK);
+        List<Integer> selectedDaysPerWeek = new ArrayList<>();
+        int daysToBeAdded = getDaysToBeAdded(startDayCode, selectedDaysPerWeek);
+        calendar.add(Calendar.DAY_OF_WEEK, (Calendar.DAY_OF_WEEK * appointmentRecurringPattern.getPeriod() *
+                (appointmentRecurringPattern.getFrequency() / selectedDaysPerWeek.size())  - 1) + daysToBeAdded);
         return calendar.getTime();
+    }
+
+    private int getDaysToBeAdded(int startDayCode, List<Integer> selectedDaysPerWeek) {
+        getSortedSelectedDayCodes(startDayCode, selectedDaysPerWeek);
+        int daysToBeAdded = 0;
+        if(appointmentRecurringPattern.getFrequency() % selectedDaysPerWeek.size() != 0) {
+            int selectedDayCode =  selectedDaysPerWeek.get(appointmentRecurringPattern.getFrequency() % selectedDaysPerWeek.size() - 1);
+            if (startDayCode > selectedDayCode) {
+                daysToBeAdded = Calendar.DAY_OF_WEEK - (startDayCode - selectedDayCode) + 1;
+            } else {
+                daysToBeAdded = selectedDayCode - startDayCode + 1;
+            }
+        }
+        return daysToBeAdded;
+    }
+
+    private void getSortedSelectedDayCodes(int startDayCode, List<Integer> selectedDaysPerWeek) {
+        for (int dayCode : getSelectedDayCodes(appointmentRecurringPattern.getDaysOfWeek())) {
+            if (dayCode >= startDayCode) selectedDaysPerWeek.add(dayCode);
+        }
+        for (int dayCode : getSelectedDayCodes(appointmentRecurringPattern.getDaysOfWeek())) {
+            if (dayCode < startDayCode) {
+                selectedDaysPerWeek.add(dayCode);
+            } else break;
+        }
     }
 
     private List<Appointment> generateAppointments(Date endDate) {
