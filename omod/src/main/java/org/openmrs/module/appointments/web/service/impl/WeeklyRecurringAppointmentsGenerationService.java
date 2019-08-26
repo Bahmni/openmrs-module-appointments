@@ -4,7 +4,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.service.RecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -14,7 +14,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class WeeklyRecurringAppointmentsGenerationService implements RecurringAppointmentsGenerationService {
+public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsGenerationService {
 
     private AppointmentRecurringPattern appointmentRecurringPattern;
     private AppointmentRequest appointmentRequest;

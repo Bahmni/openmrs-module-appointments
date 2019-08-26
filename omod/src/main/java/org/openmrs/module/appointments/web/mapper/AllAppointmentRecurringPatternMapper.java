@@ -1,5 +1,4 @@
 package org.openmrs.module.appointments.web.mapper;
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.APIException;
@@ -8,15 +7,14 @@ import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
-
-
 @Component
 @Qualifier("allAppointmentRecurringPatternMapper")
 public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRecurringPatternMapper {
@@ -29,6 +27,7 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
 
     @Autowired
     private AppointmentServiceHelper appointmentServiceHelper;
+
     @Autowired
     private AppointmentMapper appointmentMapper;
 
@@ -40,7 +39,6 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
             throw new APIException("Time Zone is missing");
         }
         String appointmentUuid = appointmentRequest.getUuid();
-
         Appointment appointment;
         if (!StringUtils.isBlank(appointmentRequest.getUuid())) {
             appointment = appointmentsService.getAppointmentByUuid(appointmentRequest.getUuid());
@@ -50,14 +48,47 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         }
         appointmentMapper.mapAppointmentRequestToAppointment(appointmentRequest, appointment);
         appointment.setUuid(appointmentUuid);
-
+        AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
+        List<Appointment> newSetOfAppointments = getUpdatedSetOfAppointments(appointmentRequest, appointmentRecurringPattern);
+        if (newSetOfAppointments.size() != 0) appointmentRecurringPattern.setAppointments(newSetOfAppointments.stream().collect(Collectors.toSet()));
+        appointmentRecurringPattern.setEndDate(appointmentRequest.getRecurringPattern().getEndDate());
+        appointmentRecurringPattern.setFrequency(appointmentRequest.getRecurringPattern().getFrequency());
+        appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-        AppointmentRecurringPattern appointmentRecurringPattern = getUpdatedRecurringPattern(appointment,
+        AppointmentRecurringPattern updatedAppointmentRecurringPattern = getUpdatedRecurringPattern(appointment,
                 Collections.singletonList(AppointmentStatus.Scheduled), clientTimeZone);
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-        return appointmentRecurringPattern;
+        return updatedAppointmentRecurringPattern;
     }
-
+    private List<Appointment> getUpdatedSetOfAppointments(AppointmentRequest appointmentRequest, AppointmentRecurringPattern appointmentRecurringPattern) {
+        List<Appointment> newSetOfAppointments = new ArrayList<>();
+        if (appointmentRecurringPattern.getEndDate() == null){
+            if (appointmentRequest.getRecurringPattern().getFrequency() < appointmentRecurringPattern.getFrequency()) {
+                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, appointmentRequest);            }
+        }else {
+            if (appointmentRequest.getRecurringPattern().getEndDate().before(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments =  deleteRecurringAppointments(appointmentRecurringPattern, appointmentRequest);            }
+        }
+        return newSetOfAppointments;
+    }
+    private List<Appointment> deleteRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        try {
+            switch (appointmentRecurringPattern.getType()) {
+                case WEEK:
+                    appointments = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+                    break;
+                case DAY:
+                    appointments = new DailyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+                    break;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
     private AppointmentRecurringPattern getUpdatedRecurringPattern(Appointment appointment, List<AppointmentStatus> applicableStatusList, String clientTimeZone) {
         Date startOfDay = getStartOfDay();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
