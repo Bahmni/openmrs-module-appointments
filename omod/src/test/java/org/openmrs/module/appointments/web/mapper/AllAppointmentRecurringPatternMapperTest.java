@@ -22,6 +22,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -75,6 +76,11 @@ public class AllAppointmentRecurringPatternMapperTest {
         AppointmentProviderDetail appointmentProviderDetail = new AppointmentProviderDetail();
         appointmentProviderDetail.setUuid("101");
         appointmentRequest.setProviders(Arrays.asList(appointmentProviderDetail));
+
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
 
         Calendar startTimeCalendar = Calendar.getInstance();
         Calendar endTimeCalendar = Calendar.getInstance();
@@ -156,6 +162,10 @@ public class AllAppointmentRecurringPatternMapperTest {
     @Test
     public void shouldUpdateStartTimeAndEndTimeForScheduledPendingOccurrences() throws IOException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
         appointmentRequest.setUuid("uuid2");
         appointmentRequest.setTimeZone("Asia/Calcutta");
         Calendar startTimeCalendar = Calendar.getInstance();
@@ -251,6 +261,10 @@ public class AllAppointmentRecurringPatternMapperTest {
     @Test
     public void shouldUpdateNewProviderForAllPendingOccurrences() throws IOException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
         appointmentRequest.setUuid("uuid2");
         appointmentRequest.setTimeZone("Asia/Calcutta");
         Calendar startTimeCalendar = Calendar.getInstance();
@@ -311,6 +325,10 @@ public class AllAppointmentRecurringPatternMapperTest {
     @Test
     public void shouldSetAllProvidersToCancelWhenAllProvidersRemoved() throws IOException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
         appointmentRequest.setUuid("uuid2");
         appointmentRequest.setTimeZone("Asia/Calcutta");
         Calendar startTimeCalendar = Calendar.getInstance();
@@ -405,6 +423,10 @@ public class AllAppointmentRecurringPatternMapperTest {
     @Test
     public void shouldUpdateMetadataForAllPendingRecurringAppointments() throws IOException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
         appointmentRequest.setUuid("uuid2");
         appointmentRequest.setTimeZone("Asia/Calcutta");
 
@@ -490,5 +512,154 @@ public class AllAppointmentRecurringPatternMapperTest {
                 .withStartDateTime(startDateTime)
                 .withEndDateTime(endDateTime)
                 .build();
+    }
+
+    @Test
+    public void shouldUpdateRecurringPatternByRemovingAppointmentsWhenFrequencyIsDecreased() throws IOException {
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(2);
+        recurringPattern.setEndDate(null);
+        appointmentRequest.setRecurringPattern(recurringPattern);
+        appointmentRequest.setUuid("uuid2");
+        appointmentRequest.setTimeZone("Asia/Calcutta");
+
+        Calendar startTimeCalendar = Calendar.getInstance();
+        Calendar endTimeCalendar = Calendar.getInstance();
+        int year = startTimeCalendar.get(Calendar.YEAR);
+        int month = startTimeCalendar.get(Calendar.MONTH);
+        int day = startTimeCalendar.get(Calendar.DATE);
+        int hour = startTimeCalendar.get(Calendar.HOUR_OF_DAY);
+        startTimeCalendar.set(year, month, day, hour +1 , 00, 00);
+        endTimeCalendar.set(year, month, day, hour + 1, 30, 00);
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        appointmentRecurringPattern.setFrequency(3);
+        appointmentRecurringPattern.setPeriod(2);
+        Appointment appointmentOne = createAppointment("uuid1", patient, Completed,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appOne",
+                DateUtils.addDays(startTimeCalendar.getTime(), -2),
+                DateUtils.addDays(endTimeCalendar.getTime(), -2));
+        Appointment appointmentTwo = createAppointment("uuid2", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "oldAppTwo", startTimeCalendar.getTime(),
+                endTimeCalendar.getTime());
+        Appointment appointmentThree = createAppointment("uuid3", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setUuid("serviceUuid");
+        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+        appointmentServiceType.setUuid("serviceTypeUuid");
+        Location location = new Location();
+        location.setUuid("locationUuid");
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(new Provider(101));
+        HashSet<AppointmentProvider> appointmentProviders = new HashSet<>(Collections
+                .singleton(appointmentProvider));
+        appointmentThree.setAppointmentAudits(new HashSet<>());
+        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne,
+                appointmentTwo, appointmentThree));
+        appointmentRecurringPattern.setAppointments(appointments);
+        appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
+
+        appointmentTwo.setProviders(appointmentProviders);
+
+        when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
+        when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+                .fromRequest(appointmentRequest);
+
+        assertEquals(2, updatedRecurringPattern.getActiveAppointments().size());
+        updatedRecurringPattern.getAppointments().forEach(a -> {
+            if (a.getProviders() != null && a.getProviders().size() != 0) {
+                assertEquals(101, a.getProviders().stream().mapToInt(p -> p.getProvider()
+                        .getProviderId()).toArray()[0]);
+            }
+        });
+        verify(appointmentsService, times(1)).getAppointmentByUuid(anyString());
+
+    }
+
+    @Test
+    public void shouldUpdateRecurringPatternByRemovingAppointmentsWhenEndDateIsDecreased() throws IOException {
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        Calendar startTimeCalendar = Calendar.getInstance();
+        Calendar endTimeCalendar = Calendar.getInstance();
+        int year = startTimeCalendar.get(Calendar.YEAR);
+        int month = startTimeCalendar.get(Calendar.MONTH);
+        int day = startTimeCalendar.get(Calendar.DATE);
+        int hour = startTimeCalendar.get(Calendar.HOUR_OF_DAY);
+        startTimeCalendar.set(year, month, day, hour + 1, 00, 00);
+        endTimeCalendar.set(year, month, day, hour + 1, 30, 00);
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(0);
+        recurringPattern.setEndDate(startTimeCalendar.getTime());
+        appointmentRequest.setRecurringPattern(recurringPattern);
+        appointmentRequest.setUuid("uuid2");
+        appointmentRequest.setTimeZone("Asia/Calcutta");
+
+
+
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        appointmentRecurringPattern.setFrequency(0);
+        appointmentRecurringPattern.setEndDate(DateUtils.addDays(startTimeCalendar.getTime(), 2));
+        appointmentRecurringPattern.setPeriod(2);
+        Appointment appointmentOne = createAppointment("uuid1", patient, Completed,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appOne",
+                DateUtils.addDays(startTimeCalendar.getTime(), -2),
+                DateUtils.addDays(endTimeCalendar.getTime(), -2));
+        Appointment appointmentTwo = createAppointment("uuid2", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "oldAppTwo", startTimeCalendar.getTime(),
+                endTimeCalendar.getTime());
+        Appointment appointmentThree = createAppointment("uuid3", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+        appointmentServiceDefinition.setUuid("serviceUuid");
+        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+        appointmentServiceType.setUuid("serviceTypeUuid");
+        Location location = new Location();
+        location.setUuid("locationUuid");
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(new Provider(101));
+        HashSet<AppointmentProvider> appointmentProviders = new HashSet<>(Collections
+                .singleton(appointmentProvider));
+        appointmentThree.setAppointmentAudits(new HashSet<>());
+        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne,
+                appointmentTwo, appointmentThree));
+        appointmentRecurringPattern.setAppointments(appointments);
+        appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
+
+        appointmentTwo.setProviders(appointmentProviders);
+
+        when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
+        when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+                .fromRequest(appointmentRequest);
+
+        assertEquals(2, updatedRecurringPattern.getActiveAppointments().size());
+        updatedRecurringPattern.getAppointments().forEach(a -> {
+            if (a.getProviders() != null && a.getProviders().size() != 0) {
+                assertEquals(101, a.getProviders().stream().mapToInt(p -> p.getProvider()
+                        .getProviderId()).toArray()[0]);
+            }
+        });
+        verify(appointmentsService, times(1)).getAppointmentByUuid(anyString());
+
     }
 }
