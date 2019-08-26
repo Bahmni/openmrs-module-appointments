@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 public abstract class AbstractRecurringAppointmentsGenerationService {
     public abstract List<Appointment> getAppointments();
 
+    public abstract List<Appointment> addAppointments();
+
     public List<Appointment> removeRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
         List<Appointment> appointments = getSortedActiveAppointments(appointmentRecurringPattern);
         if (appointmentRecurringPattern.getEndDate() == null) appointmentRecurringPattern.setFrequency(appointmentRecurringPattern.getFrequency() - appointmentRequest.getRecurringPattern().getFrequency());

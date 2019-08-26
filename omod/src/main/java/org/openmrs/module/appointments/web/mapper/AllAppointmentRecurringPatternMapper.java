@@ -60,17 +60,48 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return updatedAppointmentRecurringPattern;
     }
+
     private List<Appointment> getUpdatedSetOfAppointments(AppointmentRequest appointmentRequest, AppointmentRecurringPattern appointmentRecurringPattern) {
         List<Appointment> newSetOfAppointments = new ArrayList<>();
         if (appointmentRecurringPattern.getEndDate() == null){
+            if (appointmentRequest.getRecurringPattern().getFrequency() > appointmentRecurringPattern.getFrequency()) {
+                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+            }
             if (appointmentRequest.getRecurringPattern().getFrequency() < appointmentRecurringPattern.getFrequency()) {
                 newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, appointmentRequest);            }
         }else {
+            if (appointmentRequest.getRecurringPattern().getEndDate().after(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments =  addRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+            }
             if (appointmentRequest.getRecurringPattern().getEndDate().before(appointmentRecurringPattern.getEndDate())) {
                 newSetOfAppointments =  deleteRecurringAppointments(appointmentRecurringPattern, appointmentRequest);            }
         }
         return newSetOfAppointments;
     }
+
+    private List<Appointment> addRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        try {
+            switch (appointmentRecurringPattern.getType()) {
+                case WEEK:
+                    appointments = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).addAppointments();
+                    break;
+                case DAY:
+                    appointments = new DailyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
+                            appointmentRequest, appointmentMapper).addAppointments();
+                    break;
+            }
+            appointments.forEach(appointment -> {
+                appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+                setAppointmentAudit(appointment);
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return appointments;
+    }
+
     private List<Appointment> deleteRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
         List<Appointment> appointments = new ArrayList<>();
         try {
@@ -89,6 +120,7 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         }
         return appointments;
     }
+
     private AppointmentRecurringPattern getUpdatedRecurringPattern(Appointment appointment, List<AppointmentStatus> applicableStatusList, String clientTimeZone) {
         Date startOfDay = getStartOfDay();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
