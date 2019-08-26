@@ -1,15 +1,15 @@
 package org.openmrs.module.appointments.web.service.impl;
 
+import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
+import org.springframework.beans.factory.annotation.Autowired;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class DailyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsGenerationService {
 
@@ -31,7 +31,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         return generateAppointments(endDate);
     }
 
-    private Date getEndDate() {
+    public Date getEndDate() {
         if (appointmentRecurringPattern.getEndDate() != null) {
             return appointmentRecurringPattern.getEndDate();
         }
@@ -47,15 +47,37 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         Calendar endCalender = Calendar.getInstance();
         startCalender.setTime(appointmentRequest.getStartDateTime());
         endCalender.setTime(appointmentRequest.getEndDateTime());
+        return createAppointments(appointments, endDate, startCalender, endCalender, appointmentRequest);
+    }
+
+    public List<Appointment> addAppointments(){
+        List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
+        Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
+        appointmentRequest.setStartDateTime(appointments.get(appointments.size()-1).getStartDateTime());
+        appointmentRequest.setEndDateTime(appointments.get(appointments.size()-1).getEndDateTime());
+        if (appointmentRecurringPattern.getEndDate() == null) appointmentRecurringPattern.setFrequency(appointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1 );
+        else appointmentRecurringPattern.setEndDate(appointmentRequest.getRecurringPattern().getEndDate());
+        Date endDate = getEndDate();
+        Calendar startCalender = Calendar.getInstance();
+        Calendar endCalender = Calendar.getInstance();
+        startCalender.setTime(appointmentRequest.getStartDateTime());
+        endCalender.setTime(appointmentRequest.getEndDateTime());
+        startCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
+        endCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
+        appointmentRequest.setUuid(null);
+        return createAppointments(appointments, endDate, startCalender, endCalender, appointmentRequest);
+    }
+
+    private List<Appointment> createAppointments(List<Appointment> appointments, Date endDate, Calendar startCalendar, Calendar endCalendar, AppointmentRequest appointmentRequest) {
         Date currentAppointmentDate = appointmentRequest.getStartDateTime();
         while (!currentAppointmentDate.after(endDate)) {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            appointment.setStartDateTime(startCalender.getTime());
-            appointment.setEndDateTime(endCalender.getTime());
-            startCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
-            endCalender.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
+            appointment.setStartDateTime(startCalendar.getTime());
+            appointment.setEndDateTime(endCalendar.getTime());
+            startCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
+            endCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
             appointments.add(appointment);
-            currentAppointmentDate = startCalender.getTime();
+            currentAppointmentDate = startCalendar.getTime();
         }
         return appointments;
     }
