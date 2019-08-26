@@ -232,7 +232,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     @Test
     public void should_throwExceptionWhenForApplicableToAllAndNoClientTimeZoneIsProvided() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"," +
-                    "\"applyForAll\": \"true\"" +
+                "\"applyForAll\": \"true\"" +
                 "}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
         assertNotNull(response);
@@ -242,8 +242,8 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     @Test
     public void should_throwExceptionWhenForApplicableToAllAndEmptyClientTimeZoneIsProvided() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"," +
-                    "\"applyForAll\": \"true\"," +
-                    "\"timeZone\": \"\"" +
+                "\"applyForAll\": \"true\"," +
+                "\"timeZone\": \"\"" +
                 "}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
         assertNotNull(response);
@@ -628,4 +628,33 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertNotNull(response);
         assertEquals(200, response.getStatus());
     }
+
+    @Test
+    public void shouldUpdateRecurringAppointmentByAddingAppointmentsWhenFrequencyIsChanged() throws Exception {
+        String content = "{ \"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"applyForAll\": true," +
+                "\"timeZone\": \"UTC\"," +
+                "\"providers\": []," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":5," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/appointment/uuid", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        List<AppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<AppointmentDefaultResponse>>() {
+        });
+        assertEquals(5, appointmentDefaultResponse.size());
+    }
+
 }
