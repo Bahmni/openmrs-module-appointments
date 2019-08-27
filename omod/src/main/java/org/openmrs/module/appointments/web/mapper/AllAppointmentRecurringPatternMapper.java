@@ -81,7 +81,6 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
 
     private List<Appointment> addRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
         List<Appointment> appointments = new ArrayList<>();
-        try {
             switch (appointmentRecurringPattern.getType()) {
                 case WEEK:
                     appointments = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
@@ -96,15 +95,11 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
                 appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
                 setAppointmentAudit(appointment);
             });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return appointments;
     }
 
     private List<Appointment> deleteRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern, AppointmentRequest appointmentRequest) {
         List<Appointment> appointments = new ArrayList<>();
-        try {
             switch (appointmentRecurringPattern.getType()) {
                 case WEEK:
                     appointments = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
@@ -114,9 +109,6 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
                     appointments = new DailyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                             appointmentRequest, appointmentMapper).removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
                     break;
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
         return appointments;
     }
