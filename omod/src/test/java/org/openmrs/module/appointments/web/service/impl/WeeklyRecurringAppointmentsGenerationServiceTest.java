@@ -755,7 +755,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
                 getDate(2019, Calendar.JUNE, 14, 16, 0, 0), "THURSDAY,FRIDAY");
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setEndDate(getDate(2019, Calendar.JUNE, 24, 16, 0, 0));
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -832,7 +832,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setEndDate(getDate(2019, 8, 12, 16, 0, 0));
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -983,7 +983,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day + 1, hour, minute, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -1063,7 +1063,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -1135,7 +1135,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -1208,7 +1208,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -1292,7 +1292,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
@@ -1410,7 +1410,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
         AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
-                null, days);
+                DateUtils.addDays(startTimeCalendar.getTime(), +7), days);
 
         Calendar todayStartTimeCalendar = Calendar.getInstance();
         int year = todayStartTimeCalendar.get(Calendar.YEAR);
@@ -1421,9 +1421,9 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
 
         RecurringPattern recurringPattern = new RecurringPattern();
-        todayStartTimeCalendar.set(year, month, day, hour, minute - 1, 00);
+        todayStartTimeCalendar.set(year, month, day, hour - 1, minute, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
-        recurringPattern.setFrequency(0);
+        recurringPattern.setFrequency(null);
         appointmentRequest.setRecurringPattern(recurringPattern);
         recurringAppointmentsGenerationService = new WeeklyRecurringAppointmentsGenerationService(appointmentRecurringPattern,
                 appointmentRequest, appointmentMapperMock);
