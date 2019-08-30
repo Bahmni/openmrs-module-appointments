@@ -15,7 +15,6 @@ import org.openmrs.module.appointments.service.AppointmentServiceDefinitionServi
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
-import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
@@ -45,9 +44,6 @@ public class AppointmentControllerTest {
 
     @Mock
     private AppointmentRecurringPatternService appointmentRecurringPatternService;
-
-    @Mock
-    private RecurringPatternHelper recurringPatternHelper;
 
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -322,35 +318,6 @@ public class AppointmentControllerTest {
         appointmentController.saveAppointment(appointmentRequest);
         Mockito.verify(appointmentMapper, times(1)).fromRequest(appointmentRequest);
         Mockito.verify(appointmentsService, times(1)).validateAndSave(appointment);
-    }
-
-    @Test
-    public void shouldSaveAnAppointmentWhenRecurringPatternAlsoPresentsInRequest() throws Exception{
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType("sometype");
-        recurringPattern.setPeriod(1);
-        recurringPattern.setFrequency(1);
-        appointmentRequest.setStartDateTime(new Date());
-        appointmentRequest.setUuid("someUuid");
-        appointmentRequest.setServiceUuid("someServiceUuid");
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Appointment appointmentOne = new Appointment();
-        appointmentOne.setUuid("appointmentUuid");
-        Appointment appointmentTwo = new Appointment();
-        appointmentTwo.setUuid("appointmentUuid");
-        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setAppointments(new HashSet<>( Arrays.asList(appointmentOne, appointmentTwo)));
-
-        when(allAppointmentRecurringPatternMapper.fromRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
-        when(appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
-        when(recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(new ArrayList<>());
-
-        appointmentRecurringPattern.setAppointments(Collections.emptySet());
-        appointmentController.saveAppointment(appointmentRequest);
-        Mockito.verify(allAppointmentRecurringPatternMapper, times(1)).fromRequest(recurringPattern);
-        Mockito.verify(appointmentRecurringPatternService, times(1)).validateAndSave(appointmentRecurringPattern);
-        Mockito.verify(recurringPatternHelper, times(1)).generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
     }
 
     @Test

@@ -66,9 +66,6 @@ public class AppointmentController {
     private AppointmentServiceMapper appointmentServiceMapper;
 
     @Autowired
-    private RecurringPatternHelper recurringPatternHelper;
-
-    @Autowired
     @Qualifier("appointmentRequestEditValidator")
     Validator<AppointmentRequest> appointmentRequestEditValidator;
 
@@ -93,32 +90,13 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
         try {
-            if (appointmentRequest.isRecurringAppointment()) {
-                return recurringAppointmentSave(appointmentRequest);
-            } else {
-                return normalAppointmentSave(appointmentRequest);
-            }
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            appointmentsService.validateAndSave(appointment);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
-    }
-
-    private ResponseEntity<Object> recurringAppointmentSave(AppointmentRequest appointmentRequest) {
-        RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
-        recurringPatternHelper.validateRecurringPattern(recurringPattern);
-        AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternMapper.fromRequest(recurringPattern);
-        List<Appointment> appointmentsList = recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern,
-                appointmentRequest);
-        appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
-        appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
-        return new ResponseEntity<>(appointmentMapper.constructResponse(new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
-    }
-
-    private ResponseEntity<Object> normalAppointmentSave(AppointmentRequest appointmentRequest) {
-        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-        appointmentsService.validateAndSave(appointment);
-        return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
     }
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
