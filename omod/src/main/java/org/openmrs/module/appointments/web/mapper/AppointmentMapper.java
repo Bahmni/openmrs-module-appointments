@@ -11,7 +11,6 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
@@ -21,15 +20,12 @@ import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
-import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -195,27 +191,7 @@ public class AppointmentMapper {
         if(appointmentResponseExtension!=null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
-        response.setRecurringPattern(mapRecurringPattern(a.getAppointmentRecurringPattern()));
         return response;
-    }
-
-    private RecurringPattern mapRecurringPattern(AppointmentRecurringPattern appointmentRecurringPattern) {
-        if (appointmentRecurringPattern == null) {
-            return null;
-        }
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setType(appointmentRecurringPattern.getType().toString());
-        recurringPattern.setPeriod(appointmentRecurringPattern.getPeriod());
-        Date endDate = appointmentRecurringPattern.getEndDate();
-        if (endDate != null) {
-            recurringPattern.setEndDate(endDate);
-        } else {
-            recurringPattern.setFrequency(appointmentRecurringPattern.getFrequency());
-        }
-        List<String> daysOfWeek = appointmentRecurringPattern.getDaysOfWeek() != null ?
-                Arrays.asList(appointmentRecurringPattern.getDaysOfWeek().split(",")) : null;
-        recurringPattern.setDaysOfWeek(daysOfWeek);
-        return recurringPattern;
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {

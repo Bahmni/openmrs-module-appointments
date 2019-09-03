@@ -10,6 +10,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.validators.impl.RecurringPatternValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -46,7 +47,7 @@ public class RecurringAppointmentsController {
     private RecurringPatternHelper recurringPatternHelper;
 
     @Autowired
-    private AppointmentMapper appointmentMapper;
+    private RecurringAppointmentMapper recurringAppointmentMapper;
 
     @Autowired
     private RecurringPatternMapper recurringPatternMapper;
@@ -66,7 +67,7 @@ public class RecurringAppointmentsController {
                     appointmentRequest);
             appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
-            return new ResponseEntity<>(appointmentMapper.constructResponse(
+            return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create recurring appointments", e);

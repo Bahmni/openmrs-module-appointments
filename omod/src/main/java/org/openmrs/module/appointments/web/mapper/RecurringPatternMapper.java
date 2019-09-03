@@ -4,6 +4,9 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.WEEK;
@@ -24,6 +27,22 @@ public class RecurringPatternMapper {
                     .collect(Collectors.joining(",")));
         }
         return appointmentRecurringPattern;
+    }
+
+    public RecurringPattern mapToResponse(AppointmentRecurringPattern appointmentRecurringPattern) {
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setType(appointmentRecurringPattern.getType().toString());
+        recurringPattern.setPeriod(appointmentRecurringPattern.getPeriod());
+        Date endDate = appointmentRecurringPattern.getEndDate();
+        if (endDate != null) {
+            recurringPattern.setEndDate(endDate);
+        } else {
+            recurringPattern.setFrequency(appointmentRecurringPattern.getFrequency());
+        }
+        List<String> daysOfWeek = appointmentRecurringPattern.getDaysOfWeek() != null ?
+                Arrays.asList(appointmentRecurringPattern.getDaysOfWeek().split(",")) : null;
+        recurringPattern.setDaysOfWeek(daysOfWeek);
+        return recurringPattern;
     }
 
 }
