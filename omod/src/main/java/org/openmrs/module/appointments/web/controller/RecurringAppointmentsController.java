@@ -59,7 +59,7 @@ public class RecurringAppointmentsController {
             RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
             Errors errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
             recurringPatternValidator.validate(recurringPattern, errors);
-            if (!Objects.isNull(errors) && !errors.getAllErrors().isEmpty()) {
+            if (!errors.getAllErrors().isEmpty()) {
                 throw new APIException(errors.getAllErrors().get(0).getCodes()[1]);
             }
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
