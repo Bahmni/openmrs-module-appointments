@@ -10,6 +10,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 
@@ -63,24 +64,24 @@ public class RecurringAppointmentMapperTest {
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
         when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
-        List<AppointmentDefaultResponse> appointmentDefaultResponses =
+        List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree));
 
-        assertEquals(new Integer(3), appointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
-        assertEquals(new Integer(3), appointmentDefaultResponses.get(1).getRecurringPattern().getFrequency());
-        assertEquals(new Integer(3), appointmentDefaultResponses.get(2).getRecurringPattern().getFrequency());
-        assertNull(appointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
-        assertNull(appointmentDefaultResponses.get(1).getRecurringPattern().getEndDate());
-        assertNull(appointmentDefaultResponses.get(2).getRecurringPattern().getEndDate());
-        assertEquals(2, appointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
-        assertEquals(2, appointmentDefaultResponses.get(1).getRecurringPattern().getPeriod());
-        assertEquals(2, appointmentDefaultResponses.get(2).getRecurringPattern().getPeriod());
-        assertEquals("DAY", appointmentDefaultResponses.get(0).getRecurringPattern().getType());
-        assertEquals("DAY", appointmentDefaultResponses.get(1).getRecurringPattern().getType());
-        assertEquals("DAY", appointmentDefaultResponses.get(2).getRecurringPattern().getType());
-        assertNull(appointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
-        assertNull(appointmentDefaultResponses.get(1).getRecurringPattern().getDaysOfWeek());
-        assertNull(appointmentDefaultResponses.get(2).getRecurringPattern().getDaysOfWeek());
+        assertEquals(new Integer(3), recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
+        assertEquals(new Integer(3), recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getFrequency());
+        assertEquals(new Integer(3), recurringAppointmentDefaultResponses.get(2).getRecurringPattern().getFrequency());
+        assertNull(recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
+        assertNull(recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getEndDate());
+        assertNull(recurringAppointmentDefaultResponses.get(2).getRecurringPattern().getEndDate());
+        assertEquals(2, recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
+        assertEquals(2, recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getPeriod());
+        assertEquals(2, recurringAppointmentDefaultResponses.get(2).getRecurringPattern().getPeriod());
+        assertEquals("DAY", recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getType());
+        assertEquals("DAY", recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getType());
+        assertEquals("DAY", recurringAppointmentDefaultResponses.get(2).getRecurringPattern().getType());
+        assertNull(recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
+        assertNull(recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getDaysOfWeek());
+        assertNull(recurringAppointmentDefaultResponses.get(2).getRecurringPattern().getDaysOfWeek());
         verify(appointmentMapper, times(3)).constructResponse(any(Appointment.class));
         verify(recurringPatternMapper, times(3)).mapToResponse(any());
     }
@@ -104,21 +105,21 @@ public class RecurringAppointmentMapperTest {
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
         when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
-        List<AppointmentDefaultResponse> appointmentDefaultResponses =
+        List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne, appointmentTwo));
 
-        assertEquals(endDate, appointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
-        assertEquals(endDate, appointmentDefaultResponses.get(1).getRecurringPattern().getEndDate());
-        assertNull(appointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
-        assertNull(appointmentDefaultResponses.get(1).getRecurringPattern().getFrequency());
-        assertEquals(1, appointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
-        assertEquals(1, appointmentDefaultResponses.get(1).getRecurringPattern().getPeriod());
-        assertEquals(RecurringAppointmentType.WEEK.name(), appointmentDefaultResponses.get(0).getRecurringPattern().getType());
-        assertEquals(RecurringAppointmentType.WEEK.name(), appointmentDefaultResponses.get(1).getRecurringPattern().getType());
+        assertEquals(endDate, recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
+        assertEquals(endDate, recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getEndDate());
+        assertNull(recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
+        assertNull(recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getFrequency());
+        assertEquals(1, recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
+        assertEquals(1, recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getPeriod());
+        assertEquals(RecurringAppointmentType.WEEK.name(), recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getType());
+        assertEquals(RecurringAppointmentType.WEEK.name(), recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getType());
         assertEquals(Arrays.asList("MONDAY", "TUESDAY"),
-                appointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
+                recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
         assertEquals(Arrays.asList("MONDAY", "TUESDAY"),
-                appointmentDefaultResponses.get(1).getRecurringPattern().getDaysOfWeek());
+                recurringAppointmentDefaultResponses.get(1).getRecurringPattern().getDaysOfWeek());
         verify(appointmentMapper, times(2)).constructResponse(any(Appointment.class));
         verify(recurringPatternMapper, times(2)).mapToResponse(any());
     }
@@ -137,15 +138,15 @@ public class RecurringAppointmentMapperTest {
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
         when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
-        List<AppointmentDefaultResponse> appointmentDefaultResponses =
+        List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne));
 
-        assertEquals(new Integer(1), appointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
-        assertEquals(1, appointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
-        assertEquals(RecurringAppointmentType.WEEK.name(), appointmentDefaultResponses.get(0).getRecurringPattern().getType());
+        assertEquals(new Integer(1), recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getFrequency());
+        assertEquals(1, recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getPeriod());
+        assertEquals(RecurringAppointmentType.WEEK.name(), recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getType());
         assertEquals(Arrays.asList("Monday", "Tuesday"),
-                appointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
-        assertNull(appointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
+                recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
+        assertNull(recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
         verify(appointmentMapper).constructResponse(any(Appointment.class));
         verify(recurringPatternMapper).mapToResponse(any(AppointmentRecurringPattern.class));
     }
