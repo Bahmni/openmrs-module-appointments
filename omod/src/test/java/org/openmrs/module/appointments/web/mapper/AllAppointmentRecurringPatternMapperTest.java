@@ -1,49 +1,38 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
+import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.openmrs.module.appointments.model.AppointmentProviderResponse.CANCELLED;
-import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
-import static org.openmrs.module.appointments.model.AppointmentStatus.Completed;
-import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
+import static org.openmrs.module.appointments.model.AppointmentStatus.*;
 
 @RunWith(PowerMockRunner.class)
 public class AllAppointmentRecurringPatternMapperTest {
@@ -62,8 +51,19 @@ public class AllAppointmentRecurringPatternMapperTest {
     @InjectMocks
     AllAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
 
+    @Mock
+    DailyRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
+
+    @Mock
+    WeeklyRecurringAppointmentsGenerationService weeklyRecurringAppointmentsGenerationService;
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
+
+    @Before
+    public void setUp() {
+        MockitoAnnotations.initMocks(this);
+    }
 
     @Test
     public void shouldReturnAppointmentRecurringPatternWithAllItsPendingAppointmentsUpdatedWithAppointmentRequest() throws IOException {
@@ -572,6 +572,7 @@ public class AllAppointmentRecurringPatternMapperTest {
 
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+        when(dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern,appointmentRequest)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
 
         AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
                 .fromRequest(appointmentRequest);
@@ -622,6 +623,16 @@ public class AllAppointmentRecurringPatternMapperTest {
                 new Location(), new HashSet<>(), "appThree",
                 DateUtils.addDays(startTimeCalendar.getTime(), 2),
                 DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        Appointment appointmentFour = createAppointment("uuid4", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        Appointment appointmentFive = createAppointment("uuid5", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setUuid("serviceUuid");
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
@@ -644,6 +655,8 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+        when(dailyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern, appointmentRequest))
+                .thenReturn(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour, appointmentFive));
 
         AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
                 .fromRequest(appointmentRequest);
@@ -713,8 +726,8 @@ public class AllAppointmentRecurringPatternMapperTest {
         appointmentTwo.setProviders(appointmentProviders);
 
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
-        when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
-
+        when(appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+        when(dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
         AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
                 .fromRequest(appointmentRequest);
 
@@ -766,6 +779,17 @@ public class AllAppointmentRecurringPatternMapperTest {
                 new Location(), new HashSet<>(), "appThree",
                 DateUtils.addDays(startTimeCalendar.getTime(), 2),
                 DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        Appointment appointmentFour = createAppointment("uuid4", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        Appointment appointmentFive = createAppointment("uuid5", patient, Scheduled,
+                AppointmentKind.Scheduled, new AppointmentServiceDefinition(), new AppointmentServiceType(),
+                new Location(), new HashSet<>(), "appThree",
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setUuid("serviceUuid");
         AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
@@ -777,17 +801,18 @@ public class AllAppointmentRecurringPatternMapperTest {
         HashSet<AppointmentProvider> appointmentProviders = new HashSet<>(Collections
                 .singleton(appointmentProvider));
         appointmentThree.setAppointmentAudits(new HashSet<>());
-        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne,
-                appointmentTwo, appointmentThree));
-        appointmentRecurringPattern.setAppointments(appointments);
+        List<Appointment> appointments = Arrays.asList(appointmentOne,
+                appointmentTwo, appointmentThree);
+        appointmentRecurringPattern.setAppointments(new HashSet(appointments));
         appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
-
         appointmentTwo.setProviders(appointmentProviders);
         when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
+        when(dailyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern,appointmentRequest))
+                .thenReturn((Arrays.asList(appointmentOne, appointmentTwo, appointmentThree,appointmentFour, appointmentFive)));
 
         AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
                 .fromRequest(appointmentRequest);
