@@ -5,26 +5,26 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Component
 public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsGenerationService {
 
     private AppointmentRecurringPattern appointmentRecurringPattern;
     private AppointmentRequest appointmentRequest;
+
+    @Autowired
     private AppointmentMapper appointmentMapper;
 
-    public WeeklyRecurringAppointmentsGenerationService(AppointmentRecurringPattern appointmentRecurringPattern,
-                                                        AppointmentRequest appointmentRequest,
-                                                        AppointmentMapper appointmentMapper) {
-        this.appointmentRecurringPattern = appointmentRecurringPattern;
-        this.appointmentRequest = appointmentRequest;
-        this.appointmentMapper = appointmentMapper;
-    }
-
     @Override
-    public List<Appointment> getAppointments() {
+    public List<Appointment> getAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                             AppointmentRequest appointmentRequest) {
+        this.appointmentRequest = appointmentRequest;
+        this.appointmentRecurringPattern = appointmentRecurringPattern;
         Date endDate = getEndDate();
         return generateAppointments(endDate);
     }
@@ -88,7 +88,10 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
     }
 
     @Override
-    public List<Appointment> addAppointments() {
+    public List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                             AppointmentRequest appointmentRequest) {
+        this.appointmentRecurringPattern = appointmentRecurringPattern;
+        this.appointmentRequest = appointmentRequest;
         List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
         Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
         appointmentRequest.setStartDateTime(appointments.get(appointments.size() - 1).getStartDateTime());
