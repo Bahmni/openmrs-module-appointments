@@ -7,8 +7,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import java.util.*;
 import java.util.stream.Collectors;
 public abstract class AbstractRecurringAppointmentsGenerationService {
-    public abstract List<Appointment> getAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
-                                                      AppointmentRequest appointmentRequest);
+    public abstract List<Appointment> getAppointments(AppointmentRequest appointmentRequest);
 
     public abstract List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                       AppointmentRequest appointmentRequest);

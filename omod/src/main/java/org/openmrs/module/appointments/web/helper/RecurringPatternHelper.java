@@ -29,12 +29,10 @@ public class RecurringPatternHelper {
         try {
             switch (appointmentRecurringPattern.getType()) {
                 case WEEK:
-                    appointments = new WeeklyRecurringAppointmentsGenerationService().getAppointments(
-                            appointmentRecurringPattern, appointmentRequest);
+                    appointments = new WeeklyRecurringAppointmentsGenerationService().getAppointments(appointmentRequest);
                     break;
                 case DAY:
-                    appointments = new DailyRecurringAppointmentsGenerationService().getAppointments(
-                            appointmentRecurringPattern, appointmentRequest);
+                    appointments = new DailyRecurringAppointmentsGenerationService().getAppointments(appointmentRequest);
                     break;
             }
         } catch (Exception e) {
