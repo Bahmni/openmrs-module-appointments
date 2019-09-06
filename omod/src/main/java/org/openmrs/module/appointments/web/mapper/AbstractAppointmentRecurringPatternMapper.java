@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.mapper;
 
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.springframework.stereotype.Component;
 
@@ -33,5 +34,5 @@ public abstract class AbstractAppointmentRecurringPatternMapper {
         return appointmentRecurringPattern;
     }
 
-    public abstract AppointmentRecurringPattern fromRequest(AppointmentRequest appointmentRequest);
+    public abstract AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest);
 }

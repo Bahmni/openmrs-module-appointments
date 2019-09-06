@@ -3,27 +3,30 @@ package org.openmrs.module.appointments.web.service.impl;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
+@Qualifier("weeklyRecurringAppointmentsGenerationService")
 public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsGenerationService {
 
-    private AppointmentRequest appointmentRequest;
+    private RecurringAppointmentRequest recurringAppointmentRequest;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
 
     @Override
-    public List<Appointment> getAppointments(AppointmentRequest appointmentRequest) {
-        this.appointmentRequest = appointmentRequest;
-        RecurringPattern recurringPattern = appointmentRequest.getRecurringPattern();
+    public List<Appointment> getAppointments(RecurringAppointmentRequest recurringAppointmentRequest) {
+        this.recurringAppointmentRequest = recurringAppointmentRequest;
+        RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
         Date endDate = getEndDate(recurringPattern.getPeriod(), recurringPattern.getFrequency(),
                 recurringPattern.getEndDate(), recurringPattern.getDaysOfWeek());
         return generateAppointments(endDate);
@@ -34,7 +37,7 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
             return endDate;
         }
         Calendar calendar = Calendar.getInstance();
-        calendar.setTime(appointmentRequest.getStartDateTime());
+        calendar.setTime(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime());
         int startDayCode = calendar.get(Calendar.DAY_OF_WEEK);
         List<Integer> selectedDaysPerWeek = getSortedSelectedDayCodes(startDayCode, daysOfWeek);
         int daysToBeAdded = 0;
@@ -69,9 +72,9 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
         List<Appointment> appointments = new ArrayList<>();
         Calendar startCalender = Calendar.getInstance();
         Calendar endCalender = Calendar.getInstance();
-        startCalender.setTime(appointmentRequest.getStartDateTime());
-        endCalender.setTime(appointmentRequest.getEndDateTime());
-        List<Integer> selectedDayCodes = getSelectedDayCodes(appointmentRequest.getRecurringPattern().getDaysOfWeek());
+        startCalender.setTime(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime());
+        endCalender.setTime(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime());
+        List<Integer> selectedDayCodes = getSelectedDayCodes(recurringAppointmentRequest.getRecurringPattern().getDaysOfWeek());
         return createAppointments(endDate, appointments, startCalender, endCalender, selectedDayCodes);
     }
 
@@ -79,9 +82,9 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
                                                  Calendar endCalender, List<Integer> selectedDayCodes) {
         Date currentAppointmentDate = startCalender.getTime();
         while (!currentAppointmentDate.after(endDate)) {
-            getAppointmentsForAWeek(appointmentRequest, appointments, startCalender, endCalender, selectedDayCodes, endDate);
-            startCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (appointmentRequest.getRecurringPattern().getPeriod()));
-            endCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (appointmentRequest.getRecurringPattern().getPeriod()));
+            getAppointmentsForAWeek(recurringAppointmentRequest, appointments, startCalender, endCalender, selectedDayCodes, endDate);
+            startCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (recurringAppointmentRequest.getRecurringPattern().getPeriod()));
+            endCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (recurringAppointmentRequest.getRecurringPattern().getPeriod()));
             currentAppointmentDate = startCalender.getTime();
         }
         appointments.sort(Comparator.comparing(Appointment::getStartDateTime));
@@ -90,37 +93,37 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
 
     @Override
     public List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
-                                             AppointmentRequest appointmentRequest) {
+                                             RecurringAppointmentRequest recurringAppointmentRequest) {
         List<String> daysOfWeek = Arrays.stream(appointmentRecurringPattern.getDaysOfWeek().split(",")).collect(Collectors.toList());
-        this.appointmentRequest = appointmentRequest;
+        this.recurringAppointmentRequest = recurringAppointmentRequest;
         List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
         Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
-        appointmentRequest.setStartDateTime(appointments.get(appointments.size() - 1).getStartDateTime());
-        appointmentRequest.setEndDateTime(appointments.get(appointments.size() - 1).getEndDateTime());
+        recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size() - 1).getStartDateTime());
+        recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size() - 1).getEndDateTime());
         if (appointmentRecurringPattern.getEndDate() == null)
-            appointmentRecurringPattern.setFrequency(appointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1);
-        else appointmentRecurringPattern.setEndDate(appointmentRequest.getRecurringPattern().getEndDate());
+            appointmentRecurringPattern.setFrequency(recurringAppointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1);
+        else appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
         Date endDate = getEndDate(appointmentRecurringPattern.getPeriod(), appointmentRecurringPattern.getFrequency(),
                 appointmentRecurringPattern.getEndDate(), daysOfWeek);
         Calendar startCalender = Calendar.getInstance();
         Calendar endCalender = Calendar.getInstance();
-        startCalender.setTime(appointmentRequest.getStartDateTime());
-        endCalender.setTime(appointmentRequest.getEndDateTime());
+        startCalender.setTime(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime());
+        endCalender.setTime(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime());
         List<Integer> selectedDayCodes = getSelectedDayCodes(daysOfWeek);
         List<Integer> selectedDaysPerWeek = getSortedSelectedDayCodes(startCalender.get(Calendar.DAY_OF_WEEK), daysOfWeek);
         List<Integer> updatedSelectedDayCodes = getSelectedDayCodesForExtend(selectedDaysPerWeek, startCalender.get(Calendar.DAY_OF_WEEK));
         int noOfExtradayCodes = appointments.size() % selectedDaysPerWeek.size();
         updateCalendarInstancesToNextSelectedDay(startCalender, endCalender, selectedDaysPerWeek.get(1));
-        appointmentRequest.setUuid(null);
+        recurringAppointmentRequest.getAppointmentRequest().setUuid(null);
         if (noOfExtradayCodes != 0) {
-            getAppointmentsForAWeek(appointmentRequest, appointments, startCalender, endCalender, updatedSelectedDayCodes, endDate);
+            getAppointmentsForAWeek(recurringAppointmentRequest, appointments, startCalender, endCalender, updatedSelectedDayCodes, endDate);
             startCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (appointmentRecurringPattern.getPeriod()) - 1);
             endCalender.add(Calendar.DATE, Calendar.DAY_OF_WEEK * (appointmentRecurringPattern.getPeriod()) - 1);
         }
         return createAppointments(endDate, appointments, startCalender, endCalender, selectedDayCodes);
     }
 
-    private void getAppointmentsForAWeek(AppointmentRequest appointmentRequest, List<Appointment> appointments,
+    private void getAppointmentsForAWeek(RecurringAppointmentRequest recurringAppointmentRequest, List<Appointment> appointments,
                                          Calendar startCalender, Calendar endCalender, List<Integer> selectedDayCodes, Date endDate) {
         for (int dayCode : selectedDayCodes) {
             Calendar startCalenderInstance = Calendar.getInstance();
@@ -131,7 +134,7 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
             if (startCalenderInstance.getTime().after(endDate)) {
                 continue;
             }
-            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            Appointment appointment = appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest());
             appointment.setStartDateTime(startCalenderInstance.getTime());
             appointment.setEndDateTime(endCalenderInstance.getTime());
             appointments.add(appointment);

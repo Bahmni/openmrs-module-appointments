@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,8 @@ public class SingleAppointmentRecurringPatternMapper extends AbstractAppointment
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Override
-    public AppointmentRecurringPattern fromRequest(AppointmentRequest appointmentRequest){
-        String uuid = appointmentRequest.getUuid();
+    public AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest){
+        String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
         Appointment newAppointment;
         if (appointment.getRelatedAppointment() != null) {
@@ -41,7 +42,7 @@ public class SingleAppointmentRecurringPatternMapper extends AbstractAppointment
             appointment.setVoided(true);
             newAppointment.setRelatedAppointment(appointment);
         }
-        appointmentMapper.mapAppointmentRequestToAppointment(appointmentRequest, newAppointment);
+        appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
         setAppointmentAudit(newAppointment);
         final AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
         appointmentRecurringPattern.getAppointments().add(newAppointment);

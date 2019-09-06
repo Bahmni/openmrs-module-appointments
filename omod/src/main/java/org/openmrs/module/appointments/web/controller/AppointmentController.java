@@ -18,6 +18,7 @@ import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
@@ -55,19 +56,8 @@ public class AppointmentController {
     private AppointmentMapper appointmentMapper;
 
     @Autowired
-    @Qualifier("singleAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper singleAppointmentRecurringPatternMapper;
-
-    @Autowired
-    @Qualifier("allAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
-
-    @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
 
-    @Autowired
-    @Qualifier("appointmentRequestEditValidator")
-    Validator<AppointmentRequest> appointmentRequestEditValidator;
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
@@ -229,49 +219,6 @@ public class AppointmentController {
             return new ResponseEntity<>(appointmentMapper.constructResponse(rescheduledAppointment), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create new appointment", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
-    }
-
-    @RequestMapping(method = RequestMethod.PUT, value = "/{appointmentUuid}")
-    @ResponseBody
-    public ResponseEntity<Object> editAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
-        try {
-            final boolean isValidAppointmentRequest = appointmentRequestEditValidator.validate(appointmentRequest);
-            if (!isValidAppointmentRequest)
-                throw new APIException(appointmentRequestEditValidator.getError());
-            boolean applyForAll = appointmentRequest.requiresUpdateOfAllRecurringAppointments();
-            final String appointmentRequestUuid = appointmentRequest.getUuid();
-            if (applyForAll) {
-                AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
-                AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(recurringPattern);
-                List<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
-                return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
-            } else {
-                if (appointmentRequest.isRecurringAppointment()) {
-                    AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(appointmentRequest);
-                    AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
-                    Appointment updatedAppointment = null;
-                    final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getActiveAppointments();
-                    final Iterator<Appointment> iterator = updatedAppointments.iterator();
-                    while (iterator.hasNext()) {
-                        final Appointment currentAppointment = iterator.next();
-                        final Appointment relatedAppointment = currentAppointment.getRelatedAppointment();
-                        if ((currentAppointment.getUuid().equals(appointmentRequestUuid) && !currentAppointment.getVoided())
-                                || (relatedAppointment != null && relatedAppointment.getUuid().equals(appointmentRequestUuid))) {
-                            updatedAppointment = currentAppointment;
-                            break;
-                        }
-                    }
-                    return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
-                } else {
-                    Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-                    Appointment updatedAppointment = appointmentsService.validateAndUpdate(appointment);
-                    return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
-                }
-            }
-        } catch (RuntimeException e) {
-            log.error("Runtime error while trying to validateAndUpdate an appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

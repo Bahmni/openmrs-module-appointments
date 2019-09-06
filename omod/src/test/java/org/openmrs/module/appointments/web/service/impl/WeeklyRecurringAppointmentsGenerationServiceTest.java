@@ -15,6 +15,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 
@@ -40,11 +41,12 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    private AppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-        return appointmentRequest;
+    private RecurringAppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        recurringAppointmentRequest.setAppointmentRequest(new AppointmentRequest());
+        recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointmentStartDateTime);
+        recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointmentEndDateTime);
+        return recurringAppointmentRequest;
     }
 
     private RecurringPattern getRecurringPattern(int period, int frequency, Date endDate,
@@ -74,15 +76,14 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternAndAppointmentRequestWithMultipleDaysInWeek() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
                 null, Arrays.asList("SUNDAY","WEDNESDAY","SATURDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest()))
+                .thenAnswer(x -> new Appointment());
 
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
@@ -107,14 +108,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternAndAppointmentRequestWithAllPastDaysInWeek() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 17, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 6,
                 null, Arrays.asList("SUNDAY","TUESDAY","THURSDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 19, 16, 0, 0));
@@ -141,7 +139,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 5, 6, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -156,14 +154,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternWithPastDaySelectedInWeek() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
                 null, Arrays.asList("SUNDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 19, 16, 0, 0));
@@ -174,7 +169,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 5, 2, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -189,14 +184,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnThreeAppointmentsHavingTwoSelectedDaysInWeekWithDayCodesLessThanStartDayCode() {
         Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 3,
                 null, Arrays.asList("SUNDAY","MONDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 7, 18, 16, 0, 0));
@@ -211,7 +203,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 7, 25, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -226,14 +218,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternWithFutureDaySelectedInWeek() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 4,
                 null, Arrays.asList("FRIDAY","SATURDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 17, 16, 0, 0));
@@ -252,7 +241,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 5, 1, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -267,12 +256,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnThreeAppointmentsHavingTwoSelectedDaysInWeekWithDayCodesGreaterThanStartDayCode() {
         Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 3,
                 null, Arrays.asList("FRIDAY","SATURDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 7, 16, 16, 0, 0));
@@ -287,7 +275,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 7, 30, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -302,14 +290,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternWithHighPeriodValue() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 18, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 18, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(10, 4,
                 null, Arrays.asList("MONDAY","FRIDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 20, 16, 0, 0));
@@ -328,7 +313,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 7, 2, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -343,14 +328,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternWithSameStartDaySelectedInWeek() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
                 null, Arrays.asList("MONDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 13, 16, 0, 0));
@@ -361,7 +343,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 4, 27, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -376,15 +358,12 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternAndAppointmentRequestWithEndDate() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 0,
                 getDate(2019, Calendar.JUNE, 13, 23, 45, 00),
                 Arrays.asList("SUNDAY","WEDNESDAY","SATURDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 15, 16, 0, 0));
@@ -411,7 +390,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, 5, 9, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -426,14 +405,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternForAllDaysOfWeekWithCaseInsensitive() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 7,
                 null, Arrays.asList("sunday","monday","tuesday","wednesday","thursday","friday","saturday"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         for (int date = 13; date < 20; date++) {
             Map<String, Date> appointmentInstance = new HashMap<>();
@@ -442,7 +418,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
             expectedAppointmentDatesList.add(appointmentInstance);
         }
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -457,21 +433,18 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnWeeklyAppointmentsForGivenRecurringPatternForAllDaysOfWeekWithCaseInsensitiveInvalidDays() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 1,
                 null, Arrays.asList("MISC"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, 4, 18, 16, 0, 0));
         appointmentInstance.put("endDateTime", getDate(2019, 4, 18, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -486,15 +459,12 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnAppointmentsOnlyBeforeEndDateForGivenRecurringPatternWithEndDate() {
         Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 5, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 5, 16, 30, 00);
-
         Date endDate = getDate(2019, Calendar.JUNE, 16, 16, 00, 00);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 0,
                 endDate, Arrays.asList("SATURDAY","MONDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 8, 16, 0, 0));
@@ -509,7 +479,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 15, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -524,21 +494,18 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnAppointmentsForNextWeekWithOneOccurence() {
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 31, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 31, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 1,
                 null, Arrays.asList("THURSDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
         appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 6, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -553,14 +520,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldReturnAppointmentsForNextWeekWithFourOccurences() {
         Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 6, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 6, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 4,
                 null, Arrays.asList("THURSDAY","FRIDAY"));
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
-
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
@@ -579,7 +543,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 14, 16, 30, 0));
         expectedAppointmentDatesList.add(appointmentInstance);
 
-        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(appointmentRequest);
+        List<Appointment> appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), appointments.size());
         for (int i = 0; i < appointments.size(); i++) {
@@ -594,16 +558,14 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldAddNewRecurringAppointmentsForOneMoreWeekWhenFrequencyIsIncreased() {
         Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 14, 16, 0, 0);
         Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 14, 16, 30, 0);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 4,
                 null, "THURSDAY,FRIDAY");
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(6);
         recurringPattern.setPeriod(1);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -654,7 +616,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
 
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService
-                .addAppointments(appointmentRecurringPattern, appointmentRequest);
+                .addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -669,17 +631,14 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldAddTwoNewRecurringAppointmentsToExistingThreeAppointmentsWhenFrequencyIsIncreased() {
         Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 30, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 30, 16, 30, 00);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(2, 3,
                 null, "FRIDAY,SATURDAY");
-
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(5);
         recurringPattern.setPeriod(2);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -721,7 +680,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern,
-                appointmentRequest);
+                recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -736,17 +695,15 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     public void shouldAddNewRecurringAppointmentsForOneMoreWeekWhenEndDateIsIncreased() {
         Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 14, 16, 0, 0);
         Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 14, 16, 30, 0);
-
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 getDate(2019, Calendar.JUNE, 14, 16, 0, 0), "THURSDAY,FRIDAY");
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setEndDate(getDate(2019, Calendar.JUNE, 24, 16, 0, 0));
         recurringPattern.setFrequency(null);
         recurringPattern.setPeriod(1);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -797,7 +754,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
 
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern,
-                appointmentRequest);
+                recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -813,7 +770,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 30, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 30, 16, 30, 00);
 
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(2, 0,
                 getDate(2019, 7, 30, 16, 0, 0), "FRIDAY,SATURDAY");
 
@@ -821,9 +778,9 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         recurringPattern.setEndDate(getDate(2019, 8, 12, 16, 0, 0));
         recurringPattern.setFrequency(null);
         recurringPattern.setPeriod(2);
-        appointmentRequest.setRecurringPattern(recurringPattern);
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
 
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -861,7 +818,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern,
-                appointmentRequest);
+                recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -882,14 +839,14 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 5,
                 null, days);
 
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(4);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -932,7 +889,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
 
-        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -953,7 +910,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +7), days);
 
@@ -969,8 +926,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         todayStartTimeCalendar.set(year, month, day + 1, hour, minute, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1011,7 +968,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
 
-        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -1031,7 +988,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +6);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +6);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +6), days);
 
@@ -1042,13 +999,12 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         int day = todayStartTimeCalendar.get(Calendar.DATE);
         int hour = todayStartTimeCalendar.get(Calendar.HOUR_OF_DAY);
         int minute = todayStartTimeCalendar.get(Calendar.MINUTE);
-
         RecurringPattern recurringPattern = new RecurringPattern();
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1082,7 +1038,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
         appointmentRecurringPattern.setAppointments(appointments);
-        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -1102,7 +1058,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +6);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +6);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +6), days);
         Calendar todayStartTimeCalendar = Calendar.getInstance();
@@ -1117,8 +1073,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1152,7 +1108,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
         appointmentRecurringPattern.setAppointments(appointments);
-        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
@@ -1172,7 +1128,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +7), days);
 
@@ -1188,8 +1144,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1242,7 +1198,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(error);
 
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
     }
 
     @Test
@@ -1254,7 +1210,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +7), days);
 
@@ -1270,8 +1226,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         todayStartTimeCalendar.set(year, month, day, hour, minute + 1, 00);
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1324,7 +1280,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(error);
 
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
     }
 
     @Test
@@ -1336,15 +1292,15 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 4,
                 null, days);
 
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(2);
         recurringPattern.setPeriod(1);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1369,7 +1325,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(error);
 
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
     }
 
@@ -1382,7 +1338,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
         Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
         Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 0,
                 DateUtils.addDays(startTimeCalendar.getTime(), +7), days);
 
@@ -1399,8 +1355,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         recurringPattern.setEndDate(todayStartTimeCalendar.getTime());
         recurringPattern.setFrequency(null);
         recurringPattern.setPeriod(1);
-        appointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
         Appointment appointment2 = new Appointment();
         Appointment appointment3 = new Appointment();
@@ -1425,7 +1381,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(error);
 
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, appointmentRequest);
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
     }
 
