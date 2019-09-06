@@ -30,6 +30,10 @@ public class RecurringPatternMapper {
     }
 
     public RecurringPattern mapToResponse(AppointmentRecurringPattern appointmentRecurringPattern) {
+        // TODO Remove after refactoring edit
+        if(appointmentRecurringPattern == null) {
+            return null;
+        }
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setType(appointmentRecurringPattern.getType().toString());
         recurringPattern.setPeriod(appointmentRecurringPattern.getPeriod());

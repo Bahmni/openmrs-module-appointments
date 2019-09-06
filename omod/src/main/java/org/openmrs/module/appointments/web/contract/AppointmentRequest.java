@@ -22,9 +22,6 @@ public class AppointmentRequest {
     private String appointmentKind;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
-    private RecurringPattern recurringPattern;
-    private Boolean applyForAll= false;
-    private String timeZone;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -120,37 +117,5 @@ public class AppointmentRequest {
 
     public void setProviders(List<AppointmentProviderDetail> providers) {
         this.providers = providers;
-    }
-
-    public RecurringPattern getRecurringPattern() {
-        return recurringPattern;
-    }
-
-    public void setRecurringPattern(RecurringPattern recurringPattern) {
-        this.recurringPattern = recurringPattern;
-    }
-
-    public Boolean getApplyForAll() {
-        return applyForAll;
-    }
-
-    public void setApplyForAll(Boolean applyForAll) {
-        this.applyForAll = applyForAll;
-    }
-
-    public String getTimeZone() {
-        return timeZone;
-    }
-
-    public void setTimeZone(String timeZone) {
-        this.timeZone = timeZone;
-    }
-
-    public Boolean isRecurringAppointment(){
-        return this.recurringPattern != null;
-    }
-
-    public Boolean requiresUpdateOfAllRecurringAppointments(){
-        return this.isRecurringAppointment() && this.applyForAll;
     }
 }

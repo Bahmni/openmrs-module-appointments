@@ -21,14 +21,17 @@ public class RecurringAppointmentMapper {
     public List<RecurringAppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments
                 .stream()
-                .map(appointment -> {
-                    RecurringAppointmentDefaultResponse recurringAppointmentDefaultResponse =
+                .map(this::constructResponse).collect(Collectors.toList());
+    }
+
+    // TODO Need tests
+    public RecurringAppointmentDefaultResponse constructResponse(Appointment appointment) {
+        RecurringAppointmentDefaultResponse recurringAppointmentDefaultResponse =
                             new RecurringAppointmentDefaultResponse();
-                    AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
-                    recurringAppointmentDefaultResponse.setAppointmentDefaultResponse(appointmentDefaultResponse);
-                    recurringAppointmentDefaultResponse.setRecurringPattern(
-                            recurringPatternMapper.mapToResponse(appointment.getAppointmentRecurringPattern()));
-                    return recurringAppointmentDefaultResponse;
-                }).collect(Collectors.toList());
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+        recurringAppointmentDefaultResponse.setAppointmentDefaultResponse(appointmentDefaultResponse);
+        recurringAppointmentDefaultResponse.setRecurringPattern(
+                recurringPatternMapper.mapToResponse(appointment.getAppointmentRecurringPattern()));
+        return recurringAppointmentDefaultResponse;
     }
 }

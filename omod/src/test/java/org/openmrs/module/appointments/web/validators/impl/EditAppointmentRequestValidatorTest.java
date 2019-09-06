@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -44,23 +45,23 @@ public class EditAppointmentRequestValidatorTest {
     private AppointmentsService appointmentsService;
 
     @InjectMocks
-    Validator<AppointmentRequest> editAppointmentRequestValidator =
+    Validator<RecurringAppointmentRequest> editAppointmentRequestValidator =
             new EditAppointmentRequestValidator(patientValidator, serviceValidator, appointmentValidator);
 
     @Test
     public void shouldReturnTrueWhenPatientAndAppointmentAndAppointmentServiceAreValid() {
+        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
         final Patient mockPatient = mock(Patient.class);
         final String patientUuid = "patientUuid";
         final String serviceUuid = "serviceUuid";
         final String appointmentUuid = "appointmentUuid";
         final AppointmentServiceDefinition mockService = mock(AppointmentServiceDefinition.class);
         final Appointment mockAppointment = mock(Appointment.class);
-
-        when(appointmentRequest.getServiceUuid()).thenReturn(serviceUuid);
-        when(appointmentRequest.getPatientUuid()).thenReturn(patientUuid);
-        when(appointmentRequest.getUuid()).thenReturn(appointmentUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
+        when(recurringAppointmentRequest.getAppointmentRequest().getServiceUuid()).thenReturn(serviceUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid()).thenReturn(patientUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn(appointmentUuid);
         when(patientService.getPatientByUuid(patientUuid)).thenReturn(mockPatient);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid))
                 .thenReturn(mockService);
@@ -70,7 +71,7 @@ public class EditAppointmentRequestValidatorTest {
         when(appointmentValidator.validate(mockAppointment)).thenReturn(true);
         when(serviceValidator.validate(mockService)).thenReturn(true);
 
-        final boolean isValid = editAppointmentRequestValidator.validate(appointmentRequest);
+        final boolean isValid = editAppointmentRequestValidator.validate(recurringAppointmentRequest);
 
         assertTrue(isValid);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
@@ -84,18 +85,18 @@ public class EditAppointmentRequestValidatorTest {
 
     @Test
     public void shouldReturnFalseWhenPatientIsInvalidAndAppointmentAndAppointmentServiceAreValid() {
+        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
         final Patient mockPatient = mock(Patient.class);
         final String patientUuid = "patientUuid";
         final String serviceUuid = "serviceUuid";
         final String appointmentUuid = "appointmentUuid";
         final AppointmentServiceDefinition mockService = mock(AppointmentServiceDefinition.class);
         final Appointment mockAppointment = mock(Appointment.class);
-
-        when(appointmentRequest.getServiceUuid()).thenReturn(serviceUuid);
-        when(appointmentRequest.getPatientUuid()).thenReturn(patientUuid);
-        when(appointmentRequest.getUuid()).thenReturn(appointmentUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
+        when(recurringAppointmentRequest.getAppointmentRequest().getServiceUuid()).thenReturn(serviceUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid()).thenReturn(patientUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn(appointmentUuid);
         when(patientService.getPatientByUuid(patientUuid)).thenReturn(mockPatient);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid))
                 .thenReturn(mockService);
@@ -105,7 +106,7 @@ public class EditAppointmentRequestValidatorTest {
         when(appointmentValidator.validate(mockAppointment)).thenReturn(true);
         when(serviceValidator.validate(mockService)).thenReturn(true);
 
-        final boolean isValid = editAppointmentRequestValidator.validate(appointmentRequest);
+        final boolean isValid = editAppointmentRequestValidator.validate(recurringAppointmentRequest);
 
         assertFalse(isValid);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
@@ -116,18 +117,18 @@ public class EditAppointmentRequestValidatorTest {
 
     @Test
     public void shouldReturnFalseWhenAppointmentIsInvalidAndPatientAndAppointmentServiceAreValid() {
+        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
         final Patient mockPatient = mock(Patient.class);
         final String patientUuid = "patientUuid";
         final String serviceUuid = "serviceUuid";
         final String appointmentUuid = "appointmentUuid";
         final AppointmentServiceDefinition mockService = mock(AppointmentServiceDefinition.class);
         final Appointment mockAppointment = mock(Appointment.class);
-
-        when(appointmentRequest.getServiceUuid()).thenReturn(serviceUuid);
-        when(appointmentRequest.getPatientUuid()).thenReturn(patientUuid);
-        when(appointmentRequest.getUuid()).thenReturn(appointmentUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
+        when(recurringAppointmentRequest.getAppointmentRequest().getServiceUuid()).thenReturn(serviceUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid()).thenReturn(patientUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn(appointmentUuid);
         when(patientService.getPatientByUuid(patientUuid)).thenReturn(mockPatient);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid))
                 .thenReturn(mockService);
@@ -137,7 +138,7 @@ public class EditAppointmentRequestValidatorTest {
         when(appointmentValidator.validate(mockAppointment)).thenReturn(false);
         when(serviceValidator.validate(mockService)).thenReturn(true);
 
-        final boolean isValid = editAppointmentRequestValidator.validate(appointmentRequest);
+        final boolean isValid = editAppointmentRequestValidator.validate(recurringAppointmentRequest);
 
         assertFalse(isValid);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);
@@ -149,18 +150,18 @@ public class EditAppointmentRequestValidatorTest {
 
     @Test
     public void shouldReturnFalseWhenAppointmentServiceIsInvalidAndPatientAndAppointmentAreValid() {
+        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
         final Patient mockPatient = mock(Patient.class);
         final String patientUuid = "patientUuid";
         final String serviceUuid = "serviceUuid";
         final String appointmentUuid = "appointmentUuid";
         final AppointmentServiceDefinition mockService = mock(AppointmentServiceDefinition.class);
         final Appointment mockAppointment = mock(Appointment.class);
-
-        when(appointmentRequest.getServiceUuid()).thenReturn(serviceUuid);
-        when(appointmentRequest.getPatientUuid()).thenReturn(patientUuid);
-        when(appointmentRequest.getUuid()).thenReturn(appointmentUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
+        when(recurringAppointmentRequest.getAppointmentRequest().getServiceUuid()).thenReturn(serviceUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid()).thenReturn(patientUuid);
+        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn(appointmentUuid);
         when(patientService.getPatientByUuid(patientUuid)).thenReturn(mockPatient);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid))
                 .thenReturn(mockService);
@@ -170,7 +171,7 @@ public class EditAppointmentRequestValidatorTest {
         when(appointmentValidator.validate(mockAppointment)).thenReturn(true);
         when(serviceValidator.validate(mockService)).thenReturn(false);
 
-        final boolean isValid = editAppointmentRequestValidator.validate(appointmentRequest);
+        final boolean isValid = editAppointmentRequestValidator.validate(recurringAppointmentRequest);
 
         assertFalse(isValid);
         verify(patientService, times(1)).getPatientByUuid(patientUuid);

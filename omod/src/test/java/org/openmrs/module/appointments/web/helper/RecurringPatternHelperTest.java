@@ -10,6 +10,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 
@@ -38,11 +39,12 @@ public class RecurringPatternHelperTest {
         recurringPatternHelper = new RecurringPatternHelper(appointmentMapperMock);
     }
 
-    private AppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
-        AppointmentRequest appointmentRequest = new AppointmentRequest();
-        appointmentRequest.setStartDateTime(appointmentStartDateTime);
-        appointmentRequest.setEndDateTime(appointmentEndDateTime);
-        return appointmentRequest;
+    private RecurringAppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        recurringAppointmentRequest.setAppointmentRequest(new AppointmentRequest());
+        recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointmentStartDateTime);
+        recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointmentEndDateTime);
+        return recurringAppointmentRequest;
     }
 
     private AppointmentRecurringPattern getAppointmentRecurringPattern(int period, int frequency, Date endDate) {
@@ -61,9 +63,10 @@ public class RecurringPatternHelperTest {
         appointmentRecurringPattern.setFrequency(2);
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
 
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        Mockito.when(appointmentMapperMock.fromRequest(recurringAppointmentRequest.getAppointmentRequest()))
+                .thenAnswer(x -> new Appointment());
 
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
@@ -76,7 +79,7 @@ public class RecurringPatternHelperTest {
         expectedAppointmentDatesList.add(appointmentInstance);
 
         List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
+                .generateRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest));
 
         assertEquals(appointments.size(), appointments.size());
 
@@ -98,9 +101,9 @@ public class RecurringPatternHelperTest {
 
         Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 13, 16, 00, 00);
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
-        AppointmentRequest appointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
 
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        Mockito.when(appointmentMapperMock.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
         Map<String, Date> appointmentInstance = new HashMap<>();
@@ -121,7 +124,7 @@ public class RecurringPatternHelperTest {
         expectedAppointmentDatesList.add(appointmentInstance);
 
         List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
+                .generateRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest));
 
         assertEquals(appointments.size(), appointments.size());
 
@@ -138,12 +141,12 @@ public class RecurringPatternHelperTest {
         AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 1, null);
         appointmentRecurringPattern.setType(null);
 
-        AppointmentRequest appointmentRequest = getAppointmentRequest(null, null);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(null, null);
 
-        Mockito.when(appointmentMapperMock.fromRequest(appointmentRequest)).thenAnswer(x -> new Appointment());
+        Mockito.when(appointmentMapperMock.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
         List<Appointment> appointments = new ArrayList<>(recurringPatternHelper
-                .generateRecurringAppointments(appointmentRecurringPattern, appointmentRequest));
+                .generateRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest));
         assertTrue(appointments.isEmpty());
     }
 

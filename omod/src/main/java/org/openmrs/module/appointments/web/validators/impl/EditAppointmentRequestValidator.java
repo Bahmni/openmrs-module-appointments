@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,7 +17,7 @@ import java.util.Arrays;
 import java.util.List;
 
 @Component("appointmentRequestEditValidator")
-public class EditAppointmentRequestValidator implements Validator<AppointmentRequest> {
+public class EditAppointmentRequestValidator implements Validator<RecurringAppointmentRequest> {
 
     private Validator<Patient> patientValidator;
 
@@ -46,11 +47,11 @@ public class EditAppointmentRequestValidator implements Validator<AppointmentReq
     }
 
     @Override
-    public boolean validate(AppointmentRequest appointmentRequest) {
+    public boolean validate(RecurringAppointmentRequest recurringAppointmentRequest) {
         AppointmentServiceDefinition appointmentServiceDefinition=
-                appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
-        Patient patient = patientService.getPatientByUuid(appointmentRequest.getPatientUuid());
-        Appointment appointment= appointmentsService.getAppointmentByUuid(appointmentRequest.getUuid());
+                appointmentServiceDefinitionService.getAppointmentServiceByUuid(recurringAppointmentRequest.getAppointmentRequest().getServiceUuid());
+        Patient patient = patientService.getPatientByUuid(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid());
+        Appointment appointment= appointmentsService.getAppointmentByUuid(recurringAppointmentRequest.getAppointmentRequest().getUuid());
         return patientValidator.validate(patient) && appointmentValidator.validate(appointment)
                 && serviceValidator.validate(appointmentServiceDefinition);
 
