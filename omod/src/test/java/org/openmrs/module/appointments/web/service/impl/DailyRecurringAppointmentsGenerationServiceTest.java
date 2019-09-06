@@ -76,7 +76,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
 
         assertEquals(2, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
@@ -95,7 +95,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
 
         assertEquals(2, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
@@ -115,7 +115,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
 
         assertEquals(4, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());
@@ -143,7 +143,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
 
-        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+        List<Appointment> appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
 
         assertEquals(4, appointments.size());
         assertEquals(appointmentStartDateTime.toString(), appointments.get(0).getStartDateTime().toString());

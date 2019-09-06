@@ -1,10 +1,13 @@
 package org.openmrs.module.appointments.web.service;
+import org.apache.commons.lang3.tuple.Pair;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -12,10 +15,31 @@ import java.util.stream.Collectors;
 
 @Component
 public abstract class AbstractRecurringAppointmentsGenerationService {
-    public abstract List<Appointment> getAppointments(RecurringAppointmentRequest recurringAppointmentRequest);
+
+    @Autowired
+    private AppointmentMapper appointmentMapper;
+
+    public abstract List<Appointment> generateAppointments(RecurringAppointmentRequest recurringAppointmentRequest);
 
     public abstract List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                       RecurringAppointmentRequest recurringAppointmentRequest);
+
+    protected List<Appointment> createAppointments(List<Pair<Date, Date>> appointmentDates,
+                                                   AppointmentRequest appointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        appointmentDates.forEach(appointmentDate -> {
+            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+            appointment.setStartDateTime(appointmentDate.getLeft());
+            appointment.setEndDateTime(appointmentDate.getRight());
+            appointments.add(appointment);
+        });
+        return appointments;
+    }
+
+    protected List<Appointment> sort(List<Appointment> appointments) {
+        appointments.sort(Comparator.comparing(Appointment::getStartDateTime));
+        return appointments;
+    }
 
     public List<Appointment> removeRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
