@@ -6,14 +6,12 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.helper.RecurringPatternHelper;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
-import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
+import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.appointments.web.validators.impl.RecurringPatternValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
@@ -35,9 +33,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/recurring-appointments")
@@ -52,7 +48,7 @@ public class RecurringAppointmentsController {
     private RecurringPatternValidator recurringPatternValidator;
 
     @Autowired
-    private RecurringPatternHelper recurringPatternHelper;
+    private RecurringAppointmentsService recurringAppointmentsService;
 
     @Autowired
     private RecurringAppointmentMapper recurringAppointmentMapper;
@@ -83,8 +79,7 @@ public class RecurringAppointmentsController {
                 throw new APIException(errors.getAllErrors().get(0).getCodes()[1]);
             }
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
-            List<Appointment> appointmentsList = recurringPatternHelper.generateRecurringAppointments(appointmentRecurringPattern,
-                    recurringAppointmentRequest);
+            List<Appointment> appointmentsList = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
             appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
