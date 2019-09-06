@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
@@ -49,5 +50,13 @@ public class DateUtilTest {
         String timeZoneShort = TimeZone.getDefault().getDisplayName(daylightTime, TimeZone.SHORT, Locale.ENGLISH);
         assertNotNull(date);
         assertTrue(date.toString().contains(timeZoneShort));
+    }
+
+    @Test
+    public void shouldReturnCalendarObjectForGivenDate() {
+        Date date = new Date();
+        Calendar calendar = DateUtil.getCalendar(date);
+
+        assertEquals(calendar.getTime(), date);
     }
 }

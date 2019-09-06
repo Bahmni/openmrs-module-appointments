@@ -29,10 +29,10 @@ public class RecurringAppointmentsService {
                 RecurringAppointmentType.valueOf(recurringAppointmentRequest.getRecurringPattern().getType().toUpperCase());
         switch (recurringAppointmentType) {
             case WEEK:
-                appointments = weeklyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+                appointments = weeklyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
                 break;
             case DAY:
-                appointments = dailyRecurringAppointmentsGenerationService.getAppointments(recurringAppointmentRequest);
+                appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
                 break;
         }
         return appointments;

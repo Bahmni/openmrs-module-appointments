@@ -47,7 +47,7 @@ public class RecurringAppointmentsServiceTest {
 
         recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
 
-        verify(dailyRecurringAppointmentsGenerationService).getAppointments(recurringAppointmentRequest);
+        verify(dailyRecurringAppointmentsGenerationService).generateAppointments(recurringAppointmentRequest);
     }
 
     @Test
@@ -59,6 +59,6 @@ public class RecurringAppointmentsServiceTest {
 
         recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
 
-        verify(weeklyRecurringAppointmentsGenerationService).getAppointments(recurringAppointmentRequest);
+        verify(weeklyRecurringAppointmentsGenerationService).generateAppointments(recurringAppointmentRequest);
     }
 }
