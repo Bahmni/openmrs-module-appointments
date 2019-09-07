@@ -10,6 +10,7 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -185,6 +186,10 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public void setRelatedAppointment(Appointment relatedAppointment) {
         this.relatedAppointment = relatedAppointment;
+    }
+
+    public Boolean isRecurring() {
+        return Objects.nonNull(this.appointmentRecurringPattern);
     }
 }
 

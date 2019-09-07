@@ -19,6 +19,7 @@ public class AppointmentDefaultResponse {
 	private String comments;
 	private Map additionalInfo;
 	private List<AppointmentProviderDetail> providers;
+	private Boolean isRecurring;
 
 	public String getUuid() {
 		return uuid;
@@ -131,4 +132,12 @@ public class AppointmentDefaultResponse {
 	public List<AppointmentProviderDetail> getProviders() {
 		return providers;
 	}
+
+    public Boolean getRecurring() {
+        return isRecurring;
+    }
+
+    public void setRecurring(Boolean recurring) {
+        isRecurring = recurring;
+    }
 }
