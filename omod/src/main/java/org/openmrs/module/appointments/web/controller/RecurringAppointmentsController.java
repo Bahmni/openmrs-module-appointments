@@ -6,6 +6,8 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
+import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
@@ -26,6 +28,7 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
@@ -67,6 +70,9 @@ public class RecurringAppointmentsController {
     @Autowired
     @Qualifier("allAppointmentRecurringPatternMapper")
     private AbstractAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
+
+    @Autowired
+    private AppointmentsService appointmentsService;
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -125,5 +131,16 @@ public class RecurringAppointmentsController {
             log.error("Runtime error while trying to validateAndUpdate an appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public RecurringAppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
+        Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
+        if(appointment == null) {
+            log.error("Invalid. Appointment does not exist. UUID - " + uuid);
+            throw new RuntimeException("Appointment does not exist");
+        }
+        return recurringAppointmentMapper.constructResponse(appointment);
     }
 }
