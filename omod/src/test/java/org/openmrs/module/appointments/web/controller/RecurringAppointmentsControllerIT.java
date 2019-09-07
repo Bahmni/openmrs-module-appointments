@@ -2,7 +2,9 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -23,6 +25,9 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -338,5 +343,28 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         List<RecurringAppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<RecurringAppointmentDefaultResponse>>() {
         });
         assertEquals(5, appointmentDefaultResponse.size());
+    }
+
+    @Test
+    public void shouldGetAppointmentGivenAnUuid() throws Exception {
+        RecurringAppointmentDefaultResponse response
+                = deserialize(handle(newGetRequest("/rest/v1/recurring-appointments",
+                new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a7"))),
+                new TypeReference<RecurringAppointmentDefaultResponse>() {
+                });
+        assertNotNull(response);
+        assertNotNull(response.getAppointmentDefaultResponse());
+        assertNotNull(response.getRecurringPattern());
+
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAppointmentDoesNotExist() throws Exception {
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment does not exist");
+        deserialize(handle(newGetRequest("/rest/v1/recurring-appointments",
+                new Parameter("uuid", "randomUuid"))),
+                new TypeReference<RecurringAppointmentDefaultResponse>() {});
+
     }
 }

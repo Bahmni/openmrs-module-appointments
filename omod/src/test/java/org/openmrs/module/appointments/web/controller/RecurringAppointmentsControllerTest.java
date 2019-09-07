@@ -1,12 +1,15 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
+import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
@@ -17,6 +20,7 @@ import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsSer
 import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.appointments.web.validators.impl.RecurringPatternValidator;
 import org.openmrs.module.webservices.rest.SimpleObject;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,6 +73,12 @@ public class RecurringAppointmentsControllerTest {
 
     @Mock
     Validator<RecurringAppointmentRequest> appointmentRequestEditValidator;
+
+    @Mock
+    private AppointmentsService appointmentsService;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
@@ -234,5 +244,27 @@ public class RecurringAppointmentsControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         final String message = (String) ((LinkedHashMap) ((SimpleObject) responseEntity.getBody()).get("error")).get("message");
         assertEquals(error, message);
+    }
+
+    @Test
+    public void shouldGetAppointmentByUuid() {
+        String appointmentUuid = "appointment";
+        Appointment appointment = new Appointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+
+        recurringAppointmentsController.getAppointmentByUuid(appointmentUuid);
+
+        verify(appointmentsService, times(1)).getAppointmentByUuid(appointmentUuid);
+        verify(recurringAppointmentMapper, times(1)).constructResponse(appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAppointmentDoesNotExist() {
+        when(appointmentsService.getAppointmentByUuid(any(String.class))).thenReturn(null);
+        expectedException.expect(RuntimeException.class);
+        expectedException.expectMessage("Appointment does not exist");
+
+        recurringAppointmentsController.getAppointmentByUuid("randomUuid");
     }
 }
