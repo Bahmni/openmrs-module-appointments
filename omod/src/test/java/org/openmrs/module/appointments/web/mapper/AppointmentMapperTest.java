@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -8,7 +7,6 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.*;
 import org.openmrs.api.LocationService;
@@ -21,11 +19,9 @@ import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
-import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -659,5 +655,24 @@ public class AppointmentMapperTest {
         assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse(),
                 AppointmentProviderResponse.ACCEPTED);
         assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoidReason(), null);
+    }
+
+    @Test
+    public void shouldSetIsRecurringToTrueInResponseIfAppointmentHasRecurringPattern() throws ParseException {
+        Appointment appointment = createAppointment();
+        appointment.setAppointmentRecurringPattern(new AppointmentRecurringPattern());
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertTrue(appointmentDefaultResponse.getRecurring());
+    }
+
+    @Test
+    public void shouldSetIsRecurringToFalseInResponseIfAppointmentDoesNotHaveRecurringPattern() throws ParseException {
+        Appointment appointment = createAppointment();
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertFalse(appointmentDefaultResponse.getRecurring());
     }
 }
