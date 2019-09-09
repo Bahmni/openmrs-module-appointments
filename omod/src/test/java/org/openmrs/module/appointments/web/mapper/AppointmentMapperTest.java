@@ -15,7 +15,6 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
@@ -58,9 +57,6 @@ public class AppointmentMapperTest {
 
     @InjectMocks
     private AppointmentMapper appointmentMapper;
-
-    @InjectMocks
-    private AbstractAppointmentRecurringPatternMapper appointmentRecurringPatternMapper = new AllAppointmentRecurringPatternMapper();
 
     private Patient patient;
     private AppointmentServiceDefinition service;
@@ -136,56 +132,6 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
         assertEquals(AppointmentStatus.Scheduled, appointment.getStatus());
         assertEquals(appointmentRequest.getComments(), appointment.getComments());
-    }
-
-    @Test
-    public void shouldGetRecurringPatternFromPayloadForDayWithFrequency() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(3);
-        recurringPattern.setPeriod(1);
-        recurringPattern.setType("DAY");
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
-        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
-        assertSame(recurringPattern.getFrequency(), appointmentRecurringPattern.getFrequency());
-        assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
-    }
-
-    @Test
-    public void shouldGetRecurringPatternFromPayloadForDayWithEndDate() throws ParseException {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setPeriod(1);
-        recurringPattern.setType("DAY");
-        String endDate = "2017-03-15T00:00:00.0Z";
-        recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
-        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
-        assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
-        assertEquals(RecurringAppointmentType.DAY, appointmentRecurringPattern.getType());
-    }
-
-    @Test
-    public void shouldGetRecurringPatternFromPayloadForWeekWithEndDate() throws ParseException {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setPeriod(1);
-        recurringPattern.setType("WEEk");
-        recurringPattern.setDaysOfWeek(Arrays.asList("SUNDAY", "MONDAY"));
-        String endDate = "2017-03-15T00:00:00.0Z";
-        recurringPattern.setEndDate(DateUtil.convertToDate(endDate, DateUtil.DateFormatType.UTC));
-        AppointmentRecurringPattern appointmentRecurringPattern = appointmentRecurringPatternMapper.fromRequest(recurringPattern);
-        assertSame(recurringPattern.getPeriod(), appointmentRecurringPattern.getPeriod());
-        assertSame(recurringPattern.getEndDate(), appointmentRecurringPattern.getEndDate());
-        assertEquals("SUNDAY,MONDAY", appointmentRecurringPattern.getDaysOfWeek());
-        assertEquals(RecurringAppointmentType.WEEK, appointmentRecurringPattern.getType());
-    }
-
-    @Test
-    public void shouldThrowIllegalArgumentExceptionWhenRecurringTypeIsNull() {
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(3);
-        recurringPattern.setPeriod(1);
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Valid recurrence type should be provided. Valid types are DAY and WEEK");
-        appointmentRecurringPatternMapper.fromRequest(recurringPattern);
     }
 
     @Test
