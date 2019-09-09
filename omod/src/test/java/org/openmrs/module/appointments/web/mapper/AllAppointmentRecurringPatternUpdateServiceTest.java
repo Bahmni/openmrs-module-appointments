@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -830,5 +831,16 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
         assertEquals(5, updatedRecurringPattern.getActiveAppointments().size());
         verify(appointmentsService, times(1)).getAppointmentByUuid(anyString());
 
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionIfUuidInRequestIsNull() {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        recurringAppointmentRequest.setTimeZone("some time zone");
+        recurringAppointmentRequest.setAppointmentRequest(new AppointmentRequest());
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("Invalid appointment for edit");
+
+        allAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
     }
 }
