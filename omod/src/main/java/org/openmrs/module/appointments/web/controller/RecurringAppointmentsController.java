@@ -13,7 +13,7 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
-import org.openmrs.module.appointments.web.validators.impl.RecurringPatternValidator;
+import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
