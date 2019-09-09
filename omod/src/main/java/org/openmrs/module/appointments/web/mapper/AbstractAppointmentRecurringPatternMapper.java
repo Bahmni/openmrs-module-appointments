@@ -15,24 +15,5 @@ import static org.openmrs.module.appointments.service.impl.RecurringAppointmentT
 @Component
 public abstract class AbstractAppointmentRecurringPatternMapper {
 
-    // TODO: to be removed since it is in RecurringPatternMapper
-    public AppointmentRecurringPattern fromRequest(RecurringPattern recurringPattern) {
-        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
-        appointmentRecurringPattern.setEndDate(recurringPattern.getEndDate());
-        appointmentRecurringPattern.setPeriod(recurringPattern.getPeriod());
-        appointmentRecurringPattern.setFrequency(recurringPattern.getFrequency());
-        String recurringPatternType = recurringPattern.getType();
-        if (recurringPatternType == null) {
-            throw new IllegalArgumentException(String
-                    .format("Valid recurrence type should be provided. Valid types are %s and %s",  DAY, WEEK));
-        }
-        appointmentRecurringPattern.setType(valueOf(recurringPatternType.toUpperCase()));
-        if (appointmentRecurringPattern.getType() == WEEK) {
-            appointmentRecurringPattern.setDaysOfWeek(recurringPattern.getDaysOfWeek().stream().map(String::toUpperCase)
-                    .collect(Collectors.joining(",")));
-        }
-        return appointmentRecurringPattern;
-    }
-
     public abstract AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest);
 }
