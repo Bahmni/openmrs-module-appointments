@@ -30,9 +30,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
 @Component
-@Qualifier("allAppointmentRecurringPatternMapper")
-public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRecurringPatternMapper {
+@Qualifier("allAppointmentRecurringPatternUpdateService")
+public class AllAppointmentRecurringPatternUpdateService implements AppointmentRecurringPatternUpdateService {
 
     @Autowired
     PatientService patientService;

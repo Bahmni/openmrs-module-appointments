@@ -13,7 +13,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
+import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.validators.Validator;
@@ -58,12 +58,12 @@ public class RecurringAppointmentsControllerTest {
     private RecurringAppointmentMapper recurringAppointmentMapper;
 
     @Mock
-    @Qualifier("singleAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper singleAppointmentRecurringPatternMapper;
+    @Qualifier("singleAppointmentRecurringPatternUpdateService")
+    private AppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
 
     @Mock
-    @Qualifier("allAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
+    @Qualifier("allAppointmentRecurringPatternUpdateService")
+    private AppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
 
     @Mock
     Validator<RecurringAppointmentRequest> appointmentRequestEditValidator;
@@ -122,13 +122,13 @@ public class RecurringAppointmentsControllerTest {
         when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
         when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(recurringAppointmentRequest.getTimeZone()).thenReturn("UTC");
-        when(allAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
+        when(allAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointmentMock)));
         when(appointmentRecurringPatternService.update(any())).thenReturn(mock(AppointmentRecurringPattern.class));
 
         recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
-        verify(allAppointmentRecurringPatternMapper).fromRequest(recurringAppointmentRequest);
+        verify(allAppointmentRecurringPatternUpdateService).fromRequest(recurringAppointmentRequest);
         verify(appointmentRecurringPatternService).update(any());
     }
 
@@ -145,7 +145,7 @@ public class RecurringAppointmentsControllerTest {
         Appointment appointment = mock(Appointment.class);
 
         when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
-        when(singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
+        when(singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
@@ -154,7 +154,7 @@ public class RecurringAppointmentsControllerTest {
 
         final ResponseEntity<Object> responseEntity = recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
-        verify(singleAppointmentRecurringPatternMapper, times(1)).fromRequest(recurringAppointmentRequest);
+        verify(singleAppointmentRecurringPatternUpdateService, times(1)).fromRequest(recurringAppointmentRequest);
         verify(appointmentRecurringPatternService, times(1)).update(appointmentRecurringPattern);
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
@@ -174,7 +174,7 @@ public class RecurringAppointmentsControllerTest {
         Appointment appointment = mock(Appointment.class);
         Appointment newAppointment = mock(Appointment.class);
 
-        when(singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
+        when(singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
@@ -205,7 +205,7 @@ public class RecurringAppointmentsControllerTest {
         Appointment appointment = mock(Appointment.class);
         Appointment oldRecurringAppointment = mock(Appointment.class);
 
-        when(singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
+        when(singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
         when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));

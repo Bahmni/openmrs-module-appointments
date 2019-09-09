@@ -10,7 +10,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
+import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.validators.Validator;
@@ -59,12 +59,12 @@ public class RecurringAppointmentsController {
     Validator<RecurringAppointmentRequest> appointmentRequestEditValidator;
 
     @Autowired
-    @Qualifier("singleAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper singleAppointmentRecurringPatternMapper;
+    @Qualifier("singleAppointmentRecurringPatternUpdateService")
+    private AppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
 
     @Autowired
-    @Qualifier("allAppointmentRecurringPatternMapper")
-    private AbstractAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
+    @Qualifier("allAppointmentRecurringPatternUpdateService")
+    private AppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
 
     @Autowired
     private AppointmentsService appointmentsService;
@@ -100,12 +100,12 @@ public class RecurringAppointmentsController {
             boolean applyForAll = recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments();
             final String appointmentRequestUuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
             if (applyForAll) {
-                AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+                AppointmentRecurringPattern recurringPattern = allAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
                 AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(recurringPattern);
                 List<Appointment> updatedAppointments = new ArrayList<>(updatedAppointmentRecurringPattern.getAppointments());
                 return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
-                    AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+                    AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
                     AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                     Appointment updatedAppointment = null;
                     final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getActiveAppointments();
