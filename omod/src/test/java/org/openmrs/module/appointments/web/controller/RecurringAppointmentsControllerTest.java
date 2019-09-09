@@ -109,7 +109,28 @@ public class RecurringAppointmentsControllerTest {
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
     }
 
-    // TODO : Write a test when there are errors
+    @Test
+    public void shouldThrowAPIExceptionWhenRequestIsInvalidForSave() {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                Object[] args = invocationOnMock.getArguments();
+                Errors errors = (Errors) args[1];
+                errors.reject("save error");
+                return null;
+            }
+        }).when(recurringPatternValidator).validate(any(), any());
+
+        recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
+
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.save(recurringAppointmentRequest);
+        verify(appointmentRecurringPatternService, never()).validateAndSave(any());
+        verify(recurringAppointmentsService, never()).generateAppointmentRecurringPatternWithAppointments(recurringAppointmentRequest);
+        verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "save error");
+    }
 
     @Test
     public void shouldCallUpdateOfRecurringAppointmentServiceWhenApplyForAllIsTrue() {
