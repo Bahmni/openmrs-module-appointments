@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.web.validators.impl;
+package org.openmrs.module.appointments.web.validators;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
