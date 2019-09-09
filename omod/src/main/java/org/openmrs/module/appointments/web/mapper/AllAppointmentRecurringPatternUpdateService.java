@@ -1,12 +1,9 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
-import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -20,7 +17,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -41,9 +37,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
 
     @Autowired
     private AppointmentsService appointmentsService;
-
-    @Autowired
-    private AppointmentServiceHelper appointmentServiceHelper;
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -120,10 +113,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
                             appointmentRecurringPattern, recurringAppointmentRequest);
                     break;
             }
-            appointments.forEach(appointment -> {
-                appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
-                setAppointmentAudit(appointment);
-            });
         return appointments;
     }
 
@@ -155,7 +144,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
                                 TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
                                 updateMetadata(app, appointment);
                                 TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-                                setAppointmentAudit(app);
                             }
                             return app;
                         }).collect(Collectors.toSet()));
@@ -262,24 +250,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
                     });
                 }
             }
-        }
-    }
-
-    private void setAppointmentAudit(Appointment appointment) {
-        try {
-            String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
-            updateAppointmentAudits(appointment, notes);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateAppointmentAudits(Appointment appointment, String notes) {
-        AppointmentAudit appointmentAudit = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
-        if (appointment.getAppointmentAudits() != null) {
-            appointment.getAppointmentAudits().addAll(new HashSet<>(Collections.singletonList(appointmentAudit)));
-        } else {
-            appointment.setAppointmentAudits(new HashSet<>(Collections.singletonList(appointmentAudit)));
         }
     }
 }
