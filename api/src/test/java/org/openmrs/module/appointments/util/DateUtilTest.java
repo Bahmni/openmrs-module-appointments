@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -58,5 +59,14 @@ public class DateUtilTest {
         Calendar calendar = DateUtil.getCalendar(date);
 
         assertEquals(calendar.getTime(), date);
+    }
+
+    @Test
+    public void shouldReturnStartOfDay() {
+        Date date = DateUtil.getStartOfDay();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        String time = dateFormat.format(date);
+
+        assertEquals("00:00:00", time);
     }
 }
