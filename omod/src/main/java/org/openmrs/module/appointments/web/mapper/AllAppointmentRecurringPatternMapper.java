@@ -1,20 +1,34 @@
 package org.openmrs.module.appointments.web.mapper;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.api.APIException;
 import org.openmrs.api.PatientService;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
 import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 @Component
 @Qualifier("allAppointmentRecurringPatternMapper")
@@ -125,7 +139,7 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
     }
 
     private AppointmentRecurringPattern getUpdatedRecurringPattern(Appointment appointment, List<AppointmentStatus> applicableStatusList, String clientTimeZone) {
-        Date startOfDay = getStartOfDay();
+        Date startOfDay = DateUtil.getStartOfDay();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
         appointmentRecurringPattern
@@ -147,15 +161,6 @@ public class AllAppointmentRecurringPatternMapper extends AbstractAppointmentRec
         return (appointmentInList.getStartDateTime().after(startOfDay)
                 || startOfDay.equals(appointmentInList.getStartDateTime()))
                 && applicableStatusList.contains(appointmentInList.getStatus());
-    }
-
-    private Date getStartOfDay() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMinimum(Calendar.HOUR_OF_DAY));
-        calendar.set(Calendar.MINUTE, calendar.getMinimum(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
-        calendar.set(Calendar.MILLISECOND, calendar.getMinimum(Calendar.MILLISECOND));
-        return calendar.getTime();
     }
 
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {

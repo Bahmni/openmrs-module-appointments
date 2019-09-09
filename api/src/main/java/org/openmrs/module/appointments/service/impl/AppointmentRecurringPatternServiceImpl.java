@@ -1,13 +1,10 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -23,9 +20,10 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
+
+import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
 @Transactional
 public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurringPatternService {
@@ -121,15 +119,6 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
                         || startOfDay.equals(appointmentInList.getStartDateTime()))
                         && applicableStatusList.contains(appointmentInList.getStatus()))
                 .collect(Collectors.toList());
-    }
-
-    private Date getStartOfDay() {
-        Calendar calendar = Calendar.getInstance();
-        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMinimum(Calendar.HOUR_OF_DAY));
-        calendar.set(Calendar.MINUTE, calendar.getMinimum(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
-        calendar.set(Calendar.MILLISECOND, calendar.getMinimum(Calendar.MILLISECOND));
-        return calendar.getTime();
     }
 
     private void setAppointmentAudit(Appointment appointment) {
