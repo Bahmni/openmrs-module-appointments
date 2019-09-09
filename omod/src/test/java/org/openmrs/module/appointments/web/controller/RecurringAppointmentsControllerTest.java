@@ -6,6 +6,8 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -16,9 +18,7 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
-import org.openmrs.module.appointments.web.validators.Validator;
 import org.openmrs.module.appointments.web.validators.impl.RecurringPatternValidator;
-import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,13 +28,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
@@ -64,9 +66,6 @@ public class RecurringAppointmentsControllerTest {
     @Mock
     @Qualifier("allAppointmentRecurringPatternUpdateService")
     private AppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
-
-    @Mock
-    Validator<RecurringAppointmentRequest> appointmentRequestEditValidator;
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -119,7 +118,6 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         when((recurringAppointmentRequest.getAppointmentRequest())).thenReturn(appointmentRequest);
-        when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
         when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
         when(recurringAppointmentRequest.getTimeZone()).thenReturn("UTC");
         when(allAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
@@ -144,7 +142,6 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         Appointment appointment = mock(Appointment.class);
 
-        when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
         when(singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
         when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
@@ -184,7 +181,6 @@ public class RecurringAppointmentsControllerTest {
         when(newAppointment.getUuid()).thenReturn("newUuid");
 
         when(appointment.getVoided()).thenReturn(true);
-        when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
 
         recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
@@ -214,8 +210,6 @@ public class RecurringAppointmentsControllerTest {
         when(appointment.getRelatedAppointment()).thenReturn(oldRecurringAppointment);
         when(oldRecurringAppointment.getUuid()).thenReturn("oldUuid");
         when(appointment.getVoided()).thenReturn(false);
-        when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(true);
-
 
         recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
@@ -223,20 +217,27 @@ public class RecurringAppointmentsControllerTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenAppointmentRequestValidationFailed() {
-        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
-        when(recurringAppointmentRequest.isRecurringAppointment()).thenReturn(true);
-        when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
-        when(appointmentRequestEditValidator.validate(recurringAppointmentRequest)).thenReturn(false);
-        final String error = "error";
-        when(appointmentRequestEditValidator.getError()).thenReturn(error);
+    public void shouldThrowAPIExceptionWhenRequestIsInvalidForEdit() {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                Object[] args = invocationOnMock.getArguments();
+                Errors errors = (Errors) args[1];
+                errors.reject("some error");
+                return null;
+            }
+        }).when(recurringPatternValidator).validate(any(), any());
 
-        final ResponseEntity<Object> responseEntity = recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
+        recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
-        verify(appointmentRequestEditValidator, times(1)).getError();
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        final String message = (String) ((LinkedHashMap) ((SimpleObject) responseEntity.getBody()).get("error")).get("message");
-        assertEquals(error, message);
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.save(recurringAppointmentRequest);
+        verify(allAppointmentRecurringPatternUpdateService, never()).fromRequest(any());
+        verify(singleAppointmentRecurringPatternUpdateService, never()).fromRequest(any());
+        verify(appointmentRecurringPatternService, never()).validateAndSave(any());
+        verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "some error");
     }
 
     @Test
