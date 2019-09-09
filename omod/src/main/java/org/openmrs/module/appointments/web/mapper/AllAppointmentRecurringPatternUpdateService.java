@@ -27,6 +27,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
@@ -61,13 +62,7 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
             throw new APIException("Time Zone is missing");
         }
         String appointmentUuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
-        Appointment appointment;
-        if (!StringUtils.isBlank(recurringAppointmentRequest.getAppointmentRequest().getUuid())) {
-            appointment = appointmentsService.getAppointmentByUuid(recurringAppointmentRequest.getAppointmentRequest().getUuid());
-        } else {
-            appointment = new Appointment();
-            appointment.setPatient(patientService.getPatientByUuid(recurringAppointmentRequest.getAppointmentRequest().getPatientUuid()));
-        }
+        Appointment appointment = getAppointment(recurringAppointmentRequest);
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
         appointment.setUuid(appointmentUuid);
         AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
@@ -82,6 +77,15 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
                 Collections.singletonList(AppointmentStatus.Scheduled), clientTimeZone);
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return updatedAppointmentRecurringPattern;
+    }
+
+    private Appointment getAppointment(RecurringAppointmentRequest recurringAppointmentRequest) {
+        Appointment appointment = appointmentsService
+                .getAppointmentByUuid(recurringAppointmentRequest.getAppointmentRequest().getUuid());
+        if (Objects.isNull(appointment)) {
+            throw new APIException("Invalid appointment for edit");
+        }
+        return appointment;
     }
 
     private List<Appointment> getUpdatedSetOfAppointments(RecurringAppointmentRequest recurringAppointmentRequest,
