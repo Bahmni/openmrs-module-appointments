@@ -1,13 +1,10 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,8 +15,8 @@ import java.util.Collections;
 import java.util.HashSet;
 
 @Component
-@Qualifier("singleAppointmentRecurringPatternMapper")
-public class SingleAppointmentRecurringPatternMapper extends AbstractAppointmentRecurringPatternMapper {
+@Qualifier("singleAppointmentRecurringPatternUpdateService")
+public class SingleAppointmentRecurringPatternUpdateService implements AppointmentRecurringPatternUpdateService {
 
     @Autowired
     private AppointmentsService appointmentsService;

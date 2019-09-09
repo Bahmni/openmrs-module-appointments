@@ -15,12 +15,8 @@ import org.openmrs.module.appointments.service.AppointmentServiceDefinitionServi
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
-import org.openmrs.module.appointments.web.mapper.AbstractAppointmentRecurringPatternMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
-import org.openmrs.module.appointments.web.validators.Validator;
-import org.openmrs.module.webservices.rest.SimpleObject;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 

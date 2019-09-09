@@ -24,7 +24,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 @RunWith(PowerMockRunner.class)
-public class SingleAppointmentRecurringPatternMapperTest {
+public class SingleAppointmentRecurringPatternUpdateServiceTest {
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -36,7 +36,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @InjectMocks
-    SingleAppointmentRecurringPatternMapper singleAppointmentRecurringPatternMapper;
+    SingleAppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -55,7 +55,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
         when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
 
         verify(recurringAppointmentRequest.getAppointmentRequest(), times(1)).getUuid();
         verify(appointmentsService, times(1)).getAppointmentByUuid("uuid");
@@ -93,7 +93,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
         doNothing().when(appointmentMapper).mapAppointmentRequestToAppointment(eq(appointmentRequest), any(Appointment.class));
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+        singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
 
         assertEquals(true, appointment.getVoided());
     }
@@ -115,7 +115,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
 
         assertEquals(2, appointmentRecurringPattern.getAppointments().size());
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
 
         verify(appointment, times(1)).getRelatedAppointment();
         verify(appointmentMapper, times(1))
@@ -144,7 +144,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
         when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
         final ArrayList<Appointment> finalAppointments = new ArrayList<>(returnedAppointmentRecurringPattern.getAppointments());
         final Appointment appointment1 = finalAppointments.get(0);
         final Appointment appointment2 = finalAppointments.get(1);
@@ -171,7 +171,7 @@ public class SingleAppointmentRecurringPatternMapperTest {
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, relatedAppointment)));
         assertEquals(2, appointmentRecurringPattern.getAppointments().size());
 
-        singleAppointmentRecurringPatternMapper.fromRequest(recurringAppointmentRequest);
+        singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
         assertNotNull(appointment.getAppointmentAudits());
 
     }

@@ -36,7 +36,7 @@ import static org.openmrs.module.appointments.model.AppointmentProviderResponse.
 import static org.openmrs.module.appointments.model.AppointmentStatus.*;
 
 @RunWith(PowerMockRunner.class)
-public class AllAppointmentRecurringPatternMapperTest {
+public class AllAppointmentRecurringPatternUpdateServiceTest {
     @Mock
     private AppointmentsService appointmentsService;
 
@@ -50,7 +50,7 @@ public class AllAppointmentRecurringPatternMapperTest {
     private Patient patient;
 
     @InjectMocks
-    AllAppointmentRecurringPatternMapper allAppointmentRecurringPatternMapper;
+    AllAppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
 
     @Mock
     DailyRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
@@ -147,7 +147,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(3, updatedRecurringPattern.getAppointments().size());
@@ -245,7 +245,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
 
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(3, updatedRecurringPattern.getAppointments().size());
@@ -316,7 +316,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(3, updatedRecurringPattern.getAppointments().size());
@@ -406,7 +406,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(3, updatedRecurringPattern.getAppointments().size());
@@ -484,7 +484,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(3, updatedRecurringPattern.getAppointments().size());
@@ -581,7 +581,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when( appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
         when(dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern,recurringAppointmentRequest)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(2, updatedRecurringPattern.getActiveAppointments().size());
@@ -666,7 +666,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(dailyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern, recurringAppointmentRequest))
                 .thenReturn(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour, appointmentFive));
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(5, updatedRecurringPattern.getActiveAppointments().size());
@@ -737,7 +737,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when(appointmentServiceHelper.getAppointmentAsJsonString(any())).thenReturn(null);
         when(dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest)).thenReturn(Arrays.asList(appointmentOne, appointmentTwo));
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(2, updatedRecurringPattern.getActiveAppointments().size());
@@ -824,7 +824,7 @@ public class AllAppointmentRecurringPatternMapperTest {
         when(dailyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern,recurringAppointmentRequest))
                 .thenReturn((Arrays.asList(appointmentOne, appointmentTwo, appointmentThree,appointmentFour, appointmentFive)));
 
-        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternMapper
+        AppointmentRecurringPattern updatedRecurringPattern = allAppointmentRecurringPatternUpdateService
                 .fromRequest(recurringAppointmentRequest);
 
         assertEquals(5, updatedRecurringPattern.getActiveAppointments().size());
