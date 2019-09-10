@@ -72,17 +72,26 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         }
         List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
         appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
+        updateAppointmentsDetails(appointmentRecurringPattern, appointments);
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        return appointments;
+    }
+
+    @Override
+    public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern) {
+        List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
+        appointmentServiceHelper.validate(appointments.get(0), editAppointmentValidators);
+        updateAppointmentsDetails(appointmentRecurringPattern, appointments);
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        return appointmentRecurringPattern;
+    }
+
+    private void updateAppointmentsDetails(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> appointments)  {
         appointments.forEach(appointment -> {
             appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
         });
-        save(appointmentRecurringPattern);
-        return appointments;
-    }
-
-    public void save(AppointmentRecurringPattern appointmentRecurringPattern) {
-        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
     }
 
     @Override
@@ -104,11 +113,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern) {
-        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
-        return appointmentRecurringPattern;
-    }
+
 
     private List<Appointment> getPendingOccurrences(String appointmentUuid, List<AppointmentStatus> applicableStatusList) {
         Date startOfDay = getStartOfDay();

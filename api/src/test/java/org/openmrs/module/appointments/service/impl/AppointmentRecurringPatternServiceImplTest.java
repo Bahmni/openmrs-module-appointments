@@ -11,6 +11,7 @@ import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -35,16 +36,7 @@ import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyListOf;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
 
@@ -228,16 +220,44 @@ public class AppointmentRecurringPatternServiceImplTest {
     }
 
     @Test
-    public void shouldSaveAndReturnTheUpdatedRecurringPatternWhenUpdateIsCalled() {
+    public void shouldSaveAndReturnTheUpdatedRecurringPatternWhenUpdateIsCalled() throws IOException {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         Appointment appointment = new Appointment();
         List<Appointment> appointments = Collections.singletonList(appointment);
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+        String notes = "Notes";
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.update(appointmentRecurringPattern);
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
+        verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
+        verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
+        verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfValidationFailsOnAppointmentUpdate() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment appointment = new Appointment();
+        List<Appointment> appointments = Collections.singletonList(appointment);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+        String errorMessage = "Appointment cannot be updated without Patient";
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
+                .validate(appointment, editAppointmentValidators);
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+
+        recurringAppointmentService.update(appointmentRecurringPattern);
+
+        verify(appointmentDao, never()).save(any(Appointment.class));
+        verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(appointment, any());
+        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(appointment);
     }
 
     private Appointment getAppointment(String uuid, Patient patient, AppointmentStatus appointmentStatus,
