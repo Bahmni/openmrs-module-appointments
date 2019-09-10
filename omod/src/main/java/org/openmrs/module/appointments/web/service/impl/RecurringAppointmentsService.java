@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.web.service.impl;
 
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
@@ -33,6 +34,59 @@ public class RecurringAppointmentsService {
                 break;
             case DAY:
                 appointments = dailyRecurringAppointmentsGenerationService.generateAppointments(recurringAppointmentRequest);
+                break;
+        }
+        return appointments;
+    }
+
+    public List<Appointment> getUpdatedSetOfAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
+        List<Appointment> newSetOfAppointments = new ArrayList<>();
+        if (appointmentRecurringPattern.getEndDate() == null) {
+            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyIncreased(appointmentRecurringPattern.getFrequency())) {
+                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
+            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyDecreased(appointmentRecurringPattern.getFrequency())) {
+                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
+        } else {
+            if (recurringAppointmentRequest.getRecurringPattern().isAfter(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
+            if (recurringAppointmentRequest.getRecurringPattern().isBefore(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
+        }
+        return newSetOfAppointments;
+    }
+
+    private List<Appointment> addRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                                       RecurringAppointmentRequest recurringAppointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        switch (appointmentRecurringPattern.getType()) {
+            case WEEK:
+                appointments = weeklyRecurringAppointmentsGenerationService.addAppointments(
+                        appointmentRecurringPattern, recurringAppointmentRequest);
+                break;
+            case DAY:
+                appointments = dailyRecurringAppointmentsGenerationService.addAppointments(
+                        appointmentRecurringPattern, recurringAppointmentRequest);
+                break;
+        }
+        return appointments;
+    }
+
+    private List<Appointment> deleteRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
+                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
+        List<Appointment> appointments = new ArrayList<>();
+        switch (appointmentRecurringPattern.getType()) {
+            case WEEK:
+                appointments = weeklyRecurringAppointmentsGenerationService
+                        .removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+                break;
+            case DAY:
+                appointments = dailyRecurringAppointmentsGenerationService
+                        .removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
                 break;
         }
         return appointments;

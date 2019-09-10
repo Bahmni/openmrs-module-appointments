@@ -10,8 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
-import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
-import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -40,13 +39,10 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
     private AppointmentMapper appointmentMapper;
 
     @Autowired
-    private WeeklyRecurringAppointmentsGenerationService weeklyRecurringAppointmentsGenerationService;
-
-    @Autowired
-    private DailyRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
-
-    @Autowired
     private RecurringPatternMapper recurringPatternMapper;
+
+    @Autowired
+    RecurringAppointmentsService recurringAppointmentsService;
 
     @Override
     public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest) {
@@ -57,8 +53,8 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
         }
         Appointment appointment = getAppointment(recurringAppointmentRequest);
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
-        List<Appointment> newSetOfAppointments = getUpdatedSetOfAppointments(recurringAppointmentRequest,
-                appointment.getAppointmentRecurringPattern());
+        List<Appointment> newSetOfAppointments = recurringAppointmentsService
+                .getUpdatedSetOfAppointments(appointment.getAppointmentRecurringPattern(), recurringAppointmentRequest);
         AppointmentRecurringPattern updatedAppointmentRecurringPattern =
                 recurringPatternMapper.fromRequest(recurringAppointmentRequest.getRecurringPattern());
         if (newSetOfAppointments.size() != 0) {
@@ -78,59 +74,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
             throw new APIException("Invalid appointment for edit");
         }
         return appointment;
-    }
-
-    private List<Appointment> getUpdatedSetOfAppointments(RecurringAppointmentRequest recurringAppointmentRequest,
-                                                          AppointmentRecurringPattern appointmentRecurringPattern) {
-        List<Appointment> newSetOfAppointments = new ArrayList<>();
-        if (appointmentRecurringPattern.getEndDate() == null) {
-            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyIncreased(appointmentRecurringPattern.getFrequency())) {
-                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyDecreased(appointmentRecurringPattern.getFrequency())) {
-                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-        } else {
-            if (recurringAppointmentRequest.getRecurringPattern().isAfter(appointmentRecurringPattern.getEndDate())) {
-                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-            if (recurringAppointmentRequest.getRecurringPattern().isBefore(appointmentRecurringPattern.getEndDate())) {
-                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-        }
-        return newSetOfAppointments;
-    }
-
-    private List<Appointment> addRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
-                                                       RecurringAppointmentRequest recurringAppointmentRequest) {
-        List<Appointment> appointments = new ArrayList<>();
-            switch (appointmentRecurringPattern.getType()) {
-                case WEEK:
-                    appointments = weeklyRecurringAppointmentsGenerationService.addAppointments(
-                            appointmentRecurringPattern, recurringAppointmentRequest);
-                    break;
-                case DAY:
-                    appointments = dailyRecurringAppointmentsGenerationService.addAppointments(
-                            appointmentRecurringPattern, recurringAppointmentRequest);
-                    break;
-            }
-        return appointments;
-    }
-
-    private List<Appointment> deleteRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
-                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
-        List<Appointment> appointments = new ArrayList<>();
-            switch (appointmentRecurringPattern.getType()) {
-                case WEEK:
-                    appointments = weeklyRecurringAppointmentsGenerationService
-                            .removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-                    break;
-                case DAY:
-                    appointments = dailyRecurringAppointmentsGenerationService
-                            .removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-                    break;
-        }
-        return appointments;
     }
 
     private void updateMetadataForAllAppointments(Appointment appointment, String clientTimeZone) {
