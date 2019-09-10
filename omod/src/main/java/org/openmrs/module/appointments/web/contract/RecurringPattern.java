@@ -59,4 +59,20 @@ public class RecurringPattern {
     public void setDaysOfWeek(List<String> daysOfWeek) {
         this.daysOfWeek = daysOfWeek;
     }
+
+    public boolean isFrequencyIncreased(Integer frequency) {
+        return this.getFrequency() > frequency;
+    }
+
+    public boolean isFrequencyDecreased(Integer frequency) {
+        return this.getFrequency() < frequency;
+    }
+
+    public boolean isAfter(Date endDate) {
+        return this.getEndDate().after(endDate);
+    }
+
+    public boolean isBefore(Date endDate) {
+        return this.getEndDate().before(endDate);
+    }
 }

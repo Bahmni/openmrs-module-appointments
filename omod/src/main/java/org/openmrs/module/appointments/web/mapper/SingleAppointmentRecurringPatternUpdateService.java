@@ -28,7 +28,7 @@ public class SingleAppointmentRecurringPatternUpdateService implements Appointme
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Override
-    public AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest){
+    public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest){
         String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
         Appointment newAppointment;

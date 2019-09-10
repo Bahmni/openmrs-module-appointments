@@ -9,7 +9,6 @@ import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.service.impl.DailyRecurringAppointmentsGenerationService;
 import org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentsGenerationService;
@@ -19,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -47,27 +45,28 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
     @Autowired
     private DailyRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
 
+    @Autowired
+    private RecurringPatternMapper recurringPatternMapper;
+
     @Override
-    public AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest) {
+    public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest) {
         String clientTimeZone = recurringAppointmentRequest.getTimeZone();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         if (!org.springframework.util.StringUtils.hasText(clientTimeZone)) {
             throw new APIException("Time Zone is missing");
         }
-        String appointmentUuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         Appointment appointment = getAppointment(recurringAppointmentRequest);
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
-        appointment.setUuid(appointmentUuid);
-        AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
-        List<Appointment> newSetOfAppointments = getUpdatedSetOfAppointments(recurringAppointmentRequest, appointmentRecurringPattern);
-        if (newSetOfAppointments.size() != 0)
-            appointmentRecurringPattern.setAppointments(new HashSet<>(newSetOfAppointments));
-        appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
-        appointmentRecurringPattern.setFrequency(recurringAppointmentRequest.getRecurringPattern().getFrequency());
-        appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        List<Appointment> newSetOfAppointments = getUpdatedSetOfAppointments(recurringAppointmentRequest,
+                appointment.getAppointmentRecurringPattern());
+        AppointmentRecurringPattern updatedAppointmentRecurringPattern =
+                recurringPatternMapper.fromRequest(recurringAppointmentRequest.getRecurringPattern());
+        if (newSetOfAppointments.size() != 0) {
+            updatedAppointmentRecurringPattern.setAppointments(new HashSet<>(newSetOfAppointments));
+        }
+        appointment.setAppointmentRecurringPattern(updatedAppointmentRecurringPattern);
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
-        AppointmentRecurringPattern updatedAppointmentRecurringPattern = getUpdatedRecurringPattern(appointment,
-                Collections.singletonList(AppointmentStatus.Scheduled), clientTimeZone);
+        updateMetadataForAllAppointments(appointment, clientTimeZone);
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         return updatedAppointmentRecurringPattern;
     }
@@ -84,18 +83,20 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
     private List<Appointment> getUpdatedSetOfAppointments(RecurringAppointmentRequest recurringAppointmentRequest,
                                                           AppointmentRecurringPattern appointmentRecurringPattern) {
         List<Appointment> newSetOfAppointments = new ArrayList<>();
-        if (appointmentRecurringPattern.getEndDate() == null){
-            if (recurringAppointmentRequest.getRecurringPattern().getFrequency() > appointmentRecurringPattern.getFrequency()) {
+        if (appointmentRecurringPattern.getEndDate() == null) {
+            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyIncreased(appointmentRecurringPattern.getFrequency())) {
                 newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
             }
-            if (recurringAppointmentRequest.getRecurringPattern().getFrequency() < appointmentRecurringPattern.getFrequency()) {
-                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);            }
-        }else {
-            if (recurringAppointmentRequest.getRecurringPattern().getEndDate().after(appointmentRecurringPattern.getEndDate())) {
-                newSetOfAppointments =  addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyDecreased(appointmentRecurringPattern.getFrequency())) {
+                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
             }
-            if (recurringAppointmentRequest.getRecurringPattern().getEndDate().before(appointmentRecurringPattern.getEndDate())) {
-                newSetOfAppointments =  deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);            }
+        } else {
+            if (recurringAppointmentRequest.getRecurringPattern().isAfter(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
+            if (recurringAppointmentRequest.getRecurringPattern().isBefore(appointmentRecurringPattern.getEndDate())) {
+                newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            }
         }
         return newSetOfAppointments;
     }
@@ -132,28 +133,20 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
         return appointments;
     }
 
-    private AppointmentRecurringPattern getUpdatedRecurringPattern(Appointment appointment, List<AppointmentStatus> applicableStatusList, String clientTimeZone) {
-        Date startOfDay = DateUtil.getStartOfDay();
+    private void updateMetadataForAllAppointments(Appointment appointment, String clientTimeZone) {
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
         appointmentRecurringPattern
                 .setAppointments(appointment.getAppointmentRecurringPattern().getAppointments()
                         .stream()
                         .map(app -> {
-                            if (isPendingAppointment(applicableStatusList, startOfDay, app)) {
+                            if (app.isFutureAppointment() && app.getStatus() == AppointmentStatus.Scheduled) {
                                 TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
                                 updateMetadata(app, appointment);
                                 TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
                             }
                             return app;
                         }).collect(Collectors.toSet()));
-        return appointmentRecurringPattern;
-    }
-
-    private boolean isPendingAppointment(List<AppointmentStatus> applicableStatusList, Date startOfDay, Appointment appointmentInList) {
-        return (appointmentInList.getStartDateTime().after(startOfDay)
-                || startOfDay.equals(appointmentInList.getStartDateTime()))
-                && applicableStatusList.contains(appointmentInList.getStatus());
     }
 
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {

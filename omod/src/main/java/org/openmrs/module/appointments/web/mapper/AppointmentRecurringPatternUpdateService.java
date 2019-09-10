@@ -15,5 +15,5 @@ import static org.openmrs.module.appointments.service.impl.RecurringAppointmentT
 @Component
 public interface AppointmentRecurringPatternUpdateService {
 
-    AppointmentRecurringPattern fromRequest(RecurringAppointmentRequest recurringAppointmentRequest);
+    AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest);
 }

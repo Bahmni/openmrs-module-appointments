@@ -55,7 +55,7 @@ public class SingleAppointmentRecurringPatternUpdateServiceTest {
         when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
 
         verify(recurringAppointmentRequest.getAppointmentRequest(), times(1)).getUuid();
         verify(appointmentsService, times(1)).getAppointmentByUuid("uuid");
@@ -93,7 +93,7 @@ public class SingleAppointmentRecurringPatternUpdateServiceTest {
         doNothing().when(appointmentMapper).mapAppointmentRequestToAppointment(eq(appointmentRequest), any(Appointment.class));
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+        singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
 
         assertEquals(true, appointment.getVoided());
     }
@@ -115,7 +115,7 @@ public class SingleAppointmentRecurringPatternUpdateServiceTest {
 
         assertEquals(2, appointmentRecurringPattern.getAppointments().size());
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
 
         verify(appointment, times(1)).getRelatedAppointment();
         verify(appointmentMapper, times(1))
@@ -144,7 +144,7 @@ public class SingleAppointmentRecurringPatternUpdateServiceTest {
         when(appointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
 
-        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+        final AppointmentRecurringPattern returnedAppointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
         final ArrayList<Appointment> finalAppointments = new ArrayList<>(returnedAppointmentRecurringPattern.getAppointments());
         final Appointment appointment1 = finalAppointments.get(0);
         final Appointment appointment2 = finalAppointments.get(1);
@@ -171,7 +171,7 @@ public class SingleAppointmentRecurringPatternUpdateServiceTest {
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, relatedAppointment)));
         assertEquals(2, appointmentRecurringPattern.getAppointments().size());
 
-        singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+        singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
         assertNotNull(appointment.getAppointmentAudits());
 
     }
