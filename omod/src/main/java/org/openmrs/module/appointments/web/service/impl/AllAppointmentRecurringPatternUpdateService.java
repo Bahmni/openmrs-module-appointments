@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.web.mapper;
+package org.openmrs.module.appointments.web.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.api.APIException;
@@ -10,7 +10,9 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
-import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
+import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;

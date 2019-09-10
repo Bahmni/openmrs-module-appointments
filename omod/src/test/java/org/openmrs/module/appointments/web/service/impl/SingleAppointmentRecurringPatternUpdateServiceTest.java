@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.web.mapper;
+package org.openmrs.module.appointments.web.service.impl;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -13,6 +13,8 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.io.IOException;
