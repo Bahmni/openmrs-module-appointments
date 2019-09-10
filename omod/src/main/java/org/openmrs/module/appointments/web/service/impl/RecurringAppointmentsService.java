@@ -41,20 +41,22 @@ public class RecurringAppointmentsService {
 
     public List<Appointment> getUpdatedSetOfAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                           RecurringAppointmentRequest recurringAppointmentRequest) {
-        List<Appointment> newSetOfAppointments = new ArrayList<>();
+        List<Appointment> newSetOfAppointments;
         if (appointmentRecurringPattern.getEndDate() == null) {
             if (recurringAppointmentRequest.getRecurringPattern().isFrequencyIncreased(appointmentRecurringPattern.getFrequency())) {
                 newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-            if (recurringAppointmentRequest.getRecurringPattern().isFrequencyDecreased(appointmentRecurringPattern.getFrequency())) {
+            } else if (recurringAppointmentRequest.getRecurringPattern().isFrequencyDecreased(appointmentRecurringPattern.getFrequency())) {
                 newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            } else {
+                return new ArrayList<>(appointmentRecurringPattern.getAppointments());
             }
         } else {
             if (recurringAppointmentRequest.getRecurringPattern().isAfter(appointmentRecurringPattern.getEndDate())) {
                 newSetOfAppointments = addRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-            }
-            if (recurringAppointmentRequest.getRecurringPattern().isBefore(appointmentRecurringPattern.getEndDate())) {
+            } else if (recurringAppointmentRequest.getRecurringPattern().isBefore(appointmentRecurringPattern.getEndDate())) {
                 newSetOfAppointments = deleteRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+            } else {
+                return new ArrayList<>(appointmentRecurringPattern.getAppointments());
             }
         }
         return newSetOfAppointments;
