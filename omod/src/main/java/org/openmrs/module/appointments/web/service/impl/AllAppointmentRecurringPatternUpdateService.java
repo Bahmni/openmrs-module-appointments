@@ -11,7 +11,6 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -41,9 +40,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
     private AppointmentMapper appointmentMapper;
 
     @Autowired
-    private RecurringPatternMapper recurringPatternMapper;
-
-    @Autowired
     RecurringAppointmentsService recurringAppointmentsService;
 
     @Override
@@ -57,8 +53,9 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
         List<Appointment> newSetOfAppointments = recurringAppointmentsService
                 .getUpdatedSetOfAppointments(appointment.getAppointmentRecurringPattern(), recurringAppointmentRequest);
-        AppointmentRecurringPattern updatedAppointmentRecurringPattern =
-                recurringPatternMapper.fromRequest(recurringAppointmentRequest.getRecurringPattern());
+        AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
+        updatedAppointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
+        updatedAppointmentRecurringPattern.setFrequency(recurringAppointmentRequest.getRecurringPattern().getFrequency());
         if (newSetOfAppointments.size() != 0) {
             updatedAppointmentRecurringPattern.setAppointments(new HashSet<>(newSetOfAppointments));
         }
