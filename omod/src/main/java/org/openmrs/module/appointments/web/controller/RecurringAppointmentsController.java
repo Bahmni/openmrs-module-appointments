@@ -98,12 +98,12 @@ public class RecurringAppointmentsController {
             boolean applyForAll = recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments();
             final String appointmentRequestUuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
             if (applyForAll) {
-                AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+                AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
                 AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                 List<Appointment> updatedAppointments = new ArrayList<>(updatedAppointmentRecurringPattern.getAppointments());
                 return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
-                    AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.fromRequest(recurringAppointmentRequest);
+                    AppointmentRecurringPattern appointmentRecurringPattern = singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
                     AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                     Appointment updatedAppointment = null;
                     final Set<Appointment> updatedAppointments = updatedAppointmentRecurringPattern.getActiveAppointments();

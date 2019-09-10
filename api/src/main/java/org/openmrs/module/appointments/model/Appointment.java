@@ -5,6 +5,7 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Collections;
@@ -190,6 +191,11 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public Boolean isRecurring() {
         return Objects.nonNull(this.appointmentRecurringPattern);
+    }
+
+    public Boolean isFutureAppointment() {
+        Date startOfDay = DateUtil.getStartOfDay();
+        return this.getStartDateTime().after(startOfDay) || startOfDay.equals(this.getStartDateTime());
     }
 }
 
