@@ -256,9 +256,51 @@ public class AppointmentRecurringPatternServiceImplTest {
 
         verify(appointmentDao, never()).save(any(Appointment.class));
         verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());
-        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(appointment, any());
-        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(appointment);
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
+        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
     }
+
+    @Test
+    public void shouldAddAuditAppointmentNumberToOnlyUpdatedAppointments() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment voidedAppointment = new Appointment();
+        voidedAppointment.setUuid("voidedApp");
+        voidedAppointment.setVoided(true);
+        Appointment newAppointment = new Appointment();
+        newAppointment.setUuid("newApp");
+        List<Appointment> updatedAppointments = Arrays.asList(voidedAppointment, newAppointment);
+
+        Appointment appointment = recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
+
+        verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
+        verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
+        verify(appointmentServiceHelper, times(2)).getAppointmentAuditEvent(any(Appointment.class), anyString());
+        verify(appointmentServiceHelper, times(2)).checkAndAssignAppointmentNumber(any(Appointment.class));
+        assertEquals(newAppointment, appointment);
+    }
+
+    @Test
+    public void shouldThrowExceptionIfValidationFailsOnSingleAppointmentUpdate() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment voidedAppointment = new Appointment();
+        voidedAppointment.setUuid("voidedApp");
+        Appointment newAppointment = new Appointment();
+        newAppointment.setUuid("newApp");
+        List<Appointment> updatedAppointments = Arrays.asList(voidedAppointment, newAppointment);
+        String errorMessage = "Appointment cannot be updated without Patient";
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
+                .validate(any(), anyListOf(AppointmentValidator.class));
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+
+        recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
+
+        verify(appointmentDao, never()).save(any(Appointment.class));
+        verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());
+        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
+        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
+    }
+
 
     private Appointment getAppointment(String uuid, Patient patient, AppointmentStatus appointmentStatus,
                                        AppointmentKind appointmentKind, Date start, Date end) {
