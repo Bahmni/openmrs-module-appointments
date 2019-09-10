@@ -95,6 +95,18 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
+    public Appointment update(AppointmentRecurringPattern appointmentRecurringPattern,
+                              List<Appointment> updatedAppointments) {
+        appointmentServiceHelper.validate(updatedAppointments.get(0), editAppointmentValidators);
+        updateAppointmentsDetails(appointmentRecurringPattern, updatedAppointments);
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        return updatedAppointments
+                .stream()
+                .filter(appointment -> appointment.getVoided() != true)
+                .collect(Collectors.toList()).get(0);
+    }
+
+    @Override
     public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);

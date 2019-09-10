@@ -13,6 +13,9 @@ public interface AppointmentRecurringPatternService {
     List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern);
 
     @Transactional
+    Appointment update(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> updatedAppointments);
+
+    @Transactional
     void changeStatus(Appointment appointment, String toStatus, Date onDate, String clientTimeZone);
 
     @Transactional
