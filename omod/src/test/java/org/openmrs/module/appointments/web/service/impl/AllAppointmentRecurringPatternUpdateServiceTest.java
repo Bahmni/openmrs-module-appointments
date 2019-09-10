@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.web.mapper;
+package org.openmrs.module.appointments.web.service.impl;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
@@ -26,6 +26,9 @@ import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
+import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;

@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.web.mapper;
+package org.openmrs.module.appointments.web.service;
 
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
