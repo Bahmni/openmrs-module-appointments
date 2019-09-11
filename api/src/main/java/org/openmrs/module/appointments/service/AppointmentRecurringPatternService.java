@@ -9,7 +9,7 @@ import java.util.List;
 public interface AppointmentRecurringPatternService {
 
     @Transactional
-    List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern);
+    AppointmentRecurringPattern validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern);
 
     @Transactional
     Appointment update(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> updatedAppointments);

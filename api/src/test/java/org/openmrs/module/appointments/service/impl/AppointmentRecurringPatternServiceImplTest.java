@@ -82,9 +82,10 @@ public class AppointmentRecurringPatternServiceImplTest {
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
-        List<Appointment> appointmentsList = recurringAppointmentService
+        AppointmentRecurringPattern savedAppointmentRecurringPattern = recurringAppointmentService
                 .validateAndSave(appointmentRecurringPattern);
 
+        List<Appointment> appointmentsList = new ArrayList<>(savedAppointmentRecurringPattern.getAppointments());
         assertEquals(1, appointmentsList.size());
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
@@ -92,16 +93,6 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
         assertEquals(1, appointmentRecurringPattern.getAppointments().size());
         assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
-    }
-
-    @Test
-    public void shouldReturnEmptyAppointmentsWithoutSavingWhenAppointmentsAreEmpty() {
-        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>());
-        when(appointmentRecurringPattern.isAppointmentsEmptyOrNull()).thenReturn(true);
-        List<Appointment> appointmentsList = recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
-        assertEquals(0, appointmentsList.size());
-        verify(appointmentRecurringPatternDao, never()).save(any(AppointmentRecurringPattern.class));
     }
 
     @Test
