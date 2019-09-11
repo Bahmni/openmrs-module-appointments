@@ -98,8 +98,8 @@ public class RecurringAppointmentsController {
             String toStatus = statusDetails.get("toStatus");
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
             if (appointment != null) {
-                appointmentRecurringPatternService.changeStatus(appointment, toStatus, clientTimeZone);
-                return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(appointment), HttpStatus.OK);
+                List<Appointment> appointments = appointmentRecurringPatternService.changeStatus(appointment, toStatus, clientTimeZone);
+                return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(appointments), HttpStatus.OK);
             } else {
                 throw new RuntimeException("Appointment does not exist");
             }
