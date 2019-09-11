@@ -23,6 +23,7 @@ import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringP
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
+import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -54,6 +55,9 @@ public class RecurringAppointmentsControllerTest {
 
     @Mock
     private RecurringPatternValidator recurringPatternValidator;
+
+    @Mock
+    private TimeZoneValidator timeZoneValidator;
 
     @Mock
     private RecurringPatternMapper recurringPatternMapper;
@@ -241,6 +245,15 @@ public class RecurringAppointmentsControllerTest {
     @Test
     public void shouldThrowExceptionWhenTimeZoneIsMissing() throws Exception {
         Map<String,String> statusDetails = new HashMap();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                Object[] args = invocationOnMock.getArguments();
+                Errors errors = (Errors) args[1];
+                errors.reject("Time Zone is missing");
+                return null;
+            }
+        }).when(timeZoneValidator).validate(any(), any());
         statusDetails.put("toStatus", "Cancelled");
         when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(new Appointment());
 
@@ -253,6 +266,7 @@ public class RecurringAppointmentsControllerTest {
     @Test
     public void shouldThrowExceptionIfAppointmentIsNotValid() throws Exception {
         Map<String,String> statusDetails = new HashMap<>();
+        doNothing().when(timeZoneValidator).validate(any(), any());
         statusDetails.put("toStatus", "Cancelled");
         statusDetails.put("timeZone", "Asia/Calcutta");
         when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
