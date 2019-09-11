@@ -50,4 +50,35 @@ public class RecurringPatternMapperTest {
         assertEquals(appointmentRecurringPattern.getEndDate(), endDate);
         assertEquals(appointmentRecurringPattern.getDaysOfWeek(), "MON,TUE");
     }
+
+    @Test
+    public void shouldMapDatabaseObjectToResponseWhenTypeIsDay() {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setFrequency(2);
+        appointmentRecurringPattern.setPeriod(1);
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+
+        RecurringPattern recurringPattern = recurringPatternMapper.mapToResponse(appointmentRecurringPattern);
+
+        assertEquals("DAY", recurringPattern.getType());
+        assertEquals(1, recurringPattern.getPeriod());
+        assertEquals(new Integer(2), recurringPattern.getFrequency());
+    }
+
+    @Test
+    public void shouldMapDatabaseObjectToResponseWhenTypeIsWeek() {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Date endDate = new Date();
+        appointmentRecurringPattern.setEndDate(endDate);
+        appointmentRecurringPattern.setPeriod(1);
+        appointmentRecurringPattern.setType(RecurringAppointmentType.WEEK);
+        appointmentRecurringPattern.setDaysOfWeek("MON,TUE");
+
+        RecurringPattern recurringPattern = recurringPatternMapper.mapToResponse(appointmentRecurringPattern);
+
+        assertEquals("WEEK", recurringPattern.getType());
+        assertEquals(1, recurringPattern.getPeriod());
+        assertEquals(endDate, recurringPattern.getEndDate());
+        assertEquals(2, recurringPattern.getDaysOfWeek().size());
+    }
 }
