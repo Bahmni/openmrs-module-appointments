@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -66,15 +67,12 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public List<Appointment> validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern) {
-        if (appointmentRecurringPattern.isAppointmentsEmptyOrNull()) {
-            return Collections.emptyList();
-        }
+    public AppointmentRecurringPattern validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern) {
         List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
-        appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
-        updateAppointmentsDetails(appointmentRecurringPattern, appointments);
+         appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
+         updateAppointmentsDetails(appointmentRecurringPattern, appointments);
         appointmentRecurringPatternDao.save(appointmentRecurringPattern);
-        return appointments;
+        return appointmentRecurringPattern;
     }
 
     @Override
