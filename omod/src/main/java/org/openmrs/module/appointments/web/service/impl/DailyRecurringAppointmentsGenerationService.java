@@ -7,7 +7,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 
 @Component
 @Qualifier("dailyRecurringAppointmentsGenerationService")
-public class DailyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsGenerationService {
+public class DailyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsService {
 
     private RecurringAppointmentRequest recurringAppointmentRequest;
 

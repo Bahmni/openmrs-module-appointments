@@ -14,7 +14,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
-public abstract class AbstractRecurringAppointmentsGenerationService {
+public abstract class AbstractRecurringAppointmentsService {
 
     @Autowired
     private AppointmentMapper appointmentMapper;
@@ -43,9 +43,12 @@ public abstract class AbstractRecurringAppointmentsGenerationService {
 
     public List<Appointment> removeRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
-        List<Appointment> appointments = getSortedActiveAppointments(appointmentRecurringPattern);
-        if (appointmentRecurringPattern.getEndDate() == null) appointmentRecurringPattern.setFrequency(appointmentRecurringPattern.getFrequency() - recurringAppointmentRequest.getRecurringPattern().getFrequency());
-        else appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
+        List<Appointment> appointments = sort(new ArrayList<>(appointmentRecurringPattern.getActiveAppointments()));
+        if (appointmentRecurringPattern.getEndDate() == null)
+            appointmentRecurringPattern.setFrequency(appointmentRecurringPattern.getFrequency() -
+                    recurringAppointmentRequest.getRecurringPattern().getFrequency());
+        else
+            appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
         recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(0).getStartDateTime());
         recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(0).getEndDateTime());
         Calendar startCalender = Calendar.getInstance();
@@ -54,16 +57,10 @@ public abstract class AbstractRecurringAppointmentsGenerationService {
         removableAppointments = getRemovableAppointments(appointmentRecurringPattern, recurringAppointmentRequest,
                 appointments, currentDate, removableAppointments);
         checkAppointmentStatus(appointments, removableAppointments);
-        for (int i = 0; i < removableAppointments.size(); i++) {
-            appointments.get(removableAppointments.get(i)).setVoided(true);
+        for (int appointmentIndex = 0; appointmentIndex < removableAppointments.size(); appointmentIndex++) {
+            appointments.get(removableAppointments.get(appointmentIndex)).setVoided(true);
         }
-        return getSortedActiveAppointments(appointmentRecurringPattern);
-    }
-
-    private List<Appointment> getSortedActiveAppointments(AppointmentRecurringPattern appointmentRecurringPattern) {
-        List<Appointment> appointments = appointmentRecurringPattern.getActiveAppointments().stream().collect(Collectors.toList());
-        Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
-        return appointments;
+        return sort(new ArrayList<>(appointmentRecurringPattern.getActiveAppointments()));
     }
 
     private void checkAppointmentStatus(List<Appointment> appointments, List<Integer> removableAppointments) {

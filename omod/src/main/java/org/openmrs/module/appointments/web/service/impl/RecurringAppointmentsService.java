@@ -4,7 +4,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
-import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -17,11 +17,11 @@ public class RecurringAppointmentsService {
 
     @Autowired
     @Qualifier("dailyRecurringAppointmentsGenerationService")
-    AbstractRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
+    AbstractRecurringAppointmentsService dailyRecurringAppointmentsGenerationService;
 
     @Autowired
     @Qualifier("weeklyRecurringAppointmentsGenerationService")
-    AbstractRecurringAppointmentsGenerationService weeklyRecurringAppointmentsGenerationService;
+    AbstractRecurringAppointmentsService weeklyRecurringAppointmentsGenerationService;
 
     //todo Use strategy for day, week and month logics
     public List<Appointment> generateRecurringAppointments(RecurringAppointmentRequest recurringAppointmentRequest) {
