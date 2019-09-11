@@ -18,7 +18,7 @@ import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
-import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
+import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
@@ -70,8 +70,7 @@ public class RecurringAppointmentsControllerTest {
     private SingleAppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
 
     @Mock
-    @Qualifier("allAppointmentRecurringPatternUpdateService")
-    private AppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
+    private AllAppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
 
     @Mock
     private AppointmentsService appointmentsService;

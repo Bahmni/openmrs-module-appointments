@@ -11,9 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -27,8 +25,7 @@ import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 @Component
-@Qualifier("allAppointmentRecurringPatternUpdateService")
-public class AllAppointmentRecurringPatternUpdateService implements AppointmentRecurringPatternUpdateService {
+public class AllAppointmentRecurringPatternUpdateService {
 
     @Autowired
     PatientService patientService;
@@ -42,7 +39,6 @@ public class AllAppointmentRecurringPatternUpdateService implements AppointmentR
     @Autowired
     RecurringAppointmentsService recurringAppointmentsService;
 
-    @Override
     public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest) {
         String clientTimeZone = recurringAppointmentRequest.getTimeZone();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
