@@ -16,13 +16,13 @@ import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringP
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
+import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
@@ -65,6 +65,9 @@ public class RecurringAppointmentsController {
     @Autowired
     private AppointmentsService appointmentsService;
 
+    @Autowired
+    private TimeZoneValidator timeZoneValidator;
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Object> save(@RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
@@ -92,9 +95,12 @@ public class RecurringAppointmentsController {
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
         try {
             String clientTimeZone = statusDetails.get("timeZone");
-            if (!StringUtils.hasText(clientTimeZone)) {
-                throw new APIException("Time Zone is missing");
+            Errors errors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
+            timeZoneValidator.validate(clientTimeZone, errors);
+            if (!errors.getAllErrors().isEmpty()) {
+                throw new APIException(errors.getAllErrors().get(0).getCodes()[1]);
             }
+
             String toStatus = statusDetails.get("toStatus");
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
             if (appointment != null) {
@@ -114,13 +120,19 @@ public class RecurringAppointmentsController {
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
             RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
-            Errors errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
-            recurringPatternValidator.validate(recurringPattern, errors);
-            if (!errors.getAllErrors().isEmpty()) {
-                throw new APIException(errors.getAllErrors().get(0).getCodes()[1]);
+            Errors recurringPatternErrors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
+            recurringPatternValidator.validate(recurringPattern, recurringPatternErrors);
+            if (!recurringPatternErrors.getAllErrors().isEmpty()) {
+                throw new APIException(recurringPatternErrors.getAllErrors().get(0).getCodes()[1]);
             }
             boolean applyForAll = recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments();
             if (applyForAll) {
+                String clientTimeZone = recurringAppointmentRequest.getTimeZone();
+                Errors timeZoneErrors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
+                timeZoneValidator.validate(clientTimeZone, timeZoneErrors);
+                if (!timeZoneErrors.getAllErrors().isEmpty()) {
+                    throw new APIException(timeZoneErrors.getAllErrors().get(0).getCodes()[1]);
+                }
                 AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
                 AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
                 List<Appointment> updatedAppointments = new ArrayList<>(updatedAppointmentRecurringPattern.getAppointments());

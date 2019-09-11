@@ -2,33 +2,18 @@ package org.openmrs.module.appointments.web.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.api.APIException;
-import org.openmrs.api.PatientService;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TimeZone;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Component
 public class AllAppointmentRecurringPatternUpdateService {
-
-    @Autowired
-    PatientService patientService;
 
     @Autowired
     private AppointmentsService appointmentsService;
@@ -42,9 +27,6 @@ public class AllAppointmentRecurringPatternUpdateService {
     public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest) {
         String clientTimeZone = recurringAppointmentRequest.getTimeZone();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
-        if (!org.springframework.util.StringUtils.hasText(clientTimeZone)) {
-            throw new APIException("Time Zone is missing");
-        }
         Appointment appointment = getAppointment(recurringAppointmentRequest);
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
         List<Appointment> newSetOfAppointments = recurringAppointmentsService
