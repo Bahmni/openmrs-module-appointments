@@ -13,12 +13,14 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
+import org.openmrs.module.appointments.web.service.AppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
+import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
@@ -65,8 +67,7 @@ public class RecurringAppointmentsControllerTest {
     private RecurringAppointmentMapper recurringAppointmentMapper;
 
     @Mock
-    @Qualifier("singleAppointmentRecurringPatternUpdateService")
-    private AppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
+    private SingleAppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
 
     @Mock
     @Qualifier("allAppointmentRecurringPatternUpdateService")
@@ -135,7 +136,7 @@ public class RecurringAppointmentsControllerTest {
         verify(recurringAppointmentsService, never()).generateRecurringAppointments(recurringAppointmentRequest);
         verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "save error");
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "save error");
     }
 
     @Test
@@ -158,89 +159,31 @@ public class RecurringAppointmentsControllerTest {
     }
 
     @Test
-    public void shouldUpdateSingleRecurringAppointmentByCreatingANewAppointmentReferencingTheExisitngAppointment() {
+    public void shouldCallUpdateWithRecurringPatternAndUpdatedAppointmentsWhenApplyForAllIsNull() {
         RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
         when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
-        when(recurringAppointmentRequest.isRecurringAppointment()).thenReturn(true);
         when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
-
-        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
-        Appointment appointment = mock(Appointment.class);
-
-        when(singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
-        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
-        when(updatedRecurringAppointmentPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment)));
-        when(appointment.getUuid()).thenReturn("uuid");
-        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn("uuid");
-
-        final ResponseEntity<Object> responseEntity = recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
-
-        verify(singleAppointmentRecurringPatternUpdateService, times(1)).getUpdatedRecurringPattern(recurringAppointmentRequest);
-        verify(appointmentRecurringPatternService, times(1)).update(appointmentRecurringPattern);
-
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-
-    }
-
-    @Test
-    public void shouldUpdateSingleRecurringAppointmentAndReturnTheNewAppointmentWhenAppointmentInRequestDoesNotHaveARelatedAppointment() {
-        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
-        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
-        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
-        when(recurringAppointmentRequest.isRecurringAppointment()).thenReturn(true);
-        when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
-
-        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         Appointment appointment = mock(Appointment.class);
         Appointment newAppointment = mock(Appointment.class);
+        Appointment updatedAppointment = mock(Appointment.class);
+        List<Appointment> appointments = Arrays.asList(newAppointment, appointment);
+        final AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
 
-        when(singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
-        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
-        when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, newAppointment)));
-        when(appointment.getUuid()).thenReturn("uuid");
-        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn("uuid");
+        when(singleAppointmentRecurringPatternUpdateService.getUpdatedAppointment(recurringAppointmentRequest)).thenReturn(newAppointment);
+        when(newAppointment.getAppointmentRecurringPattern()).thenReturn(appointmentRecurringPattern);
         when(newAppointment.getRelatedAppointment()).thenReturn(appointment);
-        when(newAppointment.getUuid()).thenReturn("newUuid");
+        when(appointmentRecurringPatternService.update(appointmentRecurringPattern, appointments)).thenReturn(updatedAppointment);
+        RecurringAppointmentDefaultResponse defaultResponse = mock(RecurringAppointmentDefaultResponse.class);
+        when(recurringAppointmentMapper.constructResponse(updatedAppointment)).thenReturn(defaultResponse);
 
-        when(appointment.getVoided()).thenReturn(true);
+        RecurringAppointmentDefaultResponse actualResponse =
+                (RecurringAppointmentDefaultResponse) recurringAppointmentsController.editAppointment(recurringAppointmentRequest).getBody();
 
-        recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
-
-        verify(recurringAppointmentMapper, times(1)).constructResponse(newAppointment);
-
-    }
-
-    @Test
-    public void shouldUpdateRecurringAppointmentAndReturnTheSameAppointmentWhenThisAppointmentHasRelatedAppointment() {
-        RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
-        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
-
-        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
-        when(recurringAppointmentRequest.isRecurringAppointment()).thenReturn(true);
-        when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
-
-        AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
-        Appointment appointment = mock(Appointment.class);
-        Appointment oldRecurringAppointment = mock(Appointment.class);
-
-        when(singleAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
-        final AppointmentRecurringPattern updatedRecurringAppointmentPattern = mock(AppointmentRecurringPattern.class);
-        when(appointmentRecurringPatternService.update(any())).thenReturn(updatedRecurringAppointmentPattern);
-        when(updatedRecurringAppointmentPattern.getActiveAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointment, oldRecurringAppointment)));
-        when(appointment.getUuid()).thenReturn("uuid");
-        when(recurringAppointmentRequest.getAppointmentRequest().getUuid()).thenReturn("uuid");
-        when(appointment.getRelatedAppointment()).thenReturn(oldRecurringAppointment);
-        when(oldRecurringAppointment.getUuid()).thenReturn("oldUuid");
-        when(appointment.getVoided()).thenReturn(false);
-
-        recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
-
-        verify(recurringAppointmentMapper, times(1)).constructResponse(appointment);
+        verify(singleAppointmentRecurringPatternUpdateService).getUpdatedAppointment(recurringAppointmentRequest);
+        verify(appointmentRecurringPatternService).update(appointmentRecurringPattern, appointments);
+        verify(recurringAppointmentMapper).constructResponse(updatedAppointment);
+        assertEquals(defaultResponse, actualResponse);
     }
 
     @Test
@@ -260,11 +203,11 @@ public class RecurringAppointmentsControllerTest {
 
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.save(recurringAppointmentRequest);
         verify(allAppointmentRecurringPatternUpdateService, never()).getUpdatedRecurringPattern(any());
-        verify(singleAppointmentRecurringPatternUpdateService, never()).getUpdatedRecurringPattern(any());
+        verify(singleAppointmentRecurringPatternUpdateService, never()).getUpdatedAppointment(any());
         verify(appointmentRecurringPatternService, never()).validateAndSave(any());
         verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "some error");
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error");
     }
 
     @Test
