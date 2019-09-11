@@ -11,7 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
-import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsGenerationService;
+import org.openmrs.module.appointments.web.service.AbstractRecurringAppointmentsService;
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -32,11 +32,11 @@ public class RecurringAppointmentsServiceTest {
 
     @Mock
     @Qualifier("dailyRecurringAppointmentsGenerationService")
-    AbstractRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
+    AbstractRecurringAppointmentsService dailyRecurringAppointmentsGenerationService;
 
     @Mock
     @Qualifier("weeklyRecurringAppointmentsGenerationService")
-    AbstractRecurringAppointmentsGenerationService weeklyRecurringAppointmentsGenerationService;
+    AbstractRecurringAppointmentsService weeklyRecurringAppointmentsGenerationService;
 
     @Before
     public void setUp() {
