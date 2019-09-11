@@ -96,13 +96,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointment;
     }
 
-    @Override
-    public Appointment validateAndUpdate(Appointment appointment) throws APIException {
-        validate(appointment, editAppointmentValidators );
-        save(appointment);
-        return appointment;
-    }
-
     private void save(Appointment appointment) {
         createAndSetAppointmentAudit(appointment);
         appointmentDao.save(appointment);
