@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.*;
-import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -39,9 +38,6 @@ public class AppointmentControllerTest {
 
     @Mock
     private AppointmentsService appointmentsService;
-
-    @Mock
-    private AppointmentRecurringPatternService appointmentRecurringPatternService;
 
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;

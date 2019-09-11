@@ -4,7 +4,6 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 public interface AppointmentRecurringPatternService {
@@ -16,7 +15,7 @@ public interface AppointmentRecurringPatternService {
     Appointment update(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> updatedAppointments);
 
     @Transactional
-    void changeStatus(Appointment appointment, String toStatus, Date onDate, String clientTimeZone);
+    void changeStatus(Appointment appointment, String toStatus, String clientTimeZone);
 
     @Transactional
     AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern);

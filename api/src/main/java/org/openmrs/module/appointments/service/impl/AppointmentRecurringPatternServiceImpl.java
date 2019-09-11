@@ -107,7 +107,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
+    public void changeStatus(Appointment appointment, String status, String clientTimeZone) {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
@@ -118,7 +118,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         pendingAppointments.stream()
                 .map(pendingAppointment -> {
                     pendingAppointment.setStatus(appointmentStatus);
-                    setAppointmentAuditForStatusChange(pendingAppointment, onDate);
+                    updateAppointmentAudits(pendingAppointment, null);
                     appointmentDao.save(pendingAppointment);
                     return pendingAppointment;
                 })
@@ -145,11 +145,6 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setAppointmentAuditForStatusChange(Appointment appointment, Date onDate) {
-        String notes = onDate != null ? onDate.toInstant().toString() : null;
-        updateAppointmentAudits(appointment, notes);
     }
 
     private void updateAppointmentAudits(Appointment appointment, String notes) {
