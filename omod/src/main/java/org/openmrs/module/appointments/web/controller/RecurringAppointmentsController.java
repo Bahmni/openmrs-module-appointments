@@ -125,8 +125,7 @@ public class RecurringAppointmentsController {
             if (!recurringPatternErrors.getAllErrors().isEmpty()) {
                 throw new APIException(recurringPatternErrors.getAllErrors().get(0).getCodes()[1]);
             }
-            boolean applyForAll = recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments();
-            if (applyForAll) {
+            if (recurringAppointmentRequest.getApplyForAll()) {
                 String clientTimeZone = recurringAppointmentRequest.getTimeZone();
                 Errors timeZoneErrors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
                 timeZoneValidator.validate(clientTimeZone, timeZoneErrors);

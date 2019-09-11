@@ -144,7 +144,7 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         AppointmentRecurringPattern appointmentRecurringPattern = mock(AppointmentRecurringPattern.class);
         when((recurringAppointmentRequest.getAppointmentRequest())).thenReturn(appointmentRequest);
-        when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(true);
+        when(recurringAppointmentRequest.getApplyForAll()).thenReturn(true);
         when(recurringAppointmentRequest.getTimeZone()).thenReturn("UTC");
         when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointmentMock)));
@@ -161,7 +161,7 @@ public class RecurringAppointmentsControllerTest {
         RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
-        when(recurringAppointmentRequest.requiresUpdateOfAllRecurringAppointments()).thenReturn(false);
+        when(recurringAppointmentRequest.getApplyForAll()).thenReturn(false);
         Appointment appointment = mock(Appointment.class);
         Appointment newAppointment = mock(Appointment.class);
         Appointment updatedAppointment = mock(Appointment.class);

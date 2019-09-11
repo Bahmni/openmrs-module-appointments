@@ -34,14 +34,6 @@ public class RecurringAppointmentRequest {
         this.applyForAll = applyForAll;
     }
 
-    public Boolean isRecurringAppointment(){
-        return this.recurringPattern != null;
-    }
-
-    public Boolean requiresUpdateOfAllRecurringAppointments(){
-        return this.isRecurringAppointment() && this.applyForAll;
-    }
-
     public String getTimeZone() {
         return timeZone;
     }
