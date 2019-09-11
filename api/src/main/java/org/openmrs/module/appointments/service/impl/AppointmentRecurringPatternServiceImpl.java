@@ -107,7 +107,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, String clientTimeZone) {
+    public List<Appointment> changeStatus(Appointment appointment, String status, String clientTimeZone) {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
@@ -123,6 +123,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
                     return pendingAppointment;
                 })
                 .collect(Collectors.toList());
+        return pendingAppointments;
     }
 
 
