@@ -107,7 +107,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate, String clientTimeZone) {
+    public void changeStatus(Appointment appointment, String status, String clientTimeZone) {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
@@ -115,11 +115,10 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
                 Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
-        pendingAppointments
-                .stream()
+        pendingAppointments.stream()
                 .map(pendingAppointment -> {
                     pendingAppointment.setStatus(appointmentStatus);
-                    setAppointmentAuditForStatusChange(pendingAppointment, onDate);
+                    updateAppointmentAudits(pendingAppointment, null);
                     appointmentDao.save(pendingAppointment);
                     return pendingAppointment;
                 })
@@ -142,15 +141,10 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     private void setAppointmentAudit(Appointment appointment) {
         try {
             String notes = appointmentServiceHelper.getAppointmentAsJsonString(appointment);
-            updaateAppointmentAudits(appointment, notes);
+            updateAppointmentAudits(appointment, notes);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    private void setAppointmentAuditForStatusChange(Appointment appointment, Date onDate) {
-        String notes = onDate != null ? onDate.toInstant().toString() : null;
-        updaateAppointmentAudits(appointment, notes);
     }
 
     private void updateAppointmentAudits(Appointment appointment, String notes) {

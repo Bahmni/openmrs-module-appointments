@@ -154,7 +154,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentAudit.setStatus(CheckedIn);
         when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
 
-        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", new Date(), "");
+        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
     }
 
@@ -213,7 +213,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentAudit.setStatus(CheckedIn);
         when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
 
-        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", new Date(), "");
+        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
         verify(appointmentServiceHelper, times(2))
                 .getAppointmentAuditEvent(any(Appointment.class), any(String.class));

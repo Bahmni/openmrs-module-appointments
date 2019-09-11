@@ -10,7 +10,6 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
@@ -21,7 +20,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -39,9 +37,6 @@ public class AppointmentController {
 
     @Autowired
     private AppointmentsService appointmentsService;
-
-    @Autowired
-    private AppointmentRecurringPatternService appointmentRecurringPatternService;
 
     @Autowired
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -131,26 +126,17 @@ public class AppointmentController {
     @ResponseBody
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
         try {
-            boolean applyForAll = statusDetails.get("applyForAll") != null && Boolean.parseBoolean(statusDetails.get("applyForAll"));
             String toStatus = statusDetails.get("toStatus");
             Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
             if (appointment != null) {
-                if (applyForAll) {
-                    String clientTimeZone = statusDetails.get("timeZone");
-                    if (!StringUtils.hasText(clientTimeZone)) {
-                        throw new APIException("Time Zone is missing");
-                    }
-                    appointmentRecurringPatternService.changeStatus(appointment, toStatus, onDate, clientTimeZone);
-                } else {
-                    appointmentsService.changeStatus(appointment, toStatus, onDate);
-                }
+                appointmentsService.changeStatus(appointment, toStatus, onDate);
                 return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
             } else {
                 throw new RuntimeException("Appointment does not exist");
             }
         } catch (RuntimeException e) {
-            log.error("Runtime error while trying to validateAndUpdate appointment status", e);
+            log.error("Runtime error while trying to update appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

@@ -6,6 +6,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openmrs.module.appointments.model.Appointment;
@@ -22,21 +23,15 @@ import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringP
 import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsService;
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -229,5 +224,41 @@ public class RecurringAppointmentsControllerTest {
         expectedException.expectMessage("Appointment does not exist");
 
         recurringAppointmentsController.getAppointmentByUuid("randomUuid");
+    }
+
+    @Test
+    public void shouldChangeStatusOfAllRecurringAppointments() throws Exception {
+        Map statusDetails = new HashMap();
+        statusDetails.put("toStatus", "Cancelled");
+        statusDetails.put("timeZone", "Asia/Calcutta");
+        Appointment appointment = new Appointment();
+        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(appointment);
+        recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
+        Mockito.verify(appointmentsService).getAppointmentByUuid("appointmentUuid");
+        Mockito.verify(appointmentRecurringPatternService).changeStatus(appointment, "Cancelled", "Asia/Calcutta");
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenTimeZoneIsMissing() throws Exception {
+        Map<String,String> statusDetails = new HashMap();
+        statusDetails.put("toStatus", "Cancelled");
+        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(new Appointment());
+
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
+        Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Time Zone is missing");
+    }
+
+    @Test
+    public void shouldThrowExceptionIfAppointmentIsNotValid() throws Exception {
+        Map<String,String> statusDetails = new HashMap<>();
+        statusDetails.put("toStatus", "Cancelled");
+        statusDetails.put("timeZone", "Asia/Calcutta");
+        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
+        Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
+        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Appointment does not exist");
     }
 }

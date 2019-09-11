@@ -10,7 +10,6 @@ import org.mockito.Mockito;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.*;
-import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -37,9 +36,6 @@ public class AppointmentControllerTest {
 
     @Mock
     private AppointmentsService appointmentsService;
-
-    @Mock
-    private AppointmentRecurringPatternService appointmentRecurringPatternService;
 
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -198,19 +194,6 @@ public class AppointmentControllerTest {
         Mockito.verify(appointmentsService, times(1)).changeStatus(appointment, "Completed", null);
     }
 
-    @Test
-    public void shouldChangeStatusOfRecurringAppointment() throws Exception {
-        Map statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        statusDetails.put("applyForAll", "true");
-        statusDetails.put("timeZone", "Asia/Calcutta");
-        Appointment appointment = new Appointment();
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(appointment);
-        appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        Mockito.verify(appointmentRecurringPatternService, times(1)).changeStatus(appointment, "Completed", null, "Asia/Calcutta");
-        Mockito.verify(appointmentsService, never()).changeStatus(appointment, "Completed", null);
-    }
 
     @Test
     public void shouldReturnErrorResponseWhenAppointmentDoesNotExist() throws Exception {
@@ -220,18 +203,6 @@ public class AppointmentControllerTest {
         appointmentController.transitionAppointment("appointmentUuid", statusDetails);
         Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
         Mockito.verify(appointmentsService, never()).changeStatus(any(),any(),any());
-    }
-
-    @Test
-    public void shouldChangeStatusOfScheduledFutureAppointments() throws Exception {
-        Map<String,String> statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        statusDetails.put("applyForAll", "true");
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(new Appointment());
-
-        ResponseEntity<Object> responseEntity = appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(),any(), any());
-        assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
 
     @Test

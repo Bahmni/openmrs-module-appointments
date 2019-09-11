@@ -6,7 +6,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
@@ -14,9 +16,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 
 public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
@@ -25,6 +29,9 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Autowired
+    AppointmentAuditDao appointmentAuditDao;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -366,5 +373,47 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
                 new Parameter("uuid", "randomUuid"))),
                 new TypeReference<RecurringAppointmentDefaultResponse>() {});
 
+    }
+
+    @Test
+    public void should_changeAppointmentStatusForAllRecurringAppointments() throws Exception {
+        String content = "{ \"toStatus\": \"Cancelled\"," +
+                "\"timeZone\": \"Asia/Calcutta\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
+        assertNotNull(response);
+
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals(200, response.getStatus());
+        assertNotNull(appointmentByUuid);
+
+        Set<Appointment> recurringAppointments = appointmentByUuid.getAppointmentRecurringPattern().getAppointments();
+        recurringAppointments.stream().forEach(appointment -> assertEquals(appointmentByUuid.getStatus(), appointment.getStatus()));
+
+        List<AppointmentAudit> historyForAppointment = appointmentAuditDao.getAppointmentHistoryForAppointment(appointmentByUuid);
+        assertEquals(1, historyForAppointment.size());
+        assertNotNull(historyForAppointment.get(0).getDateCreated());
+        assertNotNull(historyForAppointment.get(0).getCreator());
+        assertEquals(appointmentByUuid, historyForAppointment.get(0).getAppointment());
+        assertNull(historyForAppointment.get(0).getAppointment().getComments());
+    }
+
+    @Test
+    public void should_throwExceptionWhenNoClientTimeZoneIsProvided() throws Exception {
+        String content = "{ \"toStatus\": \"Scheduled\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void should_throwExceptionWhenEmptyClientTimeZoneIsProvided() throws Exception {
+        String content = "{ \"toStatus\": \"Scheduled\"," +
+                "\"timeZone\": \"\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
     }
 }

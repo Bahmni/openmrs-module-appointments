@@ -21,7 +21,6 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -190,30 +189,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void should_changeAppointmentStatusForAllRecurringAppointments() throws Exception {
-        String content = "{ \"toStatus\": \"Cancelled\"," +
-                "\"applyForAll\": \"true\"," +
-                "\"timeZone\": \"Asia/Calcutta\"" +
-                "}";
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
-        assertNotNull(response);
-
-        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
-        assertEquals(200, response.getStatus());
-        assertNotNull(appointmentByUuid);
-
-        Set<Appointment> recurringAppointments = appointmentByUuid.getAppointmentRecurringPattern().getAppointments();
-        recurringAppointments.stream().forEach(appointment -> assertEquals(appointmentByUuid.getStatus(), appointment.getStatus()));
-
-        List<AppointmentAudit> historyForAppointment = appointmentAuditDao.getAppointmentHistoryForAppointment(appointmentByUuid);
-        assertEquals(1, historyForAppointment.size());
-        assertNotNull(historyForAppointment.get(0).getDateCreated());
-        assertNotNull(historyForAppointment.get(0).getCreator());
-        assertEquals(appointmentByUuid, historyForAppointment.get(0).getAppointment());
-        assertNull(historyForAppointment.get(0).getAppointment().getComments());
-    }
-
-    @Test
     public void should_throwExceptionForInvalidStatusChange() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a7/changeStatus", content));
@@ -224,27 +199,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     @Test
     public void should_throwExceptionForInvalidAppointment() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"}";
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
-        assertNotNull(response);
-        assertEquals(400, response.getStatus());
-    }
-
-    @Test
-    public void should_throwExceptionWhenForApplicableToAllAndNoClientTimeZoneIsProvided() throws Exception {
-        String content = "{ \"toStatus\": \"Scheduled\"," +
-                "\"applyForAll\": \"true\"" +
-                "}";
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
-        assertNotNull(response);
-        assertEquals(400, response.getStatus());
-    }
-
-    @Test
-    public void should_throwExceptionWhenForApplicableToAllAndEmptyClientTimeZoneIsProvided() throws Exception {
-        String content = "{ \"toStatus\": \"Scheduled\"," +
-                "\"applyForAll\": \"true\"," +
-                "\"timeZone\": \"\"" +
-                "}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
         assertNotNull(response);
         assertEquals(400, response.getStatus());

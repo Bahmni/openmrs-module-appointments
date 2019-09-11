@@ -22,19 +22,18 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.text.ParseException;
+import java.util.*;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/recurring-appointments")
@@ -84,6 +83,28 @@ public class RecurringAppointmentsController {
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create recurring appointments", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{appointmentUuid}/changeStatus")
+    @ResponseBody
+    public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
+        try {
+            String clientTimeZone = statusDetails.get("timeZone");
+            if (!StringUtils.hasText(clientTimeZone)) {
+                throw new APIException("Time Zone is missing");
+            }
+            String toStatus = statusDetails.get("toStatus");
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if (appointment != null) {
+                appointmentRecurringPatternService.changeStatus(appointment, toStatus, clientTimeZone);
+                return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(appointment), HttpStatus.OK);
+            } else {
+                throw new RuntimeException("Appointment does not exist");
+            }
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to validateAndUpdate appointment status", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
