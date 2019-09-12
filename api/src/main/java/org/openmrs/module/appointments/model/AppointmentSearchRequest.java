@@ -2,7 +2,7 @@ package org.openmrs.module.appointments.model;
 
 import java.util.Date;
 
-public class AppointmentSearch {
+public class AppointmentSearchRequest {
 
     private Date startDate;
     private Date endDate;

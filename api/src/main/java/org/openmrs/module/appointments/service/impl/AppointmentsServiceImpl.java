@@ -13,7 +13,7 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentSearch;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.*;
@@ -34,8 +34,6 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
-
-import static java.util.Objects.isNull;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
@@ -216,11 +214,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> search(AppointmentSearch appointmentSearch) {
-        if(isNull(appointmentSearch.getStartDate()) || isNull(appointmentSearch.getEndDate())){
+    public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
+        if(isNull(appointmentSearchRequest.getStartDate()) || isNull(appointmentSearchRequest.getEndDate())){
             return null;
         }
-        return appointmentDao.search(appointmentSearch);
+        return appointmentDao.search(appointmentSearchRequest);
     }
 
     @Override

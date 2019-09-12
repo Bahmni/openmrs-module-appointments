@@ -5,7 +5,7 @@ import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentSearch;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.springframework.transaction.annotation.Transactional;
@@ -70,6 +70,6 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
-    List<Appointment> search(AppointmentSearch appointmentSearch);
+    List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
 }
 
