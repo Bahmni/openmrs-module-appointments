@@ -24,15 +24,16 @@ public class SingleAppointmentRecurringPatternUpdateService {
         final AppointmentRecurringPattern appointmentRecurringPattern = appointment.getAppointmentRecurringPattern();
         if (appointment.getRelatedAppointment() != null) {
             newAppointment = appointment;
+            appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
         } else {
             newAppointment = new Appointment();
             newAppointment.setPatient(appointment.getPatient());
+            appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
             appointment.setVoided(true);
             newAppointment.setRelatedAppointment(appointment);
             newAppointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
             appointmentRecurringPattern.getAppointments().add(newAppointment);
         }
-        appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), newAppointment);
         return newAppointment;
     }
 }

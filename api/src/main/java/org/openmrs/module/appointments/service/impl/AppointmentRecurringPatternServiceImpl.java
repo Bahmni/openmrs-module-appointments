@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -76,10 +75,10 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     @Override
-    public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern) {
+    public AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern, Appointment editedAppointment) {
         List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
-        appointmentServiceHelper.validate(appointments.get(0), editAppointmentValidators);
         updateAppointmentsDetails(appointmentRecurringPattern, appointments);
+        appointmentServiceHelper.validate(editedAppointment, editAppointmentValidators);
         appointmentRecurringPatternDao.save(appointmentRecurringPattern);
         return appointmentRecurringPattern;
     }
@@ -95,13 +94,14 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     @Override
     public Appointment update(AppointmentRecurringPattern appointmentRecurringPattern,
                               List<Appointment> updatedAppointments) {
-        appointmentServiceHelper.validate(updatedAppointments.get(0), editAppointmentValidators);
-        updateAppointmentsDetails(appointmentRecurringPattern, updatedAppointments);
-        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
-        return updatedAppointments
+        Appointment editedAppointment = updatedAppointments
                 .stream()
-                .filter(appointment -> appointment.getVoided() != true)
+                .filter(app -> app.getVoided() != true)
                 .collect(Collectors.toList()).get(0);
+        updateAppointmentsDetails(appointmentRecurringPattern, updatedAppointments);
+        appointmentServiceHelper.validate(editedAppointment.getRelatedAppointment(), editAppointmentValidators);
+        appointmentRecurringPatternDao.save(appointmentRecurringPattern);
+        return editedAppointment;
     }
 
     @Override

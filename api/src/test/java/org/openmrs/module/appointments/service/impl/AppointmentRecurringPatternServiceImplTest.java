@@ -223,7 +223,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
-        recurringAppointmentService.update(appointmentRecurringPattern);
+        recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
@@ -243,7 +243,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
-        recurringAppointmentService.update(appointmentRecurringPattern);
+        recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentDao, never()).save(any(Appointment.class));
         verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());

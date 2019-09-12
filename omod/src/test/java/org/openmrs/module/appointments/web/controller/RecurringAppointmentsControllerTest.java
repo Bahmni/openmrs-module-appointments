@@ -146,14 +146,18 @@ public class RecurringAppointmentsControllerTest {
         when((recurringAppointmentRequest.getAppointmentRequest())).thenReturn(appointmentRequest);
         when(recurringAppointmentRequest.getApplyForAll()).thenReturn(true);
         when(recurringAppointmentRequest.getTimeZone()).thenReturn("UTC");
+        when(appointmentMock.getUuid()).thenReturn("uuid");
+        when(appointmentRequest.getUuid()).thenReturn("uuid");
         when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(appointmentRecurringPattern);
         when(appointmentRecurringPattern.getAppointments()).thenReturn(new HashSet<>(Arrays.asList(appointmentMock)));
-        when(appointmentRecurringPatternService.update(any())).thenReturn(mock(AppointmentRecurringPattern.class));
+        when(appointmentRecurringPatternService.update(appointmentRecurringPattern, appointmentMock)).thenReturn(mock(AppointmentRecurringPattern.class));
 
         recurringAppointmentsController.editAppointment(recurringAppointmentRequest);
 
+        verify(appointmentMock).getUuid();
+        verify(appointmentRequest).getUuid();
         verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPattern(recurringAppointmentRequest);
-        verify(appointmentRecurringPatternService).update(any());
+        verify(appointmentRecurringPatternService).update(appointmentRecurringPattern, appointmentMock);
     }
 
     @Test

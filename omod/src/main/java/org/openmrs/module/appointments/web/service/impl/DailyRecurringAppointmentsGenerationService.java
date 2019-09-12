@@ -75,9 +75,11 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         Calendar endCalendar = DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime());
         startCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
         endCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
+        String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         recurringAppointmentRequest.getAppointmentRequest().setUuid(null);
         appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalendar, endCalendar),
                 recurringAppointmentRequest.getAppointmentRequest()));
+        recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
         return sort(appointments);
     }
 }

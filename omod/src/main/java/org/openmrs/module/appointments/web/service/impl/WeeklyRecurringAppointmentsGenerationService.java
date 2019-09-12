@@ -128,6 +128,7 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
         List<Integer> updatedSelectedDayCodes = getSelectedDayCodesForExtend(selectedDaysPerWeek, startCalender.get(Calendar.DAY_OF_WEEK));
         int noOfExtradayCodes = appointments.size() % selectedDaysPerWeek.size();
         updateCalendarInstancesToNextSelectedDay(startCalender, endCalender, selectedDaysPerWeek.get(1));
+        String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         recurringAppointmentRequest.getAppointmentRequest().setUuid(null);
         if (noOfExtradayCodes != 0) {
             appointments.addAll(createAppointments(getAppointmentDatesForAWeek(endDate, startCalender, endCalender, updatedSelectedDayCodes),
@@ -137,6 +138,7 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
         }
         appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalender, endCalender, selectedDayCodes),
                 recurringAppointmentRequest.getAppointmentRequest()));
+        recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
         return sort(appointments);
     }
 

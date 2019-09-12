@@ -133,7 +133,9 @@ public class RecurringAppointmentsController {
                     throw new APIException(timeZoneErrors.getAllErrors().get(0).getCodes()[1]);
                 }
                 AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
-                AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern);
+                Appointment editedAppointment = appointmentRecurringPattern.getAppointments().stream()
+                        .filter(app -> recurringAppointmentRequest.getAppointmentRequest().getUuid().equals(app.getUuid())).findFirst().orElse(null);
+                AppointmentRecurringPattern updatedAppointmentRecurringPattern = appointmentRecurringPatternService.update(appointmentRecurringPattern, editedAppointment);
                 List<Appointment> updatedAppointments = new ArrayList<>(updatedAppointmentRecurringPattern.getAppointments());
                 return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
             } else {
