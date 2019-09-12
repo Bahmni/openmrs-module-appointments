@@ -18,5 +18,5 @@ public interface AppointmentRecurringPatternService {
     List<Appointment> changeStatus(Appointment appointment, String toStatus, String clientTimeZone);
 
     @Transactional
-    AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern);
+    AppointmentRecurringPattern update(AppointmentRecurringPattern appointmentRecurringPattern, Appointment editedAppointment);
 }
