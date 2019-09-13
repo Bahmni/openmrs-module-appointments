@@ -288,9 +288,9 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         assertNotNull(response);
         assertEquals(200, response.getStatus());
 
-        RecurringAppointmentDefaultResponse appointmentDefaultResponse = deserialize(response, new TypeReference<RecurringAppointmentDefaultResponse>() {
+        List<RecurringAppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<RecurringAppointmentDefaultResponse>>() {
         });
-        String appointmentUuid = appointmentDefaultResponse.getAppointmentDefaultResponse().getUuid();
+        String appointmentUuid = appointmentDefaultResponse.get(0).getAppointmentDefaultResponse().getUuid();
 
         Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
         Appointment relatedAppointment = appointment.getRelatedAppointment();

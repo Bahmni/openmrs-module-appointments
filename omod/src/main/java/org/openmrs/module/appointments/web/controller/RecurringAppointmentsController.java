@@ -142,7 +142,7 @@ public class RecurringAppointmentsController {
                 Appointment appointmentToBeUpdated = singleAppointmentRecurringPatternUpdateService.getUpdatedAppointment(recurringAppointmentRequest);
                 Appointment updatedAppointment = appointmentRecurringPatternService.update(appointmentToBeUpdated.getAppointmentRecurringPattern(),
                         Arrays.asList(appointmentToBeUpdated, appointmentToBeUpdated.getRelatedAppointment()));
-                return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(updatedAppointment), HttpStatus.OK);
+                return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(Arrays.asList(updatedAppointment)), HttpStatus.OK);
             }
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to validateAndUpdate an appointment", e);
