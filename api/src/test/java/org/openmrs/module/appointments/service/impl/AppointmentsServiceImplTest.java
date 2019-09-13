@@ -22,6 +22,12 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -31,6 +37,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,9 +48,11 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -443,4 +452,44 @@ public class AppointmentsServiceImplTest {
         when(appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED)).thenReturn(appointmentProviders);
     }
 
+    @Test
+    public void shouldReturnAppointmentsByCallingSearchMethodInAppointmentDaoWithAppointmentSearchParameters() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = Date.from(Instant.now());
+        Date endDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        ArrayList<Appointment> expectedAppointments = new ArrayList<>();
+        when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, times(1)).search(appointmentSearchRequest);
+        assertEquals(expectedAppointments, actualAppointments);
+    }
+
+    @Test
+    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenStartDateIsNull() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date endDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(null);
+        appointmentSearchRequest.setEndDate(endDate);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, never()).search(appointmentSearchRequest);
+        assertNull(actualAppointments);
+    }
+    @Test
+    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenEndDateIsNull() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(null);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, never()).search(appointmentSearchRequest);
+        assertNull(actualAppointments);
+    }
 }

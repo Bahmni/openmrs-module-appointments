@@ -3,18 +3,25 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.openmrs.Patient;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -23,19 +30,28 @@ import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
+
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
+import static org.powermock.api.mockito.PowerMockito.doAnswer;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+@RunWith(MockitoJUnitRunner.class)
 public class AppointmentsControllerTest {
 
     @Mock
     private AppointmentsService appointmentsService;
 
     @Mock
-    private AppointmentMapper appointmentMapper;
+    AppointmentSearchValidator appointmentSearchValidator;
 
+    @Mock
+    private AppointmentMapper appointmentMapper;
 
     @InjectMocks
     private AppointmentsController appointmentsController;
@@ -136,5 +152,38 @@ public class AppointmentsControllerTest {
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
+    @Test
+    public void shouldGetAppointmentsBetweenGivenDateRange() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        ArrayList<Appointment> appointments = new ArrayList<>();
+        ArrayList<AppointmentDefaultResponse> expectedResponse = new ArrayList<>();
+        when(appointmentsService.search(appointmentSearchRequest)).thenReturn(appointments);
+        when(appointmentMapper.constructResponse(appointments)).thenReturn(expectedResponse);
+
+        List<AppointmentDefaultResponse> actualResponse = appointmentsController.search(appointmentSearchRequest);
+
+        verify(appointmentsService, times(1)).search(appointmentSearchRequest);
+        verify(appointmentMapper, times(1)).constructResponse(appointments);
+        assertEquals(expectedResponse, actualResponse);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenAppointmentsServiceSearchMethodReturnsNull() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                Object[] args = invocationOnMock.getArguments();
+                Errors errors = (Errors) args[1];
+                errors.reject("Either StartDate or EndDate not provided");
+                return null;
+            }
+        }).when(appointmentSearchValidator).validate(any(), any());
+
+        appointmentsController.search(appointmentSearchRequest);
+
+        verify(appointmentsService, never()).search(appointmentSearchRequest);
+        verify(appointmentMapper, never()).constructResponse(anyListOf(Appointment.class));
+    }
 
 }
