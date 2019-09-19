@@ -189,27 +189,6 @@ public class AppointmentControllerTest {
     }
 
     @Test
-    public void shouldChangeStatusOfAppointment() throws Exception {
-        Map statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        Appointment appointment = new Appointment();
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(appointment);
-        appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        Mockito.verify(appointmentsService, times(1)).changeStatus(appointment, "Completed", null);
-    }
-
-    @Test
-    public void shouldReturnErrorResponseWhenAppointmentDoesNotExist() throws Exception {
-        Map<String,String> statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
-        appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        Mockito.verify(appointmentsService, never()).changeStatus(any(),any(),any());
-    }
-
-    @Test
     public void shouldUndoStatusOfAppointment() throws Exception {
         Appointment appointment = new Appointment();
         appointment.setUuid("appointmentUuid");
