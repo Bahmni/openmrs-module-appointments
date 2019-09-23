@@ -25,15 +25,17 @@ import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyList;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -186,4 +188,28 @@ public class AppointmentsControllerTest {
         verify(appointmentMapper, never()).constructResponse(anyListOf(Appointment.class));
     }
 
+    @Test
+    public void shouldChangeStatusOfAppointment() throws Exception {
+        Map statusDetails = new HashMap();
+        statusDetails.put("toStatus", "Completed");
+        Appointment appointment = new Appointment();
+        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(appointment);
+
+        appointmentsController.transitionAppointment("appointmentUuid", statusDetails);
+
+        verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
+        verify(appointmentsService, times(1)).changeStatus(appointment, "Completed", null);
+    }
+
+    @Test
+    public void shouldReturnErrorResponseWhenAppointmentDoesNotExist() throws Exception {
+        Map<String, String> statusDetails = new HashMap();
+        statusDetails.put("toStatus", "Completed");
+        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
+
+        appointmentsController.transitionAppointment("appointmentUuid", statusDetails);
+
+        verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
+        verify(appointmentsService, never()).changeStatus(any(), any(), any());
+    }
 }

@@ -34,12 +34,13 @@ import java.util.stream.Collectors;
 import static java.util.Objects.isNull;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
-    private static final int EMPTY_SET_SIZE = 0;
     private Log log = LogFactory.getLog(this.getClass());
+    private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
 
     AppointmentDao appointmentDao;
 
@@ -84,33 +85,32 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
-        if(!CollectionUtils.isEmpty(appointmentValidators)){
+        if (!CollectionUtils.isEmpty(appointmentValidators)) {
             List<String> errors = new ArrayList<>();
-            for(AppointmentValidator validator: appointmentValidators){
+            for (AppointmentValidator validator : appointmentValidators) {
                 validator.validate(appointment, errors);
             }
-            if(!errors.isEmpty()) {
+            if (!errors.isEmpty()) {
                 String message = StringUtils.join(errors, "\n");
                 throw new APIException(message);
             }
         }
         checkAndAssignAppointmentNumber(appointment);
         appointmentDao.save(appointment);
-	    try {
-		    createEventInAppointmentAudit(appointment, getAppointmentAsJsonString(appointment));
-	    }
-	    catch (IOException e) {
-		    throw new APIException(e);
-	    }
-	    return appointment;
+        try {
+            createEventInAppointmentAudit(appointment, getAppointmentAsJsonString(appointment));
+        } catch (IOException e) {
+            throw new APIException(e);
+        }
+        return appointment;
     }
 
     //TODO refactor throwing of IOExeption. Its forcing everywhere the exception to be caught and rethrown
     private String getAppointmentAsJsonString(Appointment appointment) throws IOException {
-        Map appointmentJson = new HashMap<String,String>();
+        Map appointmentJson = new HashMap<String, String>();
         String serviceUuid = appointment.getService().getUuid();
         appointmentJson.put("serviceUuid", serviceUuid);
         String serviceTypeUuid = appointment.getServiceType() != null ? appointment.getServiceType().getUuid() : null;
@@ -134,9 +134,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
-    private boolean isServiceOrServiceTypeVoided(Appointment appointment){
+    private boolean isServiceOrServiceTypeVoided(Appointment appointment) {
         return (appointment.getService() != null && appointment.getService().getVoided()) ||
-               (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
+                (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
     }
 
     /**
@@ -172,24 +172,35 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
-        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
-                    new Object[] { MANAGE_APPOINTMENTS }, null));
-        }
-        List<String> errors = new ArrayList<>();
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
+        validateUserPrivilege(appointment, appointmentStatus);
+        List<String> errors = new ArrayList<>();
         validateStatusChange(appointment, appointmentStatus, errors);
-        if(errors.isEmpty()) {
+        if (errors.isEmpty()) {
             appointment.setStatus(appointmentStatus);
             appointmentDao.save(appointment);
-            String notes = onDate != null ? onDate.toInstant().toString(): null;
+            String notes = onDate != null ? onDate.toInstant().toString() : null;
             createEventInAppointmentAudit(appointment, notes);
-        }
-        else {
+        } else {
             String message = StringUtils.join(errors, "\n");
             throw new APIException(message);
         }
+    }
+
+    private void validateUserPrivilege(Appointment appointment, AppointmentStatus appointmentStatus) {
+        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{MANAGE_APPOINTMENTS}, null));
+        }
+        if (!isUserAllowedToResetStatus(appointmentStatus)) {
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{RESET_APPOINTMENT_STATUS}, null));
+        }
+    }
+
+    private boolean isUserAllowedToResetStatus(AppointmentStatus appointmentStatus) {
+        return appointmentStatus != AppointmentStatus.Scheduled || Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
     }
 
     @Override
@@ -201,21 +212,21 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public void undoStatusChange(Appointment appointment) throws APIException{
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
         AppointmentAudit statusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
-        if(statusChangeEvent != null) {
-	        appointment.setStatus(statusChangeEvent.getStatus());
-	        appointmentDao.save(appointment);
-	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
+        if (statusChangeEvent != null) {
+            appointment.setStatus(statusChangeEvent.getStatus());
+            appointmentDao.save(appointment);
+            createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
         } else
             throw new APIException("No status change actions to undo");
     }
 
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
-        if(isNull(appointmentSearchRequest.getStartDate()) || isNull(appointmentSearchRequest.getEndDate())){
+        if (isNull(appointmentSearchRequest.getStartDate()) || isNull(appointmentSearchRequest.getEndDate())) {
             return null;
         }
         return appointmentDao.search(appointmentSearchRequest);
@@ -264,7 +275,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     private void createEventInAppointmentAudit(Appointment appointment,
-            String notes) {
+                                               String notes) {
         AppointmentAudit appointmentAuditEvent = new AppointmentAudit();
         appointmentAuditEvent.setAppointment(appointment);
         appointmentAuditEvent.setStatus(appointment.getStatus());

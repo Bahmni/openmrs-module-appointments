@@ -42,6 +42,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     private String readOnlyUserPassword;
     private String noPrivilegeUser;
     private String noPrivilegeUserPassword;
+    private String resetUser;
+    private String resetUserPassword;
 
     @Autowired
     AppointmentsService appointmentsService;
@@ -68,6 +70,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         readOnlyUserPassword = "P@ssw0rd";
         noPrivilegeUser = "no-privilege-user";
         noPrivilegeUserPassword = "P@ssw0rd";
+        resetUser = "reset-user";
+        resetUserPassword = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
         executeDataSet("appointmentTestData.xml");
     }
@@ -291,5 +295,21 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertEquals("System OpenMRS", provider.getName());
 
 
+    }
+
+    @Test
+    public void shouldBeAbleToChangeStatusFromMissedToScheduledIfUserHaveResetAppointmentStatusPrivilege() {
+        Context.authenticate(resetUser, resetUserPassword);
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Missed);
+        appointmentsService.changeStatus(appointment, "Scheduled", null);
+    }
+
+    @Test(expected = APIAuthenticationException.class)
+    public void shouldNotBeAbleToChangeStatusFromMissedToScheduledIfUserDoNotHaveResetAppointmentStatusPrivilege() {
+        Context.authenticate(manageUser, manageUserPassword);
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Missed);
+        appointmentsService.changeStatus(appointment, "Scheduled", null);
     }
 }
