@@ -21,8 +21,15 @@ import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -33,7 +40,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,9 +59,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
@@ -411,7 +415,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
         expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.changeStatus(appointment, AppointmentStatus.Scheduled.name(), null);
+        appointmentsService.changeStatus(appointment, null, null);
     }
 
     @Test
@@ -529,5 +533,45 @@ public class AppointmentsServiceImplTest {
         verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
         verify(appointmentDao, never()).save(any(Appointment.class));
+    }
+    @Test
+    public void shouldReturnAppointmentsByCallingSearchMethodInAppointmentDaoWithAppointmentSearchParameters() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = Date.from(Instant.now());
+        Date endDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        ArrayList<Appointment> expectedAppointments = new ArrayList<>();
+        when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, times(1)).search(appointmentSearchRequest);
+        assertEquals(expectedAppointments, actualAppointments);
+    }
+
+    @Test
+    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenStartDateIsNull() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date endDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(null);
+        appointmentSearchRequest.setEndDate(endDate);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, never()).search(appointmentSearchRequest);
+        assertNull(actualAppointments);
+    }
+    @Test
+    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenEndDateIsNull() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = Date.from(Instant.now());
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(null);
+
+        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
+
+        verify(appointmentDao, never()).search(appointmentSearchRequest);
+        assertNull(actualAppointments);
     }
 }

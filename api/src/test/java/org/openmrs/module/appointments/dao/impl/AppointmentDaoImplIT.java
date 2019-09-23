@@ -180,6 +180,6 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(9, appointments.size());
+        assertEquals(11, appointments.size());
     }
 }
