@@ -59,7 +59,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
@@ -415,7 +417,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
         expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.changeStatus(appointment, null, null);
+        appointmentsService.changeStatus(appointment, AppointmentStatus.Scheduled.name(), null);
     }
 
     @Test
@@ -573,5 +575,25 @@ public class AppointmentsServiceImplTest {
 
         verify(appointmentDao, never()).search(appointmentSearchRequest);
         assertNull(actualAppointments);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenUserWithoutResetAppointmentStatusPrivilegeTriesToFromMissedToScheduled() {
+        String exceptionMessage = "exception message";
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Missed);
+        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(false);
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        when(messageSourceService.getMessage(any(), any(), any())).thenReturn(exceptionMessage);
+
+        try {
+            expectedException.expect(APIAuthenticationException.class);
+            expectedException.expectMessage(exceptionMessage);
+            appointmentsService.changeStatus(appointment, "Scheduled", null);
+        } finally {
+            verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
+            verifyStatic();
+            Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
+        }
     }
 }

@@ -23,7 +23,9 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 
 @Controller
@@ -80,5 +82,22 @@ public class AppointmentsController {
         }
         List<Appointment> appointments = appointmentsService.search(appointmentSearchRequest);
         return appointmentMapper.constructResponse(appointments);
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/{appointmentUuid}/status-change")
+    @ResponseBody
+    public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
+        try {
+            String toStatus = statusDetails.get("toStatus");
+            Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if (appointment != null) {
+                appointmentsService.changeStatus(appointment, toStatus, onDate);
+                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+            } else
+                throw new RuntimeException("Appointment does not exist");
+        } catch (RuntimeException e) {
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
     }
 }

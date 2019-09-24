@@ -1,7 +1,10 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
@@ -23,20 +26,18 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
     private Log log = LogFactory.getLog(this.getClass());
+    private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
 
     private AppointmentDao appointmentDao;
 
@@ -106,7 +107,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
         appointmentServiceHelper.validate(appointment, appointmentValidators);
@@ -156,12 +157,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
-        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
-            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage("error.privilegesRequired",
-                    new Object[]{MANAGE_APPOINTMENTS}, null));
-        }
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
+        validateUserPrivilege(appointment, appointmentStatus);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         validateUserPrivilege(appointment, appointmentStatus);
         appointment.setStatus(appointmentStatus);
@@ -198,10 +196,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                     new Object[] { MANAGE_APPOINTMENTS }, null));
         }
         AppointmentAudit statusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
-        if(statusChangeEvent != null) {
-	        appointment.setStatus(statusChangeEvent.getStatus());
-	        appointmentDao.save(appointment);
-	        createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
+        if (statusChangeEvent != null) {
+            appointment.setStatus(statusChangeEvent.getStatus());
+            appointmentDao.save(appointment);
+            createEventInAppointmentAudit(appointment, statusChangeEvent.getNotes());
         } else
             throw new APIException("No status change actions to undo");
     }

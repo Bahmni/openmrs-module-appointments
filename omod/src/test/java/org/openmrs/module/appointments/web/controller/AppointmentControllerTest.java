@@ -27,7 +27,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -85,19 +87,19 @@ public class AppointmentControllerTest {
         assertEquals(1, appointmentDefaultResponses.size());
         assertEquals(appointment.getUuid(), appointmentDefaultResponses.get(0).getUuid());
     }
-
+    
     @Test
     public void shouldGetAllAppointments() throws Exception {
         Appointment appointment = new Appointment();
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
         when(appointmentsService.getAllAppointments(null)).thenReturn(appointmentList);
-
+        
         appointmentController.getAllAppointments(null);
         verify(appointmentsService, times(1)).getAllAppointments(null);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
     }
-
+    
     @Test
     public void shouldGetAllAppointmentsForDate() throws Exception {
         Appointment appointment = new Appointment();
@@ -105,9 +107,9 @@ public class AppointmentControllerTest {
         appointmentList.add(appointment);
         String dateString = "2017-08-15T00:00:00.0Z";
         Date forDate = DateUtil.convertToLocalDateFromUTC(dateString);
-
+        
         when(appointmentsService.getAllAppointments(forDate)).thenReturn(appointmentList);
-
+        
         appointmentController.getAllAppointments(dateString);
         verify(appointmentsService, times(1)).getAllAppointments(forDate);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
@@ -181,28 +183,6 @@ public class AppointmentControllerTest {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Appointment does not exist");
         appointmentController.getAppointmentByUuid("randomUuid");
-    }
-
-    @Test
-    public void shouldChangeStatusOfAppointment() throws Exception {
-        Map statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        Appointment appointment = new Appointment();
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(appointment);
-        appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        Mockito.verify(appointmentsService, times(1)).changeStatus(appointment, "Completed", null);
-    }
-
-
-    @Test
-    public void shouldReturnErrorResponseWhenAppointmentDoesNotExist() throws Exception {
-        Map<String,String> statusDetails = new HashMap();
-        statusDetails.put("toStatus", "Completed");
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
-        appointmentController.transitionAppointment("appointmentUuid", statusDetails);
-        Mockito.verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        Mockito.verify(appointmentsService, never()).changeStatus(any(),any(),any());
     }
 
     @Test
