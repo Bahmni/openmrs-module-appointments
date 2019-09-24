@@ -1,7 +1,10 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.map.ObjectMapper;
 import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
@@ -20,11 +23,7 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -206,6 +205,21 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             String message = StringUtils.join(errors, "\n");
             throw new APIException(message);
         }
+    }
+
+    private void validateUserPrivilege(Appointment appointment, AppointmentStatus appointmentStatus) {
+        if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{MANAGE_APPOINTMENTS}, null));
+        }
+        if (!isUserAllowedToResetStatus(appointmentStatus)) {
+            throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
+                    new Object[]{RESET_APPOINTMENT_STATUS}, null));
+        }
+    }
+
+    private boolean isUserAllowedToResetStatus(AppointmentStatus appointmentStatus) {
+        return appointmentStatus != AppointmentStatus.Scheduled || Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
     }
 
     private void validateUserPrivilege(Appointment appointment, AppointmentStatus appointmentStatus) {

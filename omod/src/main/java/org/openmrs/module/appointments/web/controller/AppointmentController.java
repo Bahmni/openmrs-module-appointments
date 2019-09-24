@@ -183,4 +183,5 @@ public class AppointmentController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
 }

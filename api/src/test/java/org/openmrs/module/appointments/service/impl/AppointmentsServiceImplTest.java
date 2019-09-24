@@ -559,4 +559,24 @@ public class AppointmentsServiceImplTest {
         verify(appointmentDao, never()).search(appointmentSearchRequest);
         assertNull(actualAppointments);
     }
+
+    @Test
+    public void shouldThrowExceptionWhenUserWithoutResetAppointmentStatusPrivilegeTriesToFromMissedToScheduled() {
+        String exceptionMessage = "exception message";
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Missed);
+        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(false);
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        when(messageSourceService.getMessage(any(), any(), any())).thenReturn(exceptionMessage);
+
+        try {
+            expectedException.expect(APIAuthenticationException.class);
+            expectedException.expectMessage(exceptionMessage);
+            appointmentsService.changeStatus(appointment, "Scheduled", null);
+        } finally {
+            verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
+            verifyStatic();
+            Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
+        }
+    }
 }

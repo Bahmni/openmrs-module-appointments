@@ -29,7 +29,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
 
@@ -87,19 +89,19 @@ public class AppointmentControllerTest {
         assertEquals(1, appointmentDefaultResponses.size());
         assertEquals(appointment.getUuid(), appointmentDefaultResponses.get(0).getUuid());
     }
-
+    
     @Test
     public void shouldGetAllAppointments() throws Exception {
         Appointment appointment = new Appointment();
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
         when(appointmentsService.getAllAppointments(null)).thenReturn(appointmentList);
-
+        
         appointmentController.getAllAppointments(null);
         verify(appointmentsService, times(1)).getAllAppointments(null);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
     }
-
+    
     @Test
     public void shouldGetAllAppointmentsForDate() throws Exception {
         Appointment appointment = new Appointment();
@@ -107,9 +109,9 @@ public class AppointmentControllerTest {
         appointmentList.add(appointment);
         String dateString = "2017-08-15T00:00:00.0Z";
         Date forDate = DateUtil.convertToLocalDateFromUTC(dateString);
-
+        
         when(appointmentsService.getAllAppointments(forDate)).thenReturn(appointmentList);
-
+        
         appointmentController.getAllAppointments(dateString);
         verify(appointmentsService, times(1)).getAllAppointments(forDate);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
