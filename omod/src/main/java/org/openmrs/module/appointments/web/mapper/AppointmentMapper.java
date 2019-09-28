@@ -279,8 +279,6 @@ public class AppointmentMapper {
         return appointments.stream().map(appointment -> {
             AppointmentDefaultResponse defaultResponse = new AppointmentDefaultResponse();
             defaultResponse.setUuid(appointment.getUuid());
-            defaultResponse.setService(appointmentServiceMapper.constructDefaultResponse(appointment.getService()));
-            defaultResponse.setServiceType(createServiceTypeMap(appointment.getServiceType()));
             defaultResponse.setAppointmentNumber(appointment.getAppointmentNumber());
             defaultResponse.setLocation(createLocationMap(appointment.getLocation()));
             defaultResponse.setStartDateTime(appointment.getStartDateTime());

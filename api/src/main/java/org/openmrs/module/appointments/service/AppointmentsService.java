@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
@@ -72,5 +73,13 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS})
+    Map<String, List<Appointment>> getAppointmentConflicts(Appointment appointment);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS})
+    Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 }
 

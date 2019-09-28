@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +106,10 @@ public class AppointmentsController {
     public ResponseEntity<Object> conflicts(@RequestBody AppointmentRequest appointmentRequest) {
         try {
             Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
-            return new ResponseEntity<>(appointmentMapper.constructConflictResponse(Collections.emptyMap()), HttpStatus.OK);
+            Map<String, List<Appointment>> appointmentConflicts = appointmentsService.getAppointmentConflicts(appointment);
+            if (appointmentConflicts.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentConflicts), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);

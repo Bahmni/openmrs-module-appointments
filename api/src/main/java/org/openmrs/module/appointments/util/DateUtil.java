@@ -1,11 +1,12 @@
 package org.openmrs.module.appointments.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-import org.apache.commons.lang3.StringUtils;
 
 public class DateUtil {
 
@@ -30,7 +31,7 @@ public class DateUtil {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(dateFormat.getDateFormat());
         return simpleDateFormat.parse(dateString);
     }
-    
+
     public static Date convertToLocalDateFromUTC(String dateString) throws ParseException {
         if (StringUtils.isEmpty(dateString)) {
             return null;
@@ -53,6 +54,18 @@ public class DateUtil {
         calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
         calendar.set(Calendar.MILLISECOND, calendar.getMinimum(Calendar.MILLISECOND));
         return calendar.getTime();
+    }
+
+    public static long getEpochTime(long date) {
+        long milliSeconds = 0;
+        if (date > 0) {
+            Calendar calendar = getCalendar(new Date(date));
+            int hours = calendar.get(Calendar.HOUR_OF_DAY);
+            int minutes = calendar.get(Calendar.MINUTE);
+            int seconds = calendar.get(Calendar.SECOND);
+            milliSeconds = (hours * 3600 + minutes * 60 + seconds) * 1000;
+        }
+        return milliSeconds;
     }
 }
 
