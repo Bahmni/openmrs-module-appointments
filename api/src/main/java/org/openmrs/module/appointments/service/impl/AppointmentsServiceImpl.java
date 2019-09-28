@@ -9,6 +9,7 @@ import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -51,6 +52,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private AppointmentServiceHelper appointmentServiceHelper;
 
+    private List<AppointmentConflictType> appointmentConflictTypes;
+
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
     }
@@ -73,6 +76,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
         this.editAppointmentValidators = editAppointmentValidators;
+    }
+
+    public void setAppointmentConflictTypes(List<AppointmentConflictType> appointmentConflictTypes) {
+        this.appointmentConflictTypes = appointmentConflictTypes;
     }
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
@@ -210,6 +217,16 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             return null;
         }
         return appointmentDao.search(appointmentSearchRequest);
+    }
+
+    @Override
+    public Map<String, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
+        return null;
+    }
+
+    @Override
+    public Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments) {
+        return null;
     }
 
     @Override

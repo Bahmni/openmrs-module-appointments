@@ -322,10 +322,12 @@ public class RecurringAppointmentsControllerTest {
         List<Appointment> appointments = mock(List.class);
         Map<String, List<Appointment>> conflicts = mock(Map.class);
         when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(appointments);
+        when(appointmentsService.getAppointmentsConflicts(appointments)).thenReturn(conflicts);
 
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
         verify(recurringAppointmentsService).generateRecurringAppointments(recurringAppointmentRequest);
-        verify(appointmentMapper).constructConflictResponse(Collections.emptyMap());
+        verify(appointmentsService).getAppointmentsConflicts(appointments);
+        verify(appointmentMapper).constructConflictResponse(conflicts);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
         assertNotNull(responseEntity.getBody());
     }
@@ -342,7 +344,7 @@ public class RecurringAppointmentsControllerTest {
         when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(mock(AppointmentRecurringPattern.class));
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
         verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPattern(recurringAppointmentRequest);
-        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
-        assertNotNull(responseEntity.getBody());
+        assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
+        assertNull(responseEntity.getBody());
     }
 }
