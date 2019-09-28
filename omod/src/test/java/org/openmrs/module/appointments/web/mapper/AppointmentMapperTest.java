@@ -621,4 +621,25 @@ public class AppointmentMapperTest {
 
         assertFalse(appointmentDefaultResponse.getRecurring());
     }
+
+    @Test
+    public void shouldReturnClonedAppointmentFromRequest() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
+        assertNotNull(appointment);
+        verify(patientService, times(1)).getPatientByUuid(appointmentRequest.getPatientUuid());
+        assertEquals(patient, appointment.getPatient());
+        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
+        assertEquals(service, appointment.getService());
+        assertEquals(serviceType, appointment.getServiceType());
+        verify(providerService, times(1)).getProviderByUuid(appointmentRequest.getProviderUuid());
+        assertEquals(provider, appointment.getProviders().iterator().next().getProvider());
+        verify(locationService, times(1)).getLocationByUuid(appointmentRequest.getLocationUuid());
+        assertEquals(location, appointment.getLocation());
+        assertEquals(appointmentRequest.getStartDateTime(), appointment.getStartDateTime());
+        assertEquals(appointmentRequest.getEndDateTime(), appointment.getEndDateTime());
+        assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
+        assertEquals(AppointmentStatus.Scheduled, appointment.getStatus());
+        assertEquals(appointmentRequest.getComments(), appointment.getComments());
+    }
 }

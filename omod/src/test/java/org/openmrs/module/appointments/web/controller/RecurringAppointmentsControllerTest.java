@@ -17,6 +17,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
+import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringAppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.service.impl.AllAppointmentRecurringPatternUpdateService;
@@ -32,6 +33,8 @@ import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -65,6 +68,9 @@ public class RecurringAppointmentsControllerTest {
 
     @Mock
     private RecurringAppointmentMapper recurringAppointmentMapper;
+
+    @Mock
+    private AppointmentMapper appointmentMapper;
 
     @Mock
     private SingleAppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
@@ -286,5 +292,57 @@ public class RecurringAppointmentsControllerTest {
         Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
         assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Appointment does not exist");
+    }
+
+    @Test
+    public void shouldThrowAPIExceptionWhenRequestIsInvalidForConflicts() {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        doAnswer(new Answer() {
+            @Override
+            public Object answer(InvocationOnMock invocationOnMock) {
+                Object[] args = invocationOnMock.getArguments();
+                Errors errors = (Errors) args[1];
+                errors.reject("some error");
+                return null;
+            }
+        }).when(recurringPatternValidator).validate(any(), any());
+
+
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        verify(appointmentMapper, never()).constructConflictResponse(Collections.emptyMap());
+        verify(recurringAppointmentsService, never()).generateRecurringAppointments(any());
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error");
+    }
+
+    @Test
+    public void shouldConstructResponseWhenConflictsForRecurringAppointmentRequestExists() {
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        recurringAppointmentRequest.setAppointmentRequest(mock(AppointmentRequest.class));
+        List<Appointment> appointments = mock(List.class);
+        Map<String, List<Appointment>> conflicts = mock(Map.class);
+        when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(appointments);
+
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        verify(recurringAppointmentsService).generateRecurringAppointments(recurringAppointmentRequest);
+        verify(appointmentMapper).constructConflictResponse(Collections.emptyMap());
+        assertEquals(responseEntity.getStatusCode(), HttpStatus.OK);
+        assertNotNull(responseEntity.getBody());
+    }
+
+    @Test
+    public void shouldConstructConflictResponseInAppointmentEdit() {
+        AppointmentRequest appointmentRequest = new AppointmentRequest();
+        appointmentRequest.setUuid("1");
+        RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
+        recurringAppointmentRequest.setAppointmentRequest(appointmentRequest);
+        Set<Appointment> appointments = mock(Set.class);
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setAppointments(appointments);
+        when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(mock(AppointmentRecurringPattern.class));
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPattern(recurringAppointmentRequest);
+        assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+        assertNotNull(responseEntity.getBody());
     }
 }

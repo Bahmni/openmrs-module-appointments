@@ -77,6 +77,14 @@ public class AppointmentMapper {
         return appointment;
     }
 
+    public Appointment fromRequestClonedAppointment(AppointmentRequest appointmentRequest) {
+        Appointment appointment = new Appointment();
+        appointment.setUuid(appointmentRequest.getUuid());
+        appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
+        mapAppointmentRequestToAppointment(appointmentRequest, appointment);
+        return appointment;
+    }
+
     public void mapAppointmentRequestToAppointment(AppointmentRequest appointmentRequest, Appointment appointment) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
@@ -257,5 +265,28 @@ public class AppointmentMapper {
         appointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
+    }
+
+    public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(Map<String, List<Appointment>> conflicts) {
+        Map<String, List<AppointmentDefaultResponse>> conflictsResponse = new HashMap<>();
+        for (Map.Entry<String, List<Appointment>> entry : conflicts.entrySet()) {
+            conflictsResponse.put(entry.getKey(), constructDefaultResponse(entry.getValue()));
+        }
+        return conflictsResponse;
+    }
+
+    private List<AppointmentDefaultResponse> constructDefaultResponse(List<Appointment> appointments) {
+        return appointments.stream().map(appointment -> {
+            AppointmentDefaultResponse defaultResponse = new AppointmentDefaultResponse();
+            defaultResponse.setUuid(appointment.getUuid());
+            defaultResponse.setService(appointmentServiceMapper.constructDefaultResponse(appointment.getService()));
+            defaultResponse.setServiceType(createServiceTypeMap(appointment.getServiceType()));
+            defaultResponse.setAppointmentNumber(appointment.getAppointmentNumber());
+            defaultResponse.setLocation(createLocationMap(appointment.getLocation()));
+            defaultResponse.setStartDateTime(appointment.getStartDateTime());
+            defaultResponse.setEndDateTime(appointment.getEndDateTime());
+            defaultResponse.setRecurring(appointment.isRecurring());
+            return defaultResponse;
+        }).collect(Collectors.toList());
     }
 }

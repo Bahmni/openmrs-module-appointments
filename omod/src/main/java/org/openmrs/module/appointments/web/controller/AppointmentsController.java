@@ -23,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -98,6 +99,18 @@ public class AppointmentsController {
                 throw new RuntimeException("Appointment does not exist");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/conflicts")
+    @ResponseBody
+    public ResponseEntity<Object> conflicts(@RequestBody AppointmentRequest appointmentRequest) {
+        try {
+            Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
+            return new ResponseEntity<>(appointmentMapper.constructConflictResponse(Collections.emptyMap()), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to create new appointment", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
