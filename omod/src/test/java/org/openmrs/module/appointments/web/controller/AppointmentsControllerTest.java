@@ -41,6 +41,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.doAnswer;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -211,5 +212,17 @@ public class AppointmentsControllerTest {
 
         verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
         verify(appointmentsService, never()).changeStatus(any(), any(), any());
+    }
+
+    @Test
+    public void shouldReturnConflictResponseForAnAppointmentHavingNoConflicts() {
+        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
+        Appointment appointment = mock(Appointment.class);
+
+        when(appointmentMapper.fromRequestClonedAppointment(appointmentRequest)).thenReturn(appointment);
+
+        appointmentsController.conflicts(appointmentRequest);
+
+        verify(appointmentMapper).fromRequestClonedAppointment(appointmentRequest);
     }
 }
