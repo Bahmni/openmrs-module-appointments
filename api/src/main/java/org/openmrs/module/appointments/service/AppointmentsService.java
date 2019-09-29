@@ -84,5 +84,9 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
     Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
+
+    @Transactional
+    @Authorized
+    List<Appointment> getAppointmentsForPatient(Integer patientId);
 }
 

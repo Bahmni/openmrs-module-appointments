@@ -182,4 +182,10 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         assertEquals(11, appointments.size());
     }
+
+    @Test
+    public void shouldReturnAllNonVoidedFutureAppointmentsOfPatient() {
+        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
+        assertEquals(5, appointments.size());
+    }
 }
