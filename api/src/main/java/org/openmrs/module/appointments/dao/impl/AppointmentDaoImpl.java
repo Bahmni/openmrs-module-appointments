@@ -11,6 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -127,6 +128,18 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Date startDate = appointmentSearchRequest.getStartDate();
         if(maxEndDate!=null && startDate!=null)
             criteria.add(Restrictions.between("startDateTime", startDate, maxEndDate));
+        return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> getAppointmentsForPatient(Integer patientId) {
+
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.patientId", patientId));
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.ge("startDateTime", DateUtil.getStartOfDay()));
+
         return criteria.list();
     }
 }

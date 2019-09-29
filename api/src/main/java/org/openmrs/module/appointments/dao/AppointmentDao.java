@@ -29,4 +29,6 @@ public interface AppointmentDao {
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
+
+    List<Appointment> getAppointmentsForPatient(Integer patientId);
 }

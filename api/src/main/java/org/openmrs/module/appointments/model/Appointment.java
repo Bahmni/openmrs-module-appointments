@@ -197,5 +197,9 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         Date startOfDay = DateUtil.getStartOfDay();
         return this.getStartDateTime().after(startOfDay) || startOfDay.equals(this.getStartDateTime());
     }
+
+    public boolean isSameAppointment(Appointment appointment) {
+        return this.getUuid().equals(appointment.getUuid());
+    }
 }
 

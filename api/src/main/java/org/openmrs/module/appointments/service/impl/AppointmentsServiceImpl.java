@@ -353,7 +353,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }
     }
 
-
+    @Override
+    public List<Appointment> getAppointmentsForPatient(Integer patientId) {
+        return appointmentDao.getAppointmentsForPatient(patientId);
+    }
 
     private void createEventInAppointmentAudit(Appointment appointment,
                                                String notes) {
