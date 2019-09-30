@@ -4,8 +4,8 @@ package org.openmrs.module.appointments.service;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -84,9 +84,5 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
     Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
-
-    @Transactional
-    @Authorized
-    List<Appointment> getAppointmentsForPatient(Integer patientId);
 }
 

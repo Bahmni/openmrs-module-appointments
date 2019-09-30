@@ -2,16 +2,16 @@
 <beans xmlns="http://www.springframework.org/schema/beans"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
 		http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
 		http://www.springframework.org/schema/context
 		http://www.springframework.org/schema/context/spring-context-3.0.xsd
 		http://www.springframework.org/schema/util
 		http://www.springframework.org/schema/util/spring-util-3.0.xsd">
-	
-	<!-- 
+
+	<!--
 	From applicationContext-service.xml in openmrs-api
-	Needed to override and add hibernate mappings to the classpath since omod is not packaged yet 
+	Needed to override and add hibernate mappings to the classpath since omod is not packaged yet
 	-->
 	<bean id="sessionFactory" class="org.openmrs.api.db.hibernate.HibernateSessionFactoryBean">
 		<property name="configLocations">
@@ -59,6 +59,10 @@
 		</property>
 	</bean>
 
+	<bean id="patientDoubleBookingConflict" class="org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict">
+		<property name="appointmentDao" ref="appointmentDao"/>
+	</bean>
+
 	<bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
 		<property name="transactionManager">
 			<ref bean="transactionManager"/>
@@ -92,6 +96,12 @@
                 <property name="appointmentServiceHelper">
                     <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
                 </property>
+				<property name="appointmentConflictTypes">
+					<list>
+						<bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
+						<ref bean="patientDoubleBookingConflict"/>
+					</list>
+				</property>
 			</bean>
 		</property>
 		<property name="preInterceptors">
@@ -154,5 +164,11 @@
 			<ref bean="transactionAttributeSource"/>
 		</property>
 	</bean>
-	
+
+	<bean id="appointmentDao" class="org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl">
+		<property name="sessionFactory">
+			<ref bean="sessionFactory"/>
+		</property>
+	</bean>
+
 </beans>

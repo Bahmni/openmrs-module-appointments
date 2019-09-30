@@ -188,4 +188,11 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
         assertEquals(5, appointments.size());
     }
+
+    @Test
+    public void shouldReturnEmptyListWhenPatientIsNull() {
+        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(null);
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
 }
