@@ -222,7 +222,7 @@ public class AppointmentsControllerTest {
         when(appointmentMapper.fromRequestClonedAppointment(appointmentRequest)).thenReturn(appointment);
         when(appointmentsService.getAppointmentConflicts(appointment)).thenReturn(mock(Map.class));
 
-        appointmentsController.conflicts(appointmentRequest);
+        appointmentsController.getConflicts(appointmentRequest);
 
         verify(appointmentMapper).fromRequestClonedAppointment(appointmentRequest);
         verify(appointmentsService).getAppointmentConflicts(appointment);

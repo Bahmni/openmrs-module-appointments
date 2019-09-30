@@ -78,7 +78,7 @@ public class AppointmentsController {
         Errors appointmentSearchErrors = new BeanPropertyBindingResult(appointmentSearchRequest, "appointmentSearchRequest");
         appointmentSearchValidator.validate(appointmentSearchRequest, appointmentSearchErrors);
         if (!appointmentSearchErrors.getAllErrors().isEmpty()) {
-            throw new RuntimeException(appointmentSearchErrors.getAllErrors().get(0).getCodes()[1]);
+            throw new RuntimeException(appointmentSearchErrors.getAllErrors().get(0).getDefaultMessage());
         }
         List<Appointment> appointments = appointmentsService.search(appointmentSearchRequest);
         return appointmentMapper.constructResponse(appointments);
@@ -103,7 +103,7 @@ public class AppointmentsController {
 
     @RequestMapping(method = RequestMethod.POST, value = "/conflicts")
     @ResponseBody
-    public ResponseEntity<Object> conflicts(@RequestBody AppointmentRequest appointmentRequest) {
+    public ResponseEntity<Object> getConflicts(@RequestBody AppointmentRequest appointmentRequest) {
         try {
             Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
             Map<String, List<Appointment>> appointmentConflicts = appointmentsService.getAppointmentConflicts(appointment);
@@ -111,7 +111,7 @@ public class AppointmentsController {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentConflicts), HttpStatus.OK);
         } catch (Exception e) {
-            log.error("Runtime error while trying to create new appointment", e);
+            log.error("Runtime error while trying to get getConflicts for appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
