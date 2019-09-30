@@ -1,13 +1,14 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import java.util.List;
+
 import org.hibernate.Criteria;
+import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.Speciality;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 public class SpecialityDaoImpl implements SpecialityDao{
     private SessionFactory sessionFactory;
@@ -28,4 +29,12 @@ public class SpecialityDaoImpl implements SpecialityDao{
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Speciality.class, "Speciality");
         return criteria.list();
     }
+    
+    @Transactional
+	@Override
+	public Speciality save(Speciality speciality) {
+		 Session currentSession = sessionFactory.getCurrentSession();
+		 currentSession.saveOrUpdate(speciality);
+	     return speciality;
+	}
 }
