@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,7 +48,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,0,0));
         when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Collections.singletonList(patientAppointment));
 
-        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(1,appointments.size());
@@ -71,7 +72,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,30,0));
         when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentTwo));
 
-        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(2,appointments.size());
@@ -102,7 +103,7 @@ public class PatientDoubleBookingConflictTest {
         when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,
                 patientAppointmentTwo,patientAppointmentFour));
 
-        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(4,appointments.size());
@@ -131,7 +132,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,30,0));
         when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,patientAppointmentTwo));
 
-        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(0,appointments.size());

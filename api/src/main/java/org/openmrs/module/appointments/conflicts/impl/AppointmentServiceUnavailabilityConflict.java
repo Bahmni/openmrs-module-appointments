@@ -7,8 +7,8 @@ import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,12 +27,18 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
     }
 
     @Override
-    public List<Appointment> getAppointmentConflicts(Appointment appointment) {
-        AppointmentServiceDefinition appointmentServiceDefinition = appointment.getService();
-        return checkConflicts(appointment, appointmentServiceDefinition);
+    public List<Appointment> getAppointmentConflicts(List<Appointment> appointments) {
+        List<Appointment> conflictingAppointments = new ArrayList<>();
+        for (Appointment appointment : appointments) {
+            AppointmentServiceDefinition appointmentServiceDefinition = appointment.getService();
+            Appointment conflict = checkConflicts(appointment, appointmentServiceDefinition);
+            if (Objects.nonNull(conflict))
+                conflictingAppointments.add(conflict);
+        }
+        return conflictingAppointments;
     }
 
-    private List<Appointment> checkConflicts(Appointment appointment, AppointmentServiceDefinition appointmentServiceDefinition) {
+    private Appointment checkConflicts(Appointment appointment, AppointmentServiceDefinition appointmentServiceDefinition) {
         Set<ServiceWeeklyAvailability> weeklyAvailableDays = appointmentServiceDefinition.getWeeklyAvailability();
         if (isObjectPresent(weeklyAvailableDays)) {
             String appointmentDay = DayFormat.format(appointment.getStartDateTime());
@@ -46,7 +52,7 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
             appointment = checkTimeAvailability(appointment,
                     appointmentServiceDefinition.getStartTime(), appointmentServiceDefinition.getEndTime());
         }
-        return Objects.nonNull(appointment) ? Collections.singletonList(appointment) : null;
+        return appointment;
     }
 
     private boolean isObjectPresent(Collection<?> object) {

@@ -604,14 +604,15 @@ public class AppointmentsServiceImplTest {
     @Test
     public void shouldReturnConflictingAppointmentsForSingleAppointment() {
         Appointment appointment = new Appointment();
-        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment)).thenReturn(Collections.emptyList());
+        List<Appointment> appointments = Collections.singletonList(appointment);
+        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointments)).thenReturn(Collections.emptyList());
         when(appointmentServiceUnavailabilityConflict.getType()).thenReturn("SERVICE_UNAVAILABLE");
-        when(patientDoubleBookingConflict.getAppointmentConflicts(appointment)).thenReturn(Arrays.asList(appointment));
+        when(patientDoubleBookingConflict.getAppointmentConflicts(appointments)).thenReturn(appointments);
         when(patientDoubleBookingConflict.getType()).thenReturn("PATIENT_DOUBLE_BOOKING");
 
-        Map<String, List<Appointment>> response= appointmentsService.getAppointmentConflicts(appointment);
+        Map<String, List<Appointment>> response = appointmentsService.getAppointmentConflicts(appointment);
         for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
-            verify(appointmentConflictType).getAppointmentConflicts(appointment);
+            verify(appointmentConflictType).getAppointmentConflicts(appointments);
         }
         verify(appointmentServiceUnavailabilityConflict, never()).getType();
         assertTrue(response.containsKey("PATIENT_DOUBLE_BOOKING"));
@@ -631,25 +632,23 @@ public class AppointmentsServiceImplTest {
         appointmentFour.setStartDateTime(DateUtil.getStartOfDay());
         appointmentFour.setVoided(true);
 
-        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentTwo)).thenReturn(Arrays.asList(appointmentTwo));
-        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentThree)).thenReturn(Arrays.asList(appointmentThree));
+
+        List<Appointment> filteredAppointments = Arrays.asList(appointmentTwo, appointmentThree);
+        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(filteredAppointments)).thenReturn(Arrays.asList(appointmentTwo, appointmentThree));
         when(appointmentServiceUnavailabilityConflict.getType()).thenReturn("SERVICE_UNAVAILABLE");
-        when(patientDoubleBookingConflict.getAppointmentConflicts(appointmentThree)).thenReturn(Collections.emptyList());
-        when(patientDoubleBookingConflict.getAppointmentConflicts(appointmentTwo)).thenReturn(Arrays.asList(mock(Appointment.class), mock(Appointment.class), mock(Appointment.class)));
+        when(patientDoubleBookingConflict.getAppointmentConflicts(filteredAppointments)).thenReturn(Arrays.asList(mock(Appointment.class)));
         when(patientDoubleBookingConflict.getType()).thenReturn("PATIENT_DOUBLE_BOOKING");
 
         Map<String, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour));
 
-        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
-            for (Appointment appointment: Arrays.asList(appointmentTwo, appointmentThree)) {
-                verify(appointmentConflictType).getAppointmentConflicts(appointment);
-            }
+        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
+            verify(appointmentConflictType).getAppointmentConflicts(filteredAppointments);
             verify(appointmentConflictType).getType();
         }
         assertTrue(response.containsKey("PATIENT_DOUBLE_BOOKING"));
         assertTrue(response.containsKey("SERVICE_UNAVAILABLE"));
         assertEquals(2, response.get("SERVICE_UNAVAILABLE").size());
-        assertEquals(3, response.get("PATIENT_DOUBLE_BOOKING").size());
+        assertEquals(1, response.get("PATIENT_DOUBLE_BOOKING").size());
     }
 
     @Test
@@ -657,10 +656,11 @@ public class AppointmentsServiceImplTest {
         Appointment appointmentOne = new Appointment();
         appointmentOne.setVoided(true);
         appointmentOne.setStartDateTime(DateUtil.getStartOfDay());
+        List<Appointment> appointments = Collections.singletonList(appointmentOne);
 
-        Map<String, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne));
+        Map<String, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(appointments);
 
-        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
+        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
             verify(appointmentConflictType, never()).getAppointmentConflicts(any());
         }
         assertEquals(0, response.size());
