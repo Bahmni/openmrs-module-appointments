@@ -1,10 +1,10 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
-import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -13,14 +13,11 @@ import static org.openmrs.module.appointments.constants.AppointmentConflictTypeE
 
 public class PatientDoubleBookingConflict implements AppointmentConflictType {
 
-    private List<Appointment> patientAppointments;
-
     private AppointmentDao appointmentDao;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
     }
-
 
     @Override
     public String getType() {
@@ -28,16 +25,16 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
     }
 
     @Override
-    public List<Appointment> getAppointmentConflicts(Appointment appointment) {
-        return checkConflicts(appointment);
+    public List<Appointment> getAppointmentConflicts(List<Appointment> appointments) {
+        List<Appointment> conflictingAppointments = new ArrayList<>();
+        List<Appointment> patientAppointments = getPatientAppointments(appointments.get(0).getPatient().getPatientId());
+        for (Appointment appointment : appointments) {
+            conflictingAppointments.addAll(getConflictingAppointments(appointment, patientAppointments));
+        }
+        return conflictingAppointments;
     }
 
-    private List<Appointment> checkConflicts(Appointment appointment) {
-        getPatientAppointments(appointment);
-        return getConflictingAppointments(appointment);
-    }
-
-    private List<Appointment> getConflictingAppointments(Appointment appointment) {
+    private List<Appointment> getConflictingAppointments(Appointment appointment, List<Appointment> patientAppointments) {
         return patientAppointments.stream()
                 .filter(patientAppointment -> isConflicting(appointment, patientAppointment))
                 .collect(Collectors.toList());
@@ -56,9 +53,7 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
         return appointment.getStartDateTime().before(endTime) && appointment.getEndDateTime().after(startTime);
     }
 
-    private void getPatientAppointments(Appointment appointment) {
-        if (CollectionUtils.isEmpty(patientAppointments)) {
-            patientAppointments = appointmentDao.getAppointmentsForPatient(appointment.getPatient().getPatientId());
-        }
+    private List<Appointment> getPatientAppointments(Integer patientId) {
+        return appointmentDao.getAppointmentsForPatient(patientId);
     }
 }

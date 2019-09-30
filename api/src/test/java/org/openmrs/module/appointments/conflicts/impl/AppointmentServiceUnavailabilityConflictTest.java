@@ -12,13 +12,13 @@ import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -40,7 +40,7 @@ public class AppointmentServiceUnavailabilityConflictTest {
         day2.setDayOfWeek(DayOfWeek.WEDNESDAY);
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
-        List<Appointment> conflictingAppointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment);
+        List<Appointment> conflictingAppointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(Collections.singletonList(appointment));
         assertNotNull(conflictingAppointments);
         assertEquals(appointment, conflictingAppointments.get(0));
     }
@@ -65,9 +65,10 @@ public class AppointmentServiceUnavailabilityConflictTest {
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
 
-        List<Appointment> conflicts = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment);
+        List<Appointment> conflicts = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
-        assertNull(conflicts);
+        assertNotNull(conflicts);
+        assertEquals(0, conflicts.size());
     }
 
     @Test
@@ -101,9 +102,7 @@ public class AppointmentServiceUnavailabilityConflictTest {
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
 
         List<Appointment> conflictingAppointments= new ArrayList<>();
-        conflictingAppointments.addAll(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentOne));
-        conflictingAppointments.addAll(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentTwo));
-        conflictingAppointments.addAll(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentThree));
+        conflictingAppointments.addAll(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree)));
 
         assertNotNull(conflictingAppointments);
         assertEquals(3,conflictingAppointments.size());
@@ -130,7 +129,7 @@ public class AppointmentServiceUnavailabilityConflictTest {
         day2.setDayOfWeek(DayOfWeek.TUESDAY);
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
-        List<Appointment> appointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(appointment, appointments.get(0));
@@ -147,7 +146,7 @@ public class AppointmentServiceUnavailabilityConflictTest {
         appointmentServiceDefinition.setStartTime(new Time(11, 30, 0));
         appointmentServiceDefinition.setEndTime(new Time(17, 0, 0));
 
-        List<Appointment> appointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment);
+        List<Appointment> appointments = appointmentServiceUnavailabilityConflict.getAppointmentConflicts(Collections.singletonList(appointment));
 
         assertNotNull(appointments);
         assertEquals(appointment, appointments.get(0));

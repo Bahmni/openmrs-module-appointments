@@ -9,5 +9,5 @@ public interface AppointmentConflictType {
 
     String getType();
 
-    List<Appointment> getAppointmentConflicts(Appointment appointment);
+    List<Appointment> getAppointmentConflicts(List<Appointment> appointment);
 }

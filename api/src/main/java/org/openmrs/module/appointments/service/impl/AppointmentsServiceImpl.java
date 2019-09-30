@@ -25,7 +25,6 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -227,28 +226,21 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public Map<String, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
-        Map<String, List<Appointment>> conflicts = new HashMap<>();
-        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
-            List<Appointment> conflictAppointments = appointmentConflictType.getAppointmentConflicts(appointment);
-            if (CollectionUtils.isNotEmpty(conflictAppointments))
-                conflicts.put(appointmentConflictType.getType(), conflictAppointments);
-        }
-        return conflicts;
+        return getAllConflicts(Collections.singletonList(appointment));
     }
 
     @Override
     public Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments) {
-        Map<String, List<Appointment>> conflictsMap = new HashMap<>();
         List<Appointment> filteredAppointments = getNonVoidedFutureAppointments(appointments);
+        return CollectionUtils.isEmpty(filteredAppointments) ? new HashMap<>() : getAllConflicts(filteredAppointments);
+    }
+
+    private Map<String, List<Appointment>> getAllConflicts(List<Appointment> appointments) {
+        Map<String, List<Appointment>> conflictsMap = new HashMap<>();
         for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
-            List<Appointment> conflicts = new ArrayList<>();
-            for (Appointment appointment : filteredAppointments) {
-                List<Appointment> conflictingAppointments = appointmentConflictType.getAppointmentConflicts(appointment);
-                if (CollectionUtils.isNotEmpty(conflictingAppointments))
-                    conflicts.addAll(conflictingAppointments);
-            }
-            if (CollectionUtils.isNotEmpty(conflicts))
-                conflictsMap.put(appointmentConflictType.getType(), conflicts);
+            List<Appointment> conflictAppointments = appointmentConflictType.getAppointmentConflicts(appointments);
+            if (CollectionUtils.isNotEmpty(conflictAppointments))
+                conflictsMap.put(appointmentConflictType.getType(), conflictAppointments);
         }
         return conflictsMap;
     }

@@ -30,7 +30,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -270,21 +269,8 @@ public class AppointmentMapper {
     public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(Map<String, List<Appointment>> conflicts) {
         Map<String, List<AppointmentDefaultResponse>> conflictsResponse = new HashMap<>();
         for (Map.Entry<String, List<Appointment>> entry : conflicts.entrySet()) {
-            conflictsResponse.put(entry.getKey(), constructDefaultResponse(entry.getValue()));
+            conflictsResponse.put(entry.getKey(), constructResponse(entry.getValue()));
         }
         return conflictsResponse;
-    }
-
-    private List<AppointmentDefaultResponse> constructDefaultResponse(List<Appointment> appointments) {
-        return appointments.stream().map(appointment -> {
-            AppointmentDefaultResponse defaultResponse = new AppointmentDefaultResponse();
-            defaultResponse.setUuid(appointment.getUuid());
-            defaultResponse.setAppointmentNumber(appointment.getAppointmentNumber());
-            defaultResponse.setLocation(createLocationMap(appointment.getLocation()));
-            defaultResponse.setStartDateTime(appointment.getStartDateTime());
-            defaultResponse.setEndDateTime(appointment.getEndDateTime());
-            defaultResponse.setRecurring(appointment.isRecurring());
-            return defaultResponse;
-        }).collect(Collectors.toList());
     }
 }
