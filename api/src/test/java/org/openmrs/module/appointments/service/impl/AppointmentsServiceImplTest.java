@@ -18,16 +18,20 @@ import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
+import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
+import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
+import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
+import org.openmrs.module.appointments.helper.DateHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -47,10 +51,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Mockito.doThrow;
@@ -60,6 +67,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
+import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -85,6 +93,9 @@ public class AppointmentsServiceImplTest {
     @Spy
     private List<AppointmentValidator> appointmentValidators = new ArrayList<>();
 
+    @Spy
+    private List<AppointmentConflictType> appointmentConflictTypes = new ArrayList<>();
+
     @Mock
     private AppointmentServiceHelper appointmentServiceHelper;
 
@@ -103,6 +114,12 @@ public class AppointmentsServiceImplTest {
     @Mock
     private MessageSourceService messageSourceService;
 
+    @Mock
+    private AppointmentServiceUnavailabilityConflict appointmentServiceUnavailabilityConflict;
+
+    @Mock
+    private PatientDoubleBookingConflict patientDoubleBookingConflict;
+
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -114,8 +131,11 @@ public class AppointmentsServiceImplTest {
         mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
+        appointmentConflictTypes.add(appointmentServiceUnavailabilityConflict);
+        appointmentConflictTypes.add(patientDoubleBookingConflict);
         setValuesForMemberFields(appointmentsService, "appointmentValidators", appointmentValidators);
         setValuesForMemberFields(appointmentsService, "statusChangeValidators", statusChangeValidators);
+        setValuesForMemberFields(appointmentsService, "appointmentConflictTypes", appointmentConflictTypes);
     }
 
     public static void setValuesForMemberFields(Object classInstance, String fieldName, Object valueForMemberField)
@@ -595,5 +615,71 @@ public class AppointmentsServiceImplTest {
             verifyStatic();
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
+    }
+
+
+    @Test
+    public void shouldReturnConflictingAppointmentsForSingleAppointment() {
+        Appointment appointment = new Appointment();
+        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointment)).thenReturn(Collections.emptyList());
+        when(appointmentServiceUnavailabilityConflict.getType()).thenReturn("SERVICE_UNAVAILABLE");
+        when(patientDoubleBookingConflict.getAppointmentConflicts(appointment)).thenReturn(Arrays.asList(appointment));
+        when(patientDoubleBookingConflict.getType()).thenReturn("PATIENT_DOUBLE_BOOKING");
+
+        Map<String, List<Appointment>> response= appointmentsService.getAppointmentConflicts(appointment);
+        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
+            verify(appointmentConflictType).getAppointmentConflicts(appointment);
+        }
+        verify(appointmentServiceUnavailabilityConflict, never()).getType();
+        assertTrue(response.containsKey("PATIENT_DOUBLE_BOOKING"));
+        assertEquals(1, response.get("PATIENT_DOUBLE_BOOKING").size());
+        assertFalse(response.containsKey("SERVICE_UNAVAILABLE"));
+    }
+
+    @Test
+    public void shouldReturnConflictingAppointmentsForMultipleAppointment() {
+        Appointment appointmentOne = new Appointment();
+        appointmentOne.setStartDateTime(getDate(2017, 10,10,10,10,10));
+        Appointment appointmentTwo = new Appointment();
+        appointmentTwo.setStartDateTime(DateUtil.getStartOfDay());
+        Appointment appointmentThree = new Appointment();
+        appointmentThree.setStartDateTime(DateUtil.getStartOfDay());
+        Appointment appointmentFour = new Appointment();
+        appointmentFour.setStartDateTime(DateUtil.getStartOfDay());
+        appointmentFour.setVoided(true);
+
+        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentTwo)).thenReturn(Arrays.asList(appointmentTwo));
+        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointmentThree)).thenReturn(Arrays.asList(appointmentThree));
+        when(appointmentServiceUnavailabilityConflict.getType()).thenReturn("SERVICE_UNAVAILABLE");
+        when(patientDoubleBookingConflict.getAppointmentConflicts(appointmentThree)).thenReturn(Collections.emptyList());
+        when(patientDoubleBookingConflict.getAppointmentConflicts(appointmentTwo)).thenReturn(Arrays.asList(mock(Appointment.class), mock(Appointment.class), mock(Appointment.class)));
+        when(patientDoubleBookingConflict.getType()).thenReturn("PATIENT_DOUBLE_BOOKING");
+
+        Map<String, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour));
+
+        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
+            for (Appointment appointment: Arrays.asList(appointmentTwo, appointmentThree)) {
+                verify(appointmentConflictType).getAppointmentConflicts(appointment);
+            }
+            verify(appointmentConflictType).getType();
+        }
+        assertTrue(response.containsKey("PATIENT_DOUBLE_BOOKING"));
+        assertTrue(response.containsKey("SERVICE_UNAVAILABLE"));
+        assertEquals(2, response.get("SERVICE_UNAVAILABLE").size());
+        assertEquals(3, response.get("PATIENT_DOUBLE_BOOKING").size());
+    }
+
+    @Test
+    public void shouldNeverCallGetConflictsForEmptyList() {
+        Appointment appointmentOne = new Appointment();
+        appointmentOne.setVoided(true);
+        appointmentOne.setStartDateTime(DateUtil.getStartOfDay());
+
+        Map<String, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne));
+
+        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
+            verify(appointmentConflictType, never()).getAppointmentConflicts(any());
+        }
+        assertEquals(0, response.size());
     }
 }
