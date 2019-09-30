@@ -6,16 +6,19 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
+import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
@@ -415,5 +418,72 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/changeStatus", content));
         assertNotNull(response);
         assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldReturnNoContentResponseForRecurringAppointmentsForNoConflicts() throws Exception {
+        String content = "{" +
+                "\"appointmentRequest\": {" +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
+                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2019-09-23T07:30:00\"," +
+                "\"endDateTime\": \"2019-09-23T12:00:00\"," +
+                "\"providers\": [{" +
+                "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
+                "\"response\": \"ACCEPTED\"," +
+                "\"comments\": null" +
+                "}]," +
+                "\"locationUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"appointmentKind\": \"Scheduled\"" +
+                "}," +
+                "\"recurringPattern\": {" +
+                "\"frequency\": 2," +
+                "\"period\": 1," +
+                "\"daysOfWeek\": []," +
+                "\"endDate\": \"\"," +
+                "\"type\": \"Day\"" +
+                "}," +
+                "\"timeZone\": \"asia/kolkata\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/conflicts", content));
+        assertNotNull(response);
+        assertEquals(204, response.getStatus());
+    }
+
+    @Test
+    public void shouldReturnResponseForRecurringAppointmentsForNoConflicts() throws Exception {
+        String content = "{" +
+                "\"appointmentRequest\": {" +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
+                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T11:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T12:30:00\"," +
+                "\"providers\": [{" +
+                "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
+                "\"response\": \"ACCEPTED\"," +
+                "\"comments\": null" +
+                "}]," +
+                "\"locationUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"appointmentKind\": \"Scheduled\"" +
+                "}," +
+                "\"recurringPattern\": {" +
+                "\"frequency\": 2," +
+                "\"period\": 1," +
+                "\"daysOfWeek\": []," +
+                "\"endDate\": \"\"," +
+                "\"type\": \"Day\"" +
+                "}," +
+                "\"timeZone\": \"asia/kolkata\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/conflicts", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
+        });
+        assertEquals(2, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING.name()).size());
     }
 }

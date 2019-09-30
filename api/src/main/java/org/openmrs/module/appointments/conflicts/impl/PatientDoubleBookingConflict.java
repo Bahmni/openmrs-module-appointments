@@ -44,7 +44,7 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
     }
 
     private boolean isConflicting(Appointment appointment, Appointment patientAppointment) {
-        return !appointment.isSameAppointment(patientAppointment)
+        return !patientAppointment.isSameAppointment(appointment)
                 && !patientAppointment.getVoided()
                 && patientAppointment.isFutureAppointment()
                 && isAppointmentOverlapping(patientAppointment, appointment);
