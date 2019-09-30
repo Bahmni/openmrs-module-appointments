@@ -8,15 +8,16 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
+import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.DateHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.service.AppointmentsService;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -26,7 +27,7 @@ public class PatientDoubleBookingConflictTest {
     private PatientDoubleBookingConflict patientDoubleBookingConflict;
 
     @Mock
-    private AppointmentsService appointmentsService;
+    private AppointmentDao appointmentDao;
 
     @Before
     public void init() {
@@ -44,7 +45,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setPatient(patient);
         appointment.setStartDateTime(DateHelper.getDate(2119,8,1,11,0,0));
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,0,0));
-        when(appointmentsService.getAppointmentsForPatient(1)).thenReturn(Collections.singletonList(patientAppointment));
+        when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Collections.singletonList(patientAppointment));
 
         List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
 
@@ -68,7 +69,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setPatient(patient);
         appointment.setStartDateTime(DateHelper.getDate(2119,8,1,10,30,0));
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,30,0));
-        when(appointmentsService.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentTwo));
+        when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentTwo));
 
         List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
 
@@ -98,7 +99,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setPatient(patient);
         appointment.setStartDateTime(DateHelper.getDate(2119,8,1,11,30,0));
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,30,0));
-        when(appointmentsService.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,
+        when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,
                 patientAppointmentTwo,patientAppointmentFour));
 
         List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
@@ -128,7 +129,7 @@ public class PatientDoubleBookingConflictTest {
         appointment.setPatient(patient);
         appointment.setStartDateTime(DateHelper.getDate(2119,8,1,12,0,0));
         appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,30,0));
-        when(appointmentsService.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,patientAppointmentTwo));
+        when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Arrays.asList(patientAppointment,patientAppointmentThree,patientAppointmentTwo));
 
         List<Appointment> appointments = patientDoubleBookingConflict.getAppointmentConflicts(appointment);
 

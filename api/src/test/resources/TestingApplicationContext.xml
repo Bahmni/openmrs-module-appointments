@@ -113,7 +113,7 @@
     </bean>
 
     <bean id="patientDoubleBookingConflict" class="org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict">
-        <property name="appointmentsService" ref="appointmentsService"/>
+        <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
 
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">

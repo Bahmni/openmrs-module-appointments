@@ -2,8 +2,8 @@ package org.openmrs.module.appointments.conflicts.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
+import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.service.AppointmentsService;
 
 import java.util.Date;
 import java.util.List;
@@ -15,11 +15,12 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
 
     private List<Appointment> patientAppointments;
 
-    private AppointmentsService appointmentsService;
+    private AppointmentDao appointmentDao;
 
-    public void setAppointmentsService(AppointmentsService appointmentsService) {
-        this.appointmentsService = appointmentsService;
+    public void setAppointmentDao(AppointmentDao appointmentDao) {
+        this.appointmentDao = appointmentDao;
     }
+
 
     @Override
     public String getType() {
@@ -57,7 +58,7 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
 
     private void getPatientAppointments(Appointment appointment) {
         if (CollectionUtils.isEmpty(patientAppointments)) {
-            patientAppointments = appointmentsService.getAppointmentsForPatient(appointment.getPatient().getPatientId());
+            patientAppointments = appointmentDao.getAppointmentsForPatient(appointment.getPatient().getPatientId());
         }
     }
 }

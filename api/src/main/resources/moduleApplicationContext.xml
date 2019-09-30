@@ -22,7 +22,7 @@
   		    http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
-    <context:component-scan base-package="org.openmrs.module.appointmens"/>
+    <context:component-scan base-package="org.openmrs.module.appointments"/>
     <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>
     <bean parent="serviceContext">
         <property name="moduleService">
@@ -59,7 +59,7 @@
     </bean>
 
     <bean id="patientDoubleBookingConflict" class="org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict">
-        <property name="appointmentsService" ref="appointmentsService"/>
+        <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
 
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
