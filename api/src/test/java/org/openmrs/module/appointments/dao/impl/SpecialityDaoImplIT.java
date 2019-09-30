@@ -5,13 +5,14 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
+import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.Speciality;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class SpecialityDaoImplIT  extends BaseIntegrationTest {
 
     @Autowired
-    SpecialityDaoImpl specialityDao;
+    SpecialityDao specialityDao;
 
     @Before
     public void setUp() throws Exception {
