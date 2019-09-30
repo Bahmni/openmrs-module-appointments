@@ -319,7 +319,7 @@ public class RecurringAppointmentsControllerTest {
         RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
         recurringAppointmentRequest.setAppointmentRequest(mock(AppointmentRequest.class));
         List<Appointment> appointments = mock(List.class);
-        Map<String, List<Appointment>> conflicts = mock(Map.class);
+        Map<Enum, List<Appointment>> conflicts = mock(Map.class);
         when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(appointments);
         when(appointmentsService.getAppointmentsConflicts(appointments)).thenReturn(conflicts);
 

@@ -19,11 +19,12 @@ import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 public class AppointmentServiceUnavailabilityConflict implements AppointmentConflictType {
 
-    private final SimpleDateFormat DayFormat = new SimpleDateFormat("EEEE");
+    private final static String DAY_OF_WEEK_PATTERN = "EEEE";
+    private final SimpleDateFormat DayFormat = new SimpleDateFormat(DAY_OF_WEEK_PATTERN);
 
     @Override
-    public String getType() {
-        return SERVICE_UNAVAILABLE.name();
+    public Enum getType() {
+        return SERVICE_UNAVAILABLE;
     }
 
     @Override
@@ -31,14 +32,14 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
         List<Appointment> conflictingAppointments = new ArrayList<>();
         for (Appointment appointment : appointments) {
             AppointmentServiceDefinition appointmentServiceDefinition = appointment.getService();
-            Appointment conflict = checkConflicts(appointment, appointmentServiceDefinition);
+            Appointment conflict = getConflictingAppointment(appointment, appointmentServiceDefinition);
             if (Objects.nonNull(conflict))
                 conflictingAppointments.add(conflict);
         }
         return conflictingAppointments;
     }
 
-    private Appointment checkConflicts(Appointment appointment, AppointmentServiceDefinition appointmentServiceDefinition) {
+    private Appointment getConflictingAppointment(Appointment appointment, AppointmentServiceDefinition appointmentServiceDefinition) {
         Set<ServiceWeeklyAvailability> weeklyAvailableDays = appointmentServiceDefinition.getWeeklyAvailability();
         if (isObjectPresent(weeklyAvailableDays)) {
             String appointmentDay = DayFormat.format(appointment.getStartDateTime());

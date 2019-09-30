@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface AppointmentConflictType {
 
-    String getType();
+    Enum getType();
 
     List<Appointment> getAppointmentConflicts(List<Appointment> appointment);
 }

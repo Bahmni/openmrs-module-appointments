@@ -20,8 +20,8 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
     }
 
     @Override
-    public String getType() {
-        return PATIENT_DOUBLE_BOOKING.name();
+    public Enum getType() {
+        return PATIENT_DOUBLE_BOOKING;
     }
 
     @Override

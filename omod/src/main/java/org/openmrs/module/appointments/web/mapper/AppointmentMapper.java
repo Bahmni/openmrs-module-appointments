@@ -87,7 +87,7 @@ public class AppointmentMapper {
     public void mapAppointmentRequestToAppointment(AppointmentRequest appointmentRequest, Appointment appointment) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
-        if(appointmentRequest.getServiceTypeUuid() != null) {
+        if (appointmentRequest.getServiceTypeUuid() != null) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
         appointment.setServiceType(appointmentServiceType);
@@ -124,7 +124,7 @@ public class AppointmentMapper {
         }
 
         if (newProviders != null && !newProviders.isEmpty()) {
-            if (appointment.getProviders() == null ) {
+            if (appointment.getProviders() == null) {
                 appointment.setProviders(new HashSet<>());
             }
             for (AppointmentProviderDetail providerDetail : newProviders) {
@@ -159,7 +159,7 @@ public class AppointmentMapper {
     }
 
     public AppointmentProviderResponse mapProviderResponse(String response) {
-        String namedEnum = StringUtils.isEmpty(response) ? AppointmentProviderResponse.ACCEPTED.toString()  : response.toUpperCase();
+        String namedEnum = StringUtils.isEmpty(response) ? AppointmentProviderResponse.ACCEPTED.toString() : response.toUpperCase();
         //TODO: validation if not valid enum string
         return AppointmentProviderResponse.valueOf(namedEnum);
     }
@@ -196,7 +196,7 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-        if(appointmentResponseExtension!=null)
+        if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
@@ -220,7 +220,7 @@ public class AppointmentMapper {
     }
 
     private Set<AppointmentProvider> getNonVoidedProviders(Set<AppointmentProvider> providers) {
-        if(providers == null || providers.isEmpty()) {
+        if (providers == null || providers.isEmpty()) {
             return providers;
         }
         providers = providers
@@ -266,10 +266,10 @@ public class AppointmentMapper {
         return appointmentProvider;
     }
 
-    public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(Map<String, List<Appointment>> conflicts) {
+    public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(Map<Enum, List<Appointment>> conflicts) {
         Map<String, List<AppointmentDefaultResponse>> conflictsResponse = new HashMap<>();
-        for (Map.Entry<String, List<Appointment>> entry : conflicts.entrySet()) {
-            conflictsResponse.put(entry.getKey(), constructResponse(entry.getValue()));
+        for (Map.Entry<Enum, List<Appointment>> entry : conflicts.entrySet()) {
+            conflictsResponse.put(entry.getKey().name(), constructResponse(entry.getValue()));
         }
         return conflictsResponse;
     }
