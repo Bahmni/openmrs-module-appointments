@@ -5,9 +5,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.User;
 import org.openmrs.module.appointments.dao.SpecialityDao;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -64,6 +66,14 @@ public class SpecialityServiceImplTest {
         assertEquals(specialities, response);
         assertEquals(new Integer(1), specialities.get(0).getId());
         assertEquals(creator, specialities.get(0).getCreator());
+    }
+    
+    @Test
+    public void testCreateSpeciality() throws Exception {
+       Speciality speciality = new Speciality();
+       speciality.setName("Cardiology");
+       specialityService.save(speciality);
+       Mockito.verify(specialityDao, times(1)).save(speciality);
     }
 
 }

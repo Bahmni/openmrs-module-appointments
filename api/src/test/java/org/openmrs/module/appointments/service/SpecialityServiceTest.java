@@ -3,15 +3,22 @@ package org.openmrs.module.appointments.service;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.dao.AppointmentServiceDao;
+import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.mockito.Mockito.times;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
@@ -21,7 +28,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     private String readOnlyUser;
     private String noPrivilegeUser;
     private String password;
-
+    
     @Autowired
     SpecialityService specialityService;
 
@@ -57,5 +64,13 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     public void shouldNotGetAllSpecialitiesIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
         assertNotNull(specialityService.getAllSpecialities());
+    }
+    
+    @Test
+    public void shouldBeAbleToSaveSpecialityIfUserHasManageServicesPrivilege() throws Exception {
+        Context.authenticate(adminUser, password);
+        Speciality speciality = new Speciality();
+        speciality.setName("speciality");
+        assertNotNull(specialityService.save(speciality));
     }
 }
