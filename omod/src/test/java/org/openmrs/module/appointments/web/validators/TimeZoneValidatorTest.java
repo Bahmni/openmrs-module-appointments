@@ -7,7 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class TimeZoneValidatorTest {
 
@@ -33,7 +33,8 @@ public class TimeZoneValidatorTest {
         timeZoneValidator.validate(timeZone, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("missing.timeZone", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test

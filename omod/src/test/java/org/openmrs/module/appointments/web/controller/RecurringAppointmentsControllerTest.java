@@ -29,7 +29,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 
-import java.lang.reflect.Array;
 import java.util.*;
 
 import static org.junit.Assert.assertEquals;
@@ -129,7 +128,7 @@ public class RecurringAppointmentsControllerTest {
             public Object answer(InvocationOnMock invocationOnMock) {
                 Object[] args = invocationOnMock.getArguments();
                 Errors errors = (Errors) args[1];
-                errors.reject("save error");
+                errors.reject("invalid","save error");
                 return null;
             }
         }).when(recurringPatternValidator).validate(any(), any());
@@ -210,7 +209,7 @@ public class RecurringAppointmentsControllerTest {
             public Object answer(InvocationOnMock invocationOnMock) {
                 Object[] args = invocationOnMock.getArguments();
                 Errors errors = (Errors) args[1];
-                errors.reject("some error");
+                errors.reject("invalid","some error");
                 return null;
             }
         }).when(recurringPatternValidator).validate(any(), any());
@@ -268,7 +267,7 @@ public class RecurringAppointmentsControllerTest {
             public Object answer(InvocationOnMock invocationOnMock) {
                 Object[] args = invocationOnMock.getArguments();
                 Errors errors = (Errors) args[1];
-                errors.reject("Time Zone is missing");
+                errors.reject("invalid","Time Zone is missing");
                 return null;
             }
         }).when(timeZoneValidator).validate(any(), any());
@@ -302,13 +301,13 @@ public class RecurringAppointmentsControllerTest {
             public Object answer(InvocationOnMock invocationOnMock) {
                 Object[] args = invocationOnMock.getArguments();
                 Errors errors = (Errors) args[1];
-                errors.reject("some error");
+                errors.reject("invalid","some error");
                 return null;
             }
         }).when(recurringPatternValidator).validate(any(), any());
 
 
-        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.getConflicts(recurringAppointmentRequest);
         verify(appointmentMapper, never()).constructConflictResponse(Collections.emptyMap());
         verify(recurringAppointmentsService, never()).generateRecurringAppointments(any());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
@@ -324,7 +323,7 @@ public class RecurringAppointmentsControllerTest {
         when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(appointments);
         when(appointmentsService.getAppointmentsConflicts(appointments)).thenReturn(conflicts);
 
-        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.getConflicts(recurringAppointmentRequest);
         verify(recurringAppointmentsService).generateRecurringAppointments(recurringAppointmentRequest);
         verify(appointmentsService).getAppointmentsConflicts(appointments);
         verify(appointmentMapper).constructConflictResponse(conflicts);
@@ -342,7 +341,7 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setAppointments(appointments);
         when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(mock(AppointmentRecurringPattern.class));
-        ResponseEntity<Object> responseEntity = recurringAppointmentsController.conflicts(recurringAppointmentRequest);
+        ResponseEntity<Object> responseEntity = recurringAppointmentsController.getConflicts(recurringAppointmentRequest);
         verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPattern(recurringAppointmentRequest);
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
         assertNull(responseEntity.getBody());

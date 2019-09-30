@@ -40,6 +40,7 @@ public class RecurringPatternValidatorTest {
                 "daysOfWeek, period and frequency/endDate are mandatory if type is WEEK";
     }
 
+
     @Test
     public void shouldAddToErrorsWhenTypeIsNullInRecurringPattern() {
         recurringPattern.setType(null);
@@ -48,7 +49,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -58,7 +60,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -69,7 +72,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -79,7 +83,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -89,7 +94,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -99,7 +105,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -110,7 +117,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -124,7 +132,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -138,7 +147,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -151,7 +161,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -164,7 +175,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test
@@ -177,7 +189,8 @@ public class RecurringPatternValidatorTest {
         recurringPatternValidator.validate(recurringPattern, errors);
 
         assertEquals(errors.getAllErrors().size(), 1);
-        assertEquals(errors.getAllErrors().get(0).getCodes()[1], getExceptionMessage());
+        assertEquals(getExceptionMessage(), errors.getAllErrors().get(0).getDefaultMessage());
+        assertEquals("invalid.recurringPattern", errors.getAllErrors().get(0).getCodes()[0]);
     }
 
     @Test

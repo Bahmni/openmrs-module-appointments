@@ -26,7 +26,7 @@ public class RecurringPatternValidator implements Validator {
         RecurringPattern recurringPattern = (RecurringPattern)o;
         boolean isValidRecurringPattern = isValidRecurringAppointmentsPattern(recurringPattern);
         if (!isValidRecurringPattern) {
-           errors.reject(String.format("type should be %s/%s\n" +
+           errors.reject("invalid",String.format("type should be %s/%s\n" +
                             "period and frequency/endDate are mandatory if type is DAY\n" +
                             "daysOfWeek, period and frequency/endDate are mandatory if type is WEEK",
                     RecurringAppointmentType.DAY, RecurringAppointmentType.WEEK));

@@ -21,6 +21,6 @@ public class AppointmentSearchValidator  implements Validator {
         Date endDate = appointmentSearchRequest.getEndDate();
         Date startDate = appointmentSearchRequest.getStartDate();
         if(isNull(endDate) || isNull(startDate))
-            errors.reject("Either StartDate or EndDate not provided");
+            errors.reject("invalid","Either StartDate or EndDate not provided");
     }
 }
