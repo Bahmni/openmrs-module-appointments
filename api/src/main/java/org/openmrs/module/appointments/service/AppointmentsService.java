@@ -79,10 +79,10 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
-    Map<String, List<Appointment>> getAppointmentConflicts(Appointment appointment);
+    Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment);
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
-    Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
+    Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 }
 

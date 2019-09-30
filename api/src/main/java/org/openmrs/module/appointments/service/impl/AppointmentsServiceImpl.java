@@ -225,18 +225,18 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public Map<String, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
+    public Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment) {
         return getAllConflicts(Collections.singletonList(appointment));
     }
 
     @Override
-    public Map<String, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments) {
+    public Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments) {
         List<Appointment> filteredAppointments = getNonVoidedFutureAppointments(appointments);
         return CollectionUtils.isEmpty(filteredAppointments) ? new HashMap<>() : getAllConflicts(filteredAppointments);
     }
 
-    private Map<String, List<Appointment>> getAllConflicts(List<Appointment> appointments) {
-        Map<String, List<Appointment>> conflictsMap = new HashMap<>();
+    private Map<Enum, List<Appointment>> getAllConflicts(List<Appointment> appointments) {
+        Map<Enum, List<Appointment>> conflictsMap = new HashMap<>();
         for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
             List<Appointment> conflictAppointments = appointmentConflictType.getAppointmentConflicts(appointments);
             if (CollectionUtils.isNotEmpty(conflictAppointments))

@@ -26,15 +26,21 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
-import java.text.ParseException;
-import java.util.*;
+import java.util.Map;
+import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/recurring-appointments")
@@ -77,11 +83,7 @@ public class RecurringAppointmentsController {
     public ResponseEntity<Object> save(@RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
             RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
-            Errors errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
-            recurringPatternValidator.validate(recurringPattern, errors);
-            if (!errors.getAllErrors().isEmpty()) {
-                throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
-            }
+            validateRecurringPattern(recurringPattern);
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
             List<Appointment> appointmentsList = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
             appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
@@ -99,12 +101,7 @@ public class RecurringAppointmentsController {
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
         try {
             String clientTimeZone = statusDetails.get("timeZone");
-            Errors errors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
-            timeZoneValidator.validate(clientTimeZone, errors);
-            if (!errors.getAllErrors().isEmpty()) {
-                throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
-            }
-
+            validateTimeZone(clientTimeZone);
             String toStatus = statusDetails.get("toStatus");
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
             if (appointment != null) {
@@ -123,19 +120,9 @@ public class RecurringAppointmentsController {
     @ResponseBody
     public ResponseEntity<Object> editAppointment(@Valid @RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
-            RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
-            Errors recurringPatternErrors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
-            recurringPatternValidator.validate(recurringPattern, recurringPatternErrors);
-            if (!recurringPatternErrors.getAllErrors().isEmpty()) {
-                throw new APIException(recurringPatternErrors.getAllErrors().get(0).getDefaultMessage());
-            }
+            validateRecurringPattern(recurringAppointmentRequest.getRecurringPattern());
             if (recurringAppointmentRequest.getApplyForAll()) {
-                String clientTimeZone = recurringAppointmentRequest.getTimeZone();
-                Errors timeZoneErrors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
-                timeZoneValidator.validate(clientTimeZone, timeZoneErrors);
-                if (!timeZoneErrors.getAllErrors().isEmpty()) {
-                    throw new APIException(timeZoneErrors.getAllErrors().get(0).getDefaultMessage());
-                }
+                validateTimeZone(recurringAppointmentRequest.getTimeZone());
                 AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
                 Appointment editedAppointment = appointmentRecurringPattern.getAppointments().stream()
                         .filter(app -> recurringAppointmentRequest.getAppointmentRequest().getUuid().equals(app.getUuid())).findFirst().orElse(null);
@@ -156,9 +143,9 @@ public class RecurringAppointmentsController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public RecurringAppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
+    public RecurringAppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid) {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        if(appointment == null) {
+        if (appointment == null) {
             log.error("Invalid. Appointment does not exist. UUID - " + uuid);
             throw new RuntimeException("Appointment does not exist");
         }
@@ -169,20 +156,9 @@ public class RecurringAppointmentsController {
     @ResponseBody
     public ResponseEntity<Object> getConflicts(@RequestBody RecurringAppointmentRequest recurringAppointmentRequest) {
         try {
-            RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
-            Errors errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
-            recurringPatternValidator.validate(recurringPattern, errors);
-            if (!errors.getAllErrors().isEmpty()) {
-                throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
-            }
-            String clientTimeZone = recurringAppointmentRequest.getTimeZone();
-            Errors timeZoneErrors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
-            timeZoneValidator.validate(clientTimeZone, timeZoneErrors);
-            if (!timeZoneErrors.getAllErrors().isEmpty()) {
-                throw new APIException(timeZoneErrors.getAllErrors().get(0).getDefaultMessage());
-            }
+            validateRecurringPattern(recurringAppointmentRequest.getRecurringPattern());
             List<Appointment> appointments = getValidAppointments(recurringAppointmentRequest);
-            Map<String, List<Appointment>> appointmentsConflicts = appointmentsService.getAppointmentsConflicts(appointments);
+            Map<Enum, List<Appointment>> appointmentsConflicts = appointmentsService.getAppointmentsConflicts(appointments);
             if (appointmentsConflicts.isEmpty())
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentsConflicts),
@@ -193,11 +169,28 @@ public class RecurringAppointmentsController {
         }
     }
 
+    private void validateTimeZone(String clientTimeZone) {
+        Errors timeZoneErrors = new BeanPropertyBindingResult(clientTimeZone, "clientTimeZone");
+        timeZoneValidator.validate(clientTimeZone, timeZoneErrors);
+        if (!timeZoneErrors.getAllErrors().isEmpty()) {
+            throw new APIException(timeZoneErrors.getAllErrors().get(0).getDefaultMessage());
+        }
+    }
+
+    private void validateRecurringPattern(RecurringPattern recurringPattern) {
+        Errors errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");
+        recurringPatternValidator.validate(recurringPattern, errors);
+        if (!errors.getAllErrors().isEmpty()) {
+            throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
+        }
+    }
+
     private List<Appointment> getValidAppointments(RecurringAppointmentRequest recurringAppointmentRequest) {
         List<Appointment> appointments;
         if (Objects.isNull(recurringAppointmentRequest.getAppointmentRequest().getUuid())) {
             appointments = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
         } else {
+            validateTimeZone(recurringAppointmentRequest.getTimeZone());
             AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService
                     .getUpdatedRecurringPattern(recurringAppointmentRequest);
             appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
