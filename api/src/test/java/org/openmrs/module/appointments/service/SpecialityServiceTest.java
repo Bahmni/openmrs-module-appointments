@@ -67,7 +67,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     }
     
     @Test
-    public void shouldBeAbleToSaveSpecialityIfUserHasManageServicesPrivilege() throws Exception {
+    public void shouldBeAbleToSaveSpecialityIfUserHasManageSpecialitiesPrivilege() throws Exception {
         Context.authenticate(adminUser, password);
         Speciality speciality = new Speciality();
         speciality.setName("speciality");

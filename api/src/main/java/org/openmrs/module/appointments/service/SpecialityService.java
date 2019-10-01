@@ -17,6 +17,6 @@ public interface SpecialityService {
     List<Speciality> getAllSpecialities();
     
     @Transactional
-    @Authorized({"Manage Appointment Services"})
+    @Authorized({"Manage Appointment Specialities"})
     Speciality save(Speciality speciality);
 }
