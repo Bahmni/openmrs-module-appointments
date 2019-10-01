@@ -2,7 +2,7 @@ package org.openmrs.module.appointments.conflicts.impl;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
-import org.openmrs.module.appointments.constants.AppointmentConflictType;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 
@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.openmrs.module.appointments.constants.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
+import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 
 public class PatientDoubleBookingConflict implements AppointmentConflict {
 

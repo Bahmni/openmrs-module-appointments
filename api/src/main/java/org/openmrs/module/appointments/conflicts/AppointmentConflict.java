@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.conflicts;
 
-import org.openmrs.module.appointments.constants.AppointmentConflictType;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.Appointment;
 
 import java.util.List;
