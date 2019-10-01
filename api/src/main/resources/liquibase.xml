@@ -315,6 +315,16 @@
             INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Services', 'Able to manage Services in Appointments module', uuid());
         </sql>
     </changeSet>
+    
+    <changeSet id="Create-privilege-manage-appointment-specialities-201709201608"  author="Bailly, Rurangirwa">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Manage Appointment Specialities'</sqlCheck>
+        </preConditions>
+        <comment>Adding privilege to manage Specialities in Appointments module</comment>
+        <sql>
+            INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Specialities', 'Able to manage Specialities in Appointments module', uuid());
+        </sql>
+    </changeSet>
 
     <changeSet id="global-property-past-appointments-sql" author="Maharjun, Shireesha">
         <preConditions onFail="MARK_RAN">
