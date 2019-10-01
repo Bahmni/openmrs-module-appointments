@@ -73,4 +73,12 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         speciality.setName("speciality");
         assertNotNull(specialityService.save(speciality));
     }
+    
+    @Test(expected = APIAuthenticationException.class)
+    public void shouldNotBeAbleToSaveSpecialityIfUserDoesNotHaveManageSpecialitiesPrivilege() throws Exception {
+        Context.authenticate(manageUser, password);
+        Speciality speciality = new Speciality();
+        speciality.setName("speciality");
+        assertNotNull(specialityService.save(speciality));
+    }
 }
