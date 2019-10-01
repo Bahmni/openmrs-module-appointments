@@ -69,7 +69,7 @@ public class SpecialityServiceImplTest {
     }
     
     @Test
-    public void testCreateSpeciality() throws Exception {
+    public void shouldCreateSpeciality() throws Exception {
        Speciality speciality = new Speciality();
        speciality.setName("Cardiology");
        specialityService.save(speciality);
