@@ -68,7 +68,7 @@ public class ServiceWeeklyAvailability extends BaseOpenmrsData implements Serial
 		this.dayOfWeek = dayOfWeek;
 	}
 
-	public boolean isEquals(String day){
+	public boolean isSameDay(String day){
 		return this.getDayOfWeek().toString().equalsIgnoreCase(day);
 	}
 

@@ -94,7 +94,7 @@
                         <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
                     </list>
                 </property>
-                <property name="appointmentConflictTypes">
+                <property name="appointmentConflicts">
                     <list>
                         <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
                         <ref bean="patientDoubleBookingConflict"/>
