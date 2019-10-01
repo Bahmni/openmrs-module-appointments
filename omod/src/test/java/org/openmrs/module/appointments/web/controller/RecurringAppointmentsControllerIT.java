@@ -6,7 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum;
+import org.openmrs.module.appointments.constants.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -483,7 +483,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
-        assertEquals(2, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING.name()).size());
+        assertEquals(2, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.PATIENT_DOUBLE_BOOKING.name()).size());
     }
 }

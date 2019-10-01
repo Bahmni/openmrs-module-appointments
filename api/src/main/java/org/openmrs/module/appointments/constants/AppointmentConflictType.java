@@ -1,5 +1,5 @@
 package org.openmrs.module.appointments.constants;
 
-public enum AppointmentConflictTypeEnum {
+public enum AppointmentConflictType {
     SERVICE_UNAVAILABLE, PATIENT_DOUBLE_BOOKING
 }

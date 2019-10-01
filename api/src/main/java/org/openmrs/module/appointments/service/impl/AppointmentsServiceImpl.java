@@ -7,7 +7,7 @@ import org.hibernate.cfg.NotYetImplementedException;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
+import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -57,7 +57,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private AppointmentServiceHelper appointmentServiceHelper;
 
-    private List<AppointmentConflictType> appointmentConflictTypes;
+    private List<AppointmentConflict> appointmentConflicts;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -83,8 +83,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.editAppointmentValidators = editAppointmentValidators;
     }
 
-    public void setAppointmentConflictTypes(List<AppointmentConflictType> appointmentConflictTypes) {
-        this.appointmentConflictTypes = appointmentConflictTypes;
+    public void setAppointmentConflicts(List<AppointmentConflict> appointmentConflicts) {
+        this.appointmentConflicts = appointmentConflicts;
     }
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
@@ -237,10 +237,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private Map<Enum, List<Appointment>> getAllConflicts(List<Appointment> appointments) {
         Map<Enum, List<Appointment>> conflictsMap = new HashMap<>();
-        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
-            List<Appointment> conflictAppointments = appointmentConflictType.getAppointmentConflicts(appointments);
+        for (AppointmentConflict appointmentConflict : appointmentConflicts) {
+            List<Appointment> conflictAppointments = appointmentConflict.getConflicts(appointments);
             if (CollectionUtils.isNotEmpty(conflictAppointments))
-                conflictsMap.put(appointmentConflictType.getType(), conflictAppointments);
+                conflictsMap.put(appointmentConflict.getType(), conflictAppointments);
         }
         return conflictsMap;
     }

@@ -18,10 +18,9 @@ import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
-import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
+import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
-import org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -66,8 +65,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING;
-import static org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE;
+import static org.openmrs.module.appointments.constants.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
+import static org.openmrs.module.appointments.constants.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -96,7 +95,7 @@ public class AppointmentsServiceImplTest {
     private List<AppointmentValidator> appointmentValidators = new ArrayList<>();
 
     @Spy
-    private List<AppointmentConflictType> appointmentConflictTypes = new ArrayList<>();
+    private List<AppointmentConflict> appointmentConflicts = new ArrayList<>();
 
     @Mock
     private AppointmentServiceHelper appointmentServiceHelper;
@@ -133,11 +132,11 @@ public class AppointmentsServiceImplTest {
         mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
-        appointmentConflictTypes.add(appointmentServiceUnavailabilityConflict);
-        appointmentConflictTypes.add(patientDoubleBookingConflict);
+        appointmentConflicts.add(appointmentServiceUnavailabilityConflict);
+        appointmentConflicts.add(patientDoubleBookingConflict);
         setValuesForMemberFields(appointmentsService, "appointmentValidators", appointmentValidators);
         setValuesForMemberFields(appointmentsService, "statusChangeValidators", statusChangeValidators);
-        setValuesForMemberFields(appointmentsService, "appointmentConflictTypes", appointmentConflictTypes);
+        setValuesForMemberFields(appointmentsService, "appointmentConflicts", appointmentConflicts);
     }
 
     public static void setValuesForMemberFields(Object classInstance, String fieldName, Object valueForMemberField)
@@ -624,14 +623,14 @@ public class AppointmentsServiceImplTest {
     public void shouldReturnConflictingAppointmentsForSingleAppointment() {
         Appointment appointment = new Appointment();
         List<Appointment> appointments = Collections.singletonList(appointment);
-        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(appointments)).thenReturn(Collections.emptyList());
+        when(appointmentServiceUnavailabilityConflict.getConflicts(appointments)).thenReturn(Collections.emptyList());
         when(appointmentServiceUnavailabilityConflict.getType()).thenReturn(SERVICE_UNAVAILABLE);
-        when(patientDoubleBookingConflict.getAppointmentConflicts(appointments)).thenReturn(appointments);
+        when(patientDoubleBookingConflict.getConflicts(appointments)).thenReturn(appointments);
         when(patientDoubleBookingConflict.getType()).thenReturn(PATIENT_DOUBLE_BOOKING);
 
         Map<Enum, List<Appointment>> response = appointmentsService.getAppointmentConflicts(appointment);
-        for (AppointmentConflictType appointmentConflictType: appointmentConflictTypes) {
-            verify(appointmentConflictType).getAppointmentConflicts(appointments);
+        for (AppointmentConflict appointmentConflict : appointmentConflicts) {
+            verify(appointmentConflict).getConflicts(appointments);
         }
         verify(appointmentServiceUnavailabilityConflict, never()).getType();
         assertTrue(response.containsKey(PATIENT_DOUBLE_BOOKING));
@@ -653,16 +652,16 @@ public class AppointmentsServiceImplTest {
 
 
         List<Appointment> filteredAppointments = Arrays.asList(appointmentTwo, appointmentThree);
-        when(appointmentServiceUnavailabilityConflict.getAppointmentConflicts(filteredAppointments)).thenReturn(Arrays.asList(appointmentTwo, appointmentThree));
+        when(appointmentServiceUnavailabilityConflict.getConflicts(filteredAppointments)).thenReturn(Arrays.asList(appointmentTwo, appointmentThree));
         when(appointmentServiceUnavailabilityConflict.getType()).thenReturn(SERVICE_UNAVAILABLE);
-        when(patientDoubleBookingConflict.getAppointmentConflicts(filteredAppointments)).thenReturn(Arrays.asList(mock(Appointment.class)));
+        when(patientDoubleBookingConflict.getConflicts(filteredAppointments)).thenReturn(Arrays.asList(mock(Appointment.class)));
         when(patientDoubleBookingConflict.getType()).thenReturn(PATIENT_DOUBLE_BOOKING);
 
         Map<Enum, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour));
 
-        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
-            verify(appointmentConflictType).getAppointmentConflicts(filteredAppointments);
-            verify(appointmentConflictType).getType();
+        for (AppointmentConflict appointmentConflict : appointmentConflicts) {
+            verify(appointmentConflict).getConflicts(filteredAppointments);
+            verify(appointmentConflict).getType();
         }
         assertTrue(response.containsKey(PATIENT_DOUBLE_BOOKING));
         assertTrue(response.containsKey(SERVICE_UNAVAILABLE));
@@ -679,8 +678,8 @@ public class AppointmentsServiceImplTest {
 
         Map<Enum, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(appointments);
 
-        for (AppointmentConflictType appointmentConflictType : appointmentConflictTypes) {
-            verify(appointmentConflictType, never()).getAppointmentConflicts(any());
+        for (AppointmentConflict appointmentConflict : appointmentConflicts) {
+            verify(appointmentConflict, never()).getConflicts(any());
         }
         assertEquals(0, response.size());
     }

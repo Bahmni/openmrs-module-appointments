@@ -4,7 +4,7 @@ import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum;
+import org.openmrs.module.appointments.constants.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -179,7 +179,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
     }
 
     @Test
@@ -202,7 +202,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
     }
 
     @Test
@@ -225,8 +225,8 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.PATIENT_DOUBLE_BOOKING.name()).size());
     }
 
     @Test
@@ -250,7 +250,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.SERVICE_UNAVAILABLE.name()).size());
-        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.PATIENT_DOUBLE_BOOKING.name()).size());
     }
 }

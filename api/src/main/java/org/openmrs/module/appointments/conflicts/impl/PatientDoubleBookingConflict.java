@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
-import org.openmrs.module.appointments.conflicts.AppointmentConflictType;
+import org.apache.commons.collections.CollectionUtils;
+import org.openmrs.module.appointments.conflicts.AppointmentConflict;
+import org.openmrs.module.appointments.constants.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 
@@ -9,9 +11,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.openmrs.module.appointments.constants.AppointmentConflictTypeEnum.PATIENT_DOUBLE_BOOKING;
+import static org.openmrs.module.appointments.constants.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 
-public class PatientDoubleBookingConflict implements AppointmentConflictType {
+public class PatientDoubleBookingConflict implements AppointmentConflict {
 
     private AppointmentDao appointmentDao;
 
@@ -20,16 +22,18 @@ public class PatientDoubleBookingConflict implements AppointmentConflictType {
     }
 
     @Override
-    public Enum getType() {
+    public AppointmentConflictType getType() {
         return PATIENT_DOUBLE_BOOKING;
     }
 
     @Override
-    public List<Appointment> getAppointmentConflicts(List<Appointment> appointments) {
+    public List<Appointment> getConflicts(List<Appointment> appointments) {
         List<Appointment> conflictingAppointments = new ArrayList<>();
-        List<Appointment> patientAppointments = getPatientAppointments(appointments.get(0).getPatient().getPatientId());
-        for (Appointment appointment : appointments) {
-            conflictingAppointments.addAll(getConflictingAppointments(appointment, patientAppointments));
+        if(CollectionUtils.isNotEmpty(appointments)) {
+            List<Appointment> patientAppointments = getPatientAppointments(appointments.get(0).getPatient().getPatientId());
+            for (Appointment appointment : appointments) {
+                conflictingAppointments.addAll(getConflictingAppointments(appointment, patientAppointments));
+            }
         }
         return conflictingAppointments;
     }
