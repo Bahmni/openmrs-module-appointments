@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
-import org.openmrs.module.appointments.constants.AppointmentConflictType;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
@@ -15,7 +15,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.openmrs.module.appointments.constants.AppointmentConflictType.SERVICE_UNAVAILABLE;
+import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 public class AppointmentServiceUnavailabilityConflict implements AppointmentConflict {
