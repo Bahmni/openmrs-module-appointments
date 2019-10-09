@@ -44,7 +44,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetSpecialityByUuidIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        assertEquals(null, specialityService.getSpecialityByUuid("uuid"));
+        specialityService.getSpecialityByUuid("uuid");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAllSpecialitiesIfUserHasNoPrivilege() throws Exception {
         Context.authenticate(noPrivilegeUser, password);
-        assertNotNull(specialityService.getAllSpecialities());
+        specialityService.getAllSpecialities();
     }
     
     @Test
