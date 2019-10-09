@@ -28,6 +28,7 @@
     <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
     <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module"/>
     <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
+    <privilege privilege="Manage Appointment Specialities" description="Able to manage Specialities in Appointments module"/>
     <privilege privilege="Get Providers" description="Able to view Providers"/>
     <privilege privilege="Reset Appointment Status" description="Able to reset the status of appointments back to scheduled"/>
 
@@ -41,6 +42,7 @@
     <role_privilege role="Appointment: FullAccess" privilege="Manage Appointments"/>
     <role_privilege role="Appointment: FullAccess" privilege="View Appointment Services"/>
     <role_privilege role="Appointment: FullAccess" privilege="Manage Appointment Services"/>
+    <role_privilege role="Appointment: FullAccess" privilege="Manage Appointment Specialities"/>
     <role_privilege role="Appointment: ReadOnly" privilege="View Appointments"/>
     <role_privilege role="Appointment: ReadOnly" privilege="View Appointment Services"/>
     <role_privilege role="Appointment: Manage" privilege="Manage Appointments"/>
