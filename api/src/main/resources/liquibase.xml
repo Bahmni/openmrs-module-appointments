@@ -480,4 +480,15 @@
             <column name="uuid" valueComputed="UUID()"/>
         </insert>
     </changeSet>
+    <changeSet id="201910091141" author="Dubey">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.appointments.runningOnOpenMRS'</sqlCheck>
+        </preConditions>
+        <comment>Adding 'bahmni.appointments.runningOnOpenMRS' global property to figure out instance type</comment>
+        <insert tableName="global_property">
+            <column name="property" value="bahmni.appointments.runningOnOpenMRS"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="If set to yes, the appointments ui will run independent of bahmni core"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
