@@ -11,6 +11,7 @@ import org.mockito.stubbing.Answer;
 import org.openmrs.Patient;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
