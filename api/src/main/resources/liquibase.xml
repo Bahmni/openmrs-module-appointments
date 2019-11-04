@@ -467,7 +467,7 @@
             <column name="uuid" valueComputed="UUID()"/>
         </insert>
     </changeSet>
-    <changeSet id="201808241255" author="Saikumar, Sowmika">
+    <changeSet id="reset_appointment_status_privilege_201808241255" author="Saikumar, Sowmika">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM privilege WHERE privilege = 'Reset Appointment Status';
@@ -539,17 +539,4 @@
 
     </changeSet>
 
-    <changeSet id="201808241255" author="Saikumar, Sowmika">
-        <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">
-                SELECT COUNT(*) FROM privilege WHERE privilege = 'Reset Appointment Status';
-            </sqlCheck>
-        </preConditions>
-        <comment>Add Reset Appointment Status privilege to reset appointments from any status to scheduled.</comment>
-        <insert tableName="privilege">
-            <column name="privilege" value="Reset Appointment Status"/>
-            <column name="description" value="With this privilege, users can reset appointments from any status to scheduled."/>
-            <column name="uuid" valueComputed="UUID()"/>
-        </insert>
-    </changeSet>
 </databaseChangeLog>
