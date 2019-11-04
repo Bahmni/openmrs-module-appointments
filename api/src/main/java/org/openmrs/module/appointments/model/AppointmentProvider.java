@@ -12,6 +12,19 @@ public class AppointmentProvider extends BaseOpenmrsData implements Serializable
     private Provider provider;
     private AppointmentProviderResponse response;
     private String comments;
+    private Boolean voided;
+
+    public AppointmentProvider(AppointmentProvider appointmentProvider) {
+        this.appointmentProviderId = appointmentProvider.getAppointmentProviderId();
+        this.appointment = appointmentProvider.getAppointment();
+        this.provider = appointmentProvider.getProvider();
+        this.response = appointmentProvider.getResponse();
+        this.comments = appointmentProvider.getComments();
+        this.voided = appointmentProvider.getVoided();
+    }
+
+    public AppointmentProvider() {
+    }
 
     @Override
     public Integer getId() {
@@ -61,5 +74,15 @@ public class AppointmentProvider extends BaseOpenmrsData implements Serializable
 
     public void setProvider(Provider provider) {
         this.provider = provider;
+    }
+
+    @Override
+    public Boolean getVoided() {
+        return voided;
+    }
+
+    @Override
+    public void setVoided(Boolean voided) {
+        this.voided = voided;
     }
 }

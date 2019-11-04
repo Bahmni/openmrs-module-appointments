@@ -1,16 +1,13 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import java.text.ParseException;
-import java.util.*;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-
-import org.apache.commons.lang.StringUtils;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.*;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -19,37 +16,64 @@ import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.openmrs.module.appointments.web.contract.*;
+import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
+import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
+import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
+import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.junit.Assume.assumeTrue;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
-import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
-import org.powermock.modules.junit4.PowerMockRunner;
-
-import static org.junit.Assert.assertEquals;
-
 @RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
-    
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
     @Mock
     private PatientService patientService;
-    
+
     @Mock
     private LocationService locationService;
-    
+
     @Mock
     private ProviderService providerService;
-    
+
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
@@ -79,6 +103,14 @@ public class AppointmentMapperTest {
         MockitoAnnotations.initMocks(this);
         patient = new Patient();
         patient.setUuid("patientUuid");
+        PersonName name = new PersonName();
+        name.setGivenName("test patient");
+        Set<PersonName> personNames = new HashSet<>();
+        personNames.add(name);
+        patient.setNames(personNames);
+        PatientIdentifier identifier = new PatientIdentifier();
+        identifier.setIdentifier("GAN230901");
+        patient.setIdentifiers(new HashSet<>(Arrays.asList(identifier)));
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
         service = new AppointmentServiceDefinition();
         service.setUuid("serviceUuid");
@@ -217,7 +249,7 @@ public class AppointmentMapperTest {
         verify(patientService, never()).getPatientByUuid(appointmentRequest.getPatientUuid());
         assertEquals(existingAppointment.getPatient(), appointment.getPatient());
     }
-    
+
     @Test
     public void shouldCreateDefaultResponse() throws Exception {
         Appointment appointment = createAppointment();
@@ -289,7 +321,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getUuid(), response.getUuid());
         assertNull(response.getAdditionalInfo());
     }
-    
+
     @Test
     public void shouldReturnNullIfNoProviderInDefaultResponse() throws Exception {
         Appointment appointment = createAppointment();
@@ -321,7 +353,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getStatus(), AppointmentStatus.valueOf(response.getStatus()));
         assertEquals(appointment.getComments(), response.getComments());
     }
-    
+
     private AppointmentRequest createAppointmentRequest() throws ParseException {
         AppointmentRequest appointmentRequest = new AppointmentRequest();
         appointmentRequest.setPatientUuid("patientUuid");
@@ -344,10 +376,10 @@ public class AppointmentMapperTest {
         providerDetail.setResponse("ACCEPTED");
         providerDetails.add(providerDetail);
         appointmentRequest.setProviders(providerDetails);
-        
+
         return appointmentRequest;
     }
-    
+
     private Appointment createAppointment() throws ParseException {
         Appointment appointment = new Appointment();
         PersonName name = new PersonName();
@@ -481,5 +513,164 @@ public class AppointmentMapperTest {
         assertEquals(provider.getUuid(), appointmentProvider.getProvider().getUuid());
         assertEquals(AppointmentProviderResponse.CANCELLED, appointmentProvider.getResponse());
 
+    }
+
+    @Test
+    public void shouldReturnOnlyNonVoidedProvidersForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        Provider anotherProvider = new Provider();
+        anotherProvider.setUuid("anotherProviderUuid");
+        when(providerService.getProviderByUuid("anotherProviderUuid")).thenReturn(anotherProvider);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        AppointmentProvider anotherAppointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        anotherAppointmentProvider.setProvider(anotherProvider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        anotherAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+        appointmentProvider.setVoided(false);
+        anotherAppointmentProvider.setVoided(true);
+
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        appProviders.add(anotherAppointmentProvider);
+        appointment.setProviders(appProviders);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(1, appointmentDefaultResponse.getProviders().size());
+        assertEquals("providerUuid", appointmentDefaultResponse.getProviders().get(0).getUuid());
+    }
+
+    @Test
+    public void shouldReturnOnlyNonVoidedProvidersForListOfAppointments() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        String anotherAppointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e56";
+        Appointment anotherAppointment = createAppointment();
+        anotherAppointment.setUuid(anotherAppointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        when(appointmentsService.getAppointmentByUuid(anotherAppointmentUuid)).thenReturn(anotherAppointment);
+        Provider anotherProvider = new Provider();
+        anotherProvider.setUuid("anotherProviderUuid");
+        when(providerService.getProviderByUuid("anotherProviderUuid")).thenReturn(anotherProvider);
+
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        appointmentProvider.setVoided(false);
+        AppointmentProvider anotherAppointmentProvider = new AppointmentProvider();
+        anotherAppointmentProvider.setProvider(anotherProvider);
+        anotherAppointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
+        anotherAppointmentProvider.setVoided(true);
+
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        appointment.setProviders(appProviders);
+        Set<AppointmentProvider> anotherAppProviders = new HashSet<>();
+        anotherAppProviders.add(anotherAppointmentProvider);
+        anotherAppointment.setProviders(anotherAppProviders);
+        List<Appointment> appointments = Arrays.asList(appointment, anotherAppointment);
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponses = appointmentMapper.constructResponse(appointments);
+
+        assertEquals(1, appointmentDefaultResponses.get(0).getProviders().size());
+        assertEquals(0, appointmentDefaultResponses.get(1).getProviders().size());
+        assertEquals("providerUuid", appointmentDefaultResponses.get(0).getProviders().get(0).getUuid());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenProvidersAreNullForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        appointment.setProvider(null);
+        appointment.setProviders(null);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenProvidersListIsEmptyForAnAppointment() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment appointment = createAppointment();
+        appointment.setUuid(appointmentUuid);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
+        appointment.setProvider(null);
+        appointment.setProviders(Collections.EMPTY_SET);
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
+    }
+
+    @Test
+    public void shouldChangeTheResponseAndVoidedDataWhenProviderIsVoidedAndAddedAgain() throws ParseException {
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
+        Set<AppointmentProvider> appProviders = new HashSet<>();
+        appProviders.add(appointmentProvider);
+        existingAppointment.setProviders(appProviders);
+        appointmentProvider.setVoided(true);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setUuid(appointmentUuid);
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided(), false);
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse(),
+                AppointmentProviderResponse.ACCEPTED);
+        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoidReason(), null);
+    }
+
+    @Test
+    public void shouldSetIsRecurringToTrueInResponseIfAppointmentHasRecurringPattern() throws ParseException {
+        Appointment appointment = createAppointment();
+        appointment.setAppointmentRecurringPattern(new AppointmentRecurringPattern());
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertTrue(appointmentDefaultResponse.getRecurring());
+    }
+
+    @Test
+    public void shouldSetIsRecurringToFalseInResponseIfAppointmentDoesNotHaveRecurringPattern() throws ParseException {
+        Appointment appointment = createAppointment();
+
+        AppointmentDefaultResponse appointmentDefaultResponse = appointmentMapper.constructResponse(appointment);
+
+        assertFalse(appointmentDefaultResponse.getRecurring());
+    }
+
+    @Test
+    public void shouldReturnClonedAppointmentFromRequest() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
+        assertNotNull(appointment);
+        verify(patientService, times(1)).getPatientByUuid(appointmentRequest.getPatientUuid());
+        assertEquals(patient, appointment.getPatient());
+        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
+        assertEquals(service, appointment.getService());
+        assertEquals(serviceType, appointment.getServiceType());
+        verify(providerService, times(1)).getProviderByUuid(appointmentRequest.getProviderUuid());
+        assertEquals(provider, appointment.getProviders().iterator().next().getProvider());
+        verify(locationService, times(1)).getLocationByUuid(appointmentRequest.getLocationUuid());
+        assertEquals(location, appointment.getLocation());
+        assertEquals(appointmentRequest.getStartDateTime(), appointment.getStartDateTime());
+        assertEquals(appointmentRequest.getEndDateTime(), appointment.getEndDateTime());
+        assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
+        assertEquals(AppointmentStatus.Scheduled, appointment.getStatus());
+        assertEquals(appointmentRequest.getComments(), appointment.getComments());
     }
 }

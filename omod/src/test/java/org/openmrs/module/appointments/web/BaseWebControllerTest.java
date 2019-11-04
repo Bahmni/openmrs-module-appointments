@@ -113,6 +113,16 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
         return request;
     }
 
+    public MockHttpServletRequest newPutRequest(String requestURI, String content) {
+        MockHttpServletRequest request = request(RequestMethod.PUT, requestURI);
+        try {
+            request.setContent(content.getBytes("UTF-8"));
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+        return request;
+    }
+
     /**
      * Passes the given request to a proper controller.
      *

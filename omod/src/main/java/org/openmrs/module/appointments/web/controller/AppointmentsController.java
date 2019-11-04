@@ -18,7 +18,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
 import java.io.IOException;
@@ -78,7 +83,7 @@ public class AppointmentsController {
         Errors appointmentSearchErrors = new BeanPropertyBindingResult(appointmentSearchRequest, "appointmentSearchRequest");
         appointmentSearchValidator.validate(appointmentSearchRequest, appointmentSearchErrors);
         if (!appointmentSearchErrors.getAllErrors().isEmpty()) {
-            throw new RuntimeException(appointmentSearchErrors.getAllErrors().get(0).getCodes()[1]);
+            throw new RuntimeException(appointmentSearchErrors.getAllErrors().get(0).getDefaultMessage());
         }
         List<Appointment> appointments = appointmentsService.search(appointmentSearchRequest);
         return appointmentMapper.constructResponse(appointments);
@@ -98,6 +103,21 @@ public class AppointmentsController {
                 throw new RuntimeException("Appointment does not exist");
         } catch (RuntimeException e) {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/conflicts")
+    @ResponseBody
+    public ResponseEntity<Object> getConflicts(@RequestBody AppointmentRequest appointmentRequest) {
+        try {
+            Appointment appointment = appointmentMapper.fromRequestClonedAppointment(appointmentRequest);
+            Map<Enum, List<Appointment>> appointmentConflicts = appointmentsService.getAppointmentConflicts(appointment);
+            if (appointmentConflicts.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            return new ResponseEntity<>(appointmentMapper.constructConflictResponse(appointmentConflicts), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to get getConflicts for appointment", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

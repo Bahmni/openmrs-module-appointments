@@ -10,9 +10,9 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
-import org.openmrs.module.appointments.web.contract.DailyAppointmentServiceSummary;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
+import org.openmrs.module.appointments.web.contract.DailyAppointmentServiceSummary;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -22,7 +22,10 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -202,5 +205,13 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertNotNull(response);
         assertEquals(400, response.getStatus());
         assertTrue(response.getContentAsString().contains("No status change actions to undo"));
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenThereIsNoRequestPayload() throws Exception {
+        String content = "{}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
     }
 }

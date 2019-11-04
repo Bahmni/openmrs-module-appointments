@@ -6,6 +6,7 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @JsonIgnoreProperties
 public class AppointmentRequest {
@@ -61,51 +62,51 @@ public class AppointmentRequest {
     public void setServiceTypeUuid(String serviceTypeUuid) {
         this.serviceTypeUuid = serviceTypeUuid;
     }
-    
+
     public String getProviderUuid() {
         return providerUuid;
     }
-    
+
     public void setProviderUuid(String providerUuid) {
         this.providerUuid = providerUuid;
     }
-    
+
     public String getLocationUuid() {
         return locationUuid;
     }
-    
+
     public void setLocationUuid(String locationUuid) {
         this.locationUuid = locationUuid;
     }
-    
+
     public Date getStartDateTime() {
         return startDateTime;
     }
-    
+
     public void setStartDateTime(Date startDateTime) {
         this.startDateTime = startDateTime;
     }
-    
+
     public Date getEndDateTime() {
         return endDateTime;
     }
-    
+
     public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
     }
-    
+
     public String getAppointmentKind() {
         return appointmentKind;
     }
-    
+
     public void setAppointmentKind(String appointmentKind) {
         this.appointmentKind = appointmentKind;
     }
-    
+
     public String getComments() {
         return comments;
     }
-    
+
     public void setComments(String comments) {
         this.comments = comments;
     }

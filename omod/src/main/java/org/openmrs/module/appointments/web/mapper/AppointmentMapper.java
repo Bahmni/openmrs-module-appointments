@@ -18,8 +18,8 @@ import org.openmrs.module.appointments.service.AppointmentServiceDefinitionServi
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
-import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,9 +72,22 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
         }
+        mapAppointmentRequestToAppointment(appointmentRequest, appointment);
+        return appointment;
+    }
+
+    public Appointment fromRequestClonedAppointment(AppointmentRequest appointmentRequest) {
+        Appointment appointment = new Appointment();
+        appointment.setUuid(appointmentRequest.getUuid());
+        appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
+        mapAppointmentRequestToAppointment(appointmentRequest, appointment);
+        return appointment;
+    }
+
+    public void mapAppointmentRequestToAppointment(AppointmentRequest appointmentRequest, Appointment appointment) {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid(appointmentRequest.getServiceUuid());
         AppointmentServiceType appointmentServiceType = null;
-        if(appointmentRequest.getServiceTypeUuid() != null) {
+        if (appointmentRequest.getServiceTypeUuid() != null) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
         appointment.setServiceType(appointmentServiceType);
@@ -86,7 +99,6 @@ public class AppointmentMapper {
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
-        return appointment;
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {
@@ -102,8 +114,7 @@ public class AppointmentMapper {
 
         if (existingProviders != null) {
             for (AppointmentProvider appointmentProvider : existingProviders) {
-                boolean exists = newProviders == null ? false :
-                        newProviders.stream().anyMatch(p -> p.getUuid().equals(appointmentProvider.getProvider().getUuid()));
+                boolean exists = newProviders != null && newProviders.stream().anyMatch(p -> p.getUuid().equals(appointmentProvider.getProvider().getUuid()));
                 if (!exists) {
                     appointmentProvider.setResponse(AppointmentProviderResponse.CANCELLED);
                     appointmentProvider.setVoided(true);
@@ -113,7 +124,7 @@ public class AppointmentMapper {
         }
 
         if (newProviders != null && !newProviders.isEmpty()) {
-            if (appointment.getProviders() == null ) {
+            if (appointment.getProviders() == null) {
                 appointment.setProviders(new HashSet<>());
             }
             for (AppointmentProviderDetail providerDetail : newProviders) {
@@ -126,6 +137,8 @@ public class AppointmentMapper {
                     providers.forEach(existingAppointmentProvider -> {
                         //TODO: if currentUser is same person as provider, set ACCEPTED
                         existingAppointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
+                        existingAppointmentProvider.setVoided(Boolean.FALSE);
+                        existingAppointmentProvider.setVoidReason(null);
                     });
                 }
             }
@@ -146,7 +159,7 @@ public class AppointmentMapper {
     }
 
     public AppointmentProviderResponse mapProviderResponse(String response) {
-        String namedEnum = StringUtils.isEmpty(response) ? AppointmentProviderResponse.ACCEPTED.toString()  : response.toUpperCase();
+        String namedEnum = StringUtils.isEmpty(response) ? AppointmentProviderResponse.ACCEPTED.toString() : response.toUpperCase();
         //TODO: validation if not valid enum string
         return AppointmentProviderResponse.valueOf(namedEnum);
     }
@@ -183,14 +196,16 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-        if(appointmentResponseExtension!=null)
+        if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
+        response.setRecurring(a.isRecurring());
         return response;
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
         List<AppointmentProviderDetail> providerList = new ArrayList<>();
+        providers = getNonVoidedProviders(providers);
         if (providers != null) {
             for (AppointmentProvider apptProviderAssociation : providers) {
                 AppointmentProviderDetail providerDetail = new AppointmentProviderDetail();
@@ -202,6 +217,16 @@ public class AppointmentMapper {
             }
         }
         return providerList;
+    }
+
+    private Set<AppointmentProvider> getNonVoidedProviders(Set<AppointmentProvider> providers) {
+        if (providers == null || providers.isEmpty()) {
+            return providers;
+        }
+        providers = providers
+                .stream()
+                .filter(provider -> provider.getVoided() != Boolean.TRUE).collect(Collectors.toSet());
+        return providers;
     }
 
     private Map createServiceTypeMap(AppointmentServiceType s) {
@@ -239,5 +264,13 @@ public class AppointmentMapper {
         appointmentProvider.setResponse(mapProviderResponse(providerDetail.getResponse()));
         appointmentProvider.setComments(providerDetail.getComments());
         return appointmentProvider;
+    }
+
+    public Map<String, List<AppointmentDefaultResponse>> constructConflictResponse(Map<Enum, List<Appointment>> conflicts) {
+        Map<String, List<AppointmentDefaultResponse>> conflictsResponse = new HashMap<>();
+        for (Map.Entry<Enum, List<Appointment>> entry : conflicts.entrySet()) {
+            conflictsResponse.put(entry.getKey().name(), constructResponse(entry.getValue()));
+        }
+        return conflictsResponse;
     }
 }

@@ -1,14 +1,20 @@
 package org.openmrs.module.appointments.util;
 
-import org.junit.Assert;
 import org.junit.Test;
 
 import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.openmrs.module.appointments.util.DateUtil.convertToLocalDateFromUTC;
+import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 public class DateUtilTest {
     @Test
@@ -36,7 +42,7 @@ public class DateUtilTest {
 
     @Test
     public void shouldReturnNullIfDateStringIsNull() throws ParseException {
-        Date date = DateUtil.convertToLocalDateFromUTC(null);
+        Date date = convertToLocalDateFromUTC(null);
         assertNull(date);
     }
 
@@ -44,10 +50,41 @@ public class DateUtilTest {
     public void shouldReturnLocalDateWithGivenUTCDate() throws ParseException {
         String dateString = "2017-03-15T16:57:09.0Z";
         DateUtil dateUtil = new DateUtil();
-        Date date = dateUtil.convertToLocalDateFromUTC(dateString);
+        Date date = convertToLocalDateFromUTC(dateString);
         boolean daylightTime = TimeZone.getDefault().inDaylightTime(date);
         String timeZoneShort = TimeZone.getDefault().getDisplayName(daylightTime, TimeZone.SHORT, Locale.ENGLISH);
         assertNotNull(date);
         assertTrue(date.toString().contains(timeZoneShort));
+    }
+
+    @Test
+    public void shouldReturnCalendarObjectForGivenDate() {
+        Date date = new Date();
+        Calendar calendar = DateUtil.getCalendar(date);
+
+        assertEquals(calendar.getTime(), date);
+    }
+
+    @Test
+    public void shouldReturnStartOfDay() {
+        Date date = DateUtil.getStartOfDay();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        String time = dateFormat.format(date);
+
+        assertEquals("00:00:00", time);
+    }
+
+    @Test
+    public void shouldConvertDateToMilliSeconds() throws ParseException {
+        String dateString = "2017-03-15T16:57:09.0Z";
+        Date date = convertToLocalDateFromUTC(dateString);
+        long milliSeconds = getEpochTime(date.getTime());
+        assertEquals(80829000, milliSeconds);
+    }
+
+    @Test
+    public void shouldReturnZeroWhenPassedLongIsNegative() {
+        long milliSeconds = getEpochTime(-10000);
+        assertEquals(0, milliSeconds);
     }
 }

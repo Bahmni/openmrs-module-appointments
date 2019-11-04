@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -46,6 +47,7 @@ public class AppointmentController {
     @Autowired
     private AppointmentServiceMapper appointmentServiceMapper;
 
+
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
     public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
@@ -65,12 +67,12 @@ public class AppointmentController {
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
+    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
         try {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointmentsService.validateAndSave(appointment);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-        } catch (RuntimeException e) {
+        } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }

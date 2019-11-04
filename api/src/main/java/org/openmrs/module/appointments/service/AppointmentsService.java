@@ -4,14 +4,16 @@ package org.openmrs.module.appointments.service;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
@@ -67,9 +69,20 @@ public interface AppointmentsService {
     @Authorized({"Manage Appointments"})
     Appointment reschedule(String originalAppointmentUuid, Appointment appointment, boolean retainAppointmentNumber);
 
+    @Transactional
+    @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
+    void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators);
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS})
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS})
+    Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS})
+    Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 }
 

@@ -12,5 +12,6 @@
 		<mapping resource="AppointmentServiceType.hbm.xml"/>
 		<mapping resource="AppointmentAudit.hbm.xml"/>
 		<mapping resource="AppointmentProvider.hbm.xml"/>
+		<mapping resource="AppointmentRecurringPattern.hbm.xml"/>
 	</session-factory>
 </hibernate-configuration>
