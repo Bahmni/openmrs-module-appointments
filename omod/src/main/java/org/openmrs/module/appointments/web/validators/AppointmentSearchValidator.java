@@ -1,4 +1,5 @@
 package org.openmrs.module.appointments.web.validators;
+
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

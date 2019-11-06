@@ -6,6 +6,7 @@ public class AppointmentSearchRequest {
 
     private Date startDate;
     private Date endDate;
+    private String patientUuid;
 
     public Date getStartDate() {
         return startDate;
@@ -21,5 +22,13 @@ public class AppointmentSearchRequest {
 
     public void setEndDate(Date endDate) {
         this.endDate = endDate;
+    }
+
+    public String getPatientUuid() {
+        return patientUuid;
+    }
+
+    public void setPatientUuid(String patientUuid) {
+        this.patientUuid = patientUuid;
     }
 }

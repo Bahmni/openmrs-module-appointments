@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
@@ -126,8 +127,13 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("voided", false));
         Date maxEndDate = appointmentSearchRequest.getEndDate();
         Date startDate = appointmentSearchRequest.getStartDate();
-        if(maxEndDate!=null && startDate!=null)
+        if (maxEndDate != null && startDate != null)
             criteria.add(Restrictions.between("startDateTime", startDate, maxEndDate));
+
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
+            criteria.createAlias("patient", "patient");
+            criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
+        }
         return criteria.list();
     }
 

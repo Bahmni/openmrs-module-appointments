@@ -75,7 +75,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceType appointmentServiceType = serviceTypes.iterator().next();
         List<Appointment> allFutureAppointmentsForServiceType = appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         assertNotNull(allFutureAppointmentsForServiceType);
-        assertEquals(1,allFutureAppointmentsForServiceType.size());
+        assertEquals(2,allFutureAppointmentsForServiceType.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13346", allFutureAppointmentsForServiceType.get(0).getUuid());
     }
 
@@ -133,7 +133,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         Date from = DateUtil.convertToDate("2108-08-10T00:00:00.0Z", DateUtil.DateFormatType.UTC);
         Date to = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
         List<Appointment> allAppointments = appointmentDao.getAllAppointmentsInDateRange(from, to);
-        assertEquals(1, allAppointments.size());
+        assertEquals(2, allAppointments.size());
     }
 
     @Test
@@ -164,14 +164,28 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldReturnAllAppointmentsBetweenGivenDates() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
-        Date startDate = DateUtil.convertToDate("2108-08-13T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
         Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(endDate);
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(5, appointments.size());
+        assertEquals(6, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsForPatientBetweenGivenDates() throws ParseException {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        appointmentSearchRequest.setPatientUuid("75e04d42-3ca8-11e3-bf2b-0800271c1b78");
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(1, appointments.size());
     }
 
     @Test
