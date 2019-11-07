@@ -5,11 +5,7 @@ import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -17,9 +13,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.Assert.*;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
@@ -75,7 +69,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceType appointmentServiceType = serviceTypes.iterator().next();
         List<Appointment> allFutureAppointmentsForServiceType = appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         assertNotNull(allFutureAppointmentsForServiceType);
-        assertEquals(2,allFutureAppointmentsForServiceType.size());
+        assertEquals(3,allFutureAppointmentsForServiceType.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13346", allFutureAppointmentsForServiceType.get(0).getUuid());
     }
 
@@ -172,6 +166,38 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
         assertEquals(6, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAllAppointmentsBetweenGivenDatesForLimit() throws ParseException {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2008-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2120-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        appointmentSearchRequest.setLimit(2);
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(2, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAllAppointmentsBetweenGivenDatesInSortedOrder() throws ParseException {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2008-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2120-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        appointmentSearchRequest.setPatientUuid("75e04d42-3ca8-11e3-bf2b-0800271c1b78");
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(2, appointments.size());
+        assertEquals(DateUtil.convertToDate("2108-08-08T13:00:00.0Z", DateUtil.DateFormatType.UTC)
+                , appointments.get(0).getStartDateTime());
+        assertEquals(DateUtil.convertToDate("2108-08-11T13:00:00.0Z", DateUtil.DateFormatType.UTC)
+                , appointments.get(1).getStartDateTime());
     }
 
     @Test

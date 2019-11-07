@@ -4,6 +4,8 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
+
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -134,6 +136,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.createAlias("patient", "patient");
             criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
         }
+
+        criteria.addOrder(Order.asc("startDateTime"));
+        if (appointmentSearchRequest.getLimit() > 0) {
+            criteria.setMaxResults(appointmentSearchRequest.getLimit());
+        }
+
         return criteria.list();
     }
 

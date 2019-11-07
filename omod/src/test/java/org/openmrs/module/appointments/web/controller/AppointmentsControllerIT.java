@@ -46,18 +46,18 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldGetAllAppointmentsInGivenDateRange() throws Exception {
-        String responseBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
+    public void shouldSearchAppointmentsGivenDateRange() throws Exception {
+        String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
                 "\"endDate\":\"2108-08-15T18:29:59.000Z\"," +
-                "\"patientUuid\":\"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"}";
-
+                "\"patientUuid\":\"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"limit\":4}";
 
         List<AppointmentDefaultResponse> response = deserialize(
-                handle(newPostRequest("/rest/v1/appointments/search", responseBodyJson)),
+                handle(newPostRequest("/rest/v1/appointments/search", requestBodyJson)),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
 
-        assertEquals(5, response.size());
+        assertEquals(4, response.size());
     }
 
     @Test
