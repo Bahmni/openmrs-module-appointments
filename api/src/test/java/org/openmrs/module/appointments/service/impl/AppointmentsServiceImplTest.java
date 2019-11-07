@@ -495,16 +495,18 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenEndDateIsNull() {
+    public void shouldCallSearchMethodInAppointmentDaoWhenEndDateIsNull() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         Date startDate = Date.from(Instant.now());
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(null);
 
+        ArrayList<Appointment> expectedAppointments = new ArrayList<>();
+        when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
-        verify(appointmentDao, never()).search(appointmentSearchRequest);
-        assertNull(actualAppointments);
+        verify(appointmentDao, times(1)).search(appointmentSearchRequest);
+        assertEquals(expectedAppointments, actualAppointments);
     }
 
     @Test

@@ -69,7 +69,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceType appointmentServiceType = serviceTypes.iterator().next();
         List<Appointment> allFutureAppointmentsForServiceType = appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         assertNotNull(allFutureAppointmentsForServiceType);
-        assertEquals(3,allFutureAppointmentsForServiceType.size());
+        assertEquals(3, allFutureAppointmentsForServiceType.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c13346", allFutureAppointmentsForServiceType.get(0).getUuid());
     }
 
@@ -156,7 +156,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldReturnAllAppointmentsBetweenGivenDates() throws ParseException {
+    public void shouldReturnAllAppointmentsBetweenGivenDatesWithoutLimiting() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
         Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
@@ -166,6 +166,17 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
         assertEquals(6, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnLimitedAppointmentsIfEndDateIsNotPassed() throws Exception {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2000-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(10, appointments.size());
     }
 
     @Test

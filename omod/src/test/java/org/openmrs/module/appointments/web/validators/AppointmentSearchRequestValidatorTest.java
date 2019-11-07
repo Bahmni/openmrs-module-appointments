@@ -41,12 +41,11 @@ public class AppointmentSearchRequestValidatorTest {
     }
 
     @Test
-    public void shouldAddToErrorsWhenEndDateIsNull() {
+    public void shouldNotThrowErrorsWhenEndDateIsNull() {
         appointmentSearchRequest = getAppointmentSearchRequest();
         appointmentSearchRequest.setEndDate(null);
         appointmentSearchValidator.validate(appointmentSearchRequest, errors);
-        assertEquals(errors.getAllErrors().size(), 1);
-        assertNotNull(errors.getAllErrors().get(0).getCodes()[1]);
+        assertEquals(errors.getAllErrors().size(), 0);
     }
 
     @Test
