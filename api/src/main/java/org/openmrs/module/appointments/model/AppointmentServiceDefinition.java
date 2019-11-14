@@ -23,6 +23,7 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData implements Ser
     private Integer durationMins;
     private Location location;
     private String  color;
+    private AppointmentStatus initialAppointmentStatus;
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
     private Set<AppointmentServiceType> serviceTypes;
 
@@ -163,5 +164,13 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData implements Ser
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public AppointmentStatus getInitialAppointmentStatus() {
+        return initialAppointmentStatus;
+    }
+
+    public void setInitialAppointmentStatus(AppointmentStatus initialAppointmentStatus) {
+        this.initialAppointmentStatus = initialAppointmentStatus;
     }
 }

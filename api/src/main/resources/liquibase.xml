@@ -538,5 +538,15 @@
         </sql>
 
     </changeSet>
+    <changeSet id="add_initial_appointment_status_appointment_service" author="Dubey">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="initial_appointment_status" tableName="appointment_service"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="appointment_service">
+            <column name="initial_appointment_status" type="varchar(45)"/>
+        </addColumn>
+    </changeSet>
 
 </databaseChangeLog>

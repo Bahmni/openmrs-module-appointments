@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -131,6 +132,19 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("type1", serviceTypes1.get("name"));
         assertEquals(20, serviceTypes1.get("duration"));
     }
+
+    @Test
+    public void should_createAppointmentServiceWithInitialAppointmentStatus() throws Exception {
+        String dataJson = "{\"name\":\"Cardiology Consultation\"," +
+                " \"initialAppointmentStatus\":\"Requested\"}";
+
+        MockHttpServletResponse handle = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject asResponse = SimpleObject.parseJson(handle.getContentAsString());
+        assertNotNull(asResponse);
+        assertEquals("Cardiology Consultation", asResponse.get("name"));
+        assertEquals(AppointmentStatus.Requested.toString(), asResponse.get("initialAppointmentStatus"));
+    }
+
 
     @Test(expected = RuntimeException.class)
     public void should_notCreateAppointmentServiceWhenNameIsNull() throws Exception {
