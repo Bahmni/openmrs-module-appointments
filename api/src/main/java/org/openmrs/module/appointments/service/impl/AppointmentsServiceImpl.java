@@ -218,7 +218,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
-        if (isNull(appointmentSearchRequest.getStartDate()) || isNull(appointmentSearchRequest.getEndDate())) {
+        if (isNull(appointmentSearchRequest.getStartDate())) {
             return null;
         }
         return appointmentDao.search(appointmentSearchRequest);

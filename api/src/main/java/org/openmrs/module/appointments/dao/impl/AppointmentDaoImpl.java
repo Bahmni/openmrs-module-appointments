@@ -1,8 +1,11 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
+
+import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -20,6 +23,7 @@ import java.util.concurrent.TimeUnit;
 
 public class AppointmentDaoImpl implements AppointmentDao {
 
+    private static final int APPOINTMENT_SEARCH_DEFAULT_LIMIT = 50;
     private SessionFactory sessionFactory;
 
     public void setSessionFactory(SessionFactory sessionFactory) {
@@ -123,12 +127,38 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+
         criteria.add(Restrictions.eq("voided", false));
-        Date maxEndDate = appointmentSearchRequest.getEndDate();
-        Date startDate = appointmentSearchRequest.getStartDate();
-        if(maxEndDate!=null && startDate!=null)
-            criteria.add(Restrictions.between("startDateTime", startDate, maxEndDate));
+        criteria.addOrder(Order.asc("startDateTime"));
+        setDateCriteria(appointmentSearchRequest, criteria);
+        setPatientCriteria(appointmentSearchRequest, criteria);
+        setLimitCriteria(appointmentSearchRequest, criteria);
+
         return criteria.list();
+    }
+
+    private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
+            criteria.createAlias("patient", "patient");
+            criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
+        }
+    }
+
+    private void setDateCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (appointmentSearchRequest.getStartDate() != null) {
+            criteria.add(Restrictions.ge("startDateTime", appointmentSearchRequest.getStartDate()));
+        }
+        if (appointmentSearchRequest.getEndDate() != null) {
+            criteria.add(Restrictions.le("startDateTime", appointmentSearchRequest.getEndDate()));
+        }
+    }
+
+    private void setLimitCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (appointmentSearchRequest.getLimit() > 0) {
+            criteria.setMaxResults(appointmentSearchRequest.getLimit());
+        } else if (appointmentSearchRequest.getEndDate() == null) {
+            criteria.setMaxResults(APPOINTMENT_SEARCH_DEFAULT_LIMIT);
+        }
     }
 
     @Override

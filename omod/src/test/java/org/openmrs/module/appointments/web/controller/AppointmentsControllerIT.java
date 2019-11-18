@@ -39,24 +39,25 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     @Test
     public void shouldGetASpecificAppointment() throws Exception {
         AppointmentDefaultResponse response = deserialize(
-                    handle(newGetRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13346")),
-                    new TypeReference<AppointmentDefaultResponse>() {
+                handle(newGetRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13346")),
+                new TypeReference<AppointmentDefaultResponse>() {
                 });
         assertEquals("GAN200000", response.getPatient().get("identifier"));
     }
 
     @Test
-    public void shouldGetAllAppointmentsInGivenDateRange() throws Exception {
-        String responseBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
-                "\"endDate\":\"2108-08-15T18:29:59.000Z\"}";
-
+    public void shouldSearchAppointmentsGivenDateRange() throws Exception {
+        String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
+                "\"endDate\":\"2108-08-15T18:29:59.000Z\"," +
+                "\"patientUuid\":\"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"limit\":4}";
 
         List<AppointmentDefaultResponse> response = deserialize(
-                handle(newPostRequest("/rest/v1/appointments/search", responseBodyJson)),
+                handle(newPostRequest("/rest/v1/appointments/search", requestBodyJson)),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
-            });
+                });
 
-        assertEquals(5, response.size());
+        assertEquals(4, response.size());
     }
 
     @Test
