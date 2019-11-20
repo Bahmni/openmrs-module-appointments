@@ -196,6 +196,35 @@ public class AppointmentMapperTest {
     }
 
     @Test
+    public void shouldCreateAppointmentWithStatusFromPayload() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setStatus("CheckedIn");
+
+        String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+        existingAppointment.setStatus(AppointmentStatus.CheckedIn);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+        assertNotNull(appointment);
+        assertEquals(AppointmentStatus.CheckedIn, appointment.getStatus());
+        assertEquals(appointmentRequest.getComments(), appointment.getComments());
+
+    }
+
+    @Test
+    public void shouldMapExistingAppointmentWhenPayloadHasAppointmentStatus() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setStatus("Requested");
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+        assertNotNull(appointment);
+        assertEquals(AppointmentStatus.Requested, appointment.getStatus());
+        assertEquals(appointmentRequest.getComments(), appointment.getComments());
+
+    }
+
+    @Test
     public void shouldGetExistingAppointmentBookedAgainstVoidedServiceTypeFromPayload() throws Exception {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
         Appointment existingAppointment = createAppointment();

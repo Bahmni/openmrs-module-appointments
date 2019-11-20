@@ -1,13 +1,15 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -43,6 +45,59 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
                 new TypeReference<AppointmentDefaultResponse>() {
                 });
         assertEquals("GAN200000", response.getPatient().get("identifier"));
+    }
+
+    @Test
+    public void shouldSaveNewAppointment() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": [ {" +
+                "\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\"," +
+                "\"comments\":\"available\"," +
+                "\"response\":\"ACCEPTED\"" +
+                "} ] }";
+
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        String contentAsString = response.getContentAsString();
+        Map responseBody = new ObjectMapper().readValue(contentAsString, Map.class);
+        assertNotNull(responseBody.get("uuid"));
+        assertEquals(AppointmentStatus.Scheduled.name(), responseBody.get("status"));
+    }
+
+    @Test
+    public void shouldSaveNewAppointmentWithGivenStatus() throws Exception {
+        String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"status\": \"Requested\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": [ {" +
+                "\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\"," +
+                "\"comments\":\"available\"," +
+                "\"response\":\"ACCEPTED\"" +
+                "} ] }";
+
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        String contentAsString = response.getContentAsString();
+        Map responseBody = new ObjectMapper().readValue(contentAsString, Map.class);
+        assertNotNull(responseBody.get("uuid"));
+        assertEquals(AppointmentStatus.Requested.name(), responseBody.get("status"));
     }
 
     @Test

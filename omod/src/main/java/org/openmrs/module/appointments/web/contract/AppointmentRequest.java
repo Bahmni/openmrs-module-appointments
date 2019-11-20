@@ -19,6 +19,7 @@ public class AppointmentRequest {
     private String locationUuid;
     private Date startDateTime;
     private Date endDateTime;
+    private String status;
     private String appointmentKind;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
@@ -101,6 +102,14 @@ public class AppointmentRequest {
 
     public void setAppointmentKind(String appointmentKind) {
         this.appointmentKind = appointmentKind;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     public String getComments() {
