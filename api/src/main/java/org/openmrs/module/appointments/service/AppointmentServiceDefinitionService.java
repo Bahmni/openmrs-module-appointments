@@ -16,11 +16,11 @@ public interface AppointmentServiceDefinitionService {
     AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition);
 
     @Transactional
-    @Authorized({"View Appointment Services"})
+    @Authorized({"View Appointment Services", "Manage Appointment Services"})
     List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided);
 
     @Transactional
-    @Authorized({"View Appointment Services"})
+    @Authorized({"View Appointment Services", "Manage Appointment Services"})
     AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid);
 
     @Transactional
@@ -28,11 +28,11 @@ public interface AppointmentServiceDefinitionService {
     AppointmentServiceDefinition voidAppointmentService(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason);
 
     @Transactional
-    @Authorized({"View Appointment Services"})
+    @Authorized({"View Appointment Services", "Manage Appointment Services"})
     AppointmentServiceType getAppointmentServiceTypeByUuid(String serviceTypeUuid);
 
     @Transactional
-    @Authorized({"View Appointment Services"})
+    @Authorized({"View Appointment Services", "Manage Appointment Services"})
 	Integer calculateCurrentLoad(AppointmentServiceDefinition appointmentServiceDefinition, Date startDateTime, Date endDateTime);
 }
 
