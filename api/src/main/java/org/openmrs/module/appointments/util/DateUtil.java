@@ -67,6 +67,15 @@ public class DateUtil {
         }
         return milliSeconds;
     }
+
+    public static Date getEndOfDay() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMaximum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getMaximum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
 }
 
 

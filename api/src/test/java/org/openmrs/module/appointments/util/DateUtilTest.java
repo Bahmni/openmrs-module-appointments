@@ -75,6 +75,15 @@ public class DateUtilTest {
     }
 
     @Test
+    public void shouldReturnEndOfDay() {
+        Date date = DateUtil.getEndOfDay();
+        SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
+        String time = dateFormat.format(date);
+
+        assertEquals("23:59:59", time);
+    }
+
+    @Test
     public void shouldConvertDateToMilliSeconds() throws ParseException {
         String dateString = "2017-03-15T16:57:09.0Z";
         Date date = convertToLocalDateFromUTC(dateString);
