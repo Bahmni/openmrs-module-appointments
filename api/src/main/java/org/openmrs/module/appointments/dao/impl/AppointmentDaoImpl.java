@@ -133,8 +133,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setDateCriteria(appointmentSearchRequest, criteria);
         setPatientCriteria(appointmentSearchRequest, criteria);
         setLimitCriteria(appointmentSearchRequest, criteria);
+        setProviderCriteria(appointmentSearchRequest, criteria);
 
         return criteria.list();
+    }
+
+    private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
+            criteria.createAlias("providers", "providers");
+            criteria.createAlias("providers.provider", "provider");
+            criteria.add(Restrictions.eq("provider.uuid", appointmentSearchRequest.getProviderUuid()));
+        }
     }
 
     private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {

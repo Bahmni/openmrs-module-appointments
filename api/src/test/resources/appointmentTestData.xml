@@ -89,9 +89,12 @@
                          end_date_time="2108-08-11 13:00:00.0" status="Scheduled" creator="1" date_created="2108-07-10 15:57:09.0"
                          voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-866b-0ece245615a8"/>
 
+    <patient_appointment_provider patient_appointment_provider_id="2" provider_id="2221" patient_appointment_id="14" response="ACCEPTED"
+                                  comments="visit as scheduled" date_created="2005-09-22 00:00:00.0" creator="1"
+                                  voided="false" void_reason="" uuid="f716177b-82ca-49e7-8394-cfe7c8d21f81" />
+
     <patient_appointment patient_appointment_id="15" patient_id ="2" appointment_service_type_id="1" start_date_time="2108-08-08 13:00:00.0"
                          end_date_time="2108-08-08 14:00:00.0" status="Scheduled" creator="1" date_created="2108-07-11 15:57:09.0"
                          voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-866b-0ece236715a8"/>
-
 
 </dataset>
