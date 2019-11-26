@@ -87,6 +87,8 @@ public class RecurringAppointmentsController {
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
             List<Appointment> appointmentsList = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
             appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
+            if (appointmentsList.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
