@@ -3,10 +3,12 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
@@ -120,4 +122,23 @@ public class AppointmentsController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
+    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/providerResponse")
+    @ResponseBody
+    public ResponseEntity<Object> updateAppointmentProviderResponse(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
+        try {
+            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+            if(appointment == null){
+                throw new RuntimeException("Appointment does not exist");
+            }
+            AppointmentProvider appointmentProviderProvider = appointmentMapper.mapAppointmentProvider(providerResponse);
+            appointmentProviderProvider.setAppointment(appointment);
+            appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
+            return new ResponseEntity<>(HttpStatus.OK);
+        }catch (RuntimeException e) {
+            log.error("Runtime error while trying to update appointment provider response", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
 }

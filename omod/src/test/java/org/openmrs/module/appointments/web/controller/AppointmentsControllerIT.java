@@ -9,6 +9,7 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentConflictType;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -318,5 +319,28 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         });
         assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
         assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.PATIENT_DOUBLE_BOOKING.name()).size());
+    }
+
+    @Test
+    public void shouldChangeProviderResponse() throws Exception {
+        String content = "{\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\",\"response\":\"ACCEPTED\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-8y6t-0ece245615a7/providerResponse", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-8y6t-0ece245615a7");
+        assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentByUuid.getProviders().iterator().next().getResponse());
+    }
+
+    @Test
+    public void shouldChangeRequestedAppointmentStatusToScheduledWhenProviderAccepts() throws Exception {
+        String content = "{\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\",\"response\":\"ACCEPTED\"}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-8ui6-8y6t-0ece245615a7/providerResponse", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-8ui6-8y6t-0ece245615a7");
+        assertEquals(AppointmentStatus.Scheduled, appointmentByUuid.getStatus());
+        assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentByUuid.getProviders().iterator().next().getResponse());
     }
 }

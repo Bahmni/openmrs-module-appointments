@@ -25,13 +25,16 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -254,8 +257,27 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
-        //TODO
-        throw new NotYetImplementedException("This feature is not yet implemented");
+        Appointment appointment = appointmentProviderProvider.getAppointment();
+        Set<AppointmentProvider> providers = appointment.getProviders();
+
+        if (CollectionUtils.isEmpty(providers)){
+            throw new APIException("No providers present in Appointment");
+        }
+
+        Optional<AppointmentProvider> providerInAppointment = providers.stream().filter(
+                provider -> provider.getProvider().equals(appointmentProviderProvider.getProvider())
+        ).findFirst();
+        if (!providerInAppointment.isPresent()){
+            throw new APIException("Provider is not part of Appointment");
+        }
+        AppointmentProvider appointmentProvider = providerInAppointment.get();
+        appointmentProvider.setResponse(appointmentProviderProvider.getResponse());
+        if (isFirstAcceptForRequestedAppointment(appointmentProviderProvider, appointment)){
+            changeStatus(appointment, AppointmentStatus.Scheduled.name(), Date.from(Instant.now()));
+        }else{
+            appointmentDao.save(appointment);
+        }
+        createAppointmentAudit(appointmentProviderProvider, appointment, appointmentProvider);
     }
 
     @Override
@@ -299,6 +321,18 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                                                String notes) {
         AppointmentAudit appointmentAuditEvent = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
         appointmentAuditDao.save(appointmentAuditEvent);
+    }
+
+    private boolean isFirstAcceptForRequestedAppointment(AppointmentProvider appointmentProviderProvider, Appointment appointment) {
+        return appointment.getStatus().equals(AppointmentStatus.Requested) &&
+                appointmentProviderProvider.getResponse().equals(AppointmentProviderResponse.ACCEPTED);
+    }
+
+    private void createAppointmentAudit(AppointmentProvider appointmentProviderProvider, Appointment appointment, AppointmentProvider appointmentProvider) {
+        String notes = String.format(
+                "Changed Provider Response to %s for provider with UUID %s in appointment with UUID %s",
+                appointmentProviderProvider.getResponse(), appointmentProvider.getProvider().getUuid(), appointment.getUuid());
+        createEventInAppointmentAudit(appointment, notes);
     }
 
     private void createAndSetAppointmentAudit(Appointment appointment) {

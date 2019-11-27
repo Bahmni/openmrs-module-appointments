@@ -65,5 +65,20 @@
     <provider provider_id="2221" person_id="221" name="labtechnician" identifier="labtechnician" creator="1"
               date_created="2005-01-01 00:00:00.0"  retired="false" uuid="2d15071d-439d-44e8-9825-aa8e1a30d2a2"/>
 
+    <person person_id="2" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="2c33920f-7aa6-uhy5-998a-60412d8ff7d5"/>r
+    <patient patient_id="2" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
+    <patient_identifier patient_identifier_id="2" patient_id="2" identifier="GAN200001" identifier_type="1"
+                        preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+                        uuid="0b7cf2fa-b377-455c-jh76-231cf34a21ac"/>
 
+    <appointment_service appointment_service_id="4" name="Ortho" description="Ortho" start_time="11:00:00" end_time="15:00:00" location_id="1" uuid="c36006d4-9fbb-ki98-866b-0ece245615c1"
+                         speciality_id="1" max_appointments_limit="7" duration_mins="16" creator="1" voided="false"/>
+
+    <patient_appointment patient_appointment_id="9" patient_id ="2" appointment_service_id="4" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-8y6t-0ece245615a7"/>
+    <patient_appointment_provider patient_appointment_provider_id="1" patient_appointment_id="9" provider_id="2221" response="AWAITING" creator="1"
+                                  date_created="2005-01-01 00:00:00.0"  uuid="2d15071d-439d-44e8-8yu6-aa8e1a30d2a2"/>
+
+    <patient_appointment patient_appointment_id="10" patient_id ="2" appointment_service_id="4" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-8ui6-8y6t-0ece245615a7"/>
+    <patient_appointment_provider patient_appointment_provider_id="2" patient_appointment_id="10" provider_id="2221" response="AWAITING" creator="1"
+                                  date_created="2005-01-01 00:00:00.0"  uuid="2d15071d-67fr-44e8-8yu6-aa8e1a30d2a2"/>
 </dataset>

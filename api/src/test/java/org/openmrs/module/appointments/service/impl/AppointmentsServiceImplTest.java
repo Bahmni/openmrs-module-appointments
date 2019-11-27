@@ -27,12 +27,12 @@ import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -46,7 +46,6 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -54,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -66,10 +66,11 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
-import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
+import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
+import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
@@ -460,7 +461,7 @@ public class AppointmentsServiceImplTest {
         AppointmentProvider appointmentProvider = new AppointmentProvider();
         appointmentProvider.setProvider(provider);
         appointmentProvider.setResponse(AppointmentProviderResponse.ACCEPTED);
-        Set<AppointmentProvider> appointmentProviders = new HashSet<>(Arrays.asList(appointmentProvider));
+        Set<AppointmentProvider> appointmentProviders = new HashSet<>(asList(appointmentProvider));
         when(appointment.getProviders()).thenReturn(appointmentProviders);
         when(appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED)).thenReturn(appointmentProviders);
     }
@@ -528,6 +529,7 @@ public class AppointmentsServiceImplTest {
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
     }
+
     @Test
     public void shouldCallSaveMethodFromDaoAndGetAppointmentAuditFromServiceHelper() throws IOException {
         Appointment appointment = new Appointment();
@@ -593,13 +595,13 @@ public class AppointmentsServiceImplTest {
         appointmentFour.setVoided(true);
 
 
-        List<Appointment> filteredAppointments = Arrays.asList(appointmentTwo, appointmentThree);
-        when(appointmentServiceUnavailabilityConflict.getConflicts(filteredAppointments)).thenReturn(Arrays.asList(appointmentTwo, appointmentThree));
+        List<Appointment> filteredAppointments = asList(appointmentTwo, appointmentThree);
+        when(appointmentServiceUnavailabilityConflict.getConflicts(filteredAppointments)).thenReturn(asList(appointmentTwo, appointmentThree));
         when(appointmentServiceUnavailabilityConflict.getType()).thenReturn(SERVICE_UNAVAILABLE);
-        when(patientDoubleBookingConflict.getConflicts(filteredAppointments)).thenReturn(Arrays.asList(mock(Appointment.class)));
+        when(patientDoubleBookingConflict.getConflicts(filteredAppointments)).thenReturn(asList(mock(Appointment.class)));
         when(patientDoubleBookingConflict.getType()).thenReturn(PATIENT_DOUBLE_BOOKING);
 
-        Map<Enum, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour));
+        Map<Enum, List<Appointment>> response = appointmentsService.getAppointmentsConflicts(asList(appointmentOne, appointmentTwo, appointmentThree, appointmentFour));
 
         for (AppointmentConflict appointmentConflict : appointmentConflicts) {
             verify(appointmentConflict).getConflicts(filteredAppointments);
@@ -618,11 +620,96 @@ public class AppointmentsServiceImplTest {
         appointmentOne.setStartDateTime(DateUtil.getStartOfDay());
         List<Appointment> appointments = Collections.singletonList(appointmentOne);
 
-        Map<Enum, List<Appointment>> response= appointmentsService.getAppointmentsConflicts(appointments);
+        Map<Enum, List<Appointment>> response = appointmentsService.getAppointmentsConflicts(appointments);
 
         for (AppointmentConflict appointmentConflict : appointmentConflicts) {
             verify(appointmentConflict, never()).getConflicts(any());
         }
         assertEquals(0, response.size());
+    }
+
+    @Test
+    public void shouldUpdateProviderResponseForGivenAppointment() {
+        Provider provider = new Provider();
+        provider.setUuid("provider-uuid");
+
+        Appointment appointment = new Appointment();
+
+        AppointmentProvider existingProvider = new AppointmentProvider();
+        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+        existingProvider.setProvider(provider);
+        existingProvider.setAppointment(appointment);
+        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+
+        AppointmentProvider providerRequest = new AppointmentProvider();
+        providerRequest.setProvider(provider);
+        providerRequest.setAppointment(appointment);
+        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+        appointmentsService.updateAppointmentProviderResponse(providerRequest);
+
+        ArgumentCaptor<Appointment> appointmentArgumentCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentDao, times(1)).save(appointmentArgumentCaptor.capture());
+
+        Appointment savedAppointment = appointmentArgumentCaptor.getValue();
+        assertEquals(AppointmentProviderResponse.ACCEPTED, savedAppointment.getProviders().iterator().next().getResponse());
+    }
+
+    @Test
+    public void shouldUpdateAppointmentStatusInCaseOfRequestedAppointment() {
+        when(Context.hasPrivilege(MANAGE_APPOINTMENTS)).thenReturn(true);
+        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(true);
+
+        Provider provider = new Provider();
+        provider.setUuid("provider-uuid");
+
+        Appointment appointment = new Appointment();
+        appointment.setStatus(AppointmentStatus.Requested);
+
+        AppointmentProvider existingProvider = new AppointmentProvider();
+        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+        existingProvider.setProvider(provider);
+        existingProvider.setAppointment(appointment);
+        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+
+        AppointmentProvider providerRequest = new AppointmentProvider();
+        providerRequest.setProvider(provider);
+        providerRequest.setAppointment(appointment);
+        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+        appointmentsService.updateAppointmentProviderResponse(providerRequest);
+
+        ArgumentCaptor<Appointment> appointmentArgumentCaptor = ArgumentCaptor.forClass(Appointment.class);
+        verify(appointmentDao, times(1)).save(appointmentArgumentCaptor.capture());
+
+        Appointment savedAppointment = appointmentArgumentCaptor.getValue();
+        assertEquals(AppointmentStatus.Scheduled, savedAppointment.getStatus());
+        assertEquals(AppointmentProviderResponse.ACCEPTED, savedAppointment.getProviders().iterator().next().getResponse());
+    }
+
+    @Test
+    public void shouldThrowErrorWhenProviderIsNotPartOfAppointment() {
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("Provider is not part of Appointment");
+
+        Provider provider1 = new Provider();
+        provider1.setUuid("provider-uuid1");
+
+        Provider provider2 = new Provider();
+        provider1.setUuid("provider-uuid2");
+
+        Appointment appointment = new Appointment();
+        AppointmentProvider existingProvider = new AppointmentProvider();
+        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+        existingProvider.setProvider(provider1);
+        existingProvider.setAppointment(appointment);
+        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+
+        AppointmentProvider providerRequest = new AppointmentProvider();
+        providerRequest.setProvider(provider2);
+        providerRequest.setAppointment(appointment);
+        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+        appointmentsService.updateAppointmentProviderResponse(providerRequest);
     }
 }

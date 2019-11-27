@@ -14,7 +14,7 @@ public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
 
     @Transactional
-    void save(Appointment appointmentService);
+    void save(Appointment appointment);
 
     List<Appointment> search(Appointment appointment);
 
