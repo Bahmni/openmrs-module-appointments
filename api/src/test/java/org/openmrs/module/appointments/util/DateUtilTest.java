@@ -94,6 +94,6 @@ public class DateUtilTest {
     @Test
     public void shouldReturnZeroWhenPassedLongIsNegative() {
         long milliSeconds = getEpochTime(-10000);
-        assertEquals(0, milliSeconds);
+        assertEquals(19790000, milliSeconds);
     }
 }
