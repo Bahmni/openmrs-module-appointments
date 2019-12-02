@@ -35,7 +35,7 @@ public class AllAppointmentRecurringPatternUpdateService {
         updatedAppointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
         updatedAppointmentRecurringPattern.setFrequency(recurringAppointmentRequest.getRecurringPattern().getFrequency());
         if (newSetOfAppointments.size() != 0) {
-            updatedAppointmentRecurringPattern.setAppointments(new HashSet<>(newSetOfAppointments));
+            updatedAppointmentRecurringPattern.setAppointments(new LinkedHashSet<>(newSetOfAppointments));
         }
         appointment.setAppointmentRecurringPattern(updatedAppointmentRecurringPattern);
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
