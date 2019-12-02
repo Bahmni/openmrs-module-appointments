@@ -71,14 +71,33 @@
                         preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
                         uuid="0b7cf2fa-b377-455c-jh76-231cf34a21ac"/>
 
+<!--    Change Provider Response Dataset-->
+    <person person_id="11" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="2c33920f-34dr-48d6-998a-60412d8ff7d5"/>r
+    <users user_id="11" person_id="11" system_id="11-6" username="provider-response-user" retired="false"
+           password="4a1750c8607d0fa237de36c6305715c223415189" salt="c788c6ad82a157b712392ca695dfcf2eed193d7f"
+           secret_question="" creator="1" date_created="2008-08-15 15:46:47.0"
+           uuid="Z9fd3a7b-6482-kj45-87eR-c07b123MxF99"/>
+
+    <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module"/>
+    <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module"/>
+    <privilege privilege="Get Providers" description="Able to view Providers"/>
+    <role role="Provider Response Update" description="To Test Provider response update" uuid="3480cb6d-c551-46c8-8d3a-96dc33d109fb"/>
+    <role_privilege role="Provider Response Update" privilege="View Appointments"/>
+    <role_privilege role="Provider Response Update" privilege="Manage Own Appointments"/>
+    <role_privilege role="Provider Response Update" privilege="Get Providers"/>
+
+    <user_role user_id="11" role="Provider Response Update"/>
+    <provider provider_id="2222" person_id="11" name="provider-response-user" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="2bdc3f7d-jh76-401a-84e9-5494dda83e8e" />
+
     <appointment_service appointment_service_id="4" name="Ortho" description="Ortho" start_time="11:00:00" end_time="15:00:00" location_id="1" uuid="c36006d4-9fbb-ki98-866b-0ece245615c1"
                          speciality_id="1" max_appointments_limit="7" duration_mins="16" creator="1" voided="false"/>
 
     <patient_appointment patient_appointment_id="9" patient_id ="2" appointment_service_id="4" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-4f20-8y6t-0ece245615a7"/>
-    <patient_appointment_provider patient_appointment_provider_id="1" patient_appointment_id="9" provider_id="2221" response="AWAITING" creator="1"
+    <patient_appointment_provider patient_appointment_provider_id="1" patient_appointment_id="9" provider_id="2222" response="AWAITING" creator="1"
                                   date_created="2005-01-01 00:00:00.0"  uuid="2d15071d-439d-44e8-8yu6-aa8e1a30d2a2"/>
 
     <patient_appointment patient_appointment_id="10" patient_id ="2" appointment_service_id="4" start_date_time="2107-07-15 17:00:00.0" end_date_time="2107-07-15 18:00:00.0" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="c36006e5-9fbb-8ui6-8y6t-0ece245615a7"/>
-    <patient_appointment_provider patient_appointment_provider_id="2" patient_appointment_id="10" provider_id="2221" response="AWAITING" creator="1"
+    <patient_appointment_provider patient_appointment_provider_id="2" patient_appointment_id="10" provider_id="2222" response="AWAITING" creator="1"
                                   date_created="2005-01-01 00:00:00.0"  uuid="2d15071d-67fr-44e8-8yu6-aa8e1a30d2a2"/>
+<!--    Change Provider Response Dataset-->
 </dataset>

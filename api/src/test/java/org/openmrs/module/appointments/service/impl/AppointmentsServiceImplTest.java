@@ -67,6 +67,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
@@ -630,9 +631,13 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldUpdateProviderResponseForGivenAppointment() {
-        Provider provider = new Provider();
-        provider.setUuid("provider-uuid");
+        Person person = new Person();
+        when(user.getPerson()).thenReturn(person);
+        when(Context.getAuthenticatedUser()).thenReturn(user);
 
+        Provider provider = new Provider();
+        provider.setPerson(person);
+        provider.setUuid("provider-uuid");
         Appointment appointment = new Appointment();
 
         AppointmentProvider existingProvider = new AppointmentProvider();
@@ -657,10 +662,14 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldUpdateAppointmentStatusInCaseOfRequestedAppointment() {
-        when(Context.hasPrivilege(MANAGE_APPOINTMENTS)).thenReturn(true);
-        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(true);
+        when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
+
+        Person person = new Person();
+        when(user.getPerson()).thenReturn(person);
+        when(Context.getAuthenticatedUser()).thenReturn(user);
 
         Provider provider = new Provider();
+        provider.setPerson(person);
         provider.setUuid("provider-uuid");
 
         Appointment appointment = new Appointment();
@@ -707,6 +716,35 @@ public class AppointmentsServiceImplTest {
 
         AppointmentProvider providerRequest = new AppointmentProvider();
         providerRequest.setProvider(provider2);
+        providerRequest.setAppointment(appointment);
+        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
+
+        appointmentsService.updateAppointmentProviderResponse(providerRequest);
+    }
+
+    @Test
+    public void shouldThrowErrorWhenTryingToChangeProviderResponseForOtherProvider() {
+        expectedException.expect(APIAuthenticationException.class);
+        expectedException.expectMessage("Cannot change Provider Response for other providers");
+
+        when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
+        when(user.getPerson()).thenReturn(new Person());
+        when(Context.getAuthenticatedUser()).thenReturn(user);
+
+        Provider provider = new Provider();
+        provider.setPerson(new Person());
+        provider.setUuid("provider-uuid");
+
+        Appointment appointment = new Appointment();
+
+        AppointmentProvider existingProvider = new AppointmentProvider();
+        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+        existingProvider.setProvider(provider);
+        existingProvider.setAppointment(appointment);
+        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+
+        AppointmentProvider providerRequest = new AppointmentProvider();
+        providerRequest.setProvider(provider);
         providerRequest.setAppointment(appointment);
         providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
 

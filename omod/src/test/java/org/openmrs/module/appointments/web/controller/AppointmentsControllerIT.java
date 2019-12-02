@@ -323,7 +323,8 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldChangeProviderResponse() throws Exception {
-        String content = "{\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\",\"response\":\"ACCEPTED\"}";
+        Context.authenticate("provider-response-user", "test");
+        String content = "{\"uuid\":\"2bdc3f7d-jh76-401a-84e9-5494dda83e8e\",\"response\":\"ACCEPTED\"}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-8y6t-0ece245615a7/providerResponse", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
@@ -334,7 +335,8 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldChangeRequestedAppointmentStatusToScheduledWhenProviderAccepts() throws Exception {
-        String content = "{\"uuid\":\"2d15071d-439d-44e8-9825-aa8e1a30d2a2\",\"response\":\"ACCEPTED\"}";
+        Context.authenticate("provider-response-user", "test");
+        String content = "{\"uuid\":\"2bdc3f7d-jh76-401a-84e9-5494dda83e8e\",\"response\":\"ACCEPTED\"}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-8ui6-8y6t-0ece245615a7/providerResponse", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
