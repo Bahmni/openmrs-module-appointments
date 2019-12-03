@@ -272,13 +272,4 @@ public class DefaultAppointmentStatusChangeValidatorTest {
         validator.validate(appointment, AppointmentStatus.Scheduled, errors);
         assertEquals(0, errors.size());
     }
-
-    @Test
-    public void shouldChangeStatusFromCheckedInToRequested() {
-        when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("true");
-        appointment.setStatus(AppointmentStatus.CheckedIn);
-        List<String> errors = new ArrayList<>();
-        validator.validate(appointment, AppointmentStatus.Requested, errors);
-        assertEquals(0, errors.size());
-    }
 }

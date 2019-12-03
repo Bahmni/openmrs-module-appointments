@@ -17,14 +17,10 @@ public class DefaultAppointmentStatusChangeValidator implements AppointmentStatu
         boolean disableValidation = disableDefaultValidationValue != null ? Boolean.valueOf(disableDefaultValidationValue) : false;
         if (!disableValidation) {
             AppointmentStatus currentStatus = appointment.getStatus();
-            if (toStatus.getSequence() <= currentStatus.getSequence() && inNotInitialAppointmentStatus(toStatus)) {
-				errors.add("Appointment status can not be changed from " + appointment.getStatus() + " to " + toStatus);
-			}
+            if (toStatus.getSequence() <= currentStatus.getSequence() && toStatus != AppointmentStatus.Scheduled) {
+                errors.add("Appointment status can not be changed from " + appointment.getStatus() + " to " + toStatus);
+            }
         }
-    }
-
-    private boolean inNotInitialAppointmentStatus(AppointmentStatus toStatus) {
-        return toStatus != AppointmentStatus.Scheduled && toStatus != AppointmentStatus.Requested;
     }
 
 }
