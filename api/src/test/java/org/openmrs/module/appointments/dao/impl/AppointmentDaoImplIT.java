@@ -226,6 +226,16 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldReturnAppointmentsForProvider() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        appointmentSearchRequest.setProviderUuid("2d15071d-439d-44e8-9825-aa8e1a30d2a2");
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(1, appointments.size());
+    }
+
+    @Test
     public void shouldReturnAllAppointmentsInNoGivenDates() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
 

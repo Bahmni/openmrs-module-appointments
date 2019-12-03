@@ -7,6 +7,7 @@ public class AppointmentSearchRequest {
     private Date startDate;
     private Date endDate;
     private String patientUuid;
+    private String providerUuid;
     private int limit;
 
     public Date getStartDate() {
@@ -39,5 +40,13 @@ public class AppointmentSearchRequest {
 
     public void setLimit(int limit) {
         this.limit = limit;
+    }
+
+    public String getProviderUuid() {
+        return providerUuid;
+    }
+
+    public void setProviderUuid(String providerUuid) {
+        this.providerUuid = providerUuid;
     }
 }

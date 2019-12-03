@@ -61,6 +61,16 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldSearchAcceptProviderUuidToSearchAppointments() throws Exception {
+        String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
+                "\"providerUuid\":\"provider-uuid\"}";
+
+        MockHttpServletResponse httpResponse = handle(newPostRequest("/rest/v1/appointments/search", requestBodyJson));
+
+        assertEquals(200, httpResponse.getStatus());
+    }
+
+    @Test
     public void should_changeAppointmentStatusWithDate() throws Exception {
         String onDate = "2108-08-22T10:30:00.0Z";
         String content = "{ \"toStatus\": \"CheckedIn\", \"onDate\":\"" + onDate + "\"}";
