@@ -90,9 +90,7 @@
                     </list>
                 </property>
                 <property name="appointmentServiceHelper">
-                    <list>
-                        <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
-                    </list>
+                    <bean class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
                 </property>
                 <property name="appointmentConflicts">
                     <list>
