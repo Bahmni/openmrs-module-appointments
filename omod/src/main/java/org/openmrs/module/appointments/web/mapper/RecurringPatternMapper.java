@@ -45,4 +45,16 @@ public class RecurringPatternMapper {
         return recurringPattern;
     }
 
+    public AppointmentRecurringPattern cloneAppointmentRecurringPattern(AppointmentRecurringPattern recurringPattern){
+        AppointmentRecurringPattern recurringPatternClone = new AppointmentRecurringPattern();
+        recurringPatternClone.setType(recurringPattern.getType());
+        recurringPatternClone.setId(recurringPattern.getId());
+        recurringPatternClone.setEndDate(recurringPattern.getEndDate());
+        recurringPatternClone.setDaysOfWeek(recurringPattern.getDaysOfWeek());
+        recurringPatternClone.setFrequency(recurringPattern.getFrequency());
+        recurringPatternClone.setPeriod(recurringPattern.getPeriod());
+        recurringPatternClone.setAppointments(recurringPattern.getAppointments());
+        return recurringPatternClone;
+    }
+
 }

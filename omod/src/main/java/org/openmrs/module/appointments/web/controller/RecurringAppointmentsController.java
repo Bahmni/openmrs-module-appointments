@@ -169,6 +169,7 @@ public class RecurringAppointmentsController {
             log.error("Runtime error while trying to get getConflicts for recurring appointments", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
     private void validateTimeZone(String clientTimeZone) {
@@ -194,7 +195,7 @@ public class RecurringAppointmentsController {
         } else {
             validateTimeZone(recurringAppointmentRequest.getTimeZone());
             AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService
-                    .getUpdatedRecurringPattern(recurringAppointmentRequest);
+                    .getUpdatedRecurringPatternForConflicts(recurringAppointmentRequest);
             appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
         }
         return appointments;

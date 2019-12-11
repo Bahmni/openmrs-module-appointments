@@ -6,6 +6,7 @@ import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -22,12 +23,25 @@ public class AllAppointmentRecurringPatternUpdateService {
     private AppointmentMapper appointmentMapper;
 
     @Autowired
+    private RecurringPatternMapper recurringPatternMapper;
+
+    @Autowired
     RecurringAppointmentsService recurringAppointmentsService;
 
     public AppointmentRecurringPattern getUpdatedRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest) {
+        return getAppointmentRecurringPattern(recurringAppointmentRequest, false);
+    }
+
+    private AppointmentRecurringPattern getAppointmentRecurringPattern(RecurringAppointmentRequest recurringAppointmentRequest, boolean forConflicts) {
         String clientTimeZone = recurringAppointmentRequest.getTimeZone();
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
-        Appointment appointment = getAppointment(recurringAppointmentRequest);
+        Appointment appointment;
+        if(forConflicts) {
+            appointment = cloneAppointmentForConflicts(recurringAppointmentRequest);
+        }
+        else {
+            appointment = getAppointment(recurringAppointmentRequest);
+        }
         appointmentMapper.mapAppointmentRequestToAppointment(recurringAppointmentRequest.getAppointmentRequest(), appointment);
         List<Appointment> newSetOfAppointments = recurringAppointmentsService
                 .getUpdatedSetOfAppointments(appointment.getAppointmentRecurringPattern(), recurringAppointmentRequest);
@@ -44,6 +58,11 @@ public class AllAppointmentRecurringPatternUpdateService {
         return updatedAppointmentRecurringPattern;
     }
 
+    public AppointmentRecurringPattern getUpdatedRecurringPatternForConflicts(RecurringAppointmentRequest recurringAppointmentRequest) {
+        return getAppointmentRecurringPattern(recurringAppointmentRequest, true);
+    }
+
+
     private Appointment getAppointment(RecurringAppointmentRequest recurringAppointmentRequest) {
         Appointment appointment = appointmentsService
                 .getAppointmentByUuid(recurringAppointmentRequest.getAppointmentRequest().getUuid());
@@ -51,6 +70,17 @@ public class AllAppointmentRecurringPatternUpdateService {
             throw new APIException("Invalid appointment for edit");
         }
         return appointment;
+    }
+
+    private Appointment cloneAppointmentForConflicts(RecurringAppointmentRequest recurringAppointmentRequest){
+        Appointment appointment = getAppointment(recurringAppointmentRequest);
+        AppointmentRecurringPattern recurringPatternClone = recurringPatternMapper.cloneAppointmentRecurringPattern(appointment.getAppointmentRecurringPattern());
+        Appointment appointmentClone = new Appointment();
+        appointmentClone.setUuid(appointment.getUuid());
+        appointmentClone.setAppointmentRecurringPattern(recurringPatternClone);
+        appointmentClone.setProviders(appointment.getProviders());
+        appointmentClone.setPatient(appointment.getPatient());
+        return appointmentClone;
     }
 
     private void updateMetadataForAllAppointments(Appointment appointment, String clientTimeZone) {

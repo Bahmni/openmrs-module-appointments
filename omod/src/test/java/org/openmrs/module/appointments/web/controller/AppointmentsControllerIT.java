@@ -18,6 +18,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -344,5 +345,31 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
         Appointment appointmentByUuid = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-8ui6-8y6t-0ece245615a7");
         assertEquals(AppointmentStatus.Scheduled, appointmentByUuid.getStatus());
         assertEquals(AppointmentProviderResponse.ACCEPTED, appointmentByUuid.getProviders().iterator().next().getResponse());
+    }
+
+    @Test
+    public void shouldNotUpdateAppointmentMetadataOnConflictsCall() throws Exception {
+        String content = "{" +
+                "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00\"," +
+                "\"providers\": [{" +
+                "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
+                "\"response\": \"ACCEPTED\"," +
+                "\"comments\": null" +
+                "}]," +
+                "\"locationUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"appointmentKind\": \"Scheduled\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/conflicts", content));
+        assertEquals(200, response.getStatus());
+        Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
+        });
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
+        Appointment appointment = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals("2107-07-15 17:00:00.0", appointment.getStartDateTime().toString());
     }
 }

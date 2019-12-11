@@ -328,9 +328,9 @@ public class RecurringAppointmentsControllerTest {
         Set<Appointment> appointments = mock(Set.class);
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setAppointments(appointments);
-        when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest)).thenReturn(mock(AppointmentRecurringPattern.class));
+        when(allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPatternForConflicts(recurringAppointmentRequest)).thenReturn(mock(AppointmentRecurringPattern.class));
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.getConflicts(recurringAppointmentRequest);
-        verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPattern(recurringAppointmentRequest);
+        verify(allAppointmentRecurringPatternUpdateService).getUpdatedRecurringPatternForConflicts(recurringAppointmentRequest);
         assertEquals(HttpStatus.NO_CONTENT, responseEntity.getStatusCode());
         assertNull(responseEntity.getBody());
     }

@@ -27,6 +27,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
+import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -57,6 +58,9 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
 
     @Mock
     private AppointmentMapper appointmentMapper;
+
+    @Mock
+    private RecurringPatternMapper recurringPatternMapper;
 
     @Mock
     private Patient patient;
@@ -153,7 +157,6 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
         appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
-
 
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when(recurringAppointmentsService.getUpdatedSetOfAppointments(appointmentRecurringPattern, recurringAppointmentRequest))
@@ -421,7 +424,6 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
         appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
-
 
         when(appointmentsService.getAppointmentByUuid(any())).thenReturn(appointmentTwo);
         when(recurringAppointmentsService.getUpdatedSetOfAppointments(appointmentRecurringPattern, recurringAppointmentRequest))
