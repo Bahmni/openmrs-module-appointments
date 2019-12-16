@@ -26,27 +26,27 @@ public interface AppointmentsService {
     Appointment validateAndSave(Appointment appointment);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAllAppointments(Date forDate);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> search(Appointment appointment);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Appointment getAppointmentByUuid(String uuid);
 
     @Transactional
@@ -54,7 +54,7 @@ public interface AppointmentsService {
     void changeStatus(Appointment appointment, String status, Date onDate);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 
     @Transactional
@@ -62,11 +62,11 @@ public interface AppointmentsService {
     void undoStatusChange(Appointment appointment);
 
     @Transactional
-    @Authorized({"Manage Appointments"})
+    @Authorized({MANAGE_APPOINTMENTS})
     void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider);
 
     @Transactional
-    @Authorized({"Manage Appointments"})
+    @Authorized({MANAGE_APPOINTMENTS})
     Appointment reschedule(String originalAppointmentUuid, Appointment appointment, boolean retainAppointmentNumber);
 
     @Transactional
@@ -74,15 +74,15 @@ public interface AppointmentsService {
     void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment);
 
     @Transactional
-    @Authorized({VIEW_APPOINTMENTS})
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 }
 
