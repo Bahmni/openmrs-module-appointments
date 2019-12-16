@@ -38,6 +38,7 @@ import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
@@ -121,7 +122,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
-                    new Object[]{MANAGE_APPOINTMENTS}, null));
+                    new Object[]{MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS}, null));
         }
         appointmentServiceHelper.validate(appointment, appointmentValidators);
     }
@@ -257,28 +258,28 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
-        Appointment appointment = appointmentProviderProvider.getAppointment();
-        Set<AppointmentProvider> providers = appointment.getProviders();
+    public void updateAppointmentProviderResponse(AppointmentProvider providerWithNewResponse) {
+        Appointment appointment = providerWithNewResponse.getAppointment();
+        Set<AppointmentProvider> existingProviders = appointment.getProviders();
 
-        if (CollectionUtils.isEmpty(providers)) {
+        if (CollectionUtils.isEmpty(existingProviders)) {
             throw new APIException("No providers present in Appointment");
         }
-        AppointmentProvider appointmentProvider = findProviderInAppointment(appointmentProviderProvider, providers);
-        validateProviderResponseForSelf(appointmentProvider);
-        appointmentProvider.setResponse(appointmentProviderProvider.getResponse());
+        AppointmentProvider existingProviderInAppointment = findProviderInAppointment(providerWithNewResponse, existingProviders);
+        validateProviderResponseForSelf(existingProviderInAppointment);
+        existingProviderInAppointment.setResponse(providerWithNewResponse.getResponse());
 
-        if (isFirstAcceptForRequestedAppointment(appointmentProviderProvider, appointment)) {
+        if (isFirstAcceptForRequestedAppointment(providerWithNewResponse, appointment)) {
             changeStatus(appointment, AppointmentStatus.Scheduled.name(), Date.from(Instant.now()));
         } else {
             appointmentDao.save(appointment);
         }
-        createAppointmentAudit(appointmentProviderProvider, appointment, appointmentProvider);
+        createAppointmentAudit(providerWithNewResponse, appointment, existingProviderInAppointment);
     }
 
-    private AppointmentProvider findProviderInAppointment(AppointmentProvider appointmentProviderProvider, Set<AppointmentProvider> providers) {
+    private AppointmentProvider findProviderInAppointment(AppointmentProvider providerWithNewResponse, Set<AppointmentProvider> providers) {
         Optional<AppointmentProvider> providerInAppointment = providers.stream().filter(
-                provider -> provider.getProvider().equals(appointmentProviderProvider.getProvider())
+                provider -> provider.getProvider().equals(providerWithNewResponse.getProvider())
         ).findFirst();
         if (!providerInAppointment.isPresent()) throw new APIException("Provider is not part of Appointment");
         return providerInAppointment.get();
@@ -335,15 +336,15 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentAuditDao.save(appointmentAuditEvent);
     }
 
-    private boolean isFirstAcceptForRequestedAppointment(AppointmentProvider appointmentProviderProvider, Appointment appointment) {
+    private boolean isFirstAcceptForRequestedAppointment(AppointmentProvider providerWithNewResponse, Appointment appointment) {
         return appointment.getStatus().equals(AppointmentStatus.Requested) &&
-                appointmentProviderProvider.getResponse().equals(AppointmentProviderResponse.ACCEPTED);
+                providerWithNewResponse.getResponse().equals(AppointmentProviderResponse.ACCEPTED);
     }
 
-    private void createAppointmentAudit(AppointmentProvider appointmentProviderProvider, Appointment appointment, AppointmentProvider appointmentProvider) {
+    private void createAppointmentAudit(AppointmentProvider providerWithNewResponse, Appointment appointment, AppointmentProvider appointmentProvider) {
         String notes = String.format(
                 "Changed Provider Response to %s for provider with UUID %s in appointment with UUID %s",
-                appointmentProviderProvider.getResponse(), appointmentProvider.getProvider().getUuid(), appointment.getUuid());
+                providerWithNewResponse.getResponse(), appointmentProvider.getProvider().getUuid(), appointment.getUuid());
         createEventInAppointmentAudit(appointment, notes);
     }
 
