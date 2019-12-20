@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.hibernate.cfg.NotYetImplementedException;
+import org.openmrs.Person;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -25,26 +25,28 @@ import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.time.Instant;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
 @Transactional
 public class AppointmentsServiceImpl implements AppointmentsService {
 
-    private Log log = LogFactory.getLog(this.getClass());
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
-
+    private Log log = LogFactory.getLog(this.getClass());
     private AppointmentDao appointmentDao;
 
     private List<AppointmentStatusChangeValidator> statusChangeValidators;
@@ -75,9 +77,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.appointmentAuditDao = appointmentAuditDao;
     }
 
-	public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
-		this.appointmentServiceHelper = appointmentServiceHelper;
-	}
+    public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
+        this.appointmentServiceHelper = appointmentServiceHelper;
+    }
 
     public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
         this.editAppointmentValidators = editAppointmentValidators;
@@ -100,12 +102,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private boolean isCurrentUserSamePersonAsOneOfTheAppointmentProviders(Set<AppointmentProvider> providers) {
         return providers.stream()
                 .anyMatch(provider -> provider.getProvider().getPerson().
-                equals(Context.getAuthenticatedUser().getPerson()));
+                        equals(Context.getAuthenticatedUser().getPerson()));
     }
 
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
-        validate(appointment, appointmentValidators );
+        validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         save(appointment);
         return appointment;
@@ -120,7 +122,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
-                    new Object[] { MANAGE_APPOINTMENTS }, null));
+                    new Object[]{MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS}, null));
         }
         appointmentServiceHelper.validate(appointment, appointmentValidators);
     }
@@ -138,6 +140,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     /**
      * TODO: refactor. How can a search by an appointment return a list of appointments?
+     *
      * @param appointment
      * @return
      */
@@ -169,7 +172,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException{
+    public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         validateUserPrivilege(appointment, appointmentStatus);
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
@@ -185,14 +188,16 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[]{MANAGE_APPOINTMENTS}, null));
         }
-        if (!isUserAllowedToResetStatus(appointmentStatus)) {
+        if (!isUserAllowedToResetStatus(appointmentStatus, appointment.getStatus())) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
                     new Object[]{RESET_APPOINTMENT_STATUS}, null));
         }
     }
 
-    private boolean isUserAllowedToResetStatus(AppointmentStatus appointmentStatus) {
-        return appointmentStatus != AppointmentStatus.Scheduled || Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
+    private boolean isUserAllowedToResetStatus(AppointmentStatus toStatus, AppointmentStatus currentStatus) {
+        if (!toStatus.equals(AppointmentStatus.Scheduled)) return true;
+        if (currentStatus.equals(AppointmentStatus.Requested)) return true;
+        return Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
     }
 
     @Override
@@ -202,10 +207,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void undoStatusChange(Appointment appointment) throws APIException{
+    public void undoStatusChange(Appointment appointment) throws APIException {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
             throw new APIAuthenticationException(Context.getMessageSourceService().getMessage(PRIVILEGES_EXCEPTION_CODE,
-                    new Object[] { MANAGE_APPOINTMENTS }, null));
+                    new Object[]{MANAGE_APPOINTMENTS}, null));
         }
         AppointmentAudit statusChangeEvent = appointmentAuditDao.getPriorStatusChangeEvent(appointment);
         if (statusChangeEvent != null) {
@@ -253,9 +258,39 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public void updateAppointmentProviderResponse(AppointmentProvider appointmentProviderProvider) {
-        //TODO
-        throw new NotYetImplementedException("This feature is not yet implemented");
+    public void updateAppointmentProviderResponse(AppointmentProvider providerWithNewResponse) {
+        Appointment appointment = providerWithNewResponse.getAppointment();
+        Set<AppointmentProvider> existingProviders = appointment.getProviders();
+
+        if (CollectionUtils.isEmpty(existingProviders)) {
+            throw new APIException("No providers present in Appointment");
+        }
+        AppointmentProvider existingProviderInAppointment = findProviderInAppointment(providerWithNewResponse, existingProviders);
+        validateProviderResponseForSelf(existingProviderInAppointment);
+        existingProviderInAppointment.setResponse(providerWithNewResponse.getResponse());
+
+        if (isFirstAcceptForRequestedAppointment(providerWithNewResponse, appointment)) {
+            changeStatus(appointment, AppointmentStatus.Scheduled.name(), Date.from(Instant.now()));
+        } else {
+            appointmentDao.save(appointment);
+        }
+        createAppointmentAudit(providerWithNewResponse, appointment, existingProviderInAppointment);
+    }
+
+    private AppointmentProvider findProviderInAppointment(AppointmentProvider providerWithNewResponse, Set<AppointmentProvider> providers) {
+        Optional<AppointmentProvider> providerInAppointment = providers.stream().filter(
+                provider -> provider.getProvider().equals(providerWithNewResponse.getProvider())
+        ).findFirst();
+        if (!providerInAppointment.isPresent()) throw new APIException("Provider is not part of Appointment");
+        return providerInAppointment.get();
+    }
+
+    private void validateProviderResponseForSelf(AppointmentProvider appointmentProvider) {
+        Person loggedInPerson = Context.getAuthenticatedUser().getPerson();
+        Person providerPerson = appointmentProvider.getProvider().getPerson();
+        if (!loggedInPerson.equals(providerPerson)) {
+            throw new APIAuthenticationException("Cannot change Provider Response for other providers");
+        }
     }
 
     @Override
@@ -299,6 +334,18 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                                                String notes) {
         AppointmentAudit appointmentAuditEvent = appointmentServiceHelper.getAppointmentAuditEvent(appointment, notes);
         appointmentAuditDao.save(appointmentAuditEvent);
+    }
+
+    private boolean isFirstAcceptForRequestedAppointment(AppointmentProvider providerWithNewResponse, Appointment appointment) {
+        return appointment.getStatus().equals(AppointmentStatus.Requested) &&
+                providerWithNewResponse.getResponse().equals(AppointmentProviderResponse.ACCEPTED);
+    }
+
+    private void createAppointmentAudit(AppointmentProvider providerWithNewResponse, Appointment appointment, AppointmentProvider appointmentProvider) {
+        String notes = String.format(
+                "Changed Provider Response to %s for provider with UUID %s in appointment with UUID %s",
+                providerWithNewResponse.getResponse(), appointmentProvider.getProvider().getUuid(), appointment.getUuid());
+        createEventInAppointmentAudit(appointment, notes);
     }
 
     private void createAndSetAppointmentAudit(Appointment appointment) {

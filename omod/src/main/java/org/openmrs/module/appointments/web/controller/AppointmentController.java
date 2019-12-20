@@ -99,6 +99,7 @@ public class AppointmentController {
                     appointmentsService.getAppointmentsForService(
                             appointmentServiceDefinition, startDate, endDate,
                             Arrays.asList(
+                                    AppointmentStatus.Requested,
                                     AppointmentStatus.Completed,
                                     AppointmentStatus.Scheduled,
                                     AppointmentStatus.CheckedIn,

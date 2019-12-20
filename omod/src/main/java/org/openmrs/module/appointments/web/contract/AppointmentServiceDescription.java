@@ -19,6 +19,7 @@ public class AppointmentServiceDescription {
     private String locationUuid;
     private String uuid;
     private String color;
+    private String initialAppointmentStatus;
     private List<ServiceWeeklyAvailabilityDescription> weeklyAvailability;
     private Set<AppointmentServiceTypeDescription> serviceTypes;
 
@@ -117,5 +118,13 @@ public class AppointmentServiceDescription {
 
     public void setColor(String color) {
         this.color = color;
+    }
+
+    public String getInitialAppointmentStatus() {
+        return initialAppointmentStatus;
+    }
+
+    public void setInitialAppointmentStatus(String initialAppointmentStatus) {
+        this.initialAppointmentStatus = initialAppointmentStatus;
     }
 }

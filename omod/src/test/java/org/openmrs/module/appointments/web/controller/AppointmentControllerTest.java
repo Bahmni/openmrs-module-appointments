@@ -135,6 +135,7 @@ public class AppointmentControllerTest {
         List<Appointment> appointmentList = new ArrayList<>();
         appointmentList.add(appointment);
         List<AppointmentStatus> appointmentStatuses = Arrays.asList(
+                AppointmentStatus.Requested,
                 AppointmentStatus.Completed,
                 AppointmentStatus.Scheduled,
                 AppointmentStatus.CheckedIn,

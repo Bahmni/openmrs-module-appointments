@@ -14,6 +14,7 @@ public class AppointmentServiceDefaultResponse {
 	private Map location;
 	private String uuid;
 	private String color;
+	private String initialAppointmentStatus;
 	private String creatorName;
 
 	public Integer getAppointmentServiceId() {
@@ -110,5 +111,14 @@ public class AppointmentServiceDefaultResponse {
 
 	public void setColor(String color) {
 		this.color = color;
+	}
+
+
+	public String getInitialAppointmentStatus() {
+		return initialAppointmentStatus;
+	}
+
+	public void setInitialAppointmentStatus(String initialAppointmentStatus) {
+		this.initialAppointmentStatus = initialAppointmentStatus;
 	}
 }

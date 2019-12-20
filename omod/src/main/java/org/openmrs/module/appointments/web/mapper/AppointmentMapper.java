@@ -90,6 +90,9 @@ public class AppointmentMapper {
         if (appointmentRequest.getServiceTypeUuid() != null) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
+        if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
+            appointment.setStatus(AppointmentStatus.valueOf(appointmentRequest.getStatus()));
+        }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
         //appointment.setProvider(identifyAppointmentProvider(appointmentRequest.getProviderUuid()));

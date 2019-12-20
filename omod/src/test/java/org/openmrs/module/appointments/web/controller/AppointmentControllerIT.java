@@ -49,7 +49,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(7, asResponses.size());
+        assertEquals(9, asResponses.size());
     }
 
     @Test
@@ -103,7 +103,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         AppointmentsSummary appointmentsSummary = appointmentsSummaries.get(0);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date appointmentDate = simpleDateFormat.parse("2108-08-15");
-        assertEquals(2, appointmentsSummaries.size());
+        assertEquals(3, appointmentsSummaries.size());
         assertNotNull(appointmentsSummary);
         assertEquals(1, appointmentsSummary.getAppointmentService().getAppointmentServiceId(), 0);
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", appointmentsSummary.getAppointmentService().getUuid());

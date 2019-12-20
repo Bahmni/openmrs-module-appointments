@@ -16,6 +16,12 @@
         <property name="maxAppointmentsLimit" type="java.lang.Integer" column="max_appointments_limit"/>
         <property name="durationMins" type="java.lang.Integer" column="duration_mins"/>
         <property name="color" type="java.lang.String" column="color" length="8" not-null="false" />
+        <property name="initialAppointmentStatus" column="initial_appointment_status">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
 
         <property name="dateCreated" type="java.util.Date" column="date_created"/>
         <property name="dateChanged" type="java.util.Date" column="date_changed"/>

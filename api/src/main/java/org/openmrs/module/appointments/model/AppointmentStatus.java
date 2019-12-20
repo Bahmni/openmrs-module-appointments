@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.model;
 
 public enum AppointmentStatus {
-    Scheduled("Scheduled", 0), CheckedIn("CheckedIn", 1), Completed("Completed", 2), Cancelled("Cancelled", 2), Missed("Missed", 2);
+    Requested("Requested", 0), Scheduled("Scheduled", 1), CheckedIn("CheckedIn", 2), Completed("Completed", 3), Cancelled("Cancelled", 3), Missed("Missed", 3);
 
     private final String value;
     private final int sequence;

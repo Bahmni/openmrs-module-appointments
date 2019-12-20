@@ -6,6 +6,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
@@ -43,6 +44,13 @@ public class AppointmentServiceMapper {
         appointmentServiceDefinition.setEndTime(appointmentServiceDescription.getEndTime());
         appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServiceDescription.getMaxAppointmentsLimit());
         appointmentServiceDefinition.setColor(appointmentServiceDescription.getColor());
+
+        String initialAppointmentStatus = appointmentServiceDescription.getInitialAppointmentStatus();
+        if (StringUtils.isNotBlank(initialAppointmentStatus)) {
+            appointmentServiceDefinition.setInitialAppointmentStatus(AppointmentStatus.valueOf(initialAppointmentStatus));
+        }else {
+            appointmentServiceDefinition.setInitialAppointmentStatus(null);
+        }
 
         String locationUuid = appointmentServiceDescription.getLocationUuid();
         Location location = locationService.getLocationByUuid(locationUuid);
@@ -160,6 +168,11 @@ public class AppointmentServiceMapper {
         asResponse.setDurationMins(as.getDurationMins());
         asResponse.setMaxAppointmentsLimit(as.getMaxAppointmentsLimit());
         asResponse.setColor(as.getColor());
+
+        AppointmentStatus initialAppointmentStatus = as.getInitialAppointmentStatus();
+        if (null != initialAppointmentStatus){
+            asResponse.setInitialAppointmentStatus(initialAppointmentStatus.name());
+        }
 
         Map specialityMap = new HashMap();
         Speciality speciality = as.getSpeciality();

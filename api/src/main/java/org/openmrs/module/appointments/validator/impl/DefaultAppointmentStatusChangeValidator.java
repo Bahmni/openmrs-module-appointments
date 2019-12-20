@@ -18,8 +18,8 @@ public class DefaultAppointmentStatusChangeValidator implements AppointmentStatu
         if (!disableValidation) {
             AppointmentStatus currentStatus = appointment.getStatus();
             if (toStatus.getSequence() <= currentStatus.getSequence() && toStatus != AppointmentStatus.Scheduled) {
-				errors.add("Appointment status can not be changed from " + appointment.getStatus() + " to " + toStatus);
-			}
+                errors.add("Appointment status can not be changed from " + appointment.getStatus() + " to " + toStatus);
+            }
         }
     }
 
