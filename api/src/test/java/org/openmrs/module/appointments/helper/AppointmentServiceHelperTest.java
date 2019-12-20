@@ -171,4 +171,13 @@ public class AppointmentServiceHelperTest {
                 any(AppointmentStatus.class),
                 anyListOf(String.class));
     }
+
+    @Test
+    public void shouldNotCallValidateWhenAppointmentIsNull(){
+        List<AppointmentValidator> appointmentValidators = Collections.singletonList(appointmentValidator);
+        appointmentServiceHelper.validate(null, appointmentValidators);
+
+        verify(appointmentValidator, never()).validate(any(Appointment.class),
+                anyListOf(String.class));
+    }
 }
