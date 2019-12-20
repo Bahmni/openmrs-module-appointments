@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
                               List<Appointment> updatedAppointments) {
         Appointment editedAppointment = updatedAppointments
                 .stream()
-                .filter(app -> app.getVoided() != true)
+                .filter(app -> !app.getVoided())
                 .collect(Collectors.toList()).get(0);
         updateAppointmentsDetails(appointmentRecurringPattern, updatedAppointments);
         appointmentServiceHelper.validate(editedAppointment.getRelatedAppointment(), editAppointmentValidators);
