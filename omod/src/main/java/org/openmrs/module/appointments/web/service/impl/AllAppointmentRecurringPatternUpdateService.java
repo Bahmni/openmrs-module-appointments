@@ -143,6 +143,7 @@ public class AllAppointmentRecurringPatternUpdateService {
         return appointmentProviders
                 .stream()
                 .filter(provider -> AppointmentProviderResponse.ACCEPTED.equals(provider.getResponse()))
+                .map(AppointmentProvider::new)
                 .collect(Collectors.toList());
     }
 
