@@ -80,6 +80,8 @@ public class AllAppointmentRecurringPatternUpdateService {
         appointmentClone.setAppointmentRecurringPattern(recurringPatternClone);
         appointmentClone.setProviders(appointment.getProviders());
         appointmentClone.setPatient(appointment.getPatient());
+        appointmentClone.setAppointmentId(appointment.getAppointmentId());
+        appointmentClone.setAppointmentNumber(appointment.getAppointmentNumber());
         return appointmentClone;
     }
 
