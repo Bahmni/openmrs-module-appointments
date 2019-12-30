@@ -181,6 +181,15 @@
     <bean parent="serviceContext">
         <property name="moduleService">
             <list merge="true">
+                <value>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</value>
+                <ref bean="recurringAppointmentService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
                 <value>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</value>
                 <ref bean="appointmentServiceService"/>
             </list>
