@@ -18,6 +18,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.net.URI;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -142,4 +143,35 @@ public class RecurringAppointmentsAdviceTest {
     public void dummy() {
     }
 
+    public void update() {
+    }
+
+    @Test
+    public void shouldRaiseEventRecordsForTheTwoAppointmentsInRecurringPatternForUpdateMethod() throws Throwable {
+        Appointment appointmentOne = new Appointment();
+        Appointment appointmentTwo = new Appointment();
+        appointmentOne.setUuid(UUID);
+        String another_uuid = "Another UUID";
+        appointmentTwo.setUuid(another_uuid);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo)));
+        recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("update"), null, null);
+
+        verify(eventService, times(2)).notify(any(Event.class));
+        verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", another_uuid)), eq("appointments"));
+        verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
+        verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
+    }
+
+    @Test
+    public void shouldRaiseEventRecordsForTheSingleRecurringAppointmentUpdateMethod() throws Throwable {
+        recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("update"), null, null);
+
+        verify(eventService, times(1)).notify(any(Event.class));
+        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
+        verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
+        verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
+    }
 }

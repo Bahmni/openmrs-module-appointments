@@ -6,7 +6,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.CATEGORY;
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.DEFAULT_URL_PATTERN;
@@ -15,19 +15,29 @@ import static org.openmrs.module.appointments.constants.AppointmentsEventRecords
 
 public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
 
-    public static final String TITLE = "RecurringAppointment";
-    public static final String VALIDATE_AND_SAVE = "validateAndSave";
-    private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Collections.singletonList(VALIDATE_AND_SAVE));
+    private static final String TITLE = "RecurringAppointment";
+    private static final String VALIDATE_AND_SAVE = "validateAndSave";
+    private static final String UPDATE = "update";
+    private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Arrays.asList(VALIDATE_AND_SAVE, UPDATE));
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] arguments, Object target) throws Throwable {
-        Object processedReturnValue = returnValue;
-        if (VALIDATE_AND_SAVE.equals(method.getName())) {
-            AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) processedReturnValue;
+        if (VALIDATE_AND_SAVE.equals(method.getName()) || isAllRecurringAppointmentsUpdate(method, returnValue)) {
+            AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) returnValue;
             for (Appointment appointment : appointmentRecurringPattern.getAppointments()) {
                 super.afterReturning(appointment, method, arguments, target);
             }
+        } else if (isSingleRecurringAppointmentUpdate(method, returnValue)) {
+            super.afterReturning(returnValue, method, arguments, target);
         }
+    }
+
+    private boolean isSingleRecurringAppointmentUpdate(Method method, Object processedReturnValue) {
+        return UPDATE.equals(method.getName()) && (processedReturnValue instanceof Appointment);
+    }
+
+    private boolean isAllRecurringAppointmentsUpdate(Method method, Object processedReturnValue) {
+        return UPDATE.equals(method.getName()) && (processedReturnValue instanceof AppointmentRecurringPattern);
     }
 
     @Override
