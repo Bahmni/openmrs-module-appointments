@@ -5,8 +5,8 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.CATEGORY;
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.DEFAULT_URL_PATTERN;
@@ -18,7 +18,8 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
     private static final String TITLE = "RecurringAppointment";
     private static final String VALIDATE_AND_SAVE = "validateAndSave";
     private static final String UPDATE = "update";
-    private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Arrays.asList(VALIDATE_AND_SAVE, UPDATE));
+    private static final String CHANGE_STATUS = "changeStatus";
+    private static final List<String> METHOD_NAMES = Arrays.asList(VALIDATE_AND_SAVE, UPDATE, CHANGE_STATUS);
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] arguments, Object target) throws Throwable {
@@ -29,6 +30,11 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
             }
         } else if (isSingleRecurringAppointmentUpdate(method, returnValue)) {
             super.afterReturning(returnValue, method, arguments, target);
+        } else if (CHANGE_STATUS.equals(method.getName())) {
+            List<Appointment> appointments = (List<Appointment>) returnValue;
+            for (Appointment appointment : appointments) {
+                super.afterReturning(appointment, method, arguments, target);
+            }
         }
     }
 
