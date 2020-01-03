@@ -40,9 +40,9 @@ import static org.powermock.api.mockito.PowerMockito.whenNew;
 public class RecurringAppointmentsAdviceTest {
 
     private static final String UUID = "5631b434-78aa-102b-91a0-001e378eb17e";
-    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointment?uuid={uuid}";
+    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
     private static final String RAISE_EVENT_GLOBAL_PROPERTY = "atomfeed.publish.eventsForAppointments";
-    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointments";
+    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
 
     private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
@@ -94,7 +94,7 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(eventService, times(1)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -132,7 +132,7 @@ public class RecurringAppointmentsAdviceTest {
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment/test/%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment/test/%s", UUID)), eq("appointments"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -161,8 +161,8 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(eventService, times(2)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -183,8 +183,8 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(eventService, times(2)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -200,8 +200,8 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(eventService, times(2)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }

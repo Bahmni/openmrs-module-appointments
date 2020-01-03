@@ -9,17 +9,17 @@ import java.util.Arrays;
 import java.util.List;
 
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.CATEGORY;
-import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.DEFAULT_URL_PATTERN;
 import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.RAISE_EVENT_GLOBAL_PROPERTY;
-import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.URL_PATTERN_GLOBAL_PROPERTY;
 
 public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
 
-    private static final String TITLE = "RecurringAppointment";
+    private static final String TITLE = "RecurringAppointments";
     private static final String VALIDATE_AND_SAVE = "validateAndSave";
     private static final String UPDATE = "update";
     private static final String CHANGE_STATUS = "changeStatus";
     private static final List<String> METHOD_NAMES = Arrays.asList(VALIDATE_AND_SAVE, UPDATE, CHANGE_STATUS);
+    public static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
+    public static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] arguments, Object target) throws Throwable {
