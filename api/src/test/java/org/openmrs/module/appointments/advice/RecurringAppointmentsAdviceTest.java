@@ -154,29 +154,39 @@ public class RecurringAppointmentsAdviceTest {
         Appointment appointmentOne = new Appointment();
         Appointment appointmentTwo = new Appointment();
         appointmentOne.setUuid(UUID);
-        String another_uuid = "Another UUID";
-        appointmentTwo.setUuid(another_uuid);
+        String anotherUuid = "Another UUID";
+        appointmentTwo.setUuid(anotherUuid);
         appointmentRecurringPattern.setAppointments(new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo)));
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("update"), null, null);
 
         verify(eventService, times(2)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", another_uuid)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
 
     @Test
     public void shouldRaiseEventRecordsForTheSingleRecurringAppointmentUpdateMethod() throws Throwable {
+        Appointment appointmentOne = new Appointment();
+        Appointment appointmentTwo = new Appointment();
+        appointmentOne.setUuid(UUID);
+        String anotherUuid = "Another UUID";
+        appointmentTwo.setUuid(anotherUuid);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo)));
+        Object arguments[] = new Object[2];
+        arguments[0] = appointmentRecurringPattern;
+        arguments[1] = Arrays.asList(appointmentOne, appointmentTwo);
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern.getAppointments().iterator().next(),
-                this.getClass().getMethod("update"), null, null);
+                this.getClass().getMethod("update"), arguments, null);
 
-        verify(eventService, times(1)).notify(any(Event.class));
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(eventService, times(2)).notify(any(Event.class));
+        verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
-        verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
+        verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
+        verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
 
     @Test
@@ -184,14 +194,14 @@ public class RecurringAppointmentsAdviceTest {
         Appointment appointmentOne = new Appointment();
         Appointment appointmentTwo = new Appointment();
         appointmentOne.setUuid(UUID);
-        String another_uuid = "Another UUID";
-        appointmentTwo.setUuid(another_uuid);
+        String anotherUuid = "Another UUID";
+        appointmentTwo.setUuid(anotherUuid);
         recurringAppointmentsAdvice.afterReturning(Arrays.asList(appointmentOne, appointmentTwo), this.getClass().getMethod("changeStatus"), null, null);
 
         verify(eventService, times(2)).notify(any(Event.class));
         verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", another_uuid)), eq("appointments"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointment"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment?uuid=%s", anotherUuid)), eq("appointments"));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }

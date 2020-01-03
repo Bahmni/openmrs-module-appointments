@@ -29,7 +29,10 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
                 super.afterReturning(appointment, method, arguments, target);
             }
         } else if (isSingleRecurringAppointmentUpdate(method, returnValue)) {
-            super.afterReturning(returnValue, method, arguments, target);
+            List<Appointment> updatedAppointments = (List<Appointment>) arguments[1];
+            for (Appointment appointment : updatedAppointments) {
+                super.afterReturning(appointment, method, arguments, target);
+            }
         } else if (CHANGE_STATUS.equals(method.getName())) {
             List<Appointment> appointments = (List<Appointment>) returnValue;
             for (Appointment appointment : appointments) {
