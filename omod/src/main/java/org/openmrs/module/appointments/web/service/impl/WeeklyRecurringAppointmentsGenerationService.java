@@ -112,7 +112,11 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
                                              RecurringAppointmentRequest recurringAppointmentRequest) {
         List<String> daysOfWeek = Arrays.stream(appointmentRecurringPattern.getDaysOfWeek().split(",")).collect(Collectors.toList());
         this.recurringAppointmentRequest = recurringAppointmentRequest;
-        List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
+        List<Appointment> activeAppointments = new ArrayList<>(appointmentRecurringPattern.getActiveAppointments());
+        List<Appointment> relatedAppointments = new ArrayList<>(appointmentRecurringPattern.getRelatedAppointments());
+        List<Appointment> removedAppointments = new ArrayList<>(appointmentRecurringPattern.getRemovedAppointments());
+        List<Appointment> appointments = new ArrayList<>(activeAppointments);
+        appointments.addAll(relatedAppointments);
         Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
         recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size() - 1).getStartDateTime());
         recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size() - 1).getEndDateTime());
@@ -140,6 +144,7 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
         appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalender, endCalender, selectedDayCodes),
                 recurringAppointmentRequest.getAppointmentRequest()));
         recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
+        appointments.addAll(removedAppointments);
         return sort(appointments);
     }
 

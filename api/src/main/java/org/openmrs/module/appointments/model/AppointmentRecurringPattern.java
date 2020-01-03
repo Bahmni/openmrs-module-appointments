@@ -82,4 +82,23 @@ public class AppointmentRecurringPattern {
                 .filter(appointment -> !appointment.getVoided()).collect(Collectors.toSet());
     }
 
+    public Set<Appointment> getRelatedAppointments() {
+        Set<Appointment> relatedAppointments = new LinkedHashSet<>();
+        getActiveAppointments().stream().forEach(appointment -> {
+            if (appointment.getRelatedAppointment() != null) {
+                relatedAppointments.add(appointment.getRelatedAppointment());
+            }
+        });
+        return relatedAppointments;
+    }
+
+    public Set<Appointment> getRemovedAppointments() {
+        Set<Appointment> removedAppointments = new LinkedHashSet<>();
+        Set<Appointment> relatedAppointments = getRelatedAppointments();
+        getAppointments().stream().forEach(appointment -> {
+            if (appointment.getVoided() == Boolean.TRUE && !relatedAppointments.contains(appointment))
+                removedAppointments.add(appointment);
+        });
+        return removedAppointments;
+    }
 }

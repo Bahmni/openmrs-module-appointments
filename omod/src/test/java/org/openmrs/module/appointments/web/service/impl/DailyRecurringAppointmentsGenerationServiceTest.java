@@ -239,4 +239,62 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
                     updatedAppointments.get(i).getEndDateTime().toString());
         }
     }
+
+    @Test
+    public void shouldAddNewAppointmentsForGivenRecurringPatternWhenEndDateIsIncreasedWithVoidedAndRelatedAppointments() {
+        Date appointmentStartDateTime = getDate(2019, Calendar.MAY, 25, 8, 45, 00);
+        Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 25, 9, 15, 00);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(3, 0,
+                getDate(2019, Calendar.MAY, 25, 8, 45, 00));
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setEndDate(getDate(2019, Calendar.MAY, 31, 8, 45, 0));
+        recurringPattern.setFrequency(0);
+        recurringPattern.setPeriod(3);
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("appointment1");
+        appointment1.setStartDateTime(getDate(2019, Calendar.MAY, 19, 8, 45, 0));
+        appointment1.setEndDateTime(getDate(2019, Calendar.MAY, 19, 9, 15, 0));
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("appointment2");
+        appointment2.setStartDateTime(getDate(2019, Calendar.MAY, 22, 8, 45, 0));
+        appointment2.setEndDateTime(getDate(2019, Calendar.MAY, 22, 9, 15, 0));
+        Appointment appointment3 = new Appointment();
+        appointment3.setUuid("appointment3");
+        appointment3.setStartDateTime(getDate(2019, Calendar.MAY, 25, 8, 45, 0));
+        appointment3.setEndDateTime(getDate(2019, Calendar.MAY, 25, 9, 15, 0));
+        appointment3.setVoided(Boolean.TRUE);
+        Appointment appointment4 = new Appointment();
+        appointment4.setUuid("appointment4");
+        appointment4.setStartDateTime(getDate(2019, Calendar.MAY, 28, 8, 45, 0));
+        appointment4.setEndDateTime(getDate(2019, Calendar.MAY, 28, 9, 15, 0));
+        Appointment appointment5 = new Appointment();
+        appointment5.setUuid("appointment5");
+        appointment5.setStartDateTime(getDate(2019, Calendar.MAY, 31, 8, 45, 0));
+        appointment5.setEndDateTime(getDate(2019, Calendar.MAY, 31, 9, 15, 0));
+        Appointment relatedAppointment = new Appointment();
+        relatedAppointment.setUuid("relatedAppointment");
+        relatedAppointment.setStartDateTime(getDate(2019, Calendar.MAY, 24, 8, 45, 0));
+        relatedAppointment.setEndDateTime(getDate(2019, Calendar.MAY, 24, 9, 15, 0));
+        relatedAppointment.setRelatedAppointment(appointment3);
+        Appointment removedAppointment = new Appointment();
+        removedAppointment.setUuid("removedAppointment");
+        removedAppointment.setStartDateTime(getDate(2019, Calendar.MAY, 23, 8, 45, 0));
+        removedAppointment.setEndDateTime(getDate(2019, Calendar.MAY, 23, 9, 15, 0));
+        removedAppointment.setVoided(Boolean.TRUE);
+
+        List<Appointment> existingAppointments = Arrays.asList(appointment1, appointment2, appointment3, relatedAppointment, removedAppointment);
+        List<Appointment> expectedAppointments = Arrays.asList(appointment1, appointment2, removedAppointment, relatedAppointment, appointment3, appointment4, appointment5);
+        appointmentRecurringPattern.setAppointments(existingAppointments.stream().collect(Collectors.toSet()));
+        List<Appointment> updatedAppointments = dailyRecurringAppointmentsGenerationService.addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        assertEquals(expectedAppointments.size(), updatedAppointments.size());
+        for (int i = 0; i < updatedAppointments.size(); i++) {
+            assertEquals(expectedAppointments.get(i).getStartDateTime().toString(),
+                    updatedAppointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointments.get(i).getEndDateTime().toString(),
+                    updatedAppointments.get(i).getEndDateTime().toString());
+        }
+    }
 }

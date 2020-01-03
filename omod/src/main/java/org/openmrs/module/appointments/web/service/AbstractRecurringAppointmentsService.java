@@ -64,7 +64,7 @@ public abstract class AbstractRecurringAppointmentsService {
         for (int appointmentIndex = 0; appointmentIndex < removableAppointments.size(); appointmentIndex++) {
             appointments.get(removableAppointments.get(appointmentIndex)).setVoided(true);
         }
-        return sort(new ArrayList<>(appointmentRecurringPattern.getActiveAppointments()));
+        return sort(new ArrayList<>(appointmentRecurringPattern.getAppointments()));
     }
 
     private void checkAppointmentStatus(List<Appointment> appointments, List<Integer> removableAppointments) {

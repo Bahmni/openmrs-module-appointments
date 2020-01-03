@@ -17,7 +17,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Qualifier("dailyRecurringAppointmentsGenerationService")
@@ -61,7 +60,11 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
     public List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                              RecurringAppointmentRequest recurringAppointmentRequest){
         this.recurringAppointmentRequest = recurringAppointmentRequest;
-        List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
+        List<Appointment> activeAppointments = new ArrayList<>(appointmentRecurringPattern.getActiveAppointments());
+        List<Appointment> relatedAppointments = new ArrayList<>(appointmentRecurringPattern.getRelatedAppointments());
+        List<Appointment> removedAppointments = new ArrayList<>(appointmentRecurringPattern.getRemovedAppointments());
+        List<Appointment> appointments = new ArrayList<>(activeAppointments);
+        appointments.addAll(relatedAppointments);
         Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
         recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size()-1).getStartDateTime());
         recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size()-1).getEndDateTime());
@@ -80,6 +83,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalendar, endCalendar),
                 recurringAppointmentRequest.getAppointmentRequest()));
         recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
+        appointments.addAll(removedAppointments);
         return sort(appointments);
     }
 }
