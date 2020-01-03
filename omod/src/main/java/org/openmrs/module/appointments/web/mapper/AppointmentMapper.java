@@ -203,6 +203,7 @@ public class AppointmentMapper {
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
+        response.setVoided(a.getVoided());
         return response;
     }
 
