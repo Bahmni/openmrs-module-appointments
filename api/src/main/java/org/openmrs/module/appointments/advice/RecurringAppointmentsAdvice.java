@@ -5,6 +5,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,26 +19,27 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
     private static final String UPDATE = "update";
     private static final String CHANGE_STATUS = "changeStatus";
     private static final List<String> METHOD_NAMES = Arrays.asList(VALIDATE_AND_SAVE, UPDATE, CHANGE_STATUS);
-    public static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
-    public static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
+    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
+    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] arguments, Object target) throws Throwable {
         if (VALIDATE_AND_SAVE.equals(method.getName()) || isAllRecurringAppointmentsUpdate(method, returnValue)) {
             AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) returnValue;
-            for (Appointment appointment : appointmentRecurringPattern.getAppointments()) {
-                super.afterReturning(appointment, method, arguments, target);
-            }
+            raiseEventsForAppointments(method, arguments, target, new ArrayList<>(appointmentRecurringPattern.getAppointments()));
         } else if (isSingleRecurringAppointmentUpdate(method, returnValue)) {
             List<Appointment> updatedAppointments = (List<Appointment>) arguments[1];
-            for (Appointment appointment : updatedAppointments) {
-                super.afterReturning(appointment, method, arguments, target);
-            }
+            raiseEventsForAppointments(method, arguments, target, updatedAppointments);
         } else if (CHANGE_STATUS.equals(method.getName())) {
             List<Appointment> appointments = (List<Appointment>) returnValue;
-            for (Appointment appointment : appointments) {
-                super.afterReturning(appointment, method, arguments, target);
-            }
+            raiseEventsForAppointments(method, arguments, target, appointments);
+        }
+    }
+
+    private void raiseEventsForAppointments(Method method, Object[] arguments, Object target,
+                                            List<Appointment> appointments) throws Throwable {
+        for (Appointment appointment : appointments) {
+            super.afterReturning(appointment, method, arguments, target);
         }
     }
 

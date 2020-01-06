@@ -13,11 +13,11 @@ import static org.openmrs.module.appointments.constants.AppointmentsEventRecords
 
 public class AppointmentAdvice extends AbstractBaseAdvice {
 
-    public static final String TITLE = "Appointment";
+    private static final String TITLE = "Appointment";
     private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Arrays.asList("validateAndSave", "changeStatus", "undoStatusChange"));
     private static final ArrayList<String> VOIDED_METHOD_NAMES = new ArrayList<>(Arrays.asList("changeStatus", "undoStatusChange"));
-    public static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointments";
-    public static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointment?uuid={uuid}";
+    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointments";
+    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointment?uuid={uuid}";
 
 
     @Override
