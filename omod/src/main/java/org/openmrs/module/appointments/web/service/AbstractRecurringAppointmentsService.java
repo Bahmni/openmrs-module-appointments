@@ -44,6 +44,10 @@ public abstract class AbstractRecurringAppointmentsService {
     public List<Appointment> removeRecurringAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
         List<Appointment> appointments = sort(new ArrayList<>(appointmentRecurringPattern.getActiveAppointments()));
+        Date recurringStartDate = appointments.get(0).getStartDateTime();
+        if(Objects.nonNull(recurringAppointmentRequest.getRecurringPattern().getEndDate()) &&
+                recurringAppointmentRequest.getRecurringPattern().getEndDate().before(recurringStartDate))
+            throw new APIException("End date cannot be before the start date of recurring series");
         if (appointmentRecurringPattern.getEndDate() == null)
             appointmentRecurringPattern.setFrequency(appointmentRecurringPattern.getFrequency() -
                     recurringAppointmentRequest.getRecurringPattern().getFrequency());

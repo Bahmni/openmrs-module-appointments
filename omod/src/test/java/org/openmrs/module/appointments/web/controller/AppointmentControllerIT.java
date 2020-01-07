@@ -7,6 +7,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -49,7 +50,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(9, asResponses.size());
+        assertEquals(13, asResponses.size());
     }
 
     @Test
@@ -90,7 +91,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
             new TypeReference<List<AppointmentDefaultResponse>>() {});
 
-        assertEquals(5, asResponse.size());
+        assertEquals(9, asResponse.size());
     }
 
     @Test
@@ -213,5 +214,42 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment", content));
         assertNotNull(response);
         assertEquals(400, response.getStatus());
+    }
+
+    @Test
+    public void shouldNotUpdateAppointmentMetadataOnConflictsCall() throws Exception {
+        String content = "{" +
+                "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a7\"," +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00.0\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00.0\"," +
+                "\"providers\": [{" +
+                "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
+                "\"response\": \"ACCEPTED\"," +
+                "\"comments\": null" +
+                "}]," +
+                "\"locationUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"appointmentKind\": \"Scheduled\"" +
+                "}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/conflicts", content));
+        assertEquals(200, response.getStatus());
+        Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
+        });
+        assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
+        Appointment appointment = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
+        assertEquals("2107-07-15 17:00:00.0", appointment.getStartDateTime().toString());
+        assertEquals("2107-07-15 18:00:00.0", appointment.getEndDateTime().toString());
+
+        MockHttpServletResponse editResponse = handle(newPostRequest("/rest/v1/appointment", content));
+        assertNotNull(editResponse);
+        assertEquals(200, editResponse.getStatus());
+        AppointmentDefaultResponse  appointmentEditResponse = deserialize(editResponse, new TypeReference<AppointmentDefaultResponse>() {
+        });
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a7", appointmentEditResponse.getUuid());
+        //As client is in IST we are receiving response in IST - 17:30 UTC = 23:00 IST
+        assertEquals("Fri Jul 15 23:00:00 IST 2107", appointmentEditResponse.getStartDateTime().toString());
+        assertEquals("Sat Jul 16 00:00:00 IST 2107", appointmentEditResponse.getEndDateTime().toString());
     }
 }

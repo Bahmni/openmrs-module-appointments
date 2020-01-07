@@ -37,7 +37,7 @@ import javax.validation.Valid;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -86,7 +86,9 @@ public class RecurringAppointmentsController {
             validateRecurringPattern(recurringPattern);
             AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
             List<Appointment> appointmentsList = recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest);
-            appointmentRecurringPattern.setAppointments(new HashSet<>(appointmentsList));
+            appointmentRecurringPattern.setAppointments(new LinkedHashSet<>(appointmentsList));
+            if (appointmentsList.isEmpty())
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
@@ -167,6 +169,7 @@ public class RecurringAppointmentsController {
             log.error("Runtime error while trying to get getConflicts for recurring appointments", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
     }
 
     private void validateTimeZone(String clientTimeZone) {
@@ -192,7 +195,7 @@ public class RecurringAppointmentsController {
         } else {
             validateTimeZone(recurringAppointmentRequest.getTimeZone());
             AppointmentRecurringPattern appointmentRecurringPattern = allAppointmentRecurringPatternUpdateService
-                    .getUpdatedRecurringPattern(recurringAppointmentRequest);
+                    .getUpdatedRecurringPatternForConflicts(recurringAppointmentRequest);
             appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
         }
         return appointments;

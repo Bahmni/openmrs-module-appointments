@@ -100,4 +100,17 @@
     <patient_appointment_provider patient_appointment_provider_id="2" patient_appointment_id="10" provider_id="2222" response="AWAITING" creator="1"
                                   date_created="2005-01-01 00:00:00.0"  uuid="2d15071d-67fr-44e8-8yu6-aa8e1a30d2a2"/>
 <!--    Change Provider Response Dataset-->
+
+    <patient_appointment patient_appointment_id="11" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-23 13:00:00.0" end_date_time="2208-12-23 13:30:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="25a7e84b-6933-49cc-aebe-c1d4d33a86e8"/>
+    <patient_appointment patient_appointment_id="12" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-24 13:00:00.0" end_date_time="2208-12-23 13:30:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="ec0f38cf-96bd-41bc-9db7-29fc3f4bca62"/>
+    <patient_appointment patient_appointment_id="13" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-25 13:00:00.0" end_date_time="2208-12-23 13:30:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="6c2d7d79-11f4-4b73-98a5-ee6a9c5bc6a5"/>
+    <patient_appointment patient_appointment_id="14" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-26 13:00:00.0" end_date_time="2208-12-23 13:30:00.0" appointment_kind="Scheduled" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="53c401fe-677c-46e8-aaed-57b063cb27b7"/>
+
+    <patient_appointment_recurring_time patient_appointment_timings_id="2" recurrence_type="DAY" period="1" frequency="4"/>
+
+    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="14"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="11"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="12"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="13"/>
+
 </dataset>

@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @Component
 public class AppointmentServiceHelper {
@@ -61,7 +62,7 @@ public class AppointmentServiceHelper {
 
     private void validateAppointment(Appointment appointment, List<AppointmentValidator> appointmentValidators,
                                      List<String> errors) {
-        if(!CollectionUtils.isEmpty(appointmentValidators)) {
+        if(!CollectionUtils.isEmpty(appointmentValidators) && Objects.nonNull(appointment)) {
             for (AppointmentValidator validator : appointmentValidators) {
                 validator.validate(appointment, errors);
             }

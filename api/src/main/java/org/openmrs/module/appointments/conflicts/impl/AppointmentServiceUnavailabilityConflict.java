@@ -5,6 +5,7 @@ import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
+import org.openmrs.module.appointments.util.DateUtil;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
@@ -14,6 +15,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
@@ -44,28 +46,29 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
         Set<ServiceWeeklyAvailability> weeklyAvailableDays = appointmentServiceDefinition.getWeeklyAvailability();
         if (isObjectPresent(weeklyAvailableDays)) {
             String appointmentDay = DayFormat.format(appointment.getStartDateTime());
-            Optional<ServiceWeeklyAvailability> dayAvailability = weeklyAvailableDays.stream()
-                    .filter(day -> day.isSameDay(appointmentDay)).findFirst();
-            if (dayAvailability.isPresent()) {
-                ServiceWeeklyAvailability availableDay = dayAvailability.get();
-                return checkTimeAvailability(appointment, availableDay.getStartTime(), availableDay.getEndTime());
-            }
+            List<ServiceWeeklyAvailability> dayAvailabilities = weeklyAvailableDays.stream()
+                    .filter(day -> day.isSameDay(appointmentDay)).collect(Collectors.toList());
+            if (!dayAvailabilities.isEmpty())
+                return dayAvailabilities.stream().allMatch(availableDay ->
+                        checkTimeAvailability(appointment, availableDay.getStartTime().getTime(), availableDay.getEndTime().getTime()));
             return true;
         }
-        return checkTimeAvailability(appointment,
-                appointmentServiceDefinition.getStartTime(), appointmentServiceDefinition.getEndTime());
-
+        Time serviceStartTime = appointmentServiceDefinition.getStartTime();
+        Time serviceEndTime = appointmentServiceDefinition.getEndTime();
+        long serviceStartMillis = serviceStartTime != null ? serviceStartTime.getTime() : DateUtil.getStartOfDay().getTime();
+        long serviceEndMillis = serviceEndTime != null ? serviceEndTime.getTime() : DateUtil.getEndOfDay().getTime();
+        return checkTimeAvailability(appointment, serviceStartMillis, serviceEndMillis);
     }
 
     private boolean isObjectPresent(Collection<?> object) {
         return Objects.nonNull(object) && !object.isEmpty();
     }
 
-    private boolean checkTimeAvailability(Appointment appointment, Time serviceStartTime, Time serviceEndTime) {
+    private boolean checkTimeAvailability(Appointment appointment, long serviceStartTime, long serviceEndTime) {
         long appointmentStartTimeMilliSeconds = getEpochTime(appointment.getStartDateTime().getTime());
         long appointmentEndTimeMilliSeconds = getEpochTime(appointment.getEndDateTime().getTime());
-        long serviceStartTimeMilliSeconds = getEpochTime(serviceStartTime.getTime());
-        long serviceEndTimeMilliSeconds = getEpochTime(serviceEndTime.getTime());
+        long serviceStartTimeMilliSeconds = getEpochTime(serviceStartTime);
+        long serviceEndTimeMilliSeconds = getEpochTime(serviceEndTime);
         boolean isConflict = (appointmentStartTimeMilliSeconds >= appointmentEndTimeMilliSeconds)
                 || ((appointmentStartTimeMilliSeconds < serviceStartTimeMilliSeconds)
                 || (appointmentEndTimeMilliSeconds > serviceEndTimeMilliSeconds));

@@ -42,7 +42,7 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAG
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
-@Transactional
+
 public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
@@ -105,6 +105,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                         equals(Context.getAuthenticatedUser().getPerson()));
     }
 
+    @Transactional
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
@@ -118,6 +119,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentDao.save(appointment);
     }
 
+    @Transactional
     @Override
     public void validate(Appointment appointment, List<AppointmentValidator> appointmentValidators) {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
@@ -127,6 +129,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentServiceHelper.validate(appointment, appointmentValidators);
     }
 
+    @Transactional
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
         List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
@@ -144,33 +147,39 @@ public class AppointmentsServiceImpl implements AppointmentsService {
      * @param appointment
      * @return
      */
+    @Transactional
     @Override
     public List<Appointment> search(Appointment appointment) {
         List<Appointment> appointments = appointmentDao.search(appointment);
         return appointments.stream().filter(searchedAppointment -> !isServiceOrServiceTypeVoided(searchedAppointment)).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
         return appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
     }
 
+    @Transactional
     @Override
     public List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType) {
         return appointmentDao.getAllFutureAppointmentsForServiceType(appointmentServiceType);
     }
 
+    @Transactional
     @Override
     public List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList) {
         return appointmentDao.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatusList);
     }
 
+    @Transactional
     @Override
     public Appointment getAppointmentByUuid(String uuid) {
         Appointment appointment = appointmentDao.getAppointmentByUuid(uuid);
         return appointment;
     }
 
+    @Transactional
     @Override
     public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
@@ -200,12 +209,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
     }
 
+    @Transactional
     @Override
     public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
         List<Appointment> appointments = appointmentDao.getAllAppointmentsInDateRange(startDate, endDate);
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public void undoStatusChange(Appointment appointment) throws APIException {
         if (!validateIfUserHasSelfOrAllAppointmentsAccess(appointment)) {
@@ -221,6 +232,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             throw new APIException("No status change actions to undo");
     }
 
+    @Transactional
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
         if (isNull(appointmentSearchRequest.getStartDate())) {
@@ -257,6 +269,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }).collect(Collectors.toList());
     }
 
+    @Transactional
     @Override
     public void updateAppointmentProviderResponse(AppointmentProvider providerWithNewResponse) {
         Appointment appointment = providerWithNewResponse.getAppointment();
@@ -293,6 +306,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }
     }
 
+    @Transactional
     @Override
     public Appointment reschedule(String originalAppointmentUuid, Appointment newAppointment, boolean retainAppointmentNumber) {
         Appointment prevAppointment = getAppointmentByUuid(originalAppointmentUuid);

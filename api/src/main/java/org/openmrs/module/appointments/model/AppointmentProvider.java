@@ -15,7 +15,6 @@ public class AppointmentProvider extends BaseOpenmrsData implements Serializable
     private Boolean voided;
 
     public AppointmentProvider(AppointmentProvider appointmentProvider) {
-        this.appointmentProviderId = appointmentProvider.getAppointmentProviderId();
         this.appointment = appointmentProvider.getAppointment();
         this.provider = appointmentProvider.getProvider();
         this.response = appointmentProvider.getResponse();

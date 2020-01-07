@@ -486,4 +486,32 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(2, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
         assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.PATIENT_DOUBLE_BOOKING.name()).size());
     }
+
+    @Test
+    public void shouldThrowApiExceptionWhenEndDateIsBeforeStartDate() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"providers\": []}," +
+                "\"applyForAll\": true," +
+                "\"timeZone\": \"UTC\"," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":0," +
+                "\"endDate\":\"2009-07-20\"," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/uuid", content));
+        assertNotNull(response);
+        assertEquals(400, response.getStatus());
+    }
+
 }
