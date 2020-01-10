@@ -14,6 +14,7 @@ import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ import java.util.Map;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointments")
-public class AppointmentsController {
+public class AppointmentsController extends BaseRestController {
     @Autowired
     private AppointmentsService appointmentsService;
     @Autowired
@@ -94,18 +95,14 @@ public class AppointmentsController {
     @RequestMapping(method = RequestMethod.POST, value = "/{appointmentUuid}/status-change")
     @ResponseBody
     public ResponseEntity<Object> transitionAppointment(@PathVariable("appointmentUuid") String appointmentUuid, @RequestBody Map<String, String> statusDetails) throws ParseException {
-        try {
-            String toStatus = statusDetails.get("toStatus");
-            Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
-            Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if (appointment != null) {
-                appointmentsService.changeStatus(appointment, toStatus, onDate);
-                return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
-            } else
-                throw new RuntimeException("Appointment does not exist");
-        } catch (RuntimeException e) {
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
-        }
+        String toStatus = statusDetails.get("toStatus");
+        Date onDate = DateUtil.convertToLocalDateFromUTC(statusDetails.get("onDate"));
+        Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
+        if (appointment != null) {
+            appointmentsService.changeStatus(appointment, toStatus, onDate);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
+        } else
+            throw new RuntimeException("Appointment does not exist");
     }
 
     @RequestMapping(method = RequestMethod.POST, value = "/conflicts")

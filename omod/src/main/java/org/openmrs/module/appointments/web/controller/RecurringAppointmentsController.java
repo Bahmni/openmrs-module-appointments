@@ -20,6 +20,7 @@ import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -44,7 +45,7 @@ import java.util.Objects;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/recurring-appointments")
-public class RecurringAppointmentsController {
+public class RecurringAppointmentsController extends BaseRestController {
 
     private Log log = LogFactory.getLog(this.getClass());
 

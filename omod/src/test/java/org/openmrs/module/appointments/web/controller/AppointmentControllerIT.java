@@ -2,7 +2,10 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -37,6 +40,9 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
 
     @Before
     public void setUp() throws Exception {
