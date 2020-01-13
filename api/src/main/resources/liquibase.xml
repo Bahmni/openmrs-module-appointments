@@ -548,5 +548,17 @@
             <column name="initial_appointment_status" type="varchar(45)"/>
         </addColumn>
     </changeSet>
-
+    <changeSet id="202001021618" author="Sukreet">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM privilege WHERE privilege = 'Appointments: Invite Providers';
+            </sqlCheck>
+        </preConditions>
+        <comment>Add Schedule Appointments privilege to manage own appointments only.</comment>
+        <insert tableName="privilege">
+            <column name="privilege" value="Appointments: Invite Providers"/>
+            <column name="description" value="With this privilege, providers can invite others to an appointment"/>
+            <column name="uuid" valueComputed="UUID()"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>
