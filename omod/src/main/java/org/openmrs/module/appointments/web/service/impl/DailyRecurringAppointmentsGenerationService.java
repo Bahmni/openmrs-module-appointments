@@ -64,7 +64,6 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         List<Appointment> relatedAppointments = new ArrayList<>(appointmentRecurringPattern.getRelatedAppointments());
         List<Appointment> removedAppointments = new ArrayList<>(appointmentRecurringPattern.getRemovedAppointments());
         List<Appointment> appointments = new ArrayList<>(activeAppointments);
-        appointments.addAll(relatedAppointments);
         Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
         recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size()-1).getStartDateTime());
         recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size()-1).getEndDateTime());
@@ -84,6 +83,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
                 recurringAppointmentRequest.getAppointmentRequest()));
         recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
         appointments.addAll(removedAppointments);
+        appointments.addAll(relatedAppointments);
         return sort(appointments);
     }
 }
