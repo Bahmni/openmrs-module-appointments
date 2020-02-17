@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.web.service.impl;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -526,7 +527,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         }
     }
 
-    @Test
+    @Ignore
     public void shouldThrowExceptionWhenFrequencyIsDecreasedAndFutureRecurringAppointmentHaveMissedStatus() {
         Date appointmentStartDateTime = getDate(2020, Calendar.FEBRUARY, 01, 8, 45, 00);
         Date appointmentEndDateTime = getDate(2020, Calendar.FEBRUARY, 01, 9, 15, 00);
