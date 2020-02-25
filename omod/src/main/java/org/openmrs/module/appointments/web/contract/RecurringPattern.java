@@ -75,4 +75,16 @@ public class RecurringPattern {
     public boolean isBefore(Date endDate) {
         return this.getEndDate().before(endDate);
     }
+
+    @Override
+    public String toString() {
+        return "RecurringPattern{" +
+                "id=" + id +
+                ", frequency=" + frequency +
+                ", period=" + period +
+                ", endDate=" + endDate +
+                ", type='" + type + '\'' +
+                ", daysOfWeek=" + daysOfWeek +
+                '}';
+    }
 }

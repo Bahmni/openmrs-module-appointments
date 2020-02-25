@@ -1,4 +1,5 @@
 package org.openmrs.module.appointments.web.service;
+
 import org.apache.commons.lang3.tuple.Pair;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
@@ -10,8 +11,12 @@ import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.List;
+import java.util.Objects;
 
 @Component
 public abstract class AbstractRecurringAppointmentsService {
@@ -45,7 +50,7 @@ public abstract class AbstractRecurringAppointmentsService {
                                                          RecurringAppointmentRequest recurringAppointmentRequest) {
         List<Appointment> appointments = sort(new ArrayList<>(appointmentRecurringPattern.getActiveAppointments()));
         Date recurringStartDate = appointments.get(0).getStartDateTime();
-        if(Objects.nonNull(recurringAppointmentRequest.getRecurringPattern().getEndDate()) &&
+        if (Objects.nonNull(recurringAppointmentRequest.getRecurringPattern().getEndDate()) &&
                 recurringAppointmentRequest.getRecurringPattern().getEndDate().before(recurringStartDate))
             throw new APIException("End date cannot be before the start date of recurring series");
         if (appointmentRecurringPattern.getEndDate() == null)
@@ -61,17 +66,23 @@ public abstract class AbstractRecurringAppointmentsService {
         removableAppointments = getRemovableAppointments(appointmentRecurringPattern, recurringAppointmentRequest,
                 appointments, currentDate, removableAppointments);
         checkAppointmentStatus(appointments, removableAppointments);
-        for (int appointmentIndex = 0; appointmentIndex < removableAppointments.size(); appointmentIndex++) {
-            appointments.get(removableAppointments.get(appointmentIndex)).setVoided(true);
+        for (Integer removableAppointment : removableAppointments) {
+            appointments.get(removableAppointment).setVoided(true);
         }
         return sort(new ArrayList<>(appointmentRecurringPattern.getAppointments()));
     }
 
+    protected void addRemovedAndRelatedAppointments(List<Appointment> appointments,
+                                                    AppointmentRecurringPattern appointmentRecurringPattern) {
+        appointments.addAll(appointmentRecurringPattern.getRemovedAppointments());
+        appointments.addAll(appointmentRecurringPattern.getRelatedAppointments());
+    }
+
     private void checkAppointmentStatus(List<Appointment> appointments, List<Integer> removableAppointments) {
-        for (int index = 0; index < removableAppointments.size(); index++) {
-            if (appointments.get(removableAppointments.get(index)).getStatus().equals(AppointmentStatus.CheckedIn))
+        for (Integer removableAppointment : removableAppointments) {
+            if (appointments.get(removableAppointment).getStatus().equals(AppointmentStatus.CheckedIn))
                 throw new APIException("Changes cannot be made as the appointments are already Checked-In");
-            if (appointments.get(removableAppointments.get(index)).getStatus().equals(AppointmentStatus.Missed))
+            if (appointments.get(removableAppointment).getStatus().equals(AppointmentStatus.Missed))
                 throw new APIException("Changes cannot be made as the appointments are already Missed");
         }
     }
@@ -82,12 +93,12 @@ public abstract class AbstractRecurringAppointmentsService {
                                                    List<Integer> removableAppointments) {
         if (appointmentRecurringPattern.getEndDate() == null) {
             if (appointments.get(recurringAppointmentRequest.getRecurringPattern().getFrequency()).getStartDateTime().before(currentDate))
-                throw new APIException(String.format("Changes cannot be made as the appointments are from past date"));
+                throw new APIException("Changes cannot be made as the appointments are from past date");
             for (int index = recurringAppointmentRequest.getRecurringPattern().getFrequency(); index < appointments.size(); index++)
                 removableAppointments.add(index);
-        } else{
-            if(currentDate.after(recurringAppointmentRequest.getRecurringPattern().getEndDate()))
-                throw new APIException(String.format("Changes cannot be made as the appointments are from past date"));
+        } else {
+            if (currentDate.after(recurringAppointmentRequest.getRecurringPattern().getEndDate()))
+                throw new APIException("Changes cannot be made as the appointments are from past date");
             for (int index = 0; index < appointments.size(); index++) {
                 if (appointments.get(index).getStartDateTime().after(appointmentRecurringPattern.getEndDate())) {
                     removableAppointments.add(index);
