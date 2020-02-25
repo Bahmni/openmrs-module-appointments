@@ -1,0 +1,75 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <person person_id="400" gender="M" dead="false" creator="1" birthdate_estimated="0"
+            date_created="2008-08-15 15:57:09.0"
+            voided="false" void_reason="" uuid="88cc17a0-b97d-4209-abfd-6ce1800be62c"/>
+    <patient patient_id="400" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
+    <person_name person_name_id="300" person_id="400" preferred="true" prefix="" given_name="Recurring User"
+                 middle_name=""
+                 family_name="MSF" family_name_suffix="" creator="1" date_created="2005-09-22 00:00:00.0"
+                 voided="false" void_reason="" uuid="1ec59302-495b-4a6e-bfad-9445e18b8b9c"/>
+    <patient_identifier patient_identifier_id="200" patient_id="400" identifier="MSF400" identifier_type="1"
+                        preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+                        uuid="59af3980-0f2d-45ae-8033-53dc1538363c"/>
+
+    <appointment_speciality speciality_id="2" name="Physio" uuid="e35e351f-7ad6-42a7-abe3-685f5c202bb3" creator="1"/>
+
+    <appointment_service appointment_service_id="4" name="Dressing" description="Dressing" start_time="09:00:00"
+                         end_time="17:00:00" location_id="1"
+                         speciality_id="2" max_appointments_limit="4" duration_mins="30" creator="1"
+                         uuid="aaa4af43-7e58-4920-9b45-92a5081145cb" voided="false"/>
+
+    <appointment_service_type appointment_service_type_id="3" appointment_service_id="4" name="serviceType3"
+                              duration_mins="30" uuid="15223a9c-4ea2-4428-988b-df2044f3f86d" creator="1"
+                              date_created="2108-08-10 15:57:09.0" voided="false"/>
+
+    <patient_appointment_recurring_time patient_appointment_timings_id="28" recurrence_type="WEEK" period="2"
+                                        frequency="6"
+                                        days_of_week="MONDAY,SATURDAY"/>
+
+
+    <patient_appointment patient_appointment_id="64681" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-01 08:51:00" end_date_time="2050-01-01 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-01 08:51:00" voided="false" void_reason=""
+                         uuid="7c9d5128-aad1-4f52-9637-54cb018b9191"/>
+    <patient_appointment patient_appointment_id="64682" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-03 08:51:00" end_date_time="2050-01-03 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-03 08:51:00" voided="false" void_reason=""
+                         uuid="a2e34326-1d05-40eb-a2c0-781a70c39789"/>
+    <patient_appointment patient_appointment_id="64683" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-15 08:51:00" end_date_time="2050-01-15 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-15 08:51:00" voided="false" void_reason=""
+                         uuid="8ce93b15-aebc-4b10-80c4-fac353cd5c75"/>
+    <patient_appointment patient_appointment_id="64684" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-17 08:51:00" end_date_time="2050-01-17 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-17 08:51:00" voided="false" void_reason=""
+                         uuid="a4e8d81b-89c1-4372-8f71-2121bf1b85fb"/>
+    <patient_appointment patient_appointment_id="64685" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-29 08:51:00" end_date_time="2050-01-29 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-29 08:51:00" voided="false" void_reason=""
+                         uuid="9865b91b-42c0-460e-b961-b9e365019de2"/>
+    <patient_appointment patient_appointment_id="64686" patient_id="400" appointment_service_id="4"
+                         appointment_service_type_id="3"
+                         start_date_time="2050-01-31 08:51:00" end_date_time="2050-01-31 09:21:00"
+                         appointment_kind="Scheduled" status="Scheduled"
+                         creator="1" date_created="2050-01-31 02:51:00" voided="false" void_reason=""
+                         uuid="a86c8742-538e-4da6-b0a3-f8e0d478b8fc"/>
+
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64681"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64682"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64683"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64684"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64685"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="28" patient_appointment_id="64686"/>
+
+</dataset>
