@@ -22,6 +22,7 @@ import static org.junit.Assert.assertEquals;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getAppointmentDates;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getEndDate;
+import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getFirstOriginalAppointmentInThePattern;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getNewAppointmentDates;
 
 public class WeeklyRecurringAppointmentDateTest {
@@ -360,5 +361,51 @@ public class WeeklyRecurringAppointmentDateTest {
         assertEquals(getDate(2020, FEBRUARY, 28, 14, 0, 0), newAppointmentDates.get(0).getLeft());
         assertEquals(getDate(2020, MARCH, 2, 14, 0, 0), newAppointmentDates.get(1).getLeft());
 
+    }
+
+    @Test
+    public void shouldReturnOriginalFirstAppointmentEvenAfterItIsRemoved() {
+        ArrayList<Appointment> activeAppointments = new ArrayList<>();
+        ArrayList<Appointment> removedAppointments = new ArrayList<>();
+
+        final Appointment appointment1 = new Appointment();
+        appointment1.setStartDateTime(getDate(2020, MARCH, 2, 14, 0, 0));
+        appointment1.setEndDateTime(getDate(2020, MARCH, 2, 14, 30, 0));
+        final Appointment appointment2 = new Appointment();
+        appointment2.setStartDateTime(getDate(2020, MARCH, 8, 14, 0, 0));
+        appointment2.setEndDateTime(getDate(2020, MARCH, 8, 14, 30, 0));
+
+        activeAppointments.add(appointment2);
+        removedAppointments.add(appointment1);
+
+        final Appointment firstOriginalAppointmentInThePattern = getFirstOriginalAppointmentInThePattern(activeAppointments, removedAppointments);
+
+        assertEquals(appointment1.getStartDateTime(), firstOriginalAppointmentInThePattern.getStartDateTime());
+
+    }
+
+    @Test
+    public void shouldReturnOriginalFirstAppointmentIfItHasARelatedAppointmentAndRemoved() {
+        ArrayList<Appointment> activeAppointments = new ArrayList<>();
+        ArrayList<Appointment> removedAppointments = new ArrayList<>();
+
+        final Appointment relatedAppointment = new Appointment();
+        relatedAppointment.setStartDateTime(getDate(2020, MARCH, 2, 14, 0, 0));
+        relatedAppointment.setEndDateTime(getDate(2020, MARCH, 2, 14, 30, 0));
+
+        final Appointment movedAndRemovedAppointment = new Appointment();
+        movedAndRemovedAppointment.setStartDateTime(getDate(2020, MARCH, 16, 14, 0, 0));
+        movedAndRemovedAppointment.setEndDateTime(getDate(2020, MARCH, 16, 14, 30, 0));
+        movedAndRemovedAppointment.setRelatedAppointment(relatedAppointment);
+        final Appointment activeApoointment = new Appointment();
+        activeApoointment.setStartDateTime(getDate(2020, MARCH, 8, 14, 0, 0));
+        activeApoointment.setEndDateTime(getDate(2020, MARCH, 8, 14, 30, 0));
+
+        activeAppointments.add(activeApoointment);
+        removedAppointments.add(movedAndRemovedAppointment);
+
+        final Appointment firstOriginalAppointmentInThePattern = getFirstOriginalAppointmentInThePattern(activeAppointments, removedAppointments);
+
+        assertEquals(relatedAppointment.getStartDateTime(), firstOriginalAppointmentInThePattern.getStartDateTime());
     }
 }

@@ -8,6 +8,7 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -181,5 +182,18 @@ public class WeeklyRecurringAppointmentDate {
                 break;
         }
         return dayCode;
+    }
+
+    static Appointment getFirstOriginalAppointmentInThePattern(List<Appointment> activeAppointments, List<Appointment> removedAppointments) {
+        List<Appointment> originalAppointmentsInThePattern = new ArrayList<>();
+        final List<Appointment> activeAndRemovedAppointments = new ArrayList<>(activeAppointments);
+        activeAndRemovedAppointments.addAll(removedAppointments);
+        activeAndRemovedAppointments.forEach(appointment -> {
+            final Appointment relatedAppointment = appointment.getRelatedAppointment();
+            originalAppointmentsInThePattern.add(relatedAppointment == null ? appointment : relatedAppointment);
+        });
+
+        originalAppointmentsInThePattern.sort(Comparator.comparing(Appointment::getDateFromStartDateTime));
+        return originalAppointmentsInThePattern.get(0);
     }
 }

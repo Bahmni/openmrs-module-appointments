@@ -84,7 +84,7 @@ public class AppointmentRecurringPattern {
 
     public Set<Appointment> getRelatedAppointments() {
         Set<Appointment> relatedAppointments = new LinkedHashSet<>();
-        getActiveAppointments().stream().forEach(appointment -> {
+        getActiveAppointments().forEach(appointment -> {
             if (appointment.getRelatedAppointment() != null) {
                 relatedAppointments.add(appointment.getRelatedAppointment());
             }
@@ -95,7 +95,7 @@ public class AppointmentRecurringPattern {
     public Set<Appointment> getRemovedAppointments() {
         Set<Appointment> removedAppointments = new LinkedHashSet<>();
         Set<Appointment> relatedAppointments = getRelatedAppointments();
-        getAppointments().stream().forEach(appointment -> {
+        getAppointments().forEach(appointment -> {
             if (appointment.getVoided() && !relatedAppointments.contains(appointment))
                 removedAppointments.add(appointment);
         });

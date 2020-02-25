@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
 
@@ -19,6 +18,7 @@ import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.toList;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getAppointmentDates;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getEndDate;
+import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getFirstOriginalAppointmentInThePattern;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getNewAppointmentDates;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getSelectedDayCodes;
 
@@ -49,7 +49,8 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
 
         List<Appointment> activeAppointments = new ArrayList<>(appointmentRecurringPattern.getActiveAppointments());
 
-        final Appointment originalFirstAppointmentInThePattern = getFirstOriginalAppointmentInThePattern(activeAppointments);
+        final Appointment originalFirstAppointmentInThePattern = getFirstOriginalAppointmentInThePattern(activeAppointments,
+                new ArrayList<>(appointmentRecurringPattern.getRemovedAppointments()));
         final Date startDateTime = originalFirstAppointmentInThePattern.getStartDateTime();
         final Date endDateTime = originalFirstAppointmentInThePattern.getEndDateTime();
 
@@ -71,19 +72,6 @@ public class WeeklyRecurringAppointmentsGenerationService extends AbstractRecurr
         activeAppointments.addAll(newAppointments);
         addRemovedAndRelatedAppointments(activeAppointments, appointmentRecurringPattern);
         return sort(activeAppointments);
-    }
-
-    private Appointment getFirstOriginalAppointmentInThePattern(List<Appointment> activeAppointments) {
-
-        List<Appointment> originalAppointmentsInThePattern = new ArrayList<>();
-        activeAppointments.forEach(activeAppointment -> {
-            final Appointment relatedAppointment = activeAppointment.getRelatedAppointment();
-            originalAppointmentsInThePattern.add(relatedAppointment == null ?
-                    activeAppointment : relatedAppointment);
-        });
-
-        originalAppointmentsInThePattern.sort(Comparator.comparing(Appointment::getDateFromStartDateTime));
-        return originalAppointmentsInThePattern.get(0);
     }
 
 }
