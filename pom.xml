@@ -12,6 +12,7 @@
 	<modules>
 		<module>api</module>
 		<module>omod</module>
+		<module>fhir2-appnt-api</module>
 	</modules>
 
 	<properties>
@@ -25,6 +26,8 @@
 		<jacocoVersion>0.7.9</jacocoVersion>
 		<openmrsAtomfeedVersion>2.5.6</openmrsAtomfeedVersion>
 		<atomfeed.version>1.9.4</atomfeed.version>
+		<lombokVersion>1.18.10</lombokVersion>
+		<openmrsModuleFhirVersion>1.0.0-SNAPSHOT</openmrsModuleFhirVersion>
 	</properties>
 
 	<build>
@@ -163,6 +166,19 @@
 				<version>${openmrs.platform.version}</version>
 				<type>test-jar</type>
 				<scope>test</scope>
+			</dependency>
+
+			<dependency>
+				<groupId>org.openmrs.module</groupId>
+				<artifactId>fhir2-api</artifactId>
+				<version>${openmrsModuleFhirVersion}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.projectlombok</groupId>
+				<artifactId>lombok</artifactId>
+				<version>${lombokVersion}</version>
+				<scope>provided</scope>
 			</dependency>
 
 			<dependency>
