@@ -2,23 +2,50 @@ package org.openmrs.module.fhirappnt.api.translators.impl;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
 import static org.hamcrest.Matchers.notNullValue;
 import org.exparity.hamcrest.date.DateMatchers;
+import static org.mockito.Mockito.when;
 
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
+import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Reference;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
+import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.fhir2.FhirConstants;
+import org.openmrs.module.fhirappnt.api.AppointmentFhirConstants;
+import org.openmrs.module.fhirappnt.api.translators.AppointmentParticipantTranslator;
 
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Set;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppointmentTranslatorImplTest {
 
     private static String APPOINTMENT_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    private static String PATIENT_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    private static String PROVIDER_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    @Mock
+    private AppointmentParticipantTranslator<Patient> patientTranslator;
+
+    @Mock
+    private AppointmentParticipantTranslator<Provider> providerTranslator;
+
+    @Mock
+    private AppointmentParticipantTranslator<AppointmentProvider> appointmentParticipantTranslator;
 
     private AppointmentTranslatorImpl appointmentTranslator;
 
@@ -27,7 +54,13 @@ public class AppointmentTranslatorImplTest {
     @Before
     public void setUp() {
         appointmentTranslator = new AppointmentTranslatorImpl();
+        appointmentTranslator.setPatientTranslator(patientTranslator);
+        appointmentTranslator.setProviderTranslator(providerTranslator);
+        appointmentTranslator.setAppointmentParticipantTranslator(appointmentParticipantTranslator);
         appointment = new Appointment();
+        Patient patient = new Patient();
+        patient.setUuid(PATIENT_UUID);
+        appointment.setPatient(patient);
     }
 
     @Test
@@ -138,6 +171,64 @@ public class AppointmentTranslatorImplTest {
     }
 
     @Test
+    public void toFhirTypeShouldAddPatientAsParticipant() {
+        Patient patient = new Patient();
+        patient.setUuid(PATIENT_UUID);
+        appointment.setPatient(patient);
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference patientReference = new Reference().setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID)
+                .setType(FhirConstants.PATIENT).setIdentifier(new Identifier().setValue(PATIENT_UUID));
+        participantComponent.setActor(patientReference);
+
+        when(patientTranslator.toFhirResource(patient)).thenReturn(participantComponent);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getParticipant().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getParticipant().get(0).getActor(), equalTo(patientReference));
+    }
+
+    @Test
+    public void toFhirTypeShouldAddAppointmentProviderAsParticipant() {
+        Provider provider = new Provider();
+        provider.setUuid(PROVIDER_UUID);
+        Set<AppointmentProvider>  appointmentProviders = new HashSet<>();
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+        appointmentProviders.add(appointmentProvider);
+        appointment.setProviders(appointmentProviders);
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference providerReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID)
+                .setType(FhirConstants.PRACTITIONER).setIdentifier(new Identifier().setValue(PROVIDER_UUID));
+        participantComponent.setActor(providerReference);
+
+        when(appointmentParticipantTranslator.toFhirResource(appointmentProvider)).thenReturn(participantComponent);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getParticipant().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getParticipant().get(0).getActor(), equalTo(providerReference));
+    }
+
+    @Test
+    public void toFhirTypeShouldAddProviderAsParticipant() {
+        Provider provider = new Provider();
+        provider.setUuid(PROVIDER_UUID);
+        appointment.setProvider(provider);
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference providerReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID)
+                .setType(FhirConstants.PRACTITIONER).setIdentifier(new Identifier().setValue(PROVIDER_UUID));
+        participantComponent.setActor(providerReference);
+
+        when(providerTranslator.toFhirResource(provider)).thenReturn(participantComponent);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getParticipant().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getParticipant().get(0).getActor(), equalTo(providerReference));
+    }
+
+    @Test
     public void toOpenmrsTypeShouldTranslateIdToUuid() {
         org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
         appointment.setId(APPOINTMENT_UUID);
@@ -228,7 +319,7 @@ public class AppointmentTranslatorImplTest {
     }
 
     @Test
-    public void toOpenmrsTypeShouldMapCommentsCorrectly() {
+    public void toOpenmrsTypeShouldFhirCommentToComments() {
         org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
         appointment.setComment("Test Appointment");
 
@@ -237,4 +328,75 @@ public class AppointmentTranslatorImplTest {
         assertThat(result.getComments(), equalTo("Test Appointment"));
     }
 
+    @Test
+    public void toOpenmrsTypeShouldTranslateParticipantToPatient() {
+        Patient patient = new Patient();
+        patient.setUuid(PATIENT_UUID);
+        appointment.setPatient(patient);
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference patientReference = new Reference().setReference(FhirConstants.PATIENT + "/" + PATIENT_UUID)
+                .setType(FhirConstants.PATIENT).setIdentifier(new Identifier().setValue(PATIENT_UUID));
+        participantComponent.setActor(patientReference);
+        participantComponent.addType(new CodeableConcept().addCoding(new Coding(AppointmentFhirConstants.APPOINTMENT_PARTICIPANT_TYPE, "Patient", "Patient")));
+
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.addParticipant(participantComponent);
+
+        when(patientTranslator.toOpenmrsType(participantComponent)).thenReturn(patient);
+
+        Appointment result = appointmentTranslator.toOpenmrsType(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getPatient(), notNullValue());
+        assertThat(result.getPatient(), equalTo(patient));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateParticipantToAppointmentProvider() {
+        Provider provider = new Provider();
+        provider.setUuid(PROVIDER_UUID);
+        AppointmentProvider appointmentProvider = new AppointmentProvider();
+        appointmentProvider.setProvider(provider);
+
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference providerReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID)
+                .setType(FhirConstants.PRACTITIONER).setIdentifier(new Identifier().setValue(PROVIDER_UUID));
+        participantComponent.setActor(providerReference);
+        participantComponent.addType(new CodeableConcept().addCoding(new Coding(AppointmentFhirConstants.APPOINTMENT_PARTICIPANT_TYPE, "AppointmentPractitioner", "AppointmentPractitioner")));
+
+
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.addParticipant(participantComponent);
+
+        when(appointmentParticipantTranslator.toOpenmrsType(participantComponent)).thenReturn(appointmentProvider);
+
+        Appointment result = appointmentTranslator.toOpenmrsType(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getProviders().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getProviders().iterator().next().getProvider(), equalTo(provider));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateParticipantToProvider() {
+        Provider provider = new Provider();
+        provider.setUuid(PROVIDER_UUID);
+
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference providerReference = new Reference().setReference(FhirConstants.PRACTITIONER + "/" + PROVIDER_UUID)
+                .setType(FhirConstants.PRACTITIONER).setIdentifier(new Identifier().setValue(PROVIDER_UUID));
+        participantComponent.setActor(providerReference);
+        participantComponent.addType(new CodeableConcept().addCoding(new Coding(AppointmentFhirConstants.APPOINTMENT_PARTICIPANT_TYPE, "Practitioner", "Practitioner")));
+
+
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.addParticipant(participantComponent);
+
+        when(providerTranslator.toOpenmrsType(participantComponent)).thenReturn(provider);
+
+        Appointment result = appointmentTranslator.toOpenmrsType(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getProvider(), notNullValue());
+        assertThat(result.getProvider(), equalTo(provider));
+    }
+
 }
+

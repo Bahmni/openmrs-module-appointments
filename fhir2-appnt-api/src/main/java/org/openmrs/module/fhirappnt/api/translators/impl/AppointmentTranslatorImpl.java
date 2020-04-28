@@ -1,16 +1,31 @@
 package org.openmrs.module.fhirappnt.api.translators.impl;
-
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Appointment;
+import org.openmrs.Patient;
+import org.openmrs.Provider;
+import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.fhir2.api.translators.AppointmentTranslator;
+import org.openmrs.module.fhirappnt.api.translators.AppointmentParticipantTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.HashSet;
+import java.util.Set;
 
 @Component
 @Setter(AccessLevel.PACKAGE)
 public class AppointmentTranslatorImpl implements AppointmentTranslator<org.openmrs.module.appointments.model.Appointment> {
+
+    @Autowired
+    private AppointmentParticipantTranslator<Patient> patientTranslator;
+
+    @Autowired
+    private AppointmentParticipantTranslator<Provider> providerTranslator;
+
+    @Autowired
+    private AppointmentParticipantTranslator<AppointmentProvider> appointmentParticipantTranslator;
 
     @Override
     public Appointment toFhirResource(org.openmrs.module.appointments.model.Appointment appointment) {
@@ -18,6 +33,16 @@ public class AppointmentTranslatorImpl implements AppointmentTranslator<org.open
         fhirAppointment.setId(appointment.getUuid());
         fhirAppointment.setStart(appointment.getStartDateTime());
         fhirAppointment.setEnd(appointment.getEndDateTime());
+        fhirAppointment.addParticipant(patientTranslator.toFhirResource(appointment.getPatient()));
+        if (appointment.getProvider() != null){
+            fhirAppointment.addParticipant(providerTranslator.toFhirResource(appointment.getProvider()));
+        }
+
+        if (appointment.getProviders() != null) {
+            for (AppointmentProvider provider : appointment.getProviders()) {
+                fhirAppointment.addParticipant(appointmentParticipantTranslator.toFhirResource(provider));
+            }
+        }
 
         switch (appointment.getStatus()) {
             case Requested :
@@ -57,6 +82,23 @@ public class AppointmentTranslatorImpl implements AppointmentTranslator<org.open
         appointment.setUuid(fhirAppointment.getId());
         appointment.setStartDateTime(fhirAppointment.getStart());
         appointment.setEndDateTime(fhirAppointment.getEnd());
+
+        Set<AppointmentProvider> providers = new HashSet<>();
+
+        if (fhirAppointment.hasParticipant()) {
+            for (Appointment.AppointmentParticipantComponent participantComponent : fhirAppointment.getParticipant()) {
+                if (participantComponent.getType().get(0).getCoding().get(0).getCode() == "Patient") {
+                    appointment.setPatient(patientTranslator.toOpenmrsType(participantComponent));
+                } else if (participantComponent.getType().get(0).getCoding().get(0).getCode() == "Practitioner") {
+                    appointment.setProvider(providerTranslator.toOpenmrsType(participantComponent));
+                } else {
+                    AppointmentProvider provider = appointmentParticipantTranslator.toOpenmrsType(participantComponent);
+                    provider.setAppointment(appointment);
+                    providers.add(provider);
+                    appointment.setProviders(providers);
+                }
+            }
+        }
 
         if (fhirAppointment.hasStatus()) {
             switch (fhirAppointment.getStatus()) {

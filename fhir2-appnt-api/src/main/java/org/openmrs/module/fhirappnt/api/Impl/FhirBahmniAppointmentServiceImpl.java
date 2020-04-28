@@ -7,9 +7,11 @@ import org.openmrs.module.fhir2.api.FhirAppointmentService;
 import org.openmrs.module.fhir2.api.dao.FhirAppointmentDao;
 import org.openmrs.module.fhir2.api.translators.AppointmentTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+@Primary
 @Component
 @Transactional
 @Setter(AccessLevel.PACKAGE)
