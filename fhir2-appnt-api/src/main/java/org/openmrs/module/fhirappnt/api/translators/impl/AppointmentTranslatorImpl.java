@@ -2,11 +2,17 @@ package org.openmrs.module.fhirappnt.api.translators.impl;
 import lombok.AccessLevel;
 import lombok.Setter;
 import org.hl7.fhir.r4.model.Appointment;
+import org.hl7.fhir.r4.model.CodeableConcept;
+import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.fhir2.api.translators.AppointmentTranslator;
+import org.openmrs.module.fhirappnt.api.AppointmentFhirConstants;
 import org.openmrs.module.fhirappnt.api.translators.AppointmentParticipantTranslator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -27,6 +33,12 @@ public class AppointmentTranslatorImpl implements AppointmentTranslator<org.open
     @Autowired
     private AppointmentParticipantTranslator<AppointmentProvider> appointmentParticipantTranslator;
 
+    @Autowired
+    AppointmentParticipantTranslator<AppointmentServiceDefinition> serviceDefinitionAppointmentParticipantTranslator;
+
+    @Autowired
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+
     @Override
     public Appointment toFhirResource(org.openmrs.module.appointments.model.Appointment appointment) {
         Appointment fhirAppointment  = new Appointment();
@@ -41,6 +53,21 @@ public class AppointmentTranslatorImpl implements AppointmentTranslator<org.open
         if (appointment.getProviders() != null) {
             for (AppointmentProvider provider : appointment.getProviders()) {
                 fhirAppointment.addParticipant(appointmentParticipantTranslator.toFhirResource(provider));
+            }
+        }
+        if (appointment.getService() != null) {
+            fhirAppointment.addParticipant(serviceDefinitionAppointmentParticipantTranslator.toFhirResource(appointment.getService()));
+        }
+        if (appointment.getServiceType() != null) {
+            fhirAppointment.addServiceType(new CodeableConcept().addCoding(new Coding(AppointmentFhirConstants.APPOINTMENT_SERVICE_TYPE, appointment.getServiceType().getUuid(), appointment.getServiceType().getName())));
+        }
+        if (appointment.getAppointmentKind() != null) {
+            switch (appointment.getAppointmentKind()) {
+                case Scheduled:
+                    fhirAppointment.setAppointmentType(new CodeableConcept().addCoding(new Coding("", "ROUTINE", "Routine appointment ")));
+                    break;
+                case WalkIn:
+                    fhirAppointment.setAppointmentType(new CodeableConcept().addCoding(new Coding("", "WALKIN", "A previously unscheduled walk-in visit")));
             }
         }
 
@@ -91,12 +118,26 @@ public class AppointmentTranslatorImpl implements AppointmentTranslator<org.open
                     appointment.setPatient(patientTranslator.toOpenmrsType(participantComponent));
                 } else if (participantComponent.getType().get(0).getCoding().get(0).getCode() == "Practitioner") {
                     appointment.setProvider(providerTranslator.toOpenmrsType(participantComponent));
-                } else {
+                } else if (participantComponent.getType().get(0).getCoding().get(0).getCode() == "AppointmentPractitioner") {
                     AppointmentProvider provider = appointmentParticipantTranslator.toOpenmrsType(participantComponent);
                     provider.setAppointment(appointment);
                     providers.add(provider);
                     appointment.setProviders(providers);
+                } else {
+                    appointment.setService(serviceDefinitionAppointmentParticipantTranslator.toOpenmrsType(participantComponent));
                 }
+            }
+        }
+
+        if (fhirAppointment.hasServiceType()) {
+            appointment.setServiceType(appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(fhirAppointment.getServiceType().get(0).getCoding().get(0).getCode()));
+        }
+
+        if (fhirAppointment.hasAppointmentType())  {
+            if (fhirAppointment.getAppointmentType().getCoding().get(0).getCode()  == "ROUTINE")  {
+                appointment.setAppointmentKind(AppointmentKind.Scheduled);
+            } else if (fhirAppointment.getAppointmentType().getCoding().get(0).getCode()  == "WALKIN")  {
+                appointment.setAppointmentKind(AppointmentKind.WalkIn);
             }
         }
 

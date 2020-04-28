@@ -3,14 +3,19 @@ package org.openmrs.module.fhirappnt.api.translators.impl;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.notNullValue;
 import org.exparity.hamcrest.date.DateMatchers;
+
+import static org.hamcrest.Matchers.nullValue;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
 
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.codesystems.ServiceType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -19,11 +24,16 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.fhir2.FhirConstants;
 import org.openmrs.module.fhirappnt.api.AppointmentFhirConstants;
 import org.openmrs.module.fhirappnt.api.translators.AppointmentParticipantTranslator;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
 import java.util.HashSet;
@@ -38,6 +48,10 @@ public class AppointmentTranslatorImplTest {
 
     private static String PROVIDER_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
 
+    private static String SERVICE_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
+    private static String SERVICE_TYPE_UUID = "162298AAAAAAAAAAAAAAAAAAAAAAAAAAAAAA";
+
     @Mock
     private AppointmentParticipantTranslator<Patient> patientTranslator;
 
@@ -46,6 +60,12 @@ public class AppointmentTranslatorImplTest {
 
     @Mock
     private AppointmentParticipantTranslator<AppointmentProvider> appointmentParticipantTranslator;
+
+    @Mock
+    AppointmentParticipantTranslator<AppointmentServiceDefinition> serviceDefinitionAppointmentParticipantTranslator;
+
+    @Mock
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     private AppointmentTranslatorImpl appointmentTranslator;
 
@@ -57,6 +77,8 @@ public class AppointmentTranslatorImplTest {
         appointmentTranslator.setPatientTranslator(patientTranslator);
         appointmentTranslator.setProviderTranslator(providerTranslator);
         appointmentTranslator.setAppointmentParticipantTranslator(appointmentParticipantTranslator);
+        appointmentTranslator.setAppointmentServiceDefinitionService(appointmentServiceDefinitionService);
+        appointmentTranslator.setServiceDefinitionAppointmentParticipantTranslator(serviceDefinitionAppointmentParticipantTranslator);
         appointment = new Appointment();
         Patient patient = new Patient();
         patient.setUuid(PATIENT_UUID);
@@ -153,7 +175,7 @@ public class AppointmentTranslatorImplTest {
     }
 
     @Test
-    public void toFhirTypeShouldDateChangedToLastDateUpdated() {
+    public void toFhirTypeShouldMapDateChangedToLastDateUpdated() {
         appointment.setDateChanged(new Date());
 
         org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
@@ -162,7 +184,7 @@ public class AppointmentTranslatorImplTest {
     }
 
     @Test
-    public void toFhirTypeShouldCommentsToFhirAppointmentComment() {
+    public void toFhirTypeShouldConvertCommentsToFhirAppointmentComment() {
         appointment.setComments("Test Appointment");
 
         org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
@@ -227,6 +249,91 @@ public class AppointmentTranslatorImplTest {
         assertThat(result.getParticipant().size(), greaterThanOrEqualTo(1));
         assertThat(result.getParticipant().get(0).getActor(), equalTo(providerReference));
     }
+
+    @Test
+    public void toFhirTypeShouldReturnNullIfAppointmentServiceDefinitionIsNull() {
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getParticipant().isEmpty(), equalTo(true));
+    }
+
+    @Test
+    public void toFhirTypeShouldAddHealthCareServiceAsParticipant() {
+        AppointmentServiceDefinition appointmentService = new AppointmentServiceDefinition();
+        appointmentService.setUuid(SERVICE_UUID);
+        appointmentService.setName("Outpatient");
+        appointment.setService(appointmentService);
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference serviceReference = new Reference().setReference("HealthCareService" + "/" + SERVICE_UUID)
+                .setType("HealthCareService").setIdentifier(new Identifier().setValue(SERVICE_UUID));
+        participantComponent.setActor(serviceReference);
+
+        when(serviceDefinitionAppointmentParticipantTranslator.toFhirResource(appointmentService)).thenReturn(participantComponent);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getParticipant().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getParticipant().get(0).getActor(), equalTo(serviceReference));
+    }
+
+    @Test
+    public void toFhirTypeShouldReturnNullIfServiceTypeIsNull() {
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getServiceType().isEmpty(), equalTo(true));
+    }
+
+    @Test
+    public void toFhirTypeShouldTranslateServiceTypeCorrectly() {
+        AppointmentServiceType serviceType = new AppointmentServiceType();
+        serviceType.setUuid(SERVICE_TYPE_UUID);
+        appointment.setServiceType(serviceType);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getServiceType().size(), greaterThanOrEqualTo(1));
+        assertThat(result.getServiceType().get(0).getCoding().get(0).getCode(), equalTo(SERVICE_TYPE_UUID));
+    }
+
+    @Test
+    public void toFhirTypeShouldReturnNullIfAppointmentKindIsNull() {
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getAppointmentType().isEmpty(), equalTo(true));
+    }
+
+    @Test
+    public void toFhirTypeShouldTranslateScheduledToRoutineAppointmentTyeRoutine() {
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getAppointmentType(), notNullValue());
+        assertThat(result.getAppointmentType().getCoding().get(0).getCode(), equalTo("ROUTINE"));
+    }
+
+    @Test
+    public void toFhirTypeShouldTranslateWalkInToRoutineAppointmentTyeWalkIn() {
+        appointment.setAppointmentKind(AppointmentKind.WalkIn);
+
+        org.hl7.fhir.r4.model.Appointment result = appointmentTranslator.toFhirResource(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getAppointmentType(), notNullValue());
+        assertThat(result.getAppointmentType().getCoding().get(0).getCode(), equalTo("WALKIN"));
+    }
+
+
+
+
+
+
+
+
+
+
+
 
     @Test
     public void toOpenmrsTypeShouldTranslateIdToUuid() {
@@ -319,7 +426,7 @@ public class AppointmentTranslatorImplTest {
     }
 
     @Test
-    public void toOpenmrsTypeShouldFhirCommentToComments() {
+    public void toOpenmrsTypeShouldMapFhirCommentToComments() {
         org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
         appointment.setComment("Test Appointment");
 
@@ -396,6 +503,64 @@ public class AppointmentTranslatorImplTest {
         assertThat(result, notNullValue());
         assertThat(result.getProvider(), notNullValue());
         assertThat(result.getProvider(), equalTo(provider));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateParticipantToAppointmentService() {
+        AppointmentServiceDefinition appointmentService = new AppointmentServiceDefinition();
+        appointmentService.setUuid(SERVICE_UUID);
+        appointmentService.setName("Outpatient");
+
+        org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent participantComponent = new org.hl7.fhir.r4.model.Appointment.AppointmentParticipantComponent();
+        Reference serviceReference = new Reference().setReference("HealthCareService" + "/" + SERVICE_UUID)
+                .setType("HealthCareService").setIdentifier(new Identifier().setValue(SERVICE_UUID));
+        participantComponent.setActor(serviceReference);
+        participantComponent.addType(new CodeableConcept().addCoding(new Coding(AppointmentFhirConstants.APPOINTMENT_PARTICIPANT_TYPE, "HealthCareService", "HealthCareService")));
+
+
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.addParticipant(participantComponent);
+
+        when(serviceDefinitionAppointmentParticipantTranslator.toOpenmrsType(participantComponent)).thenReturn(appointmentService);
+
+        Appointment result = appointmentTranslator.toOpenmrsType(appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getService(), notNullValue());
+        assertThat(result.getService(), equalTo(appointmentService));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateServiceTypeCorrectly() {
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.addServiceType(new CodeableConcept().addCoding(new Coding("", SERVICE_TYPE_UUID,"OutPatient")));
+
+        AppointmentServiceType serviceType = new AppointmentServiceType();
+        serviceType.setUuid(SERVICE_TYPE_UUID);
+
+        when(appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(SERVICE_TYPE_UUID)).thenReturn(serviceType);
+        Appointment result = appointmentTranslator.toOpenmrsType(new Appointment(), appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getServiceType().getUuid(), equalTo(SERVICE_TYPE_UUID));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateAppointmentTypeScheduledCorrectly() {
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.setAppointmentType(new CodeableConcept().addCoding(new Coding("", "ROUTINE","")));
+
+        Appointment result = appointmentTranslator.toOpenmrsType(new Appointment(), appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getAppointmentKind(), equalTo(AppointmentKind.Scheduled));
+    }
+
+    @Test
+    public void toOpenmrsTypeShouldTranslateAppointmentTypeWalkInCorrectly() {
+        org.hl7.fhir.r4.model.Appointment appointment = new org.hl7.fhir.r4.model.Appointment();
+        appointment.setAppointmentType(new CodeableConcept().addCoding(new Coding("", "WALKIN","")));
+
+        Appointment result = appointmentTranslator.toOpenmrsType(new Appointment(), appointment);
+        assertThat(result, notNullValue());
+        assertThat(result.getAppointmentKind(), equalTo(AppointmentKind.WalkIn));
     }
 
 }

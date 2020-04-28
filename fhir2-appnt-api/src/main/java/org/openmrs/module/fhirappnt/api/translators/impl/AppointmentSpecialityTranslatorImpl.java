@@ -5,7 +5,9 @@ import org.hl7.fhir.r4.model.Coding;
 import org.openmrs.module.fhirappnt.api.AppointmentFhirConstants;
 import org.openmrs.module.fhirappnt.api.translators.AppointmentSpecialityTranslator;
 import org.openmrs.module.appointments.model.Speciality;
+import org.springframework.stereotype.Component;
 
+@Component
 public class AppointmentSpecialityTranslatorImpl  implements AppointmentSpecialityTranslator {
 
     @Override
