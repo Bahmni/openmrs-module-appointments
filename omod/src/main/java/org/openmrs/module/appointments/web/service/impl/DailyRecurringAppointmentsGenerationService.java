@@ -13,11 +13,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 @Qualifier("dailyRecurringAppointmentsGenerationService")
@@ -33,7 +31,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         List<Pair<Date, Date>> appointmentDates = getAppointmentDates(endDate,
                 DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime()),
                 DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime()));
-        return createAppointments( appointmentDates, recurringAppointmentRequest.getAppointmentRequest());
+        return createAppointments(appointmentDates, recurringAppointmentRequest.getAppointmentRequest());
     }
 
     public Date getEndDate(int period, Integer frequency, Date endDate) {
@@ -59,15 +57,16 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
     }
 
     public List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
-                                             RecurringAppointmentRequest recurringAppointmentRequest){
+                                             RecurringAppointmentRequest recurringAppointmentRequest) {
         this.recurringAppointmentRequest = recurringAppointmentRequest;
-        List<Appointment> appointments = appointmentRecurringPattern.getAppointments().stream().collect(Collectors.toList());
-        Collections.sort(appointments, Comparator.comparing(Appointment::getDateFromStartDateTime));
-        recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size()-1).getStartDateTime());
-        recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size()-1).getEndDateTime());
+        List<Appointment> activeAppointments = new ArrayList<>(appointmentRecurringPattern.getActiveAppointments());
+        List<Appointment> appointments = new ArrayList<>(activeAppointments);
+        appointments.sort(Comparator.comparing(Appointment::getDateFromStartDateTime));
+        recurringAppointmentRequest.getAppointmentRequest().setStartDateTime(appointments.get(appointments.size() - 1).getStartDateTime());
+        recurringAppointmentRequest.getAppointmentRequest().setEndDateTime(appointments.get(appointments.size() - 1).getEndDateTime());
         if (appointmentRecurringPattern.getEndDate() == null)
             appointmentRecurringPattern.setFrequency(
-                    recurringAppointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1 );
+                    recurringAppointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1);
         else appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
         Date endDate = getEndDate(appointmentRecurringPattern.getPeriod(), appointmentRecurringPattern.getFrequency(),
                 appointmentRecurringPattern.getEndDate());
@@ -80,6 +79,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalendar, endCalendar),
                 recurringAppointmentRequest.getAppointmentRequest()));
         recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
+        addRemovedAndRelatedAppointments(appointments, appointmentRecurringPattern);
         return sort(appointments);
     }
 }

@@ -561,4 +561,19 @@
             <column name="uuid" valueComputed="UUID()"/>
         </insert>
     </changeSet>
+
+    <changeSet id="202001031712" author="Sowmika, Bindu">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'atomfeed.event.urlPatternForRecurringAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Adding global property to specify the URL pattern for published appointment events</comment>
+        <insert tableName="global_property">
+            <column name="property" value="atomfeed.event.urlPatternForRecurringAppointments"/>
+            <column name="property_value" value="/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}"/>
+            <column name="uuid" valueComputed="UUID()"/>
+            <column name="description" value="URL pattern to use for published Recurring appointment events. Default is /openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}. If you change default value, please add your custom implementation for the given URL"/>
+        </insert>
+    </changeSet>
 </databaseChangeLog>

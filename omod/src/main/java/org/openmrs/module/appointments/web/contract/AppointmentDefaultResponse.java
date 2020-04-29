@@ -20,6 +20,7 @@ public class AppointmentDefaultResponse {
 	private Map additionalInfo;
 	private List<AppointmentProviderDetail> providers;
 	private Boolean isRecurring;
+	private Boolean voided;
 
 	public String getUuid() {
 		return uuid;
@@ -140,4 +141,12 @@ public class AppointmentDefaultResponse {
     public void setRecurring(Boolean recurring) {
         isRecurring = recurring;
     }
+
+	public Boolean getVoided() {
+		return voided;
+	}
+
+	public void setVoided(Boolean voided) {
+		this.voided = voided;
+	}
 }

@@ -6,10 +6,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
@@ -17,6 +17,7 @@ import org.openmrs.module.appointments.web.contract.RecurringAppointmentDefaultR
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -514,4 +515,44 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(400, response.getStatus());
     }
 
+    @Test
+    public void shouldReturnNineAppointmentsOnUpdateFromSix() throws Exception {
+
+        executeDataSet("recurringAppointmentUpdateTestData.xml");
+
+        String payload = "{\n" +
+                "   \"appointmentRequest\": {\n" +
+                "      \"uuid\": \"a86c8742-538e-4da6-b0a3-f8e0d478b8fc\",\n" +
+                "      \"patientUuid\": \"88cc17a0-b97d-4209-abfd-6ce1800be62c\",\n" +
+                "      \"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\",\n" +
+                "      \"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\",\n" +
+                "      \"startDateTime\": \"2050-01-31T03:21:00.000Z\",\n" +
+                "      \"endDateTime\": \"2050-01-31T03:51:00.000Z\",\n" +
+                "      \"providers\": [],\n" +
+                "      \"locationUuid\": \"8de35e75-20e0-11e7-a53f-000c29e530d2\",\n" +
+                "      \"appointmentKind\": \"Scheduled\",\n" +
+                "      \"comments\": null\n" +
+                "   },\n" +
+                "   \"recurringPattern\": {\n" +
+                "      \"type\": \"WEEK\",\n" +
+                "      \"period\": 2,\n" +
+                "      \"frequency\": 9,\n" +
+                "      \"daysOfWeek\": [\n" +
+                "         \"MONDAY\",\n" +
+                "         \"SATURDAY\"\n" +
+                "      ]\n" +
+                "   },\n" +
+                "   \"applyForAll\": true,\n" +
+                "\"timeZone\": \"UTC\"" +
+                "}";
+        System.out.println(Calendar.getInstance().getTimeZone().getDisplayName());
+
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/a86c8742-538e-4da6-b0a3-f8e0d478b8fc", payload));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        List<RecurringAppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<RecurringAppointmentDefaultResponse>>() {
+        });
+        assertEquals(9, appointmentDefaultResponse.size());
+
+    }
 }

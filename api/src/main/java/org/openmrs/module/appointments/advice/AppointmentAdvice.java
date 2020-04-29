@@ -8,16 +8,17 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static java.util.Objects.isNull;
+import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.CATEGORY;
+import static org.openmrs.module.appointments.constants.AppointmentsEventRecordsConstants.RAISE_EVENT_GLOBAL_PROPERTY;
 
 public class AppointmentAdvice extends AbstractBaseAdvice {
 
     private static final String TITLE = "Appointment";
-    private static final String CATEGORY = "appointments";
     private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Arrays.asList("validateAndSave", "changeStatus", "undoStatusChange"));
     private static final ArrayList<String> VOIDED_METHOD_NAMES = new ArrayList<>(Arrays.asList("changeStatus", "undoStatusChange"));
-    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointment?uuid={uuid}";
-    private static final String RAISE_EVENT_GLOBAL_PROPERTY = "atomfeed.publish.eventsForAppointments";
     private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointments";
+    private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointment?uuid={uuid}";
+
 
     @Override
     protected String getContents(Object returnValue) {

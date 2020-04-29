@@ -53,6 +53,11 @@
 		<class>org.openmrs.module.appointments.advice.AppointmentAdvice</class>
 	</advice>
 
+	<advice>
+		<point>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</point>
+		<class>org.openmrs.module.appointments.advice.RecurringAppointmentsAdvice</class>
+	</advice>
+
 	<globalProperty>
 		<property>disableDefaultAppointmentValidations</property>
 		<defaultValue>false</defaultValue>

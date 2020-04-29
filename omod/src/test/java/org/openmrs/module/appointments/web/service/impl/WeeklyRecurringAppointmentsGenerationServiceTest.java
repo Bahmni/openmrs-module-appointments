@@ -19,9 +19,20 @@ import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
 public class WeeklyRecurringAppointmentsGenerationServiceTest {
@@ -50,7 +61,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     }
 
     private RecurringPattern getRecurringPattern(int period, int frequency, Date endDate,
-                                                                       List<String> daysOfWeek) {
+                                                 List<String> daysOfWeek) {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setPeriod(period);
         recurringPattern.setFrequency(frequency);
@@ -78,7 +89,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
-                null, Arrays.asList("SUNDAY","WEDNESDAY","SATURDAY"));
+                null, asList("SUNDAY", "WEDNESDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest()))
                 .thenAnswer(x -> new Appointment());
@@ -110,7 +121,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 17, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 6,
-                null, Arrays.asList("SUNDAY","TUESDAY","THURSDAY"));
+                null, asList("SUNDAY", "TUESDAY", "THURSDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -156,7 +167,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
-                null, Arrays.asList("SUNDAY"));
+                null, asList("SUNDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -182,11 +193,11 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
     @Test
     public void shouldReturnThreeAppointmentsHavingTwoSelectedDaysInWeekWithDayCodesLessThanStartDayCode() {
-        Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 00, 00);
-        Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 30, 00);
+        Date appointmentStartDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 0, 0);
+        Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 15, 16, 30, 0);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 3,
-                null, Arrays.asList("SUNDAY","MONDAY"));
+                null, asList("SUNDAY", "MONDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -220,7 +231,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 4,
-                null, Arrays.asList("FRIDAY","SATURDAY"));
+                null, asList("FRIDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -258,7 +269,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.AUGUST, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 3,
-                null, Arrays.asList("FRIDAY","SATURDAY"));
+                null, asList("FRIDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -292,7 +303,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 18, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(10, 4,
-                null, Arrays.asList("MONDAY","FRIDAY"));
+                null, asList("MONDAY", "FRIDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -330,7 +341,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(2, 2,
-                null, Arrays.asList("MONDAY"));
+                null, asList("MONDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -361,7 +372,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 0,
                 getDate(2019, Calendar.JUNE, 13, 23, 45, 00),
-                Arrays.asList("SUNDAY","WEDNESDAY","SATURDAY"));
+                asList("SUNDAY", "WEDNESDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -407,7 +418,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 7,
-                null, Arrays.asList("SUNDAY","MONDAY","TUESDAY","WEDNESDAY","THURSDAY","FRIDAY","SATURDAY"));
+                null, asList("SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -435,7 +446,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 13, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(3, 1,
-                null, Arrays.asList("MISC"));
+                null, asList("MISC"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -462,7 +473,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date endDate = getDate(2019, Calendar.JUNE, 16, 16, 00, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 0,
-                endDate, Arrays.asList("SATURDAY","MONDAY"));
+                endDate, asList("SATURDAY", "MONDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -496,7 +507,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.MAY, 31, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 1,
-                null, Arrays.asList("THURSDAY"));
+                null, asList("THURSDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -522,7 +533,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 6, 16, 30, 00);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
         RecurringPattern recurringPattern = getRecurringPattern(1, 4,
-                null, Arrays.asList("THURSDAY","FRIDAY"));
+                null, asList("THURSDAY", "FRIDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
@@ -564,6 +575,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(6);
         recurringPattern.setPeriod(1);
+        recurringPattern.setDaysOfWeek(asList("THURSDAY", "FRIDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
@@ -637,6 +649,7 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         RecurringPattern recurringPattern = new RecurringPattern();
         recurringPattern.setFrequency(5);
         recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(asList("FRIDAY", "SATURDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
@@ -883,6 +896,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", DateUtils.addDays(startTimeCalendar.getTime(), +7));
+        appointmentInstance.put("endDateTime", DateUtils.addDays(endTimeCalendar.getTime(), +7));
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment5.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +7));
         appointment5.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +7));
         appointments.add(appointment5);
@@ -892,13 +909,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
-        for (int i = 0; i < updatedAppointments.size(); i++) {
-            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
-                    updatedAppointments.get(i).getStartDateTime().toString());
-            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
-                    updatedAppointments.get(i).getEndDateTime().toString());
-        }
-
+        int removedAppointmentIndex = updatedAppointments.size() - 1;
+        assertAppointmentDetails(expectedAppointmentDatesList, updatedAppointments, removedAppointmentIndex);
     }
 
     @Test
@@ -959,9 +971,17 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointment3.setStartDateTime(todayStartTimeCalendar.getTime());
         appointment3.setEndDateTime(todayEndTimeCalendar.getTime());
         appointments.add(appointment3);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", DateUtils.addDays(startTimeCalendar.getTime(), +6));
+        appointmentInstance.put("endDateTime", DateUtils.addDays(endTimeCalendar.getTime(), +6));
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", DateUtils.addDays(startTimeCalendar.getTime(), +7));
+        appointmentInstance.put("endDateTime", DateUtils.addDays(endTimeCalendar.getTime(), +7));
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment5.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +7));
         appointment5.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +7));
         appointments.add(appointment5);
@@ -971,12 +991,8 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
-        for (int i = 0; i < updatedAppointments.size(); i++) {
-            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
-                    updatedAppointments.get(i).getStartDateTime().toString());
-            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
-                    updatedAppointments.get(i).getEndDateTime().toString());
-        }
+        List<Integer> removedAppointmentIndexes = asList(updatedAppointments.size() - 1, updatedAppointments.size() - 2);
+        assertAppointmentDetails(expectedAppointmentDatesList, updatedAppointments, removedAppointmentIndexes);
     }
 
     @Test
@@ -1034,6 +1050,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointment3.setStartDateTime(todayStartTimeCalendar.getTime());
         appointment3.setEndDateTime(todayEndTimeCalendar.getTime());
         appointments.add(appointment3);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", DateUtils.addDays(startTimeCalendar.getTime(), +6));
+        appointmentInstance.put("endDateTime", DateUtils.addDays(endTimeCalendar.getTime(), +6));
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
@@ -1041,11 +1061,20 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
+        int removedAppointmentIndex = updatedAppointments.size() - 1;
+        assertAppointmentDetails(expectedAppointmentDatesList, updatedAppointments, removedAppointmentIndex);
+    }
+
+    private void assertAppointmentDetails(List<Map<String, Date>> expectedAppointmentDatesList, List<Appointment> updatedAppointments, int removedAppointmentIndex) {
         for (int i = 0; i < updatedAppointments.size(); i++) {
             assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
                     updatedAppointments.get(i).getStartDateTime().toString());
             assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
                     updatedAppointments.get(i).getEndDateTime().toString());
+            if (i == removedAppointmentIndex)
+                assertTrue(updatedAppointments.get(i).getVoided());
+            else
+                assertFalse(updatedAppointments.get(i).getVoided());
         }
     }
 
@@ -1101,9 +1130,14 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentInstance = new HashMap<>();
         appointmentInstance.put("startDateTime", todayStartTimeCalendar.getTime());
         appointmentInstance.put("endDateTime", todayEndTimeCalendar.getTime());
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment3.setStartDateTime(todayStartTimeCalendar.getTime());
         appointment3.setEndDateTime(todayEndTimeCalendar.getTime());
         appointments.add(appointment3);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", DateUtils.addDays(startTimeCalendar.getTime(), +6));
+        appointmentInstance.put("endDateTime", DateUtils.addDays(endTimeCalendar.getTime(), +6));
+        expectedAppointmentDatesList.add(appointmentInstance);
         appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
         appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
         appointments.add(appointment4);
@@ -1111,11 +1145,20 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
 
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
+        List<Integer> removedAppointmentIndexes = asList(updatedAppointments.size() - 1, updatedAppointments.size() - 2);
+        assertAppointmentDetails(expectedAppointmentDatesList, updatedAppointments, removedAppointmentIndexes);
+    }
+
+    private void assertAppointmentDetails(List<Map<String, Date>> expectedAppointmentDatesList, List<Appointment> updatedAppointments, List<Integer> removedAppointmentIndexes) {
         for (int i = 0; i < updatedAppointments.size(); i++) {
             assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
                     updatedAppointments.get(i).getStartDateTime().toString());
             assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
                     updatedAppointments.get(i).getEndDateTime().toString());
+            if (removedAppointmentIndexes.contains(i))
+                assertTrue(updatedAppointments.get(i).getVoided());
+            else
+                assertFalse(updatedAppointments.get(i).getVoided());
         }
     }
 
@@ -1390,11 +1433,12 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         Date appointmentStartDateTime = getDate(2119, Calendar.JUNE, 14, 16, 0, 0);
         Date appointmentEndDateTime = getDate(2119, Calendar.JUNE, 14, 16, 30, 0);
         RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
-        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 4,
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 2,
                 null, "TUESDAY");
         RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(6);
+        recurringPattern.setFrequency(4);
         recurringPattern.setPeriod(1);
+        recurringPattern.setDaysOfWeek(singletonList("TUESDAY"));
         recurringAppointmentRequest.setRecurringPattern(recurringPattern);
         Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
         Appointment appointment1 = new Appointment();
@@ -1426,6 +1470,321 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
         List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService
                 .addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
+        for (int i = 0; i < updatedAppointments.size(); i++) {
+            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
+                    updatedAppointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
+                    updatedAppointments.get(i).getEndDateTime().toString());
+        }
+    }
+
+    @Test
+    public void shouldAddNewRecurringAppointmentsForOneMoreWeekWhenFrequencyIsIncreasedWithRemovedAndRelatedAppointments() {
+        Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 7, 16, 0, 0);
+        Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 7, 16, 30, 0);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 2,
+                null, "THURSDAY,FRIDAY");
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(3);
+        recurringPattern.setPeriod(1);
+        recurringPattern.setDaysOfWeek(asList("THURSDAY", "FRIDAY"));
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("appointment1");
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("appointment2");
+        Appointment removedAppointment = new Appointment();
+        Appointment relatedAppointment = new Appointment();
+        relatedAppointment.setUuid("relatedAppointment");
+
+        List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
+        Set<Appointment> appointments = new HashSet<>();
+        Map<String, Date> appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 6, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment1.setStartDateTime(getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
+        appointment1.setEndDateTime(getDate(2019, Calendar.JUNE, 6, 16, 30, 0));
+        appointment1.setVoided(Boolean.TRUE);
+        appointments.add(appointment1);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 6, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        relatedAppointment.setStartDateTime(getDate(2019, Calendar.JUNE, 6, 16, 0, 0));
+        relatedAppointment.setEndDateTime(getDate(2019, Calendar.JUNE, 6, 16, 30, 0));
+        relatedAppointment.setRelatedAppointment(appointment1);
+        appointments.add(relatedAppointment);
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment2.setStartDateTime(getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointment2.setEndDateTime(getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        appointments.add(appointment2);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        removedAppointment.setStartDateTime(getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        removedAppointment.setEndDateTime(getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        removedAppointment.setVoided(Boolean.TRUE);
+        appointments.add(removedAppointment);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+
+        appointmentRecurringPattern.setAppointments(appointments);
+
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService
+                .addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+
+        assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
+        for (int i = 0; i < updatedAppointments.size(); i++) {
+            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
+                    updatedAppointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
+                    updatedAppointments.get(i).getEndDateTime().toString());
+        }
+    }
+
+    @Test
+    public void shouldAddExpectedNumberOfAppointmentsWhenOccurrencesIsReducedToOneAndThenIncrease() {
+        Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 7, 16, 0, 0);
+        Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 7, 16, 30, 0);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 1,
+                null, "THURSDAY,FRIDAY");
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(5);
+        recurringPattern.setPeriod(1);
+        recurringPattern.setDaysOfWeek(asList("THURSDAY", "FRIDAY"));
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("appointment1");
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("appointment2");
+        Appointment appointment3 = new Appointment();
+        appointment2.setUuid("appointment3");
+        Appointment appointment4 = new Appointment();
+        appointment2.setUuid("appointment4");
+        Appointment appointment5 = new Appointment();
+        appointment2.setUuid("appointment5");
+        Appointment newAppointment2 = new Appointment();
+        appointment2.setUuid("newAppointment2");
+        Appointment newAppointment3 = new Appointment();
+        appointment2.setUuid("newAppointment3");
+        Appointment newAppointment4 = new Appointment();
+        appointment2.setUuid("newAppointment4");
+        Appointment newAppointment5 = new Appointment();
+        appointment2.setUuid("newAppointment5");
+
+        List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
+        Set<Appointment> appointments = new HashSet<>();
+        Map<String, Date> appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment1.setStartDateTime(getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointment1.setEndDateTime(getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        appointments.add(appointment1);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment2.setStartDateTime(getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointment2.setEndDateTime(getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        appointments.add(appointment2);
+        appointment2.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment2.setStartDateTime(getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        newAppointment2.setEndDateTime(getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 14, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 14, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment3.setStartDateTime(getDate(2019, Calendar.JUNE, 14, 16, 0, 0));
+        appointment3.setEndDateTime(getDate(2019, Calendar.JUNE, 14, 16, 30, 0));
+        appointments.add(appointment3);
+        appointment3.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 14, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 14, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment3.setStartDateTime(getDate(2019, Calendar.JUNE, 14, 16, 0, 0));
+        newAppointment3.setEndDateTime(getDate(2019, Calendar.JUNE, 14, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 20, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 20, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment4.setStartDateTime(getDate(2019, Calendar.JUNE, 20, 16, 0, 0));
+        appointment4.setEndDateTime(getDate(2019, Calendar.JUNE, 20, 16, 30, 0));
+        appointments.add(appointment4);
+        appointment4.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 20, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 20, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment4.setStartDateTime(getDate(2019, Calendar.JUNE, 20, 16, 0, 0));
+        newAppointment4.setEndDateTime(getDate(2019, Calendar.JUNE, 20, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment5.setStartDateTime(getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointment5.setEndDateTime(getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        appointments.add(appointment5);
+        appointment5.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment5.setStartDateTime(getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        newAppointment5.setEndDateTime(getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+
+        appointmentRecurringPattern.setAppointments(appointments);
+
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService
+                .addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+
+        assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
+        for (int i = 0; i < updatedAppointments.size(); i++) {
+            assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
+                    updatedAppointments.get(i).getStartDateTime().toString());
+            assertEquals(expectedAppointmentDatesList.get(i).get("endDateTime").toString(),
+                    updatedAppointments.get(i).getEndDateTime().toString());
+        }
+    }
+
+    @Test
+    public void shouldAddExpectedNumberOfAppointmentsWhenOccurrencesIsReducedToOneAndThenIncreaseWithPeriodAsTwoWeeks() {
+        Date appointmentStartDateTime = getDate(2019, Calendar.JUNE, 7, 16, 0, 0);
+        Date appointmentEndDateTime = getDate(2019, Calendar.JUNE, 7, 16, 30, 0);
+        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
+        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(2, 1,
+                null, "THURSDAY,FRIDAY");
+        RecurringPattern recurringPattern = new RecurringPattern();
+        recurringPattern.setFrequency(5);
+        recurringPattern.setPeriod(2);
+        recurringPattern.setDaysOfWeek(asList("THURSDAY", "FRIDAY"));
+        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
+        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("appointment1");
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("appointment2");
+        Appointment appointment3 = new Appointment();
+        appointment2.setUuid("appointment3");
+        Appointment appointment4 = new Appointment();
+        appointment2.setUuid("appointment4");
+        Appointment appointment5 = new Appointment();
+        appointment2.setUuid("appointment5");
+        Appointment newAppointment2 = new Appointment();
+        appointment2.setUuid("newAppointment2");
+        Appointment newAppointment3 = new Appointment();
+        appointment2.setUuid("newAppointment3");
+        Appointment newAppointment4 = new Appointment();
+        appointment2.setUuid("newAppointment4");
+        Appointment newAppointment5 = new Appointment();
+        appointment2.setUuid("newAppointment5");
+
+        List<Map<String, Date>> expectedAppointmentDatesList = new ArrayList<>();
+        Set<Appointment> appointments = new HashSet<>();
+        Map<String, Date> appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment1.setStartDateTime(getDate(2019, Calendar.JUNE, 7, 16, 0, 0));
+        appointment1.setEndDateTime(getDate(2019, Calendar.JUNE, 7, 16, 30, 0));
+        appointments.add(appointment1);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment2.setStartDateTime(getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointment2.setEndDateTime(getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        appointments.add(appointment2);
+        appointment2.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment2.setStartDateTime(getDate(2019, Calendar.JUNE, 13, 16, 0, 0));
+        newAppointment2.setEndDateTime(getDate(2019, Calendar.JUNE, 13, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment3.setStartDateTime(getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointment3.setEndDateTime(getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        appointments.add(appointment3);
+        appointment3.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment3.setStartDateTime(getDate(2019, Calendar.JUNE, 21, 16, 0, 0));
+        newAppointment3.setEndDateTime(getDate(2019, Calendar.JUNE, 21, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 27, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 27, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment4.setStartDateTime(getDate(2019, Calendar.JUNE, 27, 16, 0, 0));
+        appointment4.setEndDateTime(getDate(2019, Calendar.JUNE, 27, 16, 30, 0));
+        appointments.add(appointment4);
+        appointment4.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JUNE, 27, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JUNE, 27, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment4.setStartDateTime(getDate(2019, Calendar.JUNE, 27, 16, 0, 0));
+        newAppointment4.setEndDateTime(getDate(2019, Calendar.JUNE, 27, 16, 30, 0));
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JULY, 5, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JULY, 5, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        appointment5.setStartDateTime(getDate(2019, Calendar.JULY, 5, 16, 0, 0));
+        appointment5.setEndDateTime(getDate(2019, Calendar.JULY, 5, 16, 30, 0));
+        appointments.add(appointment5);
+        appointment5.setVoided(Boolean.TRUE);
+
+        appointmentInstance = new HashMap<>();
+        appointmentInstance.put("startDateTime", getDate(2019, Calendar.JULY, 5, 16, 0, 0));
+        appointmentInstance.put("endDateTime", getDate(2019, Calendar.JULY, 5, 16, 30, 0));
+        expectedAppointmentDatesList.add(appointmentInstance);
+        newAppointment5.setStartDateTime(getDate(2019, Calendar.JULY, 5, 16, 0, 0));
+        newAppointment5.setEndDateTime(getDate(2019, Calendar.JULY, 5, 16, 30, 0));
+
+        appointmentRecurringPattern.setAppointments(appointments);
+
+        List<Appointment> updatedAppointments = weeklyRecurringAppointmentsGenerationService
+                .addAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+
         assertEquals(expectedAppointmentDatesList.size(), updatedAppointments.size());
         for (int i = 0; i < updatedAppointments.size(); i++) {
             assertEquals(expectedAppointmentDatesList.get(i).get("startDateTime").toString(),
