@@ -24,16 +24,16 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
 
     @Override
     public void afterReturning(Object returnValue, Method method, Object[] arguments, Object target) throws Throwable {
+        List<Appointment> updatedAppointments = new ArrayList<>();
         if (VALIDATE_AND_SAVE.equals(method.getName()) || isAllRecurringAppointmentsUpdate(method, returnValue)) {
             AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) returnValue;
-            raiseEventsForAppointments(method, arguments, target, new ArrayList<>(appointmentRecurringPattern.getAppointments()));
+            updatedAppointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
         } else if (isSingleRecurringAppointmentUpdate(method, returnValue)) {
-            List<Appointment> updatedAppointments = (List<Appointment>) arguments[1];
-            raiseEventsForAppointments(method, arguments, target, updatedAppointments);
+            updatedAppointments = (List<Appointment>) arguments[1];
         } else if (CHANGE_STATUS.equals(method.getName())) {
-            List<Appointment> appointments = (List<Appointment>) returnValue;
-            raiseEventsForAppointments(method, arguments, target, appointments);
+            updatedAppointments = (List<Appointment>) returnValue;
         }
+        raiseEventsForAppointments(method, arguments, target, updatedAppointments);
     }
 
     private void raiseEventsForAppointments(Method method, Object[] arguments, Object target,
