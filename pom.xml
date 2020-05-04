@@ -2,7 +2,7 @@
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 
-	<groupId>org.openmrs.module</groupId>
+	<groupId>org.bahmni.module</groupId>
 	<artifactId>appointments</artifactId>
 	<version>1.2-SNAPSHOT</version>
 	<packaging>pom</packaging>
@@ -74,17 +74,37 @@
 						</excludes>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>1.5.1</version>
+					<extensions>true</extensions>
+					<executions>
+						<execution>
+							<id>default-deploy</id>
+							<phase>deploy</phase>
+							<goals>
+								<goal>deploy</goal>
+							</goals>
+						</execution>
+					</executions>
+					<configuration>
+						<serverId>nexus-sonatype</serverId>
+						<nexusUrl>https://oss.sonatype.org</nexusUrl>
+						<skipStaging>true</skipStaging>
+					</configuration>
+				</plugin>
 			</plugins>
 		</pluginManagement>
-		<plugins>
-			<plugin>
-				<artifactId>maven-compiler-plugin</artifactId>
-				<configuration>
-					<source>1.8</source>
-					<target>1.8</target>
-				</configuration>
-			</plugin>
-		</plugins>
+<!--		<plugins>-->
+<!--			<plugin>-->
+<!--				<artifactId>maven-compiler-plugin</artifactId>-->
+<!--				<configuration>-->
+<!--					<source>1.8</source>-->
+<!--					<target>1.8</target>-->
+<!--				</configuration>-->
+<!--			</plugin>-->
+<!--		</plugins>-->
 		<extensions>
 			<extension>
 				<groupId>org.kuali.maven.wagons</groupId>
@@ -223,13 +243,37 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<repositories>
-		<repository>
-			<id>openmrs-repo</id>
-			<name>OpenMRS Nexus Repository</name>
-			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
-		</repository>
-	</repositories>
+		<repositories>
+			<repository>
+				<id>openmrs-repo</id>
+				<name>OpenMRS Nexus Repository</name>
+				<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+			</repository>
+					<repository>
+							<id>sonatype-nexus-snapshots</id>
+							<name>Sonatype Nexus Snapshots</name>
+							<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+							<releases>
+								<enabled>false</enabled>
+							</releases>
+							<snapshots>
+								<enabled>true</enabled>
+								<updatePolicy>interval:10080</updatePolicy>
+							</snapshots>
+					</repository>
+					<repository>
+							<id>sonatype-nexus-releases</id>
+							<name>Sonatype Nexus Snapshots</name>
+							<url>https://oss.sonatype.org/content/repositories/releases</url>
+							<releases>
+								<enabled>true</enabled>
+							</releases>
+							<snapshots>
+								<enabled>false</enabled>
+							</snapshots>
+					</repository>
+
+		</repositories>
 
 	<pluginRepositories>
 		<pluginRepository>
@@ -243,11 +287,10 @@
 	</pluginRepositories>
 
 	<distributionManagement>
-		<snapshotRepository>
-			<id>repo.mybahmni.org</id>
-			<name>bahmni-artifactory-snapshots</name>
-			<url>s3://repo.mybahmni.org/artifactory/snapshot</url>
-		</snapshotRepository>
+			<snapshotRepository>
+						<id>nexus-sonatype</id>
+						<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+			</snapshotRepository>
 	</distributionManagement>
 
 	<profiles>
