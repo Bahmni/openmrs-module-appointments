@@ -101,8 +101,6 @@
 					<version>3.2.1</version>
 					<executions>
 						<execution>
-							<id>generate-sources</id>
-							<phase>deploy</phase>
 							<goals>
 								<goal>jar</goal>
 							</goals>
@@ -115,8 +113,6 @@
 					<version>3.2.0</version>
 					<executions>
 						<execution>
-							<id>generate-javadoc</id>
-							<phase>deploy</phase>
 							<goals>
 								<goal>jar</goal>
 							</goals>
@@ -130,7 +126,7 @@
 					<executions>
 						<execution>
 							<id>sign-artifacts</id>
-							<phase>deploy</phase>
+							<phase>verify</phase>
 							<goals>
 								<goal>sign</goal>
 							</goals>
