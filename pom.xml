@@ -8,6 +8,27 @@
 	<packaging>pom</packaging>
 	<name>Bahmni Appointment Scheduling</name>
 	<description>OpenMRS Module Scheduling and managing Appointments.</description>
+	<url>https://demo.mybahmni.org/bahmni/home/index.html</url>
+	<licenses>
+		<license>
+			<name>GNU AFFERO GENERAL PUBLIC LICENSE</name>
+			<url>https://www.gnu.org/licenses/agpl-3.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<name>Bahmnitw</name>
+			<email>bahmnicommunity@gmail.com</email>
+			<organization>Bahmni</organization>
+			<organizationUrl>https://github.com/Bahmni</organizationUrl>
+		</developer>
+	</developers>
+
+	<scm>
+		<connection>scm:git:git://github.com/bahmni/openmrs-module-appointments.git</connection>
+		<developerConnection>scm:git:https://github.com/Bahmni/openmrs-module-appointments.git</developerConnection>
+		<url>https://github.com/Bahmni/openmrs-module-appointments</url>
+	</scm>
 
 	<modules>
 		<module>api</module>
