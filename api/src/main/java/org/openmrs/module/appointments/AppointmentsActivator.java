@@ -25,16 +25,10 @@ public class AppointmentsActivator extends BaseModuleActivator {
 	
 	private Log log = LogFactory.getLog(this.getClass());
 	
-	/**
-	 * @see org.openmrs.module.Activator#startup()
-	 */
 	public void startup() {
 		log.info("Starting Appointments Module");
 	}
 	
-	/**
-	 * @see org.openmrs.module.Activator#shutdown()
-	 */
 	public void shutdown() {
 		log.info("Shutting down Appointments Module");
 	}
