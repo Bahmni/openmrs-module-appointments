@@ -9,7 +9,7 @@
 	<package>${MODULE_PACKAGE}</package>
 	<description>${project.parent.description}</description>
 
-	<activator>${MODULE_PACKAGE}.AppointmentsActivator</activator>
+	<activator>org.openmrs.module.appointments.AppointmentsActivator</activator>
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
