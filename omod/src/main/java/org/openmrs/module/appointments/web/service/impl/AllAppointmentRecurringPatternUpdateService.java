@@ -92,13 +92,17 @@ public class AllAppointmentRecurringPatternUpdateService {
                 .setAppointments(appointment.getAppointmentRecurringPattern().getAppointments()
                         .stream()
                         .map(app -> {
-                            if (app.isFutureAppointment() && app.getStatus() == AppointmentStatus.Scheduled) {
+                            if (app.isFutureAppointment() && isRequestedOrScheduledAppointment(app)) {
                                 TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
                                 updateMetadata(app, appointment);
                                 TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
                             }
                             return app;
                         }).collect(Collectors.toSet()));
+    }
+
+    private boolean isRequestedOrScheduledAppointment(Appointment app) {
+        return app.getStatus() == AppointmentStatus.Requested || app.getStatus() == AppointmentStatus.Scheduled;
     }
 
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {

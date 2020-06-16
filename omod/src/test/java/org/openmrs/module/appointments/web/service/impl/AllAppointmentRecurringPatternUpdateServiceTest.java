@@ -52,6 +52,7 @@ import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.model.AppointmentProviderResponse.CANCELLED;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Completed;
+import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
 
 @RunWith(PowerMockRunner.class)

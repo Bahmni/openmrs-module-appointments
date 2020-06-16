@@ -108,9 +108,17 @@
 
     <patient_appointment_recurring_time patient_appointment_timings_id="2" recurrence_type="DAY" period="1" frequency="4"/>
 
-    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="14"/>
-    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="11"/>
-    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="12"/>
-    <patient_appointment_occurrence patient_appointment_timings_id="2" patient_appointment_id="13"/>
+    <patient_appointment patient_appointment_id="15" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-23 13:00:00" end_date_time="2208-12-23 13:30:00" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="25a7e84b-6933-49cc-aebe-c1d4d33a86y2"/>
+    <patient_appointment patient_appointment_id="16" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-24 13:00:00" end_date_time="2208-12-23 13:30:00" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="ec0f38cf-96bd-41bc-9db7-29fc3f4bcay2"/>
+    <patient_appointment patient_appointment_id="17" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-25 13:00:00" end_date_time="2208-12-23 13:30:00" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="6c2d7d79-11f4-4b73-98a5-ee6a9c5bc6y2"/>
+    <patient_appointment patient_appointment_id="18" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2208-12-26 13:00:00" end_date_time="2208-12-23 13:30:00" appointment_kind="Scheduled" status="Requested" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="53c401fe-677c-46e8-aaed-57b063cb27y2"/>
+
+    <patient_appointment_recurring_time patient_appointment_timings_id="3" recurrence_type="DAY" period="1" frequency="4"/>
+
+    <patient_appointment_occurrence patient_appointment_timings_id="3" patient_appointment_id="15"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="3" patient_appointment_id="16"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="3" patient_appointment_id="17"/>
+    <patient_appointment_occurrence patient_appointment_timings_id="3" patient_appointment_id="18"/>
+
 
 </dataset>

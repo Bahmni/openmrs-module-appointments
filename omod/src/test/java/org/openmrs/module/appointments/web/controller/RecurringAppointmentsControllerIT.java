@@ -328,6 +328,37 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldUpdateRecurringAppointmentForRequestedStatusWhenApplyForAllIsTrue() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"uuid\": \"25a7e84b-6933-49cc-aebe-c1d4d33a86y2\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"providers\": [{\"uuid\":\"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"}]}," +
+                "\"applyForAll\": true," +
+                "\"timeZone\": \"IST\"," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":2," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/uuid", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+        List<RecurringAppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<RecurringAppointmentDefaultResponse>>() {
+        });
+        for (RecurringAppointmentDefaultResponse recurringAppointmentDefaultResponse : appointmentDefaultResponse) {
+            assertEquals(1, recurringAppointmentDefaultResponse.getAppointmentDefaultResponse().getProviders().size());
+        }
+    }
+
+    @Test
     public void shouldUpdateRecurringAppointmentByAddingAppointmentsWhenFrequencyIsChanged() throws Exception {
         String content = "{ \"appointmentRequest\":{" +
                 "\"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
@@ -554,5 +585,31 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         });
         assertEquals(9, appointmentDefaultResponse.size());
 
+    }
+
+    @Test
+    public void shouldUpdateRecurringAppointmentForRequestedAppointmentWhenApplyForAllIsTrue() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"providers\": []}," +
+                "\"applyForAll\": true," +
+                "\"timeZone\": \"UTC\"," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":2," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/uuid", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
     }
 }
