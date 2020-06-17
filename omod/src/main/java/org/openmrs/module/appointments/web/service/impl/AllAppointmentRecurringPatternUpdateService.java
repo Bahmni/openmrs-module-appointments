@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
@@ -148,9 +149,14 @@ public class AllAppointmentRecurringPatternUpdateService {
             return new ArrayList<>();
         return appointmentProviders
                 .stream()
-                .filter(provider -> AppointmentProviderResponse.ACCEPTED.equals(provider.getResponse()))
+                .filter(isAcceptedOrAwaitingProvider())
                 .map(AppointmentProvider::new)
                 .collect(Collectors.toList());
+    }
+
+    private Predicate<AppointmentProvider> isAcceptedOrAwaitingProvider() {
+        return provider -> AppointmentProviderResponse.ACCEPTED.equals(provider.getResponse())
+                || AppointmentProviderResponse.AWAITING.equals(provider.getResponse());
     }
 
     private void mapProvidersForAppointment(Appointment appointment, List<AppointmentProvider> newProviders) {
