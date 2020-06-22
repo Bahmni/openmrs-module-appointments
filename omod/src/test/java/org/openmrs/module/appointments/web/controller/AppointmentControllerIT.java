@@ -56,7 +56,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
                 = deserialize(handle(newGetRequest("/rest/v1/appointment/all")),
                 new TypeReference<List<AppointmentDefaultResponse>>() {
                 });
-        assertEquals(13, asResponses.size());
+        assertEquals(17, asResponses.size());
     }
 
     @Test
@@ -97,7 +97,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         List<AppointmentDefaultResponse> asResponse = deserialize(handle(getRequest),
             new TypeReference<List<AppointmentDefaultResponse>>() {});
 
-        assertEquals(9, asResponse.size());
+        assertEquals(13, asResponse.size());
     }
 
     @Test

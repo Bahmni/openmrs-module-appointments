@@ -38,6 +38,7 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
+import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -127,6 +128,60 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentTwo.setAppointmentAudits(new HashSet<>());
         Appointment appointmentThree = getAppointment("uuid3", patient,
                 Scheduled,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), 2),
+                DateUtils.addDays(endTimeCalendar.getTime(), 2));
+        appointmentThree.setAppointmentAudits(new HashSet<>());
+        Set<Appointment> appointments = new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree));
+        appointmentRecurringPattern.setAppointments(appointments);
+        appointmentOne.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
+        when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
+        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
+
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        appointmentAudit.setNotes(null);
+        appointmentAudit.setAppointment(appointmentTwo);
+        appointmentAudit.setStatus(CheckedIn);
+        when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
+
+        recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
+        verify(appointmentDao, times(2)).save(any(Appointment.class));
+    }
+
+    @Test
+    public void shouldUpdateStatusOfRequestedFutureOccurrences() {
+        Calendar startTimeCalendar = Calendar.getInstance();
+        Calendar endTimeCalendar = Calendar.getInstance();
+        Calendar newStartTimeCalendar = Calendar.getInstance();
+        Calendar newEndTimeCalendar = Calendar.getInstance();
+        int year = startTimeCalendar.get(Calendar.YEAR);
+        int month = startTimeCalendar.get(Calendar.MONTH);
+        int day = startTimeCalendar.get(Calendar.DATE);
+        startTimeCalendar.set(year, month, day, 10, 00, 00);
+        endTimeCalendar.set(year, month, day, 10, 30, 00);
+        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
+        appointmentRecurringPattern.setFrequency(3);
+        appointmentRecurringPattern.setPeriod(2);
+        Appointment appointmentOne = getAppointment("uuid1", patient,
+                Requested,
+                AppointmentKind.Scheduled,
+                DateUtils.addDays(startTimeCalendar.getTime(), -2),
+                DateUtils.addDays(endTimeCalendar.getTime(), -2));
+        Appointment appointmentTwo = getAppointment("uuid2", patient,
+                CheckedIn,
+                AppointmentKind.Scheduled,
+                startTimeCalendar.getTime(),
+                endTimeCalendar.getTime());
+        appointmentTwo.setAppointmentAudits(new HashSet<>());
+        Appointment appointmentThree = getAppointment("uuid3", patient,
+                Requested,
                 AppointmentKind.Scheduled,
                 DateUtils.addDays(startTimeCalendar.getTime(), 2),
                 DateUtils.addDays(endTimeCalendar.getTime(), 2));

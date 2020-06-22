@@ -96,7 +96,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     private boolean isAppointmentNotAssignedToAnyProvider(Appointment appointment) {
-        return appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED).isEmpty();
+        return appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED).isEmpty()
+                && appointment.getProvidersWithResponse(AppointmentProviderResponse.AWAITING).isEmpty();
     }
 
     private boolean isCurrentUserSamePersonAsOneOfTheAppointmentProviders(Set<AppointmentProvider> providers) {

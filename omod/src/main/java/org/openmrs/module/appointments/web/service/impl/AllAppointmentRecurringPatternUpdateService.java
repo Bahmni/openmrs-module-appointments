@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 @Component
@@ -92,13 +93,17 @@ public class AllAppointmentRecurringPatternUpdateService {
                 .setAppointments(appointment.getAppointmentRecurringPattern().getAppointments()
                         .stream()
                         .map(app -> {
-                            if (app.isFutureAppointment() && app.getStatus() == AppointmentStatus.Scheduled) {
+                            if (app.isFutureAppointment() && isRequestedOrScheduledAppointment(app)) {
                                 TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
                                 updateMetadata(app, appointment);
                                 TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
                             }
                             return app;
                         }).collect(Collectors.toSet()));
+    }
+
+    private boolean isRequestedOrScheduledAppointment(Appointment app) {
+        return app.getStatus() == AppointmentStatus.Requested || app.getStatus() == AppointmentStatus.Scheduled;
     }
 
     private void updateMetadata(Appointment pendingAppointment, Appointment appointment) {
@@ -144,9 +149,14 @@ public class AllAppointmentRecurringPatternUpdateService {
             return new ArrayList<>();
         return appointmentProviders
                 .stream()
-                .filter(provider -> AppointmentProviderResponse.ACCEPTED.equals(provider.getResponse()))
+                .filter(isAcceptedOrAwaitingProvider())
                 .map(AppointmentProvider::new)
                 .collect(Collectors.toList());
+    }
+
+    private Predicate<AppointmentProvider> isAcceptedOrAwaitingProvider() {
+        return provider -> AppointmentProviderResponse.ACCEPTED.equals(provider.getResponse())
+                || AppointmentProviderResponse.AWAITING.equals(provider.getResponse());
     }
 
     private void mapProvidersForAppointment(Appointment appointment, List<AppointmentProvider> newProviders) {

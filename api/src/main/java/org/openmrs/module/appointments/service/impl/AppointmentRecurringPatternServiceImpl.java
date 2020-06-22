@@ -20,7 +20,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -112,7 +111,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         String serverTimeZone = Calendar.getInstance().getTimeZone().getID();
         TimeZone.setDefault(TimeZone.getTimeZone(clientTimeZone));
         List<Appointment> pendingAppointments = getPendingOccurrences(appointment.getUuid(),
-                Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
+                Arrays.asList(AppointmentStatus.Requested, AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn));
         TimeZone.setDefault(TimeZone.getTimeZone(serverTimeZone));
         pendingAppointments.stream()
                 .map(pendingAppointment -> {
