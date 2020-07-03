@@ -11,6 +11,7 @@ import org.openmrs.Patient;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.DateHelper;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -54,6 +55,26 @@ public class PatientDoubleBookingConflictTest {
         assertEquals(patientAppointment,appointments.get(0));
     }
 
+    @Test
+    public void shouldNotConflictWithCancelledAppointmentOnSameTime() {
+        Patient patient = new Patient();
+        patient.setId(1);
+        Appointment patientAppointment = new Appointment();
+        patientAppointment.setStartDateTime(DateHelper.getDate(2119,8,1,11,0,0));
+        patientAppointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,0,0));
+        patientAppointment.setStatus(AppointmentStatus.Cancelled);
+
+        Appointment appointment = new Appointment();
+        appointment.setPatient(patient);
+        appointment.setStartDateTime(DateHelper.getDate(2119,8,1,11,0,0));
+        appointment.setEndDateTime(DateHelper.getDate(2119,8,1,12,0,0));
+        when(appointmentDao.getAppointmentsForPatient(1)).thenReturn(Collections.singletonList(patientAppointment));
+
+        List<Appointment> appointments = patientDoubleBookingConflict.getConflicts(Collections.singletonList(appointment));
+
+        assertNotNull(appointments);
+        assertEquals(0,appointments.size());
+    }
 
     @Test
     public void shouldReturnAppointmentWithOverlapping() {
