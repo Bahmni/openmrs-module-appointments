@@ -5,6 +5,7 @@ import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,7 +49,8 @@ public class PatientDoubleBookingConflict implements AppointmentConflict {
         return !patientAppointment.isSameAppointment(appointment)
                 && !patientAppointment.getVoided()
                 && patientAppointment.isFutureAppointment()
-                && isAppointmentOverlapping(patientAppointment, appointment);
+                && isAppointmentOverlapping(patientAppointment, appointment)
+                && patientAppointment.getStatus() != AppointmentStatus.Cancelled;
     }
 
     private boolean isAppointmentOverlapping(Appointment patientAppointment, Appointment appointment) {
