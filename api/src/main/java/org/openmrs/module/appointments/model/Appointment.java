@@ -26,6 +26,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Date startDateTime;
     private Date endDateTime;
     private AppointmentKind appointmentKind;
+    private Boolean isTeleconsultationEnabled;
     private AppointmentStatus status;
     private String comments;
     private Set<AppointmentProvider> providers;
@@ -200,6 +201,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public boolean isSameAppointment(Appointment appointment) {
         return this.getUuid().equals(appointment.getUuid());
+    }
+
+    public void setIsTeleconsultationEnabled(Boolean isTeleconsultationEnabled) {
+        this.isTeleconsultationEnabled = isTeleconsultationEnabled;
+    }
+
+    public Boolean getIsTeleconsultationEnabled(){
+        return isTeleconsultationEnabled;
     }
 }
 
