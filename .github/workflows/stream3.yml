@@ -8,9 +8,10 @@ jobs:
   spike:
     runs-on: ubuntu-latest
 
-    - name: sample
-      run: |
-        echo "Sample.  END"
+    steps:
+      - name: sample
+        run: |
+          echo "Sample.  END"
 
 #  build:
 #
