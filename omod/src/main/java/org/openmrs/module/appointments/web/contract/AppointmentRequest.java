@@ -21,6 +21,7 @@ public class AppointmentRequest {
     private Date endDateTime;
     private String status;
     private String appointmentKind;
+    private Boolean isTeleconsultationEnabled;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
 
@@ -103,6 +104,15 @@ public class AppointmentRequest {
     public void setAppointmentKind(String appointmentKind) {
         this.appointmentKind = appointmentKind;
     }
+
+    public Boolean getIsTeleconsultationEnabled() {
+        return isTeleconsultationEnabled;
+    }
+
+    public void setIsTeleconsultationEnabled(Boolean isTeleconsultationEnabled) {
+        this.isTeleconsultationEnabled = isTeleconsultationEnabled;
+    }
+
 
     public String getStatus() {
         return status;
