@@ -23,14 +23,8 @@ jobs:
           java-version: 1.8
 
       - name: Build with Maven
-        run: mvn clean package -Duser.timezone=IST
-
-      - name: DEBUG, list folder structure
         run: |
-          ls -alR
-
-      - name: build
-        run: |
+          mvn clean package -Duser.timezone=IST
           mkdir appointments
           cp -r api/target/appointments-api-1.3.0-SNAPSHOT.jar appointments
 
