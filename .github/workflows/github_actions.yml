@@ -14,7 +14,7 @@ jobs:
         run: |
           PACKAGE_VERSION=0.0.${{ github.run_number }}
           echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION"
-          echo "::set-env name=PACKAGE_FILENAME::appointments-api.1.3.0-SNAPSHOT.$PACKAGE_VERSION.zip"
+          echo "::set-env name=PACKAGE_FILENAME::appointments.$PACKAGE_VERSION.zip"
           echo "::set-env name=OCTOPUS_SERVER::https://${{ secrets.OCTOPUS_ORG }}.octopus.app/"
           echo "::set-env name=OCTOPUS_ENVIROMENT::QA-DEMO"
 
@@ -26,11 +26,11 @@ jobs:
       - name: Build with Maven
         run: |
         mvn clean package -Duser.timezone=IST
-        mkdir appointments
-        cp -r api/target/appointments-api-1.3.0-SNAPSHOT.jar appointments
 
-      - name: package
+      - name: Package
           run: |
+            mkdir appointments
+            cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod appointments
             echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
             zip -r $PACKAGE_FILENAME appointments/*
 
