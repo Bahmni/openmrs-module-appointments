@@ -13,8 +13,7 @@ jobs:
       - name: define variables
         run: |
           PACKAGE_VERSION=0.0.${{ github.run_number }}
-          echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION"
-          echo "::set-env name=PACKAGE_FILENAME::openmrs_appointments.$PACKAGE_VERSION.zip"
+          echo "::set-env name=PACKAGE_FILENAME::appointments-api-1.3.0-SNAPSHOT.jar"
           echo "::set-env name=OCTOPUS_SERVER::https://${{ secrets.OCTOPUS_ORG }}.octopus.app/"
           echo "::set-env name=OCTOPUS_ENVIROMENT::QA-DEMO"
 
@@ -35,11 +34,6 @@ jobs:
           mkdir appointments
           cp -r api/target/appointments-api-1.3.0-SNAPSHOT.jar appointments
 
-      - name: package
-        run: |
-          echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
-          zip -r $PACKAGE_FILENAME appointments/*
-
       - name: Install Octopus CLI
         run: |
           sudo apt update && sudo apt install --no-install-recommends gnupg curl ca-certificates apt-transport-https && \
@@ -50,7 +44,7 @@ jobs:
       - name: Publish to octopus
         run: |
           echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
-          octo push --server="$OCTOPUS_SERVER" --apiKey="${{ secrets.OCTOPUS_API_KEY }}" --space="${{ secrets.OCTOPUS_SPACE_URL_FRAGMENT }}" --package="$PACKAGE_FILENAME"
+          octo push --server="$OCTOPUS_SERVER" --apiKey="${{ secrets.OCTOPUS_API_KEY }}" --space="${{ secrets.OCTOPUS_SPACE_URL_FRAGMENT }}" --package="appointments-api-1.3.0-SNAPSHOT.jar"
 
       - name: Create Release and Deploy
         run: |
