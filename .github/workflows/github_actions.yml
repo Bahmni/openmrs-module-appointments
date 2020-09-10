@@ -28,14 +28,8 @@ jobs:
 
       - name: Package
         run: |
-          mkdir appointments
-          cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod appointments/
-          ls -laR appointments
-
-      - name: package
-        run: |
           echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
-          zip -r $PACKAGE_FILENAME appointments/*
+          zip -r $PACKAGE_FILENAME omod/target/appointments-1.3.0-SNAPSHOT.omod
 
       - name: Install Octopus CLI
         run: |
