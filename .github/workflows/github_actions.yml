@@ -28,11 +28,11 @@ jobs:
         mvn clean package -Duser.timezone=IST
 
       - name: Package
-          run: |
-            mkdir appointments
-            cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod appointments
-            echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
-            zip -r $PACKAGE_FILENAME appointments/*
+        run: |
+          mkdir appointments
+          cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod appointments
+          echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
+          zip -r $PACKAGE_FILENAME appointments/*
 
       - name: DEBUG, list folder structure
         run: |
