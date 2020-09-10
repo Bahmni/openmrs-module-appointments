@@ -14,7 +14,7 @@ jobs:
         run: |
           PACKAGE_VERSION=0.0.${{ github.run_number }}
           echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION"
-          echo "::set-env name=PACKAGE_FILENAME::appointments.$PACKAGE_VERSION.zip"
+          echo "::set-env name=PACKAGE_FILENAME::openmrs_appointments.$PACKAGE_VERSION.zip"
           echo "::set-env name=OCTOPUS_SERVER::https://${{ secrets.OCTOPUS_ORG }}.octopus.app/"
           echo "::set-env name=OCTOPUS_ENVIROMENT::QA-DEMO"
 
