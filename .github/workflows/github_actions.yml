@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: define variables
+      - name: Define variables
         run: |
           PACKAGE_VERSION=0.0.${{ github.run_number }}
           echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION"
@@ -23,8 +23,11 @@ jobs:
         with:
           java-version: 1.8
 
+      - name: Test
+        run: mvn test -Duser.timezone=IST
+
       - name: Build with Maven
-        run: mvn clean package -Duser.timezone=IST
+        run: mvn clean package -Duser.timezone=IST -Dmaven.test.skip=true
 
       - name: Package
         run: |
