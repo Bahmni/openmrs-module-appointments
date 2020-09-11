@@ -30,7 +30,9 @@ jobs:
         run: |
           echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
           cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod .
+          cp -r deployment_script/restart_server.sh .
           zip -r $PACKAGE_FILENAME appointments-1.3.0-SNAPSHOT.omod
+          zip -r $PACKAGE_FILENAME restart_server.sh
 
       - name: Install Octopus CLI
         run: |
