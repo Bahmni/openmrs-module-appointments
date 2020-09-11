@@ -29,7 +29,8 @@ jobs:
       - name: Package
         run: |
           echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
-          zip -r $PACKAGE_FILENAME omod/target/appointments-1.3.0-SNAPSHOT.omod
+          cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod .
+          zip -r $PACKAGE_FILENAME appointments-1.3.0-SNAPSHOT.omod
 
       - name: Install Octopus CLI
         run: |
