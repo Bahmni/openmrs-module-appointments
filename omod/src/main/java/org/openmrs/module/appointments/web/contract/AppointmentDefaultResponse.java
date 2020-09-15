@@ -103,7 +103,7 @@ public class AppointmentDefaultResponse {
 		this.appointmentKind = appointmentKind;
 	}
 
-	public Boolean getIsTeleconsultationEnabled() {return isTeleconsultationEnabled; }
+	public Boolean getIsTeleconsultationEnabled() {return false; }
 
 	public void setIsTeleconsultationEnabled(Boolean isTeleconsultationEnabled)
 	{
