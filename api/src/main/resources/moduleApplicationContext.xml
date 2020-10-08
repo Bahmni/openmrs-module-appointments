@@ -156,7 +156,6 @@
         </property>
     </bean>
 
-
     <bean id="defaultEditAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultEditAppointmentValidator">
         <property name="appointmentDao">
             <ref bean="appointmentDao"/>
@@ -238,4 +237,11 @@
             <ref bean="sessionFactory"/>
         </property>
     </bean>
+
+    <bean id="teleconsultationAppointmentNotificationService" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentNotificationServiceImpl">
+        <property name="emailNotificationService">
+            <ref bean="emailNotificationService"/>
+        </property>
+    </bean>
+
 </beans>
