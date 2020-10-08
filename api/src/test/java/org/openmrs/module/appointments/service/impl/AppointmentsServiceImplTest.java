@@ -1,15 +1,13 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
+import org.mockito.*;
 import org.openmrs.Patient;
 import org.openmrs.Person;
 import org.openmrs.Provider;
@@ -23,21 +21,15 @@ import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavaila
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -45,28 +37,13 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
+import static org.mockito.Mockito.*;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
@@ -104,6 +81,9 @@ public class AppointmentsServiceImplTest {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Mock
+    private EmailNotificationService emailNotificationService;
+
+    @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
     @Mock
@@ -123,6 +103,9 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private PatientDoubleBookingConflict patientDoubleBookingConflict;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
@@ -181,6 +164,36 @@ public class AppointmentsServiceImplTest {
         verify(appointmentServiceHelper, times(1)).getAppointmentAuditEvent(appointment, notes);
         verify(appointmentDao, times(1)).save(appointment);
         verify(appointmentAuditDao, times(0)).save(appointmentAuditMock);
+    }
+
+    @Test
+    public void shouldPublishTeleconsultationAppointmentSavedEvent() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
+        appointment.setIsTeleconsultationEnabled(true);
+        appointmentsService.validateAndSave(appointment);
+        verify(applicationEventPublisher, times(1)).
+                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
+    }
+
+    @Test
+    public void shouldNotPublishTeleconsultationAppointmentSavedEventIfNotTeleconsultation() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
+        appointment.setIsTeleconsultationEnabled(false);
+        appointmentsService.validateAndSave(appointment);
+        verify(applicationEventPublisher, times(0)).
+                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
     }
 
     @Test
