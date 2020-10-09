@@ -7,7 +7,11 @@ import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.TeleconsultationAppointmentNotificationService;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class TeleconsultationAppointmentNotificationServiceImpl implements TeleconsultationAppointmentNotificationService {
     private final static String EMAIL_SUBJECT = "teleconsultation.appointment.email.subject";
@@ -28,11 +32,29 @@ public class TeleconsultationAppointmentNotificationServiceImpl implements Telec
     public void sendTeleconsultationAppointmentLinkEmail(Appointment appointment) throws EmailNotificationException {
         String link = teleconsultationAppointmentService.getTeleconsultationURL(appointment);
         Patient patient = appointment.getPatient();
-        if (patient.getAttribute("email") != null) {
-            String email = patient.getAttribute("email").getValue();
+        String email = patient.getAttribute("email").getValue();
+        if (email != null) {
+            String patientName = appointment.getPatient().getGivenName();
+            AppointmentProvider provider = appointment.getProviders().iterator().next();
+            String doctor = "Dr. " + provider.getProvider().getPerson().getGivenName();
+            Date appointmentStart = appointment.getStartDateTime();
+            String day = new SimpleDateFormat("EEEE").format(appointmentStart);
+            String date = new SimpleDateFormat("dd/MM/yy").format(appointmentStart);
+            String time = new SimpleDateFormat("hh:mm a").format(appointmentStart);
             emailNotificationService.send(
                     Context.getMessageSourceService().getMessage(EMAIL_SUBJECT, null, null),
-                    Context.getMessageSourceService().getMessage(EMAIL_BODY, new Object[]{ link }, null),
+                    Context.getMessageSourceService().getMessage(
+                            EMAIL_BODY,
+                            new Object[]{
+                                    patientName,
+                                    doctor,
+                                    day,
+                                    date,
+                                    time,
+                                    link
+                            },
+                            null
+                    ),
                     new String[] { email },
                     null,
                     null);
