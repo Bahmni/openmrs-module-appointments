@@ -11,6 +11,7 @@ import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.TeleconsultationAppointmentNotificationService;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 public class TeleconsultationAppointmentNotificationServiceImpl implements TeleconsultationAppointmentNotificationService {
@@ -35,9 +36,17 @@ public class TeleconsultationAppointmentNotificationServiceImpl implements Telec
         String email = patient.getAttribute("email").getValue();
         if (email != null) {
             String patientName = appointment.getPatient().getGivenName();
-            AppointmentProvider provider = appointment.getProviders().iterator().next();
-            String doctor = "Dr. " + provider.getProvider().getPerson().getGivenName();
+            String doctor = "";
+            if(appointment.getProviders() != null) {
+                AppointmentProvider provider = appointment.getProviders().iterator().next();
+                doctor = " with Dr. " + provider.getProvider().getPerson().getGivenName();
+            }
             Date appointmentStart = appointment.getStartDateTime();
+            Calendar calendar = Calendar.getInstance();
+            calendar.setTime(appointmentStart);
+            calendar.add(Calendar.HOUR_OF_DAY, 5);
+            calendar.add(Calendar.MINUTE, 30);
+            appointmentStart = calendar.getTime();
             String day = new SimpleDateFormat("EEEE").format(appointmentStart);
             String date = new SimpleDateFormat("dd/MM/yy").format(appointmentStart);
             String time = new SimpleDateFormat("hh:mm a").format(appointmentStart);
