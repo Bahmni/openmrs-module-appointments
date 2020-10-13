@@ -290,7 +290,11 @@
 								<enabled>false</enabled>
 							</snapshots>
 					</repository>
-
+			<repository>
+				<id>email-notification</id>
+				<name>Email Notification</name>
+				<url>s3://bahmni-email-notification/snapshot</url>
+			</repository>
 		</repositories>
 
 	<pluginRepositories>
@@ -298,6 +302,14 @@
 			<id>openmrs-repo</id>
 			<name>OpenMRS Nexus Repository</name>
 			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
+			<snapshots>
+				<enabled>false</enabled>
+			</snapshots>
+		</pluginRepository>
+		<pluginRepository>
+			<id>email-notification</id>
+			<name>Email Notification</name>
+			<url>s3://bahmni-email-notification/snapshot</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
