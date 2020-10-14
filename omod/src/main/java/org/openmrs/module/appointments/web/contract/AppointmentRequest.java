@@ -6,7 +6,6 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 
 @JsonIgnoreProperties
 public class AppointmentRequest {
@@ -21,7 +20,7 @@ public class AppointmentRequest {
     private Date endDateTime;
     private String status;
     private String appointmentKind;
-    private Boolean isTeleconsultationEnabled;
+    private Boolean teleconsultation;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
 
@@ -105,12 +104,12 @@ public class AppointmentRequest {
         this.appointmentKind = appointmentKind;
     }
 
-    public Boolean getIsTeleconsultationEnabled() {
-        return isTeleconsultationEnabled;
+    public Boolean isTeleconsultation() {
+        return teleconsultation;
     }
 
-    public void setIsTeleconsultationEnabled(Boolean isTeleconsultationEnabled) {
-        this.isTeleconsultationEnabled = isTeleconsultationEnabled;
+    public void setTeleconsultation(Boolean teleconsultation) {
+        this.teleconsultation = teleconsultation;
     }
 
 

@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -175,7 +174,7 @@ public class AppointmentsServiceImplTest {
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         appointment.setAppointmentAudits(new HashSet<>());
-        appointment.setIsTeleconsultationEnabled(true);
+        appointment.setTeleconsultation(true);
         appointmentsService.validateAndSave(appointment);
         verify(applicationEventPublisher, times(1)).
                 publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
@@ -190,7 +189,7 @@ public class AppointmentsServiceImplTest {
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         appointment.setAppointmentAudits(new HashSet<>());
-        appointment.setIsTeleconsultationEnabled(false);
+        appointment.setTeleconsultation(false);
         appointmentsService.validateAndSave(appointment);
         verify(applicationEventPublisher, times(0)).
                 publishEvent(any(TeleconsultationAppointmentSavedEvent.class));

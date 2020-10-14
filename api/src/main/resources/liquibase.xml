@@ -205,6 +205,16 @@
     </sql>
     </changeSet>
 
+    <changeSet id="create-column-teleconsultation-202008241355" author="Vishal">
+    <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+    </preConditions>
+    <sql>
+        ALTER TABLE patient_appointment
+        ADD teleconsultation BOOLEAN NOT NULL
+    </sql>
+    </changeSet>
+
     <changeSet id="drop_index_on_appointment_service_table-201707251710" author="Santhosh, Maharjun">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="appointment_service"/>
