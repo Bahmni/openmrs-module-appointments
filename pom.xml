@@ -125,6 +125,13 @@
 <!--				</configuration>-->
 <!--			</plugin>-->
 <!--		</plugins>-->
+		<extensions>
+			<extension>
+				<groupId>com.github.platform-team</groupId>
+				<artifactId>aws-maven</artifactId>
+				<version>6.0.0</version>
+			</extension>
+		</extensions>
 	</build>
 
 	<dependencyManagement>
@@ -267,33 +274,33 @@
 				<name>OpenMRS Nexus Repository</name>
 				<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
 			</repository>
-					<repository>
-							<id>sonatype-nexus-snapshots</id>
-							<name>Sonatype Nexus Snapshots</name>
-							<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-							<releases>
-								<enabled>false</enabled>
-							</releases>
-							<snapshots>
-								<enabled>true</enabled>
-								<updatePolicy>interval:10080</updatePolicy>
-							</snapshots>
-					</repository>
-					<repository>
-							<id>sonatype-nexus-releases</id>
-							<name>Sonatype Nexus Snapshots</name>
-							<url>https://oss.sonatype.org/content/repositories/releases</url>
-							<releases>
-								<enabled>true</enabled>
-							</releases>
-							<snapshots>
-								<enabled>false</enabled>
-							</snapshots>
-					</repository>
+			<repository>
+				<id>sonatype-nexus-snapshots</id>
+				<name>Sonatype Nexus Snapshots</name>
+				<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				<releases>
+					<enabled>false</enabled>
+				</releases>
+				<snapshots>
+					<enabled>true</enabled>
+					<updatePolicy>interval:10080</updatePolicy>
+				</snapshots>
+			</repository>
+			<repository>
+				<id>sonatype-nexus-releases</id>
+				<name>Sonatype Nexus Snapshots</name>
+				<url>https://oss.sonatype.org/content/repositories/releases</url>
+				<releases>
+					<enabled>true</enabled>
+				</releases>
+				<snapshots>
+					<enabled>false</enabled>
+				</snapshots>
+			</repository>
 			<repository>
 				<id>email-notification</id>
 				<name>Email Notification</name>
-				<url>s3://bahmni-email-notification/snapshot</url>
+				<url>https://bahmni-email-notification.s3.ap-south-1.amazonaws.com/snapshot/</url>
 			</repository>
 		</repositories>
 
@@ -302,14 +309,6 @@
 			<id>openmrs-repo</id>
 			<name>OpenMRS Nexus Repository</name>
 			<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</pluginRepository>
-		<pluginRepository>
-			<id>email-notification</id>
-			<name>Email Notification</name>
-			<url>s3://bahmni-email-notification/snapshot</url>
 			<snapshots>
 				<enabled>false</enabled>
 			</snapshots>
