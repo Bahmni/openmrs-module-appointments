@@ -106,8 +106,8 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         save(appointment);
         // TODO: #92 - remove null checking after adding a default value
-        if (appointment.getIsTeleconsultationEnabled() != null &&
-                appointment.getIsTeleconsultationEnabled()) {
+        if (appointment.getTeleconsultation() != null &&
+                appointment.getTeleconsultation()) {
             applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
         }
         return appointment;

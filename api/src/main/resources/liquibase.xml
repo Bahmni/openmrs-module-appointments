@@ -195,13 +195,13 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-column-is-teleconsultation-enabled-202008241255" author="Gracil">
+    <changeSet id="create-column-teleconsultation-202008241355" author="Vishal">
     <preConditions onFail="MARK_RAN">
             <tableExists tableName="patient_appointment" />
     </preConditions>
     <sql>
         ALTER TABLE patient_appointment
-        ADD is_teleconsultation_enabled BOOLEAN
+        ADD teleconsultation BOOLEAN NOT NULL
     </sql>
     </changeSet>
 

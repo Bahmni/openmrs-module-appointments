@@ -24,7 +24,7 @@
         <many-to-one name="location" class="org.openmrs.Location" column="location_id"/>
         <property name="startDateTime" type="java.util.Date" column="start_date_time"/>
         <property name="endDateTime" type="java.util.Date" column="end_date_time"/>
-        <property name="isTeleconsultationEnabled" type="java.lang.Boolean" column="is_teleconsultation_enabled"/>
+        <property name="teleconsultation" type="java.lang.Boolean" column="teleconsultation"/>
         <property name="appointmentKind" column="appointment_kind">
             <type name="org.hibernate.type.EnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentKind</param>

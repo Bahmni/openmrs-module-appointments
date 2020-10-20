@@ -18,7 +18,7 @@ public class AppointmentDefaultResponse {
 	private String status;
 	private String comments;
 	private Map additionalInfo;
-	private Boolean isTeleconsultationEnabled;
+	private Boolean teleconsultation;
 	private List<AppointmentProviderDetail> providers;
 	private Boolean isRecurring;
 	private Boolean voided;
@@ -103,11 +103,11 @@ public class AppointmentDefaultResponse {
 		this.appointmentKind = appointmentKind;
 	}
 
-	public Boolean getIsTeleconsultationEnabled() {return isTeleconsultationEnabled; }
+	public Boolean isTeleconsultation() {return teleconsultation; }
 
-	public void setIsTeleconsultationEnabled(Boolean isTeleconsultationEnabled)
+	public void setTeleconsultation(Boolean teleconsultation)
 	{
-		this.isTeleconsultationEnabled = isTeleconsultationEnabled;
+		this.teleconsultation = teleconsultation;
 	}
 	
 	public String getStatus() {
