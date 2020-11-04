@@ -210,5 +210,9 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     public Boolean getTeleconsultation(){
         return teleconsultation;
     }
+
+    public Boolean isEmailIdAvailable() {
+        return this.patient.getAttribute("email") != null ? true : false;
+    }
 }
 

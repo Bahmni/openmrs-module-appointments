@@ -22,6 +22,7 @@ public class AppointmentDefaultResponse {
 	private List<AppointmentProviderDetail> providers;
 	private Boolean isRecurring;
 	private Boolean voided;
+	private Boolean isEmailIdAvailable;
 
 	public String getUuid() {
 		return uuid;
@@ -156,5 +157,13 @@ public class AppointmentDefaultResponse {
 
 	public void setVoided(Boolean voided) {
 		this.voided = voided;
+	}
+
+	public Boolean getEmailIdAvailable() {
+		return isEmailIdAvailable;
+	}
+
+	public void setEmailIdAvailable(Boolean emailIdAvailable) {
+		isEmailIdAvailable = emailIdAvailable;
 	}
 }
