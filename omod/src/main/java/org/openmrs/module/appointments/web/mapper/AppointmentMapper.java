@@ -206,6 +206,7 @@ public class AppointmentMapper {
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
+        response.setEmailIdAvailable(a.isEmailIdAvailable());
         return response;
     }
 
