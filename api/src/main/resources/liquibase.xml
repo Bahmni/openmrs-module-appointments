@@ -357,7 +357,7 @@
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
         <comment>Updating query to fetch upcoming appointments for patient</comment>
-        <sqlFile path="patientUpcomingAppointments.sql"/>
+        <sqlFile path="patientUpcomingAppointmentsUpdate.sql"/>
     </changeSet>
 
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">

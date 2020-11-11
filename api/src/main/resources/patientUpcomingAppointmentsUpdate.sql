@@ -1,6 +1,6 @@
-INSERT INTO global_property (property, property_value, description, uuid)
- VALUES ('bahmni.sqlGet.upComingAppointments',
-"SELECT
+UPDATE global_property
+SET property_value= "SELECT
+  app_service.uuid,
   app_service.name                                                                                AS `DASHBOARD_APPOINTMENTS_SERVICE_KEY`,
   app_service_type.name                                                                           AS `DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY`,
   DATE_FORMAT(start_date_time, \"%d/%m/%Y\")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
@@ -20,4 +20,4 @@ WHERE p.uuid = ${patientUuid} AND
       start_date_time >= CURDATE() AND
       (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
 ORDER BY start_date_time ASC;"
-, 'Upcoming appointments for patient', uuid());
+WHERE property='bahmni.sqlGet.upComingAppointments'
