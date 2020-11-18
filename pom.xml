@@ -125,13 +125,6 @@
 <!--				</configuration>-->
 <!--			</plugin>-->
 <!--		</plugins>-->
-		<extensions>
-			<extension>
-				<groupId>com.github.platform-team</groupId>
-				<artifactId>aws-maven</artifactId>
-				<version>6.0.0</version>
-			</extension>
-		</extensions>
 	</build>
 
 	<dependencyManagement>
@@ -296,11 +289,6 @@
 				<snapshots>
 					<enabled>false</enabled>
 				</snapshots>
-			</repository>
-			<repository>
-				<id>email-notification</id>
-				<name>Email Notification</name>
-				<url>https://bahmni-email-notification.s3.ap-south-1.amazonaws.com/snapshot/</url>
 			</repository>
 		</repositories>
 
