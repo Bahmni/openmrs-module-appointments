@@ -1,0 +1,56 @@
+name: Openmrs-module-appointments - Github actions CI/CD
+
+on:
+  push:
+    branches: [ stream3/master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Define variables
+        run: |
+          PACKAGE_VERSION=0.0.${{ github.run_number }}
+          echo "::set-env name=PACKAGE_VERSION::$PACKAGE_VERSION"
+          echo "::set-env name=PACKAGE_FILENAME::openmrs_appointments.$PACKAGE_VERSION.zip"
+          echo "::set-env name=OCTOPUS_SERVER::https://${{ secrets.OCTOPUS_ORG }}.octopus.app/"
+          echo "::set-env name=OCTOPUS_ENVIROMENT::QA-DEMO"
+
+      - name: Set up JDK 1.8
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+
+      - name: Build with Maven
+        run: mvn clean package -Duser.timezone=IST -Dmaven.test.skip=true
+
+      - name: Package
+        run: |
+          echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
+          cp -r omod/target/appointments-1.3.0-SNAPSHOT.omod .
+          cp -r deployment_script/restart_server.sh .
+          zip -r $PACKAGE_FILENAME appointments-1.3.0-SNAPSHOT.omod
+          zip -r $PACKAGE_FILENAME restart_server.sh
+
+      - name: Install Octopus CLI
+        run: |
+          sudo apt update && sudo apt install --no-install-recommends gnupg curl ca-certificates apt-transport-https && \
+          curl -sSfL https://apt.octopus.com/public.key | sudo apt-key add - && \
+          sudo sh -c "echo deb https://apt.octopus.com/ stable main > /etc/apt/sources.list.d/octopus.com.list" && \
+          sudo apt update && sudo apt install octopuscli
+
+      - name: Publish to octopus
+        run: |
+          echo "PACKAGE_FILENAME '$PACKAGE_FILENAME'"
+          octo push \
+            --server="$OCTOPUS_SERVER" --apiKey="${{ secrets.OCTOPUS_API_KEY }}" --space="${{ secrets.OCTOPUS_SPACE_URL_FRAGMENT }}" \
+            --package="$PACKAGE_FILENAME"
+
+      - name: Create Release and Deploy
+        run: |
+          octo create-release \
+            --server="$OCTOPUS_SERVER" --apiKey="${{ secrets.OCTOPUS_API_KEY }}" --space="${{ secrets.OCTOPUS_SPACE_URL_FRAGMENT }}" \
+            --project="openmrs-module-appointments" --packageVersion="$PACKAGE_VERSION" --deployTo="$OCTOPUS_ENVIROMENT"
+
