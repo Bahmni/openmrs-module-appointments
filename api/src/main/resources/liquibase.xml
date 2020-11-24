@@ -594,4 +594,10 @@
             <column name="description" value="URL pattern to use for published Recurring appointment events. Default is /openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}. If you change default value, please add your custom implementation for the given URL"/>
         </insert>
     </changeSet>
+    <changeSet id="default-202009011116" author="Deedee Lee">
+        <comment> Add email address in registration page </comment>
+        <sql>
+            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
+        </sql>
+    </changeSet>
 </databaseChangeLog>
