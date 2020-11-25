@@ -44,11 +44,6 @@ public class TeleconsultationAppointmentNotificationServiceImpl implements Telec
                 doctor = " with Dr. " + provider.getProvider().getPerson().getGivenName();
             }
             Date appointmentStart = appointment.getStartDateTime();
-            Calendar calendar = Calendar.getInstance();
-            calendar.setTime(appointmentStart);
-            calendar.add(Calendar.HOUR_OF_DAY, 5);
-            calendar.add(Calendar.MINUTE, 30);
-            appointmentStart = calendar.getTime();
             String day = new SimpleDateFormat("EEEE").format(appointmentStart);
             String date = new SimpleDateFormat("dd/MM/yy").format(appointmentStart);
             String time = new SimpleDateFormat("hh:mm a").format(appointmentStart);
