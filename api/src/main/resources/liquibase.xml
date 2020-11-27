@@ -196,13 +196,17 @@
     </changeSet>
 
     <changeSet id="create-column-teleconsultation-202008241355" author="Vishal">
-    <preConditions onFail="MARK_RAN">
+        <preConditions onFail="MARK_RAN">
             <tableExists tableName="patient_appointment" />
-    </preConditions>
-    <sql>
-        ALTER TABLE patient_appointment
-        ADD teleconsultation BOOLEAN NOT NULL
-    </sql>
+            <not>
+                <columnExists tableName="patient_appointment" columnName="teleconsultation" />
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="teleconsultation" type="boolean"  >
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
     </changeSet>
 
     <changeSet id="drop_index_on_appointment_service_table-201707251710" author="Santhosh, Maharjun">
@@ -357,7 +361,7 @@
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
         <comment>Updating query to fetch upcoming appointments for patient</comment>
-        <sqlFile path="patientUpcomingAppointmentsUpdate.sql"/>
+        <sqlFile path="patientUpcomingAppointments_v2.sql"/>
     </changeSet>
 
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">
@@ -595,6 +599,11 @@
         </insert>
     </changeSet>
     <changeSet id="default-202009011116" author="Deedee Lee">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM person_attribute_type where name = 'email';
+            </sqlCheck>
+        </preConditions>
         <comment> Add email address in registration page </comment>
         <sql>
             INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
