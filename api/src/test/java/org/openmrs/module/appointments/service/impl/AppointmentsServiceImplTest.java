@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -23,6 +24,7 @@ import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavaila
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -38,6 +40,7 @@ import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidato
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -66,7 +69,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.MANAGE_OWN_APPOINTMENTS;
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET_APPOINTMENT_STATUS;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
@@ -104,6 +106,9 @@ public class AppointmentsServiceImplTest {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Mock
+    private EmailNotificationService emailNotificationService;
+
+    @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
     @Mock
@@ -123,6 +128,9 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private PatientDoubleBookingConflict patientDoubleBookingConflict;
+
+    @Mock
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
@@ -181,6 +189,36 @@ public class AppointmentsServiceImplTest {
         verify(appointmentServiceHelper, times(1)).getAppointmentAuditEvent(appointment, notes);
         verify(appointmentDao, times(1)).save(appointment);
         verify(appointmentAuditDao, times(0)).save(appointmentAuditMock);
+    }
+
+    @Test
+    public void shouldPublishTeleconsultationAppointmentSavedEvent() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
+        appointment.setTeleconsultation(true);
+        appointmentsService.validateAndSave(appointment);
+        verify(applicationEventPublisher, times(1)).
+                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
+    }
+
+    @Test
+    public void shouldNotPublishTeleconsultationAppointmentSavedEventIfNotTeleconsultation() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
+        appointment.setTeleconsultation(false);
+        appointmentsService.validateAndSave(appointment);
+        verify(applicationEventPublisher, times(0)).
+                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
     }
 
     @Test

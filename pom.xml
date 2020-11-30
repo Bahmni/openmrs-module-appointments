@@ -197,7 +197,12 @@
 				<type>test-jar</type>
 				<scope>test</scope>
 			</dependency>
-
+			<dependency>
+				<groupId>org.bahmni.module</groupId>
+				<artifactId>email-notification-omod</artifactId>
+				<version>1.0.0-SNAPSHOT</version>
+				<scope>compile</scope>
+			</dependency>
 			<dependency>
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
@@ -262,30 +267,29 @@
 				<name>OpenMRS Nexus Repository</name>
 				<url>http://mavenrepo.openmrs.org/nexus/content/repositories/public</url>
 			</repository>
-					<repository>
-							<id>sonatype-nexus-snapshots</id>
-							<name>Sonatype Nexus Snapshots</name>
-							<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-							<releases>
-								<enabled>false</enabled>
-							</releases>
-							<snapshots>
-								<enabled>true</enabled>
-								<updatePolicy>interval:10080</updatePolicy>
-							</snapshots>
-					</repository>
-					<repository>
-							<id>sonatype-nexus-releases</id>
-							<name>Sonatype Nexus Snapshots</name>
-							<url>https://oss.sonatype.org/content/repositories/releases</url>
-							<releases>
-								<enabled>true</enabled>
-							</releases>
-							<snapshots>
-								<enabled>false</enabled>
-							</snapshots>
-					</repository>
-
+			<repository>
+				<id>sonatype-nexus-snapshots</id>
+				<name>Sonatype Nexus Snapshots</name>
+				<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				<releases>
+					<enabled>false</enabled>
+				</releases>
+				<snapshots>
+					<enabled>true</enabled>
+					<updatePolicy>interval:10080</updatePolicy>
+				</snapshots>
+			</repository>
+			<repository>
+				<id>sonatype-nexus-releases</id>
+				<name>Sonatype Nexus Snapshots</name>
+				<url>https://oss.sonatype.org/content/repositories/releases</url>
+				<releases>
+					<enabled>true</enabled>
+				</releases>
+				<snapshots>
+					<enabled>false</enabled>
+				</snapshots>
+			</repository>
 		</repositories>
 
 	<pluginRepositories>

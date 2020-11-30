@@ -10,6 +10,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
+import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -22,6 +23,8 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -43,7 +46,7 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
 
-public class AppointmentsServiceImpl implements AppointmentsService {
+public class AppointmentsServiceImpl implements AppointmentsService, ApplicationEventPublisherAware {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
     private Log log = LogFactory.getLog(this.getClass());
@@ -60,6 +63,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     private List<AppointmentConflict> appointmentConflicts;
+
+    private ApplicationEventPublisher applicationEventPublisher;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -79,6 +84,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
         this.appointmentServiceHelper = appointmentServiceHelper;
+    }
+
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
@@ -112,6 +121,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         save(appointment);
+        // TODO: #92 - remove null checking after adding a default value
+        if (appointment.getTeleconsultation() != null &&
+                appointment.getTeleconsultation()) {
+            applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
+        }
         return appointment;
     }
 
@@ -374,4 +388,5 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         Set<AppointmentAudit> appointmentAudits = appointment.getAppointmentAudits();
         appointmentAudits.addAll(new HashSet<>(Collections.singleton(appointmentAudit)));
     }
+
 }
