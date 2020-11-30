@@ -18,9 +18,11 @@ public class AppointmentDefaultResponse {
 	private String status;
 	private String comments;
 	private Map additionalInfo;
+	private Boolean teleconsultation;
 	private List<AppointmentProviderDetail> providers;
 	private Boolean isRecurring;
 	private Boolean voided;
+	private Boolean isEmailIdAvailable;
 
 	public String getUuid() {
 		return uuid;
@@ -101,6 +103,13 @@ public class AppointmentDefaultResponse {
 	public void setAppointmentKind(String appointmentKind) {
 		this.appointmentKind = appointmentKind;
 	}
+
+	public Boolean isTeleconsultation() {return teleconsultation; }
+
+	public void setTeleconsultation(Boolean teleconsultation)
+	{
+		this.teleconsultation = teleconsultation;
+	}
 	
 	public String getStatus() {
 		return status;
@@ -148,5 +157,13 @@ public class AppointmentDefaultResponse {
 
 	public void setVoided(Boolean voided) {
 		this.voided = voided;
+	}
+
+	public Boolean getEmailIdAvailable() {
+		return isEmailIdAvailable;
+	}
+
+	public void setEmailIdAvailable(Boolean emailIdAvailable) {
+		isEmailIdAvailable = emailIdAvailable;
 	}
 }
