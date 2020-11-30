@@ -132,6 +132,11 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.bahmni.module</groupId>
+			<artifactId>email-notification-omod</artifactId>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<scope>test</scope>

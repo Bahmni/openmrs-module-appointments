@@ -1,0 +1,21 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <person person_id="3" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75e04d42-3ca8-11e3-bf2b-0800271c1b77"/>
+
+    <person_attribute_type person_attribute_type_id="100" name="email" description="Email address" format="java.lang.String" searchable="true" creator="1" date_created="2009-05-17 09:59:23.0" retired="false" sort_weight="20" uuid="b3ghd540-a32e-44c7-91b3-292d97667518"/>
+
+    <person_attribute person_attribute_id="1" person_attribute_type_id="100" person_id="3" value="someemail@gmail.com" creator="1" date_created="2009-05-17 09:59:23.0" uuid="b3ghd540-a32e-44c7-91b3-292d97667518"/>
+
+    <patient patient_id="3" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason=""/>
+
+    <patient_identifier patient_identifier_id="1" patient_id="3" identifier="GAN200000" identifier_type="1"
+                        preferred="1" location_id="1" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"
+                        uuid="0b7cf2fa-b377-455c-8750-231cf34a21ac"/>
+    <appointment_speciality speciality_id="1" name="Ortho" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1" creator="1"/>
+
+    <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1"
+                        speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" uuid="c36006e5-9fbb-4f20-866b-0ece245615a6" voided="false"/>
+    <appointment_service_type appointment_service_type_id="1" appointment_service_id="1" name="serviceType1" duration_mins="30" uuid="678906e5-9fbb-4f20-866b-0ece24564578" creator="1" date_created="2108-08-10 15:57:09.0"  voided="false"/>
+    <patient_appointment patient_appointment_id="1" patient_id ="3" creator="1" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b77" location_id = "1" appointment_service_id="1"/>
+
+</dataset>

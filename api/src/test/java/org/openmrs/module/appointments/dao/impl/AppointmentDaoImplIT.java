@@ -145,6 +145,10 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentsForAPatient() {
+        // TODO: #92
+        // this test fails after adding a default value in Appointment:
+        // private Boolean isTeleconsultationEnabled = Boolean.FALSE;
+        // fix that in the search function (not test)
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
         Appointment appointment = new Appointment();
         appointment.setPatient(allAppointments.get(0).getPatient());

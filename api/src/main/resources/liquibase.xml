@@ -195,6 +195,20 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create-column-teleconsultation-202008241355" author="Vishal">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+            <not>
+                <columnExists tableName="patient_appointment" columnName="teleconsultation" />
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="teleconsultation" type="boolean"  >
+                <constraints nullable="false" />
+            </column>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="drop_index_on_appointment_service_table-201707251710" author="Santhosh, Maharjun">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="appointment_service"/>
@@ -340,6 +354,14 @@
         </preConditions>
         <comment>Adding query to fetch upcoming appointments for patient</comment>
         <sqlFile path="patientUpcomingAppointments.sql"/>
+    </changeSet>
+
+    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
+        </preConditions>
+        <comment>Updating query to fetch upcoming appointments for patient</comment>
+        <sqlFile path="patientUpcomingAppointments_v2.sql"/>
     </changeSet>
 
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">
@@ -575,5 +597,16 @@
             <column name="uuid" valueComputed="UUID()"/>
             <column name="description" value="URL pattern to use for published Recurring appointment events. Default is /openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}. If you change default value, please add your custom implementation for the given URL"/>
         </insert>
+    </changeSet>
+    <changeSet id="default-202009011116" author="Deedee Lee">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM person_attribute_type where name = 'email';
+            </sqlCheck>
+        </preConditions>
+        <comment> Add email address in registration page </comment>
+        <sql>
+            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
+        </sql>
     </changeSet>
 </databaseChangeLog>
