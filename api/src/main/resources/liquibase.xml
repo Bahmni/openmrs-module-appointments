@@ -204,7 +204,6 @@
         </preConditions>
         <addColumn tableName="patient_appointment">
             <column name="teleconsultation" type="boolean" defaultValue="false">
-                <constraints nullable="false" />
             </column>
         </addColumn>
     </changeSet>
