@@ -203,7 +203,7 @@
             </not>
         </preConditions>
         <addColumn tableName="patient_appointment">
-            <column name="teleconsultation" type="boolean" defaultValue="false">
+            <column name="teleconsultation" type="boolean" defaultValueBoolean="false">
             </column>
         </addColumn>
     </changeSet>
