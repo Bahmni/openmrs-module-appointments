@@ -364,6 +364,14 @@
         <sqlFile path="patientUpcomingAppointments_v2.sql"/>
     </changeSet>
 
+    <changeSet id="global-property-upcoming-appointments_updated" author="Gogia, Swati">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
+        </preConditions>
+        <comment>Updating query to fetch upcoming appointments for patient</comment>
+        <sqlFile path="patientUpcomingAppointments_v3.sql"/>
+    </changeSet>
+
     <changeSet id="Create-Available-for-appointments-201712121212-2" author="Maharjun, Saikumar">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
