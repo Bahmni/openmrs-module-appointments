@@ -1,7 +1,29 @@
 package org.openmrs.module.appointments.web.service.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang.time.DateUtils.addDays;
+import static org.apache.commons.lang.time.DateUtils.addHours;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
+
+import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,22 +40,8 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
+import org.openmrs.module.appointments.web.util.AppointmentBuilder;
+import org.openmrs.module.appointments.web.util.RecurringPatternBuilder;
 
 public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
@@ -1325,7 +1333,33 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
         weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
     }
+    
+    @Test
+    public void setAppointments_shouldThrowWhenFrequecyIsDecreasedSuchThatEndDateIsInPast() {
+    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
+    	LocalDate localDate = LocalDate.now();
+        Date refDate = Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+        
+        RecurringAppointmentRequest recurringRequest = getAppointmentRequest(addDays(refDate, +7), addHours(addDays(refDate, +7), +1));
+        recurringRequest.setRecurringPattern(new RecurringPatternBuilder().setPeriod(1).setFrequency(2).get());
+        
+        Mockito.when(appointmentMapper.fromRequest(recurringRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        
+        AppointmentRecurringPattern recurringPattern = getAppointmentRecurringPattern(1, 4, null, null);
+        recurringPattern.setAppointments(new HashSet<Appointment>() {{
+            add(new AppointmentBuilder().withStartDateTime(addDays(refDate, -7)).withEndDateTime(addHours(addDays(refDate, -7), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(refDate, -1)).withEndDateTime(addHours(addDays(refDate, -1), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(refDate, +0)).withEndDateTime(addHours(addDays(refDate, +0), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(refDate, +6)).withEndDateTime(addHours(addDays(refDate, +6), +1)).build());
+        }});
 
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("Changes cannot be made as the appointments are from past date");
+
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(recurringPattern, recurringRequest);
+    }
+
+    @Ignore
     @Test
     public void shouldThrowExceptionWhenFrequecyIsDecreasedSuchThatEndateIsInPast() {
         Calendar startTimeCalendar = Calendar.getInstance();
