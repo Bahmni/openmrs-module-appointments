@@ -23,7 +23,6 @@ import java.util.TimeZone;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -1357,53 +1356,6 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         expectedException.expectMessage("Changes cannot be made as the appointments are from past date");
 
         weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(recurringPattern, recurringRequest);
-    }
-
-    @Ignore
-    @Test
-    public void shouldThrowExceptionWhenFrequecyIsDecreasedSuchThatEndateIsInPast() {
-        Calendar startTimeCalendar = Calendar.getInstance();
-        Calendar endTimeCalendar = Calendar.getInstance();
-        int dayCode = startTimeCalendar.get(Calendar.DAY_OF_WEEK);
-        int previousDayCode = dayCode == 0 ? 7 : dayCode - 1;
-        String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
-        Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
-        Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
-        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 4,
-                null, days);
-
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(2);
-        recurringPattern.setPeriod(1);
-        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
-        Appointment appointment1 = new Appointment();
-        Appointment appointment2 = new Appointment();
-        Appointment appointment3 = new Appointment();
-        Appointment appointment4 = new Appointment();
-        Set<Appointment> appointments = new HashSet<>();
-        appointment1.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -7));
-        appointment1.setEndDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -7));
-        appointments.add(appointment1);
-        appointment2.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -1));
-        appointment2.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), -1));
-        appointments.add(appointment2);
-        appointment3.setStartDateTime(startTimeCalendar.getTime());
-        appointment3.setEndDateTime(endTimeCalendar.getTime());
-        appointments.add(appointment3);
-        appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
-        appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
-        appointments.add(appointment4);
-
-        appointmentRecurringPattern.setAppointments(appointments);
-
-        String error = "Changes cannot be made as the appointments are from past date";
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
-
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-
     }
 
     @Test
