@@ -1,5 +1,29 @@
 package org.openmrs.module.appointments.web.service.impl;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.openmrs.module.appointments.model.AppointmentProviderResponse.CANCELLED;
+import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
+import static org.openmrs.module.appointments.model.AppointmentStatus.Completed;
+import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
+import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.TimeZone;
+
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -31,29 +55,6 @@ import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.powermock.modules.junit4.PowerMockRunner;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.openmrs.module.appointments.model.AppointmentProviderResponse.CANCELLED;
-import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
-import static org.openmrs.module.appointments.model.AppointmentStatus.Completed;
-import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
-import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
 
 @RunWith(PowerMockRunner.class)
 public class AllAppointmentRecurringPatternUpdateServiceTest {
@@ -691,6 +692,7 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
 
     @Test
     public void shouldVoidTheCancelledProviders() {
+    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
         RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
         AppointmentProviderDetail appointmentProviderDetail = new AppointmentProviderDetail();
         appointmentProviderDetail.setResponse(AppointmentProviderResponse.ACCEPTED.toString());
