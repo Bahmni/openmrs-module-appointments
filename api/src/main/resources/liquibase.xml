@@ -195,7 +195,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-column-teleconsultation-202008241355" author="Vishal">
+    <changeSet id="create-column-teleconsultation-202012212044" author="Vishal, Angshu">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="patient_appointment" />
             <not>
@@ -203,8 +203,7 @@
             </not>
         </preConditions>
         <addColumn tableName="patient_appointment">
-            <column name="teleconsultation" type="boolean"  >
-                <constraints nullable="false" />
+            <column name="teleconsultation" type="boolean" defaultValueBoolean="false">
             </column>
         </addColumn>
     </changeSet>
@@ -348,7 +347,7 @@
         <sqlFile path="patientPastAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql" author="Maharjun, Shireesha">
+    <changeSet id="global-property-upcoming-appointments-sql-04022021" author="Maharjun, Shireesha">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
@@ -356,7 +355,7 @@
         <sqlFile path="patientUpcomingAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh">
+    <changeSet id="global-property-upcoming-appointments-sql-update-04022021" author="Shankar, Mahesh">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
@@ -607,7 +606,7 @@
         </insert>
     </changeSet>
     <changeSet id="default-202009011116" author="Deedee Lee">
-        <preConditions>
+        <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM person_attribute_type where name = 'email';
             </sqlCheck>

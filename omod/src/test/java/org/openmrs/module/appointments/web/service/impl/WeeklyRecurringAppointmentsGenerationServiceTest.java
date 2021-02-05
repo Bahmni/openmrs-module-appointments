@@ -1,5 +1,24 @@
 package org.openmrs.module.appointments.web.service.impl;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
+import static org.apache.commons.lang.time.DateUtils.addDays;
+import static org.apache.commons.lang.time.DateUtils.addHours;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TimeZone;
+
 import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
@@ -18,22 +37,8 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
-
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
+import org.openmrs.module.appointments.web.util.AppointmentBuilder;
+import org.openmrs.module.appointments.web.util.RecurringPatternBuilder;
 
 public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
@@ -1325,51 +1330,29 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
         weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
     }
-
+    
     @Test
-    public void shouldThrowExceptionWhenFrequecyIsDecreasedSuchThatEndateIsInPast() {
-        Calendar startTimeCalendar = Calendar.getInstance();
-        Calendar endTimeCalendar = Calendar.getInstance();
-        int dayCode = startTimeCalendar.get(Calendar.DAY_OF_WEEK);
-        int previousDayCode = dayCode == 0 ? 7 : dayCode - 1;
-        String days = getDayFromDayCode(dayCode) + "," + getDayFromDayCode(previousDayCode);
-        Date appointmentStartDateTime = DateUtils.addDays(startTimeCalendar.getTime(), +7);
-        Date appointmentEndDateTime = DateUtils.addDays(endTimeCalendar.getTime(), +7);
-        RecurringAppointmentRequest recurringAppointmentRequest = getAppointmentRequest(appointmentStartDateTime, appointmentEndDateTime);
-        AppointmentRecurringPattern appointmentRecurringPattern = getAppointmentRecurringPattern(1, 4,
-                null, days);
+    public void setAppointments_shouldThrowWhenFrequecyIsDecreasedSuchThatEndDateIsInPast() {
+    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
+        Date date = new Date();
+        
+        RecurringAppointmentRequest recurringRequest = getAppointmentRequest(addDays(date, +7), addHours(addDays(date, +7), +1));
+        recurringRequest.setRecurringPattern(new RecurringPatternBuilder().setPeriod(1).setFrequency(2).get());
+        
+        Mockito.when(appointmentMapper.fromRequest(recurringRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
+        
+        AppointmentRecurringPattern recurringPattern = getAppointmentRecurringPattern(1, 4, null, null);
+        recurringPattern.setAppointments(new HashSet<Appointment>() {{
+            add(new AppointmentBuilder().withStartDateTime(addDays(date, -7)).withEndDateTime(addHours(addDays(date, -7), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(date, -1)).withEndDateTime(addHours(addDays(date, -1), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(date, +0)).withEndDateTime(addHours(addDays(date, +0), +1)).build());
+            add(new AppointmentBuilder().withStartDateTime(addDays(date, +6)).withEndDateTime(addHours(addDays(date, +6), +1)).build());
+        }});
 
-        RecurringPattern recurringPattern = new RecurringPattern();
-        recurringPattern.setFrequency(2);
-        recurringPattern.setPeriod(1);
-        recurringAppointmentRequest.setRecurringPattern(recurringPattern);
-        Mockito.when(appointmentMapper.fromRequest(recurringAppointmentRequest.getAppointmentRequest())).thenAnswer(x -> new Appointment());
-        Appointment appointment1 = new Appointment();
-        Appointment appointment2 = new Appointment();
-        Appointment appointment3 = new Appointment();
-        Appointment appointment4 = new Appointment();
-        Set<Appointment> appointments = new HashSet<>();
-        appointment1.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -7));
-        appointment1.setEndDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -7));
-        appointments.add(appointment1);
-        appointment2.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), -1));
-        appointment2.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), -1));
-        appointments.add(appointment2);
-        appointment3.setStartDateTime(startTimeCalendar.getTime());
-        appointment3.setEndDateTime(endTimeCalendar.getTime());
-        appointments.add(appointment3);
-        appointment4.setStartDateTime(DateUtils.addDays(startTimeCalendar.getTime(), +6));
-        appointment4.setEndDateTime(DateUtils.addDays(endTimeCalendar.getTime(), +6));
-        appointments.add(appointment4);
-
-        appointmentRecurringPattern.setAppointments(appointments);
-
-        String error = "Changes cannot be made as the appointments are from past date";
         expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
+        expectedException.expectMessage("Changes cannot be made as the appointments are from past date");
 
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-
+        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(recurringPattern, recurringRequest);
     }
 
     @Test

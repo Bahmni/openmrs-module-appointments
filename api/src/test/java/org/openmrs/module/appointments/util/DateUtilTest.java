@@ -1,6 +1,11 @@
 package org.openmrs.module.appointments.util;
 
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
+import static org.openmrs.module.appointments.util.DateUtil.convertToLocalDateFromUTC;
+import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -9,12 +14,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.openmrs.module.appointments.util.DateUtil.convertToLocalDateFromUTC;
-import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
+import org.junit.Test;
 
 public class DateUtilTest {
     @Test
@@ -85,6 +85,7 @@ public class DateUtilTest {
 
     @Test
     public void shouldConvertDateToMilliSeconds() throws ParseException {
+    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
         String dateString = "2017-03-15T16:57:09.0Z";
         Date date = convertToLocalDateFromUTC(dateString);
         long milliSeconds = getEpochTime(date.getTime());
@@ -93,6 +94,7 @@ public class DateUtilTest {
 
     @Test
     public void shouldReturnZeroWhenPassedLongIsNegative() {
+    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
         long milliSeconds = getEpochTime(-10000);
         assertEquals(19790000, milliSeconds);
     }
