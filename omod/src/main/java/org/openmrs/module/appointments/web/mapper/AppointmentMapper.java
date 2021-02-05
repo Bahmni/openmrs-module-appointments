@@ -207,6 +207,7 @@ public class AppointmentMapper {
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
         response.setEmailIdAvailable(a.isEmailIdAvailable());
+        response.setEmailSent(a.getEmailSent());
         return response;
     }
 
