@@ -6,12 +6,15 @@ SET property_value= "SELECT
   DATE_FORMAT(start_date_time, \"%d/%m/%Y\")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
   CONCAT(DATE_FORMAT(start_date_time, \"%l:%i %p\"), \" - \", DATE_FORMAT(end_date_time, \"%l:%i %p\")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
   CONCAT(pn.given_name, ' ', pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
-  pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`
+  pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`,
+  pa.teleconsultation                                                                             AS `DASHBOARD_APPOINTMENTS_TELECONSULTATION`
+
 FROM
   patient_appointment pa
   JOIN person p ON p.person_id = pa.patient_id AND pa.voided IS FALSE
   JOIN appointment_service app_service
     ON app_service.appointment_service_id = pa.appointment_service_id AND app_service.voided IS FALSE
+  LEFT JOIN patient_appointment_provider pap on pa.patient_appointment_id = pap.patient_appointment_id AND (pap.voided=0 OR pap.voided IS NULL)
   LEFT JOIN provider prov ON prov.provider_id = pa.provider_id AND prov.retired IS FALSE
   LEFT JOIN person_name pn ON pn.person_id = prov.person_id AND pn.voided IS FALSE
   LEFT JOIN appointment_service_type app_service_type
