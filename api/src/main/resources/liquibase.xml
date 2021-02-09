@@ -339,7 +339,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql" author="Maharjun, Shireesha">
+    <changeSet id="global-property-past-appointments-sql-20210209" author="Maharjun, Shireesha">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -355,7 +355,7 @@
         <sqlFile path="patientPastAppointments_v2.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql" author="Maharjun, Shireesha">
+    <changeSet id="global-property-upcoming-appointments-sql-20210209" author="Maharjun, Shireesha">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
