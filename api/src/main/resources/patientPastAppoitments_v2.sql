@@ -1,4 +1,4 @@
-UPDATE global_property ('bahmni.sqlGet.pastAppointments',
+UPDATE global_property
 SET property_value= "SELECT
      app_service.name                                                                                AS `DASHBOARD_APPOINTMENTS_SERVICE_KEY`,
      app_service_type.name                                                                           AS `DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY`,
