@@ -23,6 +23,7 @@ public class AppointmentDefaultResponse {
 	private Boolean isRecurring;
 	private Boolean voided;
 	private Boolean isEmailIdAvailable;
+	private Boolean isEmailSent;
 
 	public String getUuid() {
 		return uuid;
@@ -165,5 +166,13 @@ public class AppointmentDefaultResponse {
 
 	public void setEmailIdAvailable(Boolean emailIdAvailable) {
 		isEmailIdAvailable = emailIdAvailable;
+	}
+
+	public Boolean getEmailSent() {
+		return isEmailSent;
+	}
+
+	public void setEmailSent(Boolean emailSent) {
+		isEmailSent = emailSent;
 	}
 }
