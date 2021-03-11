@@ -7,7 +7,9 @@ SET property_value= "SELECT
   CONCAT(DATE_FORMAT(start_date_time, \"%l:%i %p\"), \" - \", DATE_FORMAT(end_date_time, \"%l:%i %p\")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
   CONCAT(pn.given_name, ' ', pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
   pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`,
-  pa.teleconsultation                                                                             AS `DASHBOARD_APPOINTMENTS_TELECONSULTATION`
+  pa.teleconsultation                                                                             AS `DASHBOARD_APPOINTMENTS_TELECONSULTATION`,
+  start_date_time                                                                                 AS `DASHBOARD_APPOINTMENTS_START_DATE_KEY`,
+  end_date_time                                                                                   AS `DASHBOARD_APPOINTMENTS_END_DATE_KEY`
 
 FROM
   patient_appointment pa
