@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-@Component
 public class AppointmentServiceHelper {
 
     public void checkAndAssignAppointmentNumber(Appointment appointment) {

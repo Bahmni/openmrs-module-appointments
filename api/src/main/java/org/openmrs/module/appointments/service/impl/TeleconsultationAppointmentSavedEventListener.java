@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.stereotype.Component;
 
-@Component
 public class TeleconsultationAppointmentSavedEventListener implements ApplicationListener<TeleconsultationAppointmentSavedEvent> {
 
     private Log log = LogFactory.getLog(this.getClass());
@@ -31,5 +30,13 @@ public class TeleconsultationAppointmentSavedEventListener implements Applicatio
             event.getAppointment().setEmailSent(false);
             log.error("Unable to send teleconsultation appointment email notification", e);
         }
+    }
+
+    public TeleconsultationAppointmentNotificationService getEmailNotificationService() {
+        return emailNotificationService;
+    }
+
+    public void setEmailNotificationService(TeleconsultationAppointmentNotificationService emailNotificationService) {
+        this.emailNotificationService = emailNotificationService;
     }
 }
