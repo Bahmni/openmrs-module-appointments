@@ -32,12 +32,4 @@ public class TeleconsultationAppointmentSavedEventListener implements Applicatio
             log.error("Unable to send teleconsultation appointment email notification", e);
         }
     }
-
-    public TeleconsultationAppointmentNotificationService getEmailNotificationService() {
-        return emailNotificationService;
-    }
-
-    public void setEmailNotificationService(TeleconsultationAppointmentNotificationService emailNotificationService) {
-        this.emailNotificationService = emailNotificationService;
-    }
 }
