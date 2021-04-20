@@ -23,9 +23,14 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.module.appointments.telehealth.TeleHealthService;
+import org.openmrs.module.appointments.telehealth.InvitationRequest;
+import org.openmrs.module.appointments.telehealth.Invite;
+import org.openmrs.module.appointments.telehealth.TeleHealthUtils;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -65,6 +70,9 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     private List<AppointmentConflict> appointmentConflicts;
 
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Autowired
+    private TeleHealthService teleHealthService;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -130,8 +138,23 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     }
 
     private void save(Appointment appointment) {
+
+        if (true) {//appointment.getTeleconsultation()) {
+            InvitationRequest invitationRequest = TeleHealthUtils.createInvitation(appointment);
+            if (!AppointmentStatus.Cancelled.equals(appointment.getStatus())) {
+                Invite invite = teleHealthService.invite(invitationRequest);
+                appointment.setExternalId(invite.getId());
+
+                //String comments = appointment.getComments();
+                //comments = (comments == null ? "" : comments) + "\n\nTelehealth Link: \n" + invitation.getPatientURL();
+                //appointment.setComments(comments);
+            } else {
+                teleHealthService.delete(appointment.getExternalId());
+            }
+        }
+
         createAndSetAppointmentAudit(appointment);
-        appointmentDao.save(appointment);
+        this.save(appointment);
     }
 
     @Transactional
@@ -202,7 +225,7 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, appointmentStatus, statusChangeValidators);
         validateUserPrivilege(appointment, appointmentStatus);
         appointment.setStatus(appointmentStatus);
-        appointmentDao.save(appointment);
+        this.save(appointment);
         String notes = onDate != null ? onDate.toInstant().toString() : null;
         createEventInAppointmentAudit(appointment, notes);
     }
@@ -300,7 +323,7 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         if (isFirstAcceptForRequestedAppointment(providerWithNewResponse, appointment)) {
             changeStatus(appointment, AppointmentStatus.Scheduled.name(), Date.from(Instant.now()));
         } else {
-            appointmentDao.save(appointment);
+            this.save(appointment);
         }
         createAppointmentAudit(providerWithNewResponse, appointment, existingProviderInAppointment);
     }

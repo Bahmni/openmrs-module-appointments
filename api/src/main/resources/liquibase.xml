@@ -208,6 +208,19 @@
         </addColumn>
     </changeSet>
 
+    <changeSet id="create-column-external-id-202104151500" author="Luis Oliveira" runOnChange="true">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+            <not>
+                <columnExists tableName="patient_appointment" columnName="external_id" />
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="external_id" type="varchar(50)">
+            </column>
+        </addColumn>
+    </changeSet>
+
     <changeSet id="drop_index_on_appointment_service_table-201707251710" author="Santhosh, Maharjun">
         <preConditions onFail="MARK_RAN">
             <tableExists tableName="appointment_service"/>
@@ -339,7 +352,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql-09022021" author="Maharjun, Shireesha">
+    <changeSet id="global-property-past-appointments-sql-09022021"  author="Maharjun, Shireesha" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -347,7 +360,7 @@
         <sqlFile path="patientPastAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-past-appointments-sql-update" author="Himabindu">
+    <changeSet id="global-property-past-appointments-sql-update" author="Himabindu" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.pastAppointments'</sqlCheck>
         </preConditions>
@@ -355,7 +368,7 @@
         <sqlFile path="patientPastAppointments_v2.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-09022021" author="Maharjun, Shireesha">
+    <changeSet id="global-property-upcoming-appointments-sql-09022021" author="Maharjun, Shireesha" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
@@ -363,7 +376,7 @@
         <sqlFile path="patientUpcomingAppointments.sql"/>
     </changeSet>
 
-    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh">
+    <changeSet id="global-property-upcoming-appointments-sql-update" author="Shankar, Mahesh" runOnChange="true">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="1">select count(*) from global_property where property='bahmni.sqlGet.upComingAppointments'</sqlCheck>
         </preConditions>
