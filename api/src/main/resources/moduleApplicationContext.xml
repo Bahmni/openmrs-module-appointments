@@ -23,6 +23,17 @@
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <context:component-scan base-package="org.openmrs.module.appointments"/>
+
+    <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+    <bean id="teleconsultationAppointmentSavedEventListener" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentSavedEventListener">
+        <property name="emailNotificationService">
+            <ref bean="teleconsultationAppointmentNotificationService"/>
+        </property>
+    </bean>
+
+    <bean id="defaultAppointmentStatusChangeValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
+    <bean id="defaultAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
+
     <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>
     <bean parent="serviceContext">
         <property name="moduleService">
