@@ -34,6 +34,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     public List<Appointment> getAllAppointments(Date forDate) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
         criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         if (forDate != null) {
             Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
             criteria.add(Restrictions.ge("startDateTime", forDate));
@@ -74,6 +76,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("service", appointmentServiceDefinition));
         criteria.add(Restrictions.gt("endDateTime", new Date()));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
         return criteria.list();
     }
@@ -84,6 +88,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("serviceType", appointmentServiceType));
         criteria.add(Restrictions.gt("endDateTime", new Date()));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
         return criteria.list();
     }
@@ -94,6 +100,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.createAlias("serviceType", "serviceType", JoinType.LEFT_OUTER_JOIN);
         criteria.add(Restrictions.or(Restrictions.isNull("serviceType"), Restrictions.eq("serviceType.voided", false)));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.ge("startDateTime", startDate));
         criteria.add(Restrictions.le("startDateTime", endDate));
         criteria.createCriteria("service").add(Example.create(appointmentServiceDefinition));
@@ -115,6 +123,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
         criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         if (startDate != null) {
             criteria.add(Restrictions.ge("startDateTime", startDate));
         }
@@ -147,8 +157,9 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
-            criteria.createAlias("patient", "patient");
             criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
         }
     }
@@ -177,6 +188,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.createAlias("patient", "patient");
         criteria.add(Restrictions.eq("patient.patientId", patientId));
         criteria.add(Restrictions.eq("voided", false));
+        criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.ge("startDateTime", DateUtil.getStartOfDay()));
 
         return criteria.list();
