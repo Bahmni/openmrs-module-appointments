@@ -1,10 +1,10 @@
 UPDATE global_property
-SET property_value= 'SELECT
+SET property_value= "SELECT
   pa.uuid,
   app_service.name                                                                                AS `DASHBOARD_APPOINTMENTS_SERVICE_KEY`,
   app_service_type.name                                                                           AS `DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY`,
-  DATE_FORMAT(start_date_time, "%d/%m/%Y")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
-  CONCAT(DATE_FORMAT(start_date_time, "%l:%i %p"), " - ", DATE_FORMAT(end_date_time, "%l:%i %p")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
+  DATE_FORMAT(start_date_time, \"%d/%m/%Y\")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
+  CONCAT(DATE_FORMAT(start_date_time, \"%l:%i %p\"), \" - \", DATE_FORMAT(end_date_time, \"%l:%i %p\")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
   CONCAT(pn.given_name, ' ', pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
   pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`,
   pa.teleconsultation                                                                             AS `DASHBOARD_APPOINTMENTS_TELECONSULTATION`,
@@ -24,5 +24,5 @@ FROM
 WHERE p.uuid = ${patientUuid} AND
       start_date_time >= CURDATE() AND
       (app_service_type.voided IS FALSE OR app_service_type.voided IS NULL)
-ORDER BY start_date_time ASC;'
-WHERE property='bahmni.sqlGet.upComingAppointments';
+ORDER BY start_date_time ASC;"
+WHERE property='bahmni.sqlGet.upComingAppointments'
