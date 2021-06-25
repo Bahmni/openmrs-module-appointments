@@ -34,6 +34,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
     private Boolean isEmailSent;
+    private String teleHealthVideoLink;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
         return appointmentAudits;
@@ -208,7 +209,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.teleconsultation = teleconsultation;
     }
 
-    public Boolean getTeleconsultation(){
+    public Boolean getTeleconsultation() {
         return teleconsultation;
     }
 
@@ -222,6 +223,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public void setEmailSent(Boolean emailSent) {
         isEmailSent = emailSent;
+    }
+
+    public String getTeleHealthVideoLink() {
+        return teleHealthVideoLink;
+    }
+
+    public void setTeleHealthVideoLink(String teleHealthVideoLink) {
+        this.teleHealthVideoLink = teleHealthVideoLink;
     }
 }
 

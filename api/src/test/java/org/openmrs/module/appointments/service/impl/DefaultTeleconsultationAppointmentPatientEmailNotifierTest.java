@@ -1,7 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.bahmni.module.email.notification.EmailNotificationException;
-import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
@@ -16,8 +14,11 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.PersonAttributeType;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
+import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
+import org.openmrs.module.appointments.notification.MailSender;
+import org.openmrs.module.appointments.notification.NotificationException;
+import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.service.TeleconsultationAppointmentNotificationService;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -30,15 +31,17 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
-public class TeleconsultationAppointmentNotificationServiceImplTest {
+public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
 
-    private TeleconsultationAppointmentNotificationService teleconsultationAppointmentNotificationService;
+    private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
+    private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
+    private AppointmentEventNotifier tcAppointmentEventNotifier;
 
     @Mock
     private MessageSourceService messageSourceService;
 
     @Mock
-    private EmailNotificationService emailNotificationService;
+    private MailSender mailSender;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -47,19 +50,18 @@ public class TeleconsultationAppointmentNotificationServiceImplTest {
     public void init() {
         MockitoAnnotations.initMocks(this);
         mockStatic(Context.class);
-        teleconsultationAppointmentNotificationService =
-                new TeleconsultationAppointmentNotificationServiceImpl(emailNotificationService);
+        tcAppointmentEventNotifier = new DefaultTCAppointmentPatientEmailNotifier(mailSender);
     }
 
     @Ignore
     @Test
     public void shouldSendTeleconsultationAppointmentLinkEmail() throws Exception {
         Appointment appointment = buildAppointment();
-        when(messageSourceService.getMessage("teleconsultation.appointment.email.subject", null, null)).thenReturn("Email subject");
-        when(messageSourceService.getMessage("teleconsultation.appointment.email.body", null, null)).thenReturn("Email body");
+        when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT, null, null)).thenReturn("Email subject");
+        when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE, null, null)).thenReturn("Email body");
         when(Context.getMessageSourceService()).thenReturn(messageSourceService);
-        teleconsultationAppointmentNotificationService.sendTeleconsultationAppointmentLinkEmail(appointment);
-        verify(emailNotificationService).send(
+        tcAppointmentEventNotifier.sendNotification(appointment);
+        verify(mailSender).send(
                 eq("Email subject"),
                 eq("Email body"),
                 AdditionalMatchers.aryEq(new String[]{ "someemail@gmail.com" }),
@@ -69,16 +71,15 @@ public class TeleconsultationAppointmentNotificationServiceImplTest {
 
     @Ignore
     @Test
-    public void shouldThrowExceptionIfSendingFails() throws EmailNotificationException {
+    public void shouldThrowExceptionIfSendingFails() throws NotificationException {
         Appointment appointment = buildAppointment();
         String link = "https://meet.jit.si/" + appointment.getUuid();
-        when(messageSourceService.getMessage("teleconsultation.appointment.email.subject", null, null)).thenReturn("Email subject");
-        when(messageSourceService.getMessage("teleconsultation.appointment.email.body", new Object[]{ link }, null)).thenReturn("Link");
+        when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT, null, null)).thenReturn("Email subject");
+        when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE, new Object[]{ link }, null)).thenReturn("Link");
         when(Context.getMessageSourceService()).thenReturn(messageSourceService);
-        doThrow(new EmailNotificationException("Some error", new Exception())).when(emailNotificationService).send(any(), any(), any(), any(), any());
-        expectedException.expect(EmailNotificationException.class);
-
-        teleconsultationAppointmentNotificationService.sendTeleconsultationAppointmentLinkEmail(appointment);
+        doThrow(new NotificationException("Some error", new Exception())).when(mailSender).send(any(), any(), any(), any(), any());
+        expectedException.expect(NotificationException.class);
+        tcAppointmentEventNotifier.sendNotification(appointment);
     }
 
     private Appointment buildAppointment() {

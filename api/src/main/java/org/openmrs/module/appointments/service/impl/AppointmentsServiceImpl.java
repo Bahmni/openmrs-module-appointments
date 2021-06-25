@@ -66,6 +66,8 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
     }
@@ -98,6 +100,10 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         this.appointmentConflicts = appointmentConflicts;
     }
 
+    public void setTeleconsultationAppointmentService(TeleconsultationAppointmentService teleconsultationAppointmentService) {
+        this.teleconsultationAppointmentService = teleconsultationAppointmentService;
+    }
+
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
                 isAppointmentNotAssignedToAnyProvider(appointment) ||
@@ -120,14 +126,25 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        setupTeleconsultation(appointment);
         save(appointment);
-        // TODO: #92 - remove null checking after adding a default value
-        if (appointment.getTeleconsultation() != null &&
-                appointment.getTeleconsultation()) {
-            applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
-        }
+        notifyListeners(appointment);
         return appointment;
     }
+
+    private void setupTeleconsultation(Appointment appointment) {
+        if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
+            appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
+        }
+    }
+
+    private void notifyListeners(Appointment appointment) {
+        // TODO: #92 - remove null checking after adding a default value
+        if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
+            applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
+        }
+    }
+
 
     private void save(Appointment appointment) {
         createAndSetAppointmentAudit(appointment);

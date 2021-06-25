@@ -102,6 +102,9 @@
 						<ref bean="patientDoubleBookingConflict"/>
 					</list>
 				</property>
+				<property name="teleconsultationAppointmentService">
+					<bean class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
+				</property>
 			</bean>
 		</property>
 		<property name="preInterceptors">

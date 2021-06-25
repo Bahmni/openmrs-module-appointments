@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
@@ -74,6 +75,12 @@ public class SpecialityServiceImplTest {
        speciality.setName("Cardiology");
        specialityService.save(speciality);
        Mockito.verify(specialityDao, times(1)).save(speciality);
+    }
+
+    @Test
+    public void something() {
+        System.out.println(new MessageFormat("https://meet.jit.si/{0}").format(new Object[] { "379be02d-040e-44de-a502-86d3fe6300fe" } ));
+
     }
 
 }

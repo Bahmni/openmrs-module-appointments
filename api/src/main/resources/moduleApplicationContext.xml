@@ -25,9 +25,18 @@
     <context:component-scan base-package="org.openmrs.module.appointments"/>
 
     <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+    <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender"/>
+    <bean id="defaultPatientEmailNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier">
+        <constructor-arg ref="defaultTCApptMailSender"/>
+    </bean>
+
+<!--    <ref bean="defaultAppointmentMailSender"/>-->
+
     <bean id="teleconsultationAppointmentSavedEventListener" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentSavedEventListener">
-        <property name="emailNotificationService">
-            <ref bean="teleconsultationAppointmentNotificationService"/>
+        <property name="eventNotifiers">
+            <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
+                <ref bean="defaultPatientEmailNotifier"/>
+            </list>
         </property>
     </bean>
 
@@ -108,6 +117,9 @@
                         <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
+                </property>
+                <property name="teleconsultationAppointmentService">
+                    <bean class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
                 </property>
             </bean>
         </property>
@@ -246,12 +258,6 @@
     <bean id="appointmentAuditDao" class="org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl">
         <property name="sessionFactory">
             <ref bean="sessionFactory"/>
-        </property>
-    </bean>
-
-    <bean id="teleconsultationAppointmentNotificationService" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentNotificationServiceImpl">
-        <property name="emailNotificationService">
-            <ref bean="emailNotificationService"/>
         </property>
     </bean>
 

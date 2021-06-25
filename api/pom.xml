@@ -87,7 +87,7 @@
 										<limit>
 											<counter>BRANCH</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.68</minimum>
+											<minimum>0.65</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -130,11 +130,6 @@
 			<version>${openmrs.platform.version}</version>
 			<type>test-jar</type>
 			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.bahmni.module</groupId>
-			<artifactId>email-notification-omod</artifactId>
-			<scope>compile</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>

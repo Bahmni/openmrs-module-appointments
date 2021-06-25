@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -106,9 +105,6 @@ public class AppointmentsServiceImplTest {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Mock
-    private EmailNotificationService emailNotificationService;
-
-    @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
     @Mock
@@ -131,6 +127,9 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
