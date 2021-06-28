@@ -252,12 +252,6 @@
 				<version>3.0.1</version>
 				<scope>provided</scope>
 			</dependency>
-			<dependency>
-				<groupId>javax.mail</groupId>
-				<artifactId>mail</artifactId>
-				<version>1.3.2</version>
-				<scope>provided</scope>
-			</dependency>
 		</dependencies>
 	</dependencyManagement>
 

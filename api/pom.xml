@@ -149,7 +149,6 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- End OpenMRS core -->
-
 	</dependencies>
 
 </project>

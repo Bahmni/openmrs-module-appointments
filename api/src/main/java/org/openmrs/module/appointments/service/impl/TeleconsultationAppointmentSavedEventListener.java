@@ -10,6 +10,7 @@ import org.springframework.context.ApplicationListener;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class TeleconsultationAppointmentSavedEventListener implements ApplicationListener<TeleconsultationAppointmentSavedEvent> {
 
@@ -46,5 +47,15 @@ public class TeleconsultationAppointmentSavedEventListener implements Applicatio
 
     public void setEventNotifiers(List<AppointmentEventNotifier> eventNotifiers) {
         this.eventNotifiers = eventNotifiers;
+    }
+
+    public void registerNotifier(AppointmentEventNotifier notifier) {
+        if (notifier.getMedium() != null) {
+            List<AppointmentEventNotifier> exitingNotifiers = this.eventNotifiers.stream().filter(n -> n.getMedium().equalsIgnoreCase(notifier.getMedium())).collect(Collectors.toList());
+            if  (exitingNotifiers != null && !exitingNotifiers.isEmpty() ) {
+                this.eventNotifiers.removeAll(exitingNotifiers);
+            }
+            this.eventNotifiers.add(notifier);
+        }
     }
 }

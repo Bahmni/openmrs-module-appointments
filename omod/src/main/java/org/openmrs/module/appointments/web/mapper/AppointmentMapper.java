@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -56,6 +58,8 @@ public class AppointmentMapper {
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
 
+    private Log log = LogFactory.getLog(this.getClass());
+
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
     }
@@ -72,6 +76,11 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
         }
+
+        log.error("App uuid: " +  appointment.getUuid());
+        log.error("App datechanged: " +  appointment.getDateChanged());
+        log.error("App date created: " +  appointment.getDateCreated());
+
         mapAppointmentRequestToAppointment(appointmentRequest, appointment);
         return appointment;
     }

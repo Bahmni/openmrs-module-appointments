@@ -139,7 +139,6 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     }
 
     private void notifyListeners(Appointment appointment) {
-        // TODO: #92 - remove null checking after adding a default value
         if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
             applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
         }
