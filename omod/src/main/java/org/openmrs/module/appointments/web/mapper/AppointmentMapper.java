@@ -76,11 +76,12 @@ public class AppointmentMapper {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
         }
-
-        log.error("App uuid: " +  appointment.getUuid());
-        log.error("App datechanged: " +  appointment.getDateChanged());
-        log.error("App date created: " +  appointment.getDateCreated());
-
+        log.error("AM App uuid: " +  appointment.getUuid());
+        log.error("AM App Id: " +  appointment.getAppointmentId());
+        log.error("AM date changed: " +  appointment.getDateChanged());
+        log.error("AM App date created: " +  appointment.getDateCreated());
+        log.error("AM App start date : " + appointment.getStartDateTime());
+        log.error("AM App link: " +  appointment.getTeleHealthVideoLink());
         mapAppointmentRequestToAppointment(appointmentRequest, appointment);
         return appointment;
     }

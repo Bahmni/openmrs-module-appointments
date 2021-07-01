@@ -50,7 +50,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         log.error("Appointment Date Changed: " + appointment.getDateChanged());
         if (!shouldSendEmailToPatient())  {
             log.warn(EMAIL_NOT_SENT);
-            return new NotificationResult(null, 0, EMAIL_NOT_SENT);
+            return new NotificationResult(null, "EMAIL", 0, EMAIL_NOT_SENT);
         }
         if (patientEmailAttribute != null) {
             String patientEmail = patientEmailAttribute.getValue();
@@ -60,14 +60,14 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
             try {
                 log.error("Sending mail through: " +  mailSender.getClass());
                 mailSender.send(emailSubject, emailBody, new String[] { patientEmail }, null, null);
-                return new NotificationResult("", 0, EMAIL_SENT);
+                return new NotificationResult("", "EMAIL", 0, EMAIL_SENT);
             } catch (Exception e) {
                 log.error(EMAIL_FAILURE, e);
                 throw new NotificationException(EMAIL_FAILURE, e);
             }
         } else {
             log.warn(EMAIL_NOT_CONFIGURED);
-            return new NotificationResult(null, 1, EMAIL_NOT_CONFIGURED);
+            return new NotificationResult(null, "EMAIL", 1, EMAIL_NOT_CONFIGURED);
         }
     }
 

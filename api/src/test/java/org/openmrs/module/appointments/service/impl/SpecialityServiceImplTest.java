@@ -77,10 +77,4 @@ public class SpecialityServiceImplTest {
        Mockito.verify(specialityDao, times(1)).save(speciality);
     }
 
-    @Test
-    public void something() {
-        System.out.println(new MessageFormat("https://meet.jit.si/{0}").format(new Object[] { "379be02d-040e-44de-a502-86d3fe6300fe" } ));
-
-    }
-
 }

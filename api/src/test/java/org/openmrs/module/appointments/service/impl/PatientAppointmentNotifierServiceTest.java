@@ -8,24 +8,20 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
-import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.model.Appointment;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.springframework.context.ConfigurableApplicationContext;
-import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import java.util.Collections;
 
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @RunWith(PowerMockRunner.class)
-public class TeleconsultationAppointmentSavedEventListenerTest {
+public class PatientAppointmentNotifierServiceTest {
 
-    private ConfigurableApplicationContext ctx;
-
-    private TeleconsultationAppointmentSavedEventListener listener;
+    private PatientAppointmentNotifierService notifierService;
 
     @Mock
     private AppointmentEventNotifier appointmentEventNotifier;
@@ -33,17 +29,14 @@ public class TeleconsultationAppointmentSavedEventListenerTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        ctx = new AnnotationConfigApplicationContext();
-        listener =  new TeleconsultationAppointmentSavedEventListener(Collections.singletonList(appointmentEventNotifier));
-        ctx.addApplicationListener(listener);
-        ctx.refresh();
+        notifierService =  new PatientAppointmentNotifierService(Collections.singletonList(appointmentEventNotifier));
     }
 
     @Test
     public void shouldSendEmailOnTeleconsultationAppointmentSavedEvent() throws NotificationException {
         Appointment appointment = new Appointment();
-        when(appointmentEventNotifier.sendNotification(appointment)).thenReturn(new NotificationResult("", 0, "Some message"));
-        ctx.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
+        when(appointmentEventNotifier.sendNotification(appointment)).thenReturn(new NotificationResult("", "EMAIL", 0, "Some message"));
+        notifierService.notifyAll(appointment);
         verify(appointmentEventNotifier, times(1)).sendNotification(appointment);
     }
 }

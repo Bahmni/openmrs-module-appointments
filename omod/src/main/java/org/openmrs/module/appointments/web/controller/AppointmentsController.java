@@ -70,6 +70,7 @@ public class AppointmentsController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
+            log.error("In new AC save appt");
             appointmentRequest.setUuid(null);
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointmentsService.validateAndSave(appointment);

@@ -10,7 +10,6 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -20,6 +19,7 @@ import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -37,6 +37,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -67,6 +68,8 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     private ApplicationEventPublisher applicationEventPublisher;
 
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
+    private PatientAppointmentNotifierService appointmentNotifierService;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -104,6 +107,10 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         this.teleconsultationAppointmentService = teleconsultationAppointmentService;
     }
 
+    public void setAppointmentNotifierService(PatientAppointmentNotifierService appointmentNotifierService) {
+        this.appointmentNotifierService = appointmentNotifierService;
+    }
+
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
                 isAppointmentNotAssignedToAnyProvider(appointment) ||
@@ -126,22 +133,75 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        Appointment prev = getAppointmentByUuid(appointment.getUuid());
         setupTeleconsultation(appointment);
         save(appointment);
-        notifyListeners(appointment);
+        notifyUpdates(prev, appointment);
+        return appointment;
+    }
+
+    @Transactional
+    @Override
+    public Appointment validateAndSave(String appointmentUuid, Supplier<Appointment> mapper) {
+        Appointment prev = null;
+        if (appointmentUuid != null && !"".equals(appointmentUuid)) {
+            prev = getAppointmentByUuid(appointmentUuid);
+        }
+        Appointment appointment = mapper.get();
+        validate(appointment, appointmentValidators);
+        appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        setupTeleconsultation(appointment);
+        save(appointment);
+        notifyUpdates(prev, appointment);
         return appointment;
     }
 
     private void setupTeleconsultation(Appointment appointment) {
+        log.error("1 uuid: " +  appointment.getUuid());
+        log.error("1 Id: " +  appointment.getAppointmentId());
+        log.error("1 date changed: " +  appointment.getDateChanged());
+        log.error("1 date created: " +  appointment.getDateCreated());
+        log.error("1 start date : " + appointment.getStartDateTime());
+        log.error("1 link: " +  appointment.getTeleHealthVideoLink());
         if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
             appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
         }
     }
 
-    private void notifyListeners(Appointment appointment) {
+    private void notifyUpdates(Appointment prev, Appointment appointment) {
+        debugPrePostAppt(prev, appointment);
         if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
-            applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
+            List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
+            Optional<NotificationResult> result = notificationResults.stream().filter(r -> r.getStatus() == NotificationResult.SUCCESS_STATUS).findFirst();
+            result.ifPresent(r -> appointment.setEmailSent(true));
+            notificationResults.stream().filter(r -> r.getStatus() != NotificationResult.SUCCESS_STATUS)
+                    .forEach(nr -> log.error(String.format(
+                            "Could not send notification for medium: %s, uuid: %s, status: %d, errMsg: %s",
+                            nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage())));
         }
+    }
+
+    private void debugPrePostAppt(Appointment prev, Appointment appointment) {
+        log.error("before save: " + prev);
+        log.error("equal?: " + (appointment == prev));
+        log.error("post save: " + appointment);
+
+        if (prev != null) {
+            log.error("prev uuid: " + prev.getUuid());
+            log.error("prev Id: " + prev.getAppointmentId());
+            log.error("prev date changed: " + prev.getDateChanged());
+            log.error("prev date created: " + prev.getDateCreated());
+            log.error("prev start date : " + prev.getStartDateTime());
+            log.error("prev link: " + prev.getTeleHealthVideoLink());
+        } else {
+            log.error("no previous instance" );
+        }
+        log.error("current uuid: " +  appointment.getUuid());
+        log.error("current Id: " +  appointment.getAppointmentId());
+        log.error("current date changed: " +  appointment.getDateChanged());
+        log.error("current date created: " +  appointment.getDateCreated());
+        log.error("current start date : " + appointment.getStartDateTime());
+        log.error("current link: " +  appointment.getTeleHealthVideoLink());
     }
 
 

@@ -616,4 +616,16 @@
             INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
         </sql>
     </changeSet>
+    <changeSet id="create-column-tele_health_video_link-202106211857" author="Angshu">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+            <not>
+                <columnExists tableName="patient_appointment" columnName="tele_health_video_link" />
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="tele_health_video_link" type="varchar(255)">
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

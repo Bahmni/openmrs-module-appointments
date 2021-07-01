@@ -2,43 +2,44 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
-import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
-import org.springframework.context.ApplicationListener;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class TeleconsultationAppointmentSavedEventListener implements ApplicationListener<TeleconsultationAppointmentSavedEvent> {
+public class PatientAppointmentNotifierService {
 
+    private static final String CANNOT_SEND_NOTIFICATION_USING_MEDIUM = "Unable to send tele-consultation appointment information through ";
     private Log log = LogFactory.getLog(this.getClass());
 
     private List<AppointmentEventNotifier> eventNotifiers = new ArrayList<>();
 
-    public TeleconsultationAppointmentSavedEventListener() {}
-    public TeleconsultationAppointmentSavedEventListener(List<AppointmentEventNotifier> notifiers) {
+    //def constructor not required. Test application contexts should spring  wiring
+    public PatientAppointmentNotifierService() {}
+    public PatientAppointmentNotifierService(List<AppointmentEventNotifier> notifiers) {
         this.eventNotifiers = notifiers;
     }
 
-    @Override
-    public void onApplicationEvent(TeleconsultationAppointmentSavedEvent event) {
-        if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return;
-
-        event.getAppointment().setEmailSent(false);
-        log.error("No of notifiers:" + eventNotifiers.size());
+    public List<NotificationResult> notifyAll(Appointment appointment) {
+        if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
+        log.debug("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
+        List<NotificationResult> notificationResults = new ArrayList<>();
         for (AppointmentEventNotifier eventNotifier : eventNotifiers) {
             try {
-                NotificationResult result = eventNotifier.sendNotification(event.getAppointment());
-                if (result.getStatus() != NotificationResult.SUCCESS_STATUS) {
-                    event.getAppointment().setEmailSent(true);
-                }
+                NotificationResult result = eventNotifier.sendNotification(appointment);
+                notificationResults.add(result);
             } catch (NotificationException e) {
-                log.error("Unable to send tele-consultation appointment information through "  + eventNotifier.getMedium(), e);
+                String msg = CANNOT_SEND_NOTIFICATION_USING_MEDIUM + eventNotifier.getMedium();
+                log.error(msg, e);
+                notificationResults.add(new NotificationResult("", eventNotifier.getMedium(), NotificationResult.GENERAL_ERROR, msg));
             }
         }
+        return notificationResults;
     }
 
     public List<AppointmentEventNotifier> getEventNotifiers() {

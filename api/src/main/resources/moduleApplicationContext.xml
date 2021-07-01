@@ -34,7 +34,7 @@
 
 <!--    <ref bean="defaultAppointmentMailSender"/>-->
 
-    <bean id="teleconsultationAppointmentSavedEventListener" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentSavedEventListener">
+    <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService">
         <property name="eventNotifiers">
             <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
                 <ref bean="defaultPatientEmailNotifier"/>
@@ -122,6 +122,9 @@
                 </property>
                 <property name="teleconsultationAppointmentService">
                     <bean class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
+                </property>
+                <property name="appointmentNotifierService">
+                    <ref bean="patientAppointmentNotifierService"/>
                 </property>
             </bean>
         </property>
