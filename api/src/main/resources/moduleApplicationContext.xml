@@ -44,17 +44,7 @@
 
     <bean id="defaultAppointmentStatusChangeValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
     <bean id="defaultAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
-
-<!--    <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>-->
-<!--    <bean parent="serviceContext">-->
-<!--        <property name="moduleService">-->
-<!--            <list merge="true">-->
-<!--                <value>org.openmrs.api.AdministrationService</value>-->
-<!--                <ref bean="administrationService"/>-->
-<!--            </list>-->
-<!--        </property>-->
-<!--    </bean>-->
-
+    
     <bean id="specialityService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
