@@ -84,7 +84,13 @@ public interface AppointmentsService {
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Map<Enum, List<Appointment>> getAppointmentsConflicts(List<Appointment> appointments);
 
-
+    /**
+     * Note, this API is introduced to fix potential error of transaction not being  atomic.
+     * Please see comments on the appointmentController.
+     * Once we refactor the code, this method should be removed.
+     * @param mapper
+     * @return
+     */
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndSave(Supplier<Appointment> mapper);

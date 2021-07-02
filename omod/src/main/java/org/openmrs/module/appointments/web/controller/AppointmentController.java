@@ -69,8 +69,13 @@ public class AppointmentController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
         try {
-            //Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            //appointmentsService.validateAndSave(appointment);
+            /**
+             * The above code has been done so because to make appointment save within a transaction boundary.
+             * calling appointmentMapper starts a transaction and persistent object is modified, which when
+             * appointmentService.validateAndSave() is called was being written to DB, as calling validateAndSave() will
+             * start another transaction, and before that the dirty persistent entity will be flushed to DB.
+             * appointmentMapper should be fixed and validateAndSave() signature should be changed.
+             */
             Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
