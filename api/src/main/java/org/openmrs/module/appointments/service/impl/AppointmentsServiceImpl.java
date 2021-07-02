@@ -151,12 +151,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private void notifyUpdates(Appointment appointment) {
         List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
-        Optional<NotificationResult> result = notificationResults.stream().filter(r -> r.getStatus() == NotificationResult.SUCCESS_STATUS).findFirst();
-        result.ifPresent(r -> appointment.setEmailSent(true));
-        notificationResults.stream().filter(r -> r.getStatus() != NotificationResult.SUCCESS_STATUS)
-                .forEach(nr -> log.error(String.format(
-                        "Could not send notification for medium: %s, uuid: %s, status: %d, errMsg: %s",
-                        nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage())));
+        if (!notificationResults.isEmpty()) {
+            notificationResults.stream().forEach(nr -> {
+                String notificationMsg = String.format("Appointment Notification Result - medium: %s, uuid: %s, status: %d, message: %s",
+                        nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage());
+                log.info(notificationMsg);
+            });
+            appointment.setNotificationResults(notificationResults);
+        }
     }
 
 

@@ -5,12 +5,14 @@ import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.util.DateUtil;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,8 +35,12 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private AppointmentRecurringPattern appointmentRecurringPattern;
     private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
-    private Boolean isEmailSent;
     private String teleHealthVideoLink;
+
+    /**
+     * This attribute is not a entity property. Just a placeholder for the clients to prepare response relevant  to notification
+     */
+    private List<NotificationResult> notificationResults;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
         return appointmentAudits;
@@ -213,16 +219,9 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         return teleconsultation;
     }
 
-    public Boolean isEmailIdAvailable() {
-        return this.patient.getAttribute("email") != null ? true : false;
-    }
-
-    public Boolean getEmailSent() {
-        return isEmailSent;
-    }
-
-    public void setEmailSent(Boolean emailSent) {
-        isEmailSent = emailSent;
+    public Boolean hasPatientAttribute(String attrName) {
+        if (this.patient == null) return false;
+        return this.patient.getAttribute(attrName) != null;
     }
 
     public String getTeleHealthVideoLink() {
@@ -231,6 +230,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public void setTeleHealthVideoLink(String teleHealthVideoLink) {
         this.teleHealthVideoLink = teleHealthVideoLink;
+    }
+
+    public void setNotificationResults(List<NotificationResult> notificationResults) {
+        this.notificationResults = notificationResults;
+    }
+
+    public List<NotificationResult> getNotificationResults() {
+        return notificationResults;
     }
 }
 

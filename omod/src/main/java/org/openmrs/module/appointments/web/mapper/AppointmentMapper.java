@@ -210,9 +210,25 @@ public class AppointmentMapper {
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
-        response.setEmailIdAvailable(a.isEmailIdAvailable());
-        response.setEmailSent(a.getEmailSent());
+        HashMap extensions = new HashMap();
+        extensions.put("patientEmailDefined", isPatientEmailDefined(a));
+        response.setExtensions(extensions);
+        if (a.getNotificationResults() != null) {
+            List<HashMap<String, String>> collect = a.getNotificationResults().stream().map(nr -> {
+                HashMap<String, String> notificationResult = new HashMap<>();
+                notificationResult.put("medium", nr.getMedium());
+                notificationResult.put("status", String.valueOf(nr.getStatus()));
+                return notificationResult;
+            }).collect(Collectors.toList());
+            if (!collect.isEmpty()) {
+                response.getExtensions().put("notificationResults", collect);
+            }
+        }
         return response;
+    }
+
+    private Boolean isPatientEmailDefined(Appointment a) {
+        return a.hasPatientAttribute("email");
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {
