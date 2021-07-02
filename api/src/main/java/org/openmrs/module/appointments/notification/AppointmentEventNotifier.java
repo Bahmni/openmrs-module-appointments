@@ -23,5 +23,6 @@ public interface AppointmentEventNotifier {
      * @return
      */
     String getMedium();
+    boolean isApplicable(final Appointment appointment);
     NotificationResult sendNotification(final Appointment appointment) throws NotificationException;
 }

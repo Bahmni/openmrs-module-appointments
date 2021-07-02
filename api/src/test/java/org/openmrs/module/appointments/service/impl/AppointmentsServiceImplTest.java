@@ -218,7 +218,7 @@ public class AppointmentsServiceImplTest {
         appointment.setAppointmentAudits(new HashSet<>());
         appointment.setTeleconsultation(false);
         appointmentsService.validateAndSave(appointment);
-        verify(patientAppointmentNotifierService, times(0)).notifyAll(appointment);
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
 
     @Test

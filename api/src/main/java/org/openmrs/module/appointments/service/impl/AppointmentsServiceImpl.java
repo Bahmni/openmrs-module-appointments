@@ -133,10 +133,9 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
-        Appointment prev = getAppointmentByUuid(appointment.getUuid());
         setupTeleconsultation(appointment);
         save(appointment);
-        notifyUpdates(prev, appointment);
+        notifyUpdates(appointment);
         return appointment;
     }
 
@@ -148,7 +147,7 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         setupTeleconsultation(appointment);
         save(appointment);
-        notifyUpdates(null, appointment);
+        notifyUpdates(appointment);
         return appointment;
     }
 
@@ -158,16 +157,14 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         }
     }
 
-    private void notifyUpdates(Appointment prev, Appointment appointment) {
-        if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
-            List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
-            Optional<NotificationResult> result = notificationResults.stream().filter(r -> r.getStatus() == NotificationResult.SUCCESS_STATUS).findFirst();
-            result.ifPresent(r -> appointment.setEmailSent(true));
-            notificationResults.stream().filter(r -> r.getStatus() != NotificationResult.SUCCESS_STATUS)
-                    .forEach(nr -> log.error(String.format(
-                            "Could not send notification for medium: %s, uuid: %s, status: %d, errMsg: %s",
-                            nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage())));
-        }
+    private void notifyUpdates(Appointment appointment) {
+        List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
+        Optional<NotificationResult> result = notificationResults.stream().filter(r -> r.getStatus() == NotificationResult.SUCCESS_STATUS).findFirst();
+        result.ifPresent(r -> appointment.setEmailSent(true));
+        notificationResults.stream().filter(r -> r.getStatus() != NotificationResult.SUCCESS_STATUS)
+                .forEach(nr -> log.error(String.format(
+                        "Could not send notification for medium: %s, uuid: %s, status: %d, errMsg: %s",
+                        nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage())));
     }
 
 

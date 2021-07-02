@@ -105,6 +105,9 @@
 				<property name="teleconsultationAppointmentService">
 					<bean class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
 				</property>
+				<property name="appointmentNotifierService">
+					<ref bean="patientAppointmentNotifierService"/>
+				</property>
 			</bean>
 		</property>
 		<property name="preInterceptors">
@@ -167,6 +170,8 @@
 			<ref bean="transactionAttributeSource"/>
 		</property>
 	</bean>
+
+	<bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService"/>
 
 	<bean id="appointmentDao" class="org.openmrs.module.appointments.dao.impl.AppointmentDaoImpl">
 		<property name="sessionFactory">

@@ -44,7 +44,12 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     @Override
-    public NotificationResult sendNotification(Appointment appointment) throws NotificationException {
+    public boolean isApplicable(final Appointment appointment) {
+        return (appointment.getTeleconsultation() != null && appointment.getTeleconsultation());
+    }
+
+    @Override
+    public NotificationResult sendNotification(final Appointment appointment) throws NotificationException {
         Patient patient = appointment.getPatient();
         PersonAttribute patientEmailAttribute = patient.getPerson().getAttribute("email");
         log.error("Appointment Date Changed: " + appointment.getDateChanged());

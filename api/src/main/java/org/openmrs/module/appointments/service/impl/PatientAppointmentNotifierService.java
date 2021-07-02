@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 public class PatientAppointmentNotifierService {
 
     private static final String CANNOT_SEND_NOTIFICATION_USING_MEDIUM = "Unable to send tele-consultation appointment information through ";
+    private static final String NOT_APPLICABLE = "This appointment is not applicable to the notifier. Medium: ";
     private Log log = LogFactory.getLog(this.getClass());
 
     private List<AppointmentEventNotifier> eventNotifiers = new ArrayList<>();
@@ -25,14 +26,19 @@ public class PatientAppointmentNotifierService {
         this.eventNotifiers = notifiers;
     }
 
-    public List<NotificationResult> notifyAll(Appointment appointment) {
+    public List<NotificationResult> notifyAll(final Appointment appointment) {
         if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
-        log.debug("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
+        log.info("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
         List<NotificationResult> notificationResults = new ArrayList<>();
         for (AppointmentEventNotifier eventNotifier : eventNotifiers) {
             try {
-                NotificationResult result = eventNotifier.sendNotification(appointment);
-                notificationResults.add(result);
+                if (eventNotifier.isApplicable(appointment)) {
+                    log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
+                    NotificationResult result = eventNotifier.sendNotification(appointment);
+                    notificationResults.add(result);
+                } else {
+                    log.info(NOT_APPLICABLE + eventNotifier.getMedium());
+                }
             } catch (NotificationException e) {
                 String msg = CANNOT_SEND_NOTIFICATION_USING_MEDIUM + eventNotifier.getMedium();
                 log.error(msg, e);

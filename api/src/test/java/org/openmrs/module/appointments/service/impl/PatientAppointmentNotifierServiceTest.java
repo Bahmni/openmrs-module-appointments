@@ -35,6 +35,7 @@ public class PatientAppointmentNotifierServiceTest {
     @Test
     public void shouldSendEmailOnTeleconsultationAppointmentSavedEvent() throws NotificationException {
         Appointment appointment = new Appointment();
+        when(appointmentEventNotifier.isApplicable(appointment)).thenReturn(true);
         when(appointmentEventNotifier.sendNotification(appointment)).thenReturn(new NotificationResult("", "EMAIL", 0, "Some message"));
         notifierService.notifyAll(appointment);
         verify(appointmentEventNotifier, times(1)).sendNotification(appointment);
