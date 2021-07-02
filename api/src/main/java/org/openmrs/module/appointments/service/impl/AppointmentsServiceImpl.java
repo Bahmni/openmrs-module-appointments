@@ -23,8 +23,6 @@ import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -47,7 +45,7 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
 
-public class AppointmentsServiceImpl implements AppointmentsService, ApplicationEventPublisherAware {
+public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
     private Log log = LogFactory.getLog(this.getClass());
@@ -64,8 +62,6 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     private AppointmentServiceHelper appointmentServiceHelper;
 
     private List<AppointmentConflict> appointmentConflicts;
-
-    private ApplicationEventPublisher applicationEventPublisher;
 
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
@@ -89,10 +85,6 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
 
     public void setAppointmentServiceHelper(AppointmentServiceHelper appointmentServiceHelper) {
         this.appointmentServiceHelper = appointmentServiceHelper;
-    }
-
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {

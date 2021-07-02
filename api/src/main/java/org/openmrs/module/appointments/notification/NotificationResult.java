@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.notification;
 public class NotificationResult {
     public static int SUCCESS_STATUS = 0;
     public static int GENERAL_ERROR = 1;
+    public static int IGNORED = 2;
     private String uuid;
     private String medium;
     private int status = SUCCESS_STATUS;

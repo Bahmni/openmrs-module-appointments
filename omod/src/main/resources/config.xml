@@ -81,12 +81,8 @@
 	</globalProperty>
 	<globalProperty>
 		<property>bahmni.appointment.teleConsultation.patientEmailNotificationTemplate</property>
-		<defaultValue>Hi {0},\
-			<p>Your tele-consultation appointment with {1} for {2} has been scheduled!<br/>\
-			The appointment is on <b>{3}</b>.<br/>\
-			Please use this link <a href="{4}">{4}</a><br/>\
-			If you have any questions, please reach out to administration for assistance.<br/>\
-				See you soon!</p>
+		<defaultValue>
+			Hi {0}, Your tele-consultation appointment with {1} for {2} has been scheduled! Please use this link {3}. If you have any questions, please reach out to administration for assistance. See you soon!
 		</defaultValue>
 		<description>Template to use while sending mail. Format is define like in Java MessageFormat</description>
 	</globalProperty>

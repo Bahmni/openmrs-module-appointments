@@ -83,11 +83,10 @@ public class DefaultMailSender implements MailSender {
         if (session == null) {
             synchronized(this) {
                 if (session == null) {
-                    AdministrationService as = this.administrationService;
                     Properties sessionProperties = mailSessionPropertiesFromPath();
                     if (sessionProperties == null) {
                         log.info("Could not load mail properties from application data directory. Loading from OMRS settings.");
-                        sessionProperties = mailSessionPropertiesFromOMRS(as);
+                        sessionProperties = mailSessionPropertiesFromOMRS();
                     }
                     final String user = sessionProperties.getProperty("mail.user");
                     final String password = sessionProperties.getProperty("mail.password");
@@ -112,19 +111,18 @@ public class DefaultMailSender implements MailSender {
      * @param as
      * @return
      */
-    private Properties mailSessionPropertiesFromOMRS(AdministrationService as) {
+    private Properties mailSessionPropertiesFromOMRS() {
         Properties p = new Properties();
-        p.put("mail.transport.protocol", as.getGlobalProperty("mail.transport_protocol", "smtp"));
-        p.put("mail.smtp.host", as.getGlobalProperty("mail.smtp_host", ""));
-        p.put("mail.smtp.port", as.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
-        p.put("mail.smtp.auth", as.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
-//        p.put("mail.smtp.starttls.enable", true);
-        p.put("mail.smtp.starttls.enable", as.getGlobalProperty("mail.smtp.starttls.enable", "true"));
-        p.put("mail.debug", as.getGlobalProperty("mail.debug", "false"));
-        p.put("mail.from", as.getGlobalProperty("mail.from", ""));
-        p.put("mail.user", as.getGlobalProperty("mail.user", ""));
-        p.put("mail.password", as.getGlobalProperty("mail.password", ""));
-        p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+        p.put("mail.transport.protocol", administrationService.getGlobalProperty("mail.transport_protocol", "smtp"));
+        p.put("mail.smtp.host", administrationService.getGlobalProperty("mail.smtp_host", ""));
+        p.put("mail.smtp.port", administrationService.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
+        p.put("mail.smtp.auth", administrationService.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
+        p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
+        p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
+        p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
+        p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
+        p.put("mail.password", administrationService.getGlobalProperty("mail.password", ""));
+        //p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
         return p;
     }
 

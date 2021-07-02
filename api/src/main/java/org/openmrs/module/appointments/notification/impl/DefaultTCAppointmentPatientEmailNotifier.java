@@ -28,7 +28,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     private static final String EMAIL_SENT = "Email sent to Patient";
     private static final String MEDIUM_EMAIL = "EMAIL";
     private static final String EMAIL_FAILURE = "Failed to send email to patient";
-    private static final String EMAIL_NOT_SENT = "Email notification for tele-consultation not sent to patient.";
+    private static final String EMAIL_NOT_SENT = "Email notification for tele-consultation not configured to be sent to patient.";
 
     private Log log = LogFactory.getLog(this.getClass());
     private MailSender mailSender;
@@ -45,17 +45,17 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
 
     @Override
     public boolean isApplicable(final Appointment appointment) {
-        return (appointment.getTeleconsultation() != null && appointment.getTeleconsultation());
+        boolean sendEmailToPatient = shouldSendEmailToPatient();
+        if (!sendEmailToPatient) {
+            log.warn(EMAIL_NOT_SENT);
+        }
+        return (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) && sendEmailToPatient;
     }
 
     @Override
     public NotificationResult sendNotification(final Appointment appointment) throws NotificationException {
         Patient patient = appointment.getPatient();
         PersonAttribute patientEmailAttribute = patient.getPerson().getAttribute("email");
-        if (!shouldSendEmailToPatient())  {
-            log.warn(EMAIL_NOT_SENT);
-            return new NotificationResult(null, "EMAIL", 0, EMAIL_NOT_SENT);
-        }
         if (patientEmailAttribute != null) {
             String patientEmail = patientEmailAttribute.getValue();
             String patientName = appointment.getPatient().getGivenName();
