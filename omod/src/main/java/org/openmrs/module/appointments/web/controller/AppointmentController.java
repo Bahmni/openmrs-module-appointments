@@ -69,7 +69,6 @@ public class AppointmentController extends BaseRestController {
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
         try {
-            log.error("In OLD AC save appt");
             //Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             //appointmentsService.validateAndSave(appointment);
             Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));

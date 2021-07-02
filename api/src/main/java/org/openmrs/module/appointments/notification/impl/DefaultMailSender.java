@@ -86,7 +86,7 @@ public class DefaultMailSender implements MailSender {
                     AdministrationService as = this.administrationService;
                     Properties sessionProperties = mailSessionPropertiesFromPath();
                     if (sessionProperties == null) {
-                        log.info("Could not load mail properties from application data directory. Loading from settings.");
+                        log.info("Could not load mail properties from application data directory. Loading from OMRS settings.");
                         sessionProperties = mailSessionPropertiesFromOMRS(as);
                     }
                     final String user = sessionProperties.getProperty("mail.user");
@@ -133,7 +133,7 @@ public class DefaultMailSender implements MailSender {
         if (Files.exists(propertyFilePath)) {
             Properties properties = new Properties();
             try {
-                log.error("Reading properties from: " + propertyFilePath);
+                log.info("Reading properties from: " + propertyFilePath);
                 properties.load(Files.newInputStream(propertyFilePath));
                 return properties;
             } catch (IOException e) {
