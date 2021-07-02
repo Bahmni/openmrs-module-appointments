@@ -44,7 +44,7 @@
 
     <bean id="defaultAppointmentStatusChangeValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
     <bean id="defaultAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
-    
+
     <bean id="specialityService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>

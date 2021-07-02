@@ -72,7 +72,7 @@ public class AppointmentController extends BaseRestController {
             log.error("In OLD AC save appt");
             //Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             //appointmentsService.validateAndSave(appointment);
-            Appointment appointment = appointmentsService.validateAndSave(appointmentRequest.getUuid(), () -> appointmentMapper.fromRequest(appointmentRequest));
+            Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);

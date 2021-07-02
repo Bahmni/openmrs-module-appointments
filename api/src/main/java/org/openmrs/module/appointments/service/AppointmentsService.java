@@ -87,6 +87,6 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
-    Appointment validateAndSave(String appointmentUuid, Supplier<Appointment> mapper);
+    Appointment validateAndSave(Supplier<Appointment> mapper);
 }
 

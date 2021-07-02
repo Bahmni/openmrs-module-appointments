@@ -22,6 +22,7 @@ import org.springframework.http.ResponseEntity;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -164,7 +165,7 @@ public class AppointmentControllerTest {
     @Test
     public void shouldThrowExceptionIfPatientUuidIsBlankWhileCreatingAppointment() throws Exception {
         //when(appointmentsService.validateAndSave(any(Appointment.class))).thenThrow(new APIException("Exception Msg"));
-        when(appointmentsService.validateAndSave(any(), any())).thenThrow(new APIException("Exception Msg"));
+        when(appointmentsService.validateAndSave(any(Supplier.class))).thenThrow(new APIException("Exception Msg"));
         ResponseEntity<Object> responseEntity = appointmentController.saveAppointment(new AppointmentRequest());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
     }
@@ -252,11 +253,11 @@ public class AppointmentControllerTest {
         appointment.setUuid("appointmentUuid");
 
         when(appointmentMapper.fromRequest(appointmentRequest)).thenReturn(appointment);
-        when(appointmentsService.validateAndSave(any(), any())).thenReturn(appointment);
+        when(appointmentsService.validateAndSave(any(Supplier.class))).thenReturn(appointment);
         //when(appointmentsService.validateAndSave(appointment)).thenReturn(appointment);
 
         appointmentController.saveAppointment(appointmentRequest);
         //Mockito.verify(appointmentMapper, times(1)).fromRequest(appointmentRequest);
-        Mockito.verify(appointmentsService, times(1)).validateAndSave(eq("someUuid"), any());
+        Mockito.verify(appointmentsService, times(1)).validateAndSave(any(Supplier.class));
     }
 }

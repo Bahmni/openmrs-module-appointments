@@ -142,34 +142,23 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
 
     @Transactional
     @Override
-    public Appointment validateAndSave(String appointmentUuid, Supplier<Appointment> mapper) {
-        Appointment prev = null;
-        if (appointmentUuid != null && !"".equals(appointmentUuid)) {
-            prev = getAppointmentByUuid(appointmentUuid);
-        }
+    public Appointment validateAndSave(Supplier<Appointment> mapper) {
         Appointment appointment = mapper.get();
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
         setupTeleconsultation(appointment);
         save(appointment);
-        notifyUpdates(prev, appointment);
+        notifyUpdates(null, appointment);
         return appointment;
     }
 
     private void setupTeleconsultation(Appointment appointment) {
-        log.error("1 uuid: " +  appointment.getUuid());
-        log.error("1 Id: " +  appointment.getAppointmentId());
-        log.error("1 date changed: " +  appointment.getDateChanged());
-        log.error("1 date created: " +  appointment.getDateCreated());
-        log.error("1 start date : " + appointment.getStartDateTime());
-        log.error("1 link: " +  appointment.getTeleHealthVideoLink());
         if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
             appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
         }
     }
 
     private void notifyUpdates(Appointment prev, Appointment appointment) {
-        debugPrePostAppt(prev, appointment);
         if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
             List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
             Optional<NotificationResult> result = notificationResults.stream().filter(r -> r.getStatus() == NotificationResult.SUCCESS_STATUS).findFirst();
@@ -179,29 +168,6 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
                             "Could not send notification for medium: %s, uuid: %s, status: %d, errMsg: %s",
                             nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage())));
         }
-    }
-
-    private void debugPrePostAppt(Appointment prev, Appointment appointment) {
-        log.error("before save: " + prev);
-        log.error("equal?: " + (appointment == prev));
-        log.error("post save: " + appointment);
-
-        if (prev != null) {
-            log.error("prev uuid: " + prev.getUuid());
-            log.error("prev Id: " + prev.getAppointmentId());
-            log.error("prev date changed: " + prev.getDateChanged());
-            log.error("prev date created: " + prev.getDateCreated());
-            log.error("prev start date : " + prev.getStartDateTime());
-            log.error("prev link: " + prev.getTeleHealthVideoLink());
-        } else {
-            log.error("no previous instance" );
-        }
-        log.error("current uuid: " +  appointment.getUuid());
-        log.error("current Id: " +  appointment.getAppointmentId());
-        log.error("current date changed: " +  appointment.getDateChanged());
-        log.error("current date created: " +  appointment.getDateCreated());
-        log.error("current start date : " + appointment.getStartDateTime());
-        log.error("current link: " +  appointment.getTeleHealthVideoLink());
     }
 
 
