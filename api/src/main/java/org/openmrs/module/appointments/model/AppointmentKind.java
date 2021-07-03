@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.model;
 
 public enum AppointmentKind {
-    Scheduled("Scheduled"), WalkIn("WalkIn");
+    Scheduled("Scheduled"), WalkIn("WalkIn"), Virtual("Virtual");
 
     private final String value;
 
