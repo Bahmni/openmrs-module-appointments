@@ -44,7 +44,7 @@
 	<!-- /Internationalization -->
 
 	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentServiceService</point>
+		<point>org.openmrs.module.appointments.service.AppointmentService</point>
 		<class>org.openmrs.module.appointments.advice.AppointmentServiceDefinitionAdvice</class>
 	</advice>
 
