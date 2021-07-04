@@ -7,4 +7,5 @@ public class PrivilegeConstants {
     public static final String RESET_APPOINTMENT_STATUS = "Reset Appointment Status";
     public static final String MANAGE_APPOINTMENTS_SERVICE = "Manage Appointment Services";
     public static final String VIEW_APPOINTMENTS_SERVICE = "View Appointment Services";
+    public static final String FHIR_APPOINTMENTS = "Fhir Appointmenrs";
 }

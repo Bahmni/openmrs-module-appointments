@@ -1,7 +1,7 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 		xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 	<modelVersion>4.0.0</modelVersion>
-
+	
 	<parent>
 		<groupId>org.bahmni.module</groupId>
 		<artifactId>appointments</artifactId>
@@ -154,7 +154,29 @@
 			<scope>provided</scope>
 		</dependency>
 		<!-- End OpenMRS core -->
-
+	<!--  <dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-server</artifactId>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>ca.uhn.hapi.fhir</groupId>
+			<artifactId>hapi-fhir-client</artifactId>
+			<version>${hapifhirVersion}</version>
+			<scope>provided</scope>
+			</dependency>
+			<dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-r4</artifactId>
+                <version>${hapifhirVersion}</version>
+                <scope>provided</scope>
+            </dependency>
+            <dependency>
+                <groupId>ca.uhn.hapi.fhir</groupId>
+                <artifactId>hapi-fhir-validation-resources-dstu3</artifactId>
+                <version>${hapifhirVersion}</version>
+                <scope>provided</scope>
+            </dependency> -->
 	</dependencies>
 
 </project>
