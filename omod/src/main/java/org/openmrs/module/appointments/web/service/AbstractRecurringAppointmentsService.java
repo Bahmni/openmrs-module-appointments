@@ -5,6 +5,7 @@ import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
@@ -24,6 +25,9 @@ public abstract class AbstractRecurringAppointmentsService {
     @Autowired
     private AppointmentMapper appointmentMapper;
 
+    @Autowired
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
     public abstract List<Appointment> generateAppointments(RecurringAppointmentRequest recurringAppointmentRequest);
 
     public abstract List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
@@ -36,6 +40,9 @@ public abstract class AbstractRecurringAppointmentsService {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointment.setStartDateTime(appointmentDate.getLeft());
             appointment.setEndDateTime(appointmentDate.getRight());
+            if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
+                appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
+            }
             appointments.add(appointment);
         });
         return appointments;

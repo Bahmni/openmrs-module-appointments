@@ -68,8 +68,8 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     @Override
     public AppointmentRecurringPattern validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern) {
         List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
-         appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
-         updateAppointmentsDetails(appointmentRecurringPattern, appointments);
+        appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
+        updateAppointmentsDetails(appointmentRecurringPattern, appointments);
         appointmentRecurringPatternDao.save(appointmentRecurringPattern);
         return appointmentRecurringPattern;
     }
