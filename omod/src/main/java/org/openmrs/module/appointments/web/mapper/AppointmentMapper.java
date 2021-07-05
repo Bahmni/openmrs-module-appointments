@@ -213,6 +213,7 @@ public class AppointmentMapper {
         HashMap extensions = new HashMap();
         extensions.put("patientEmailDefined", isPatientEmailDefined(a));
         response.setExtensions(extensions);
+        response.setTeleconsultationLink(a.getTeleHealthVideoLink());
         if (a.getNotificationResults() != null) {
             List<HashMap<String, String>> collect = a.getNotificationResults().stream().map(nr -> {
                 HashMap<String, String> notificationResult = new HashMap<>();

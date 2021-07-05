@@ -24,6 +24,7 @@ public class AppointmentDefaultResponse {
 	private Boolean isRecurring;
 	private Boolean voided;
 	private HashMap extensions;
+	private String teleconsultationLink;
 
 	public String getUuid() {
 		return uuid;
@@ -166,5 +167,13 @@ public class AppointmentDefaultResponse {
 
 	public HashMap getExtensions() {
 		return extensions;
+	}
+
+	public void setTeleconsultationLink(String teleconsultationLink) {
+		this.teleconsultationLink = teleconsultationLink;
+	}
+
+	public String getTeleconsultationLink() {
+		return teleconsultationLink;
 	}
 }
