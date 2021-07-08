@@ -313,6 +313,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getVoided(), response.getVoided());
         verify(extension, times(1)).run(appointment);
         assertEquals(2, response.getAdditionalInfo().keySet().size());
+        assertEquals(false, response.getExtensions().get("patientEmailDefined"));
     }
 
 

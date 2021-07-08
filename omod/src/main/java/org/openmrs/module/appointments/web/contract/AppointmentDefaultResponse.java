@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.web.contract;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,8 @@ public class AppointmentDefaultResponse {
 	private List<AppointmentProviderDetail> providers;
 	private Boolean isRecurring;
 	private Boolean voided;
-	private Boolean isEmailIdAvailable;
-	private Boolean isEmailSent;
+	private HashMap extensions;
+	private String teleconsultationLink;
 
 	public String getUuid() {
 		return uuid;
@@ -160,19 +161,19 @@ public class AppointmentDefaultResponse {
 		this.voided = voided;
 	}
 
-	public Boolean getEmailIdAvailable() {
-		return isEmailIdAvailable;
+	public void setExtensions(HashMap extensions) {
+		this.extensions = extensions;
 	}
 
-	public void setEmailIdAvailable(Boolean emailIdAvailable) {
-		isEmailIdAvailable = emailIdAvailable;
+	public HashMap getExtensions() {
+		return extensions;
 	}
 
-	public Boolean getEmailSent() {
-		return isEmailSent;
+	public void setTeleconsultationLink(String teleconsultationLink) {
+		this.teleconsultationLink = teleconsultationLink;
 	}
 
-	public void setEmailSent(Boolean emailSent) {
-		isEmailSent = emailSent;
+	public String getTeleconsultationLink() {
+		return teleconsultationLink;
 	}
 }

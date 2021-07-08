@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -55,6 +57,8 @@ public class AppointmentMapper {
 
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
+
+    private Log log = LogFactory.getLog(this.getClass());
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
@@ -206,9 +210,26 @@ public class AppointmentMapper {
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
-        response.setEmailIdAvailable(a.isEmailIdAvailable());
-        response.setEmailSent(a.getEmailSent());
+        HashMap extensions = new HashMap();
+        extensions.put("patientEmailDefined", isPatientEmailDefined(a));
+        response.setExtensions(extensions);
+        response.setTeleconsultationLink(a.getTeleHealthVideoLink());
+        if (a.getNotificationResults() != null) {
+            List<HashMap<String, String>> collect = a.getNotificationResults().stream().map(nr -> {
+                HashMap<String, String> notificationResult = new HashMap<>();
+                notificationResult.put("medium", nr.getMedium());
+                notificationResult.put("status", String.valueOf(nr.getStatus()));
+                return notificationResult;
+            }).collect(Collectors.toList());
+            if (!collect.isEmpty()) {
+                response.getExtensions().put("notificationResults", collect);
+            }
+        }
         return response;
+    }
+
+    private Boolean isPatientEmailDefined(Appointment a) {
+        return a.hasPatientAttribute("email");
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {

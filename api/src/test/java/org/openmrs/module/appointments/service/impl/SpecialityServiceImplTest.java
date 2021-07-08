@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 

@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.bahmni.module.email.notification.service.EmailNotificationService;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -24,7 +23,6 @@ import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavaila
 import org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -106,9 +104,6 @@ public class AppointmentsServiceImplTest {
     private AppointmentServiceHelper appointmentServiceHelper;
 
     @Mock
-    private EmailNotificationService emailNotificationService;
-
-    @Mock
     private AppointmentAuditDao appointmentAuditDao;
 
     @Mock
@@ -131,6 +126,12 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private ApplicationEventPublisher applicationEventPublisher;
+
+    @Mock
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
+    @Mock
+    private PatientAppointmentNotifierService patientAppointmentNotifierService;
 
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
@@ -170,6 +171,7 @@ public class AppointmentsServiceImplTest {
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         appointment.setAppointmentAudits(new HashSet<>());
+        when(appointmentDao.getAppointmentByUuid(any())).thenReturn(null);
         appointmentsService.validateAndSave(appointment);
         verify(appointmentDao, times(1)).save(appointment);
     }
@@ -202,8 +204,7 @@ public class AppointmentsServiceImplTest {
         appointment.setAppointmentAudits(new HashSet<>());
         appointment.setTeleconsultation(true);
         appointmentsService.validateAndSave(appointment);
-        verify(applicationEventPublisher, times(1)).
-                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
 
     @Test
@@ -217,8 +218,7 @@ public class AppointmentsServiceImplTest {
         appointment.setAppointmentAudits(new HashSet<>());
         appointment.setTeleconsultation(false);
         appointmentsService.validateAndSave(appointment);
-        verify(applicationEventPublisher, times(0)).
-                publishEvent(any(TeleconsultationAppointmentSavedEvent.class));
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
 
     @Test

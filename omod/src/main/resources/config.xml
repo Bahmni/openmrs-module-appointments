@@ -44,7 +44,7 @@
 	<!-- /Internationalization -->
 
 	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentServiceService</point>
+		<point>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</point>
 		<class>org.openmrs.module.appointments.advice.AppointmentServiceDefinitionAdvice</class>
 	</advice>
 
@@ -72,6 +72,29 @@
 		<property>SchedulerMarksMissed</property>
 		<defaultValue>false</defaultValue>
 		<description>Scheduler marks scheduled appointments as missed when it is turned on</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.patientEmailNotificationSubject</property>
+		<defaultValue>Teleconsultation appointment confirmed</defaultValue>
+		<description>Subject that will be used in the mail sent to patients for Teleconsultation</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.patientEmailNotificationTemplate</property>
+		<defaultValue>
+			Hi {0}, Your tele-consultation appointment with {1} for {2} has been scheduled! Please use this link {3}. If you have any questions, please reach out to administration for assistance. See you soon!
+		</defaultValue>
+		<description>Template to use while sending mail. Format is define like in Java MessageFormat</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.serverUrlPattern</property>
+		<defaultValue>https://meet.jit.si/{0}</defaultValue>
+		<description>Pattern of the URL for the meeting server. Notice the placeholder {0} for appointment UUID</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.sendEmail</property>
+		<defaultValue>false</defaultValue>
+		<description>Whether email should be sent for tele-consultation</description>
 	</globalProperty>
 
 </module>

@@ -15,6 +15,10 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
+import org.openmrs.module.appointments.notification.NotificationException;
+import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,6 +60,8 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     ProviderService providerService;
     @Autowired
     PatientService patientService;
+    @Autowired
+    PatientAppointmentNotifierService patientAppointmentNotifierService;
 
     @Mock
     private AppointmentAudit appointmentAudit;
@@ -83,6 +89,22 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
 
     @Test
     public void shouldSaveAppointmentsOnlyIfUserHasManageOwnPrivilege() throws Exception {
+        patientAppointmentNotifierService.registerNotifier(new AppointmentEventNotifier() {
+            @Override
+            public String getMedium() {
+                return "EMAIL";
+            }
+
+            @Override
+            public boolean isApplicable(Appointment appointment) {
+                return false;
+            }
+
+            @Override
+            public NotificationResult sendNotification(Appointment appointment) throws NotificationException {
+                return null;
+            }
+        });
         Context.authenticate(manageOwnUser, manageOwnUserPassword);
         Appointment appointment = getSampleAppointment();
         assertNotNull(appointmentsService.validateAndSave(appointment));

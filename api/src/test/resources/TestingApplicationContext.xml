@@ -156,6 +156,9 @@
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
                 </property>
+                <property name="appointmentNotifierService">
+                    <ref bean="patientAppointmentNotifierService"/>
+                </property>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -165,6 +168,8 @@
             <ref bean="transactionAttributeSource"/>
         </property>
     </bean>
+
+    <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService"/>
 
     <bean parent="serviceContext">
         <property name="moduleService">
