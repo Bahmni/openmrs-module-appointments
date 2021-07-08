@@ -628,4 +628,10 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="drop-column-appointment-teleconsultation-202107061351" author="Angshu">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="patient_appointment" columnName="teleconsultation" />
+        </preConditions>
+        <dropColumn  tableName="patient_appointment" columnName="teleconsultation"/>
+    </changeSet>
 </databaseChangeLog>

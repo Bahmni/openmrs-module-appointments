@@ -200,9 +200,8 @@ public class AppointmentsServiceImplTest {
         appointment.setService(new AppointmentServiceDefinition());
         appointment.setStartDateTime(new Date());
         appointment.setEndDateTime(new Date());
-        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentKind(AppointmentKind.Virtual);
         appointment.setAppointmentAudits(new HashSet<>());
-        appointment.setTeleconsultation(true);
         appointmentsService.validateAndSave(appointment);
         verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
@@ -216,7 +215,6 @@ public class AppointmentsServiceImplTest {
         appointment.setEndDateTime(new Date());
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         appointment.setAppointmentAudits(new HashSet<>());
-        appointment.setTeleconsultation(false);
         appointmentsService.validateAndSave(appointment);
         verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }

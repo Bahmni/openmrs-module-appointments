@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
@@ -144,9 +145,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     private void setupTeleconsultation(Appointment appointment) {
-        if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
+        if (isVirtual(appointment)) {
             appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
         }
+    }
+
+    private boolean isVirtual(Appointment appointment) {
+        return appointment.getAppointmentKind() != null && appointment.getAppointmentKind().equals(AppointmentKind.Virtual);
     }
 
     private void notifyUpdates(Appointment appointment) {

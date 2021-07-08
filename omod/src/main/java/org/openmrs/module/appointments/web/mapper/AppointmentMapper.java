@@ -104,7 +104,6 @@ public class AppointmentMapper {
         appointment.setStartDateTime(appointmentRequest.getStartDateTime());
         appointment.setEndDateTime(appointmentRequest.getEndDateTime());
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
-        appointment.setTeleconsultation(appointmentRequest.isTeleconsultation());
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
     }
@@ -204,7 +203,6 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-        response.setTeleconsultation(a.getTeleconsultation());
         if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));

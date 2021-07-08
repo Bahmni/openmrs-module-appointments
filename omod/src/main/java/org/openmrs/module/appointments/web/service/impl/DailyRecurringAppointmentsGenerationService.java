@@ -21,20 +21,18 @@ import java.util.List;
 @Qualifier("dailyRecurringAppointmentsGenerationService")
 public class DailyRecurringAppointmentsGenerationService extends AbstractRecurringAppointmentsService {
 
-    private RecurringAppointmentRequest recurringAppointmentRequest;
-
     @Override
     public List<Appointment> generateAppointments(RecurringAppointmentRequest recurringAppointmentRequest) {
-        this.recurringAppointmentRequest = recurringAppointmentRequest;
         RecurringPattern recurringPattern = recurringAppointmentRequest.getRecurringPattern();
-        Date endDate = getEndDate(recurringPattern.getPeriod(), recurringPattern.getFrequency(), recurringPattern.getEndDate());
+        Date endDate = getEndDate(recurringPattern.getPeriod(), recurringPattern.getFrequency(), recurringPattern.getEndDate(), recurringAppointmentRequest);
         List<Pair<Date, Date>> appointmentDates = getAppointmentDates(endDate,
                 DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime()),
-                DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime()));
+                DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime()),
+                recurringAppointmentRequest);
         return createAppointments(appointmentDates, recurringAppointmentRequest.getAppointmentRequest());
     }
 
-    public Date getEndDate(int period, Integer frequency, Date endDate) {
+    private Date getEndDate(int period, Integer frequency, Date endDate, RecurringAppointmentRequest recurringAppointmentRequest) {
         if (endDate != null) {
             return endDate;
         }
@@ -44,7 +42,7 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
         return calendar.getTime();
     }
 
-    private List<Pair<Date, Date>> getAppointmentDates(Date endDate, Calendar startCalendar, Calendar endCalendar) {
+    private List<Pair<Date, Date>> getAppointmentDates(Date endDate, Calendar startCalendar, Calendar endCalendar, RecurringAppointmentRequest recurringAppointmentRequest) {
         List<Pair<Date, Date>> appointmentDates = new ArrayList<>();
         Date currentAppointmentDate = recurringAppointmentRequest.getAppointmentRequest().getStartDateTime();
         while (!currentAppointmentDate.after(endDate)) {
@@ -58,7 +56,6 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
 
     public List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
                                              RecurringAppointmentRequest recurringAppointmentRequest) {
-        this.recurringAppointmentRequest = recurringAppointmentRequest;
         List<Appointment> activeAppointments = new ArrayList<>(appointmentRecurringPattern.getActiveAppointments());
         List<Appointment> appointments = new ArrayList<>(activeAppointments);
         appointments.sort(Comparator.comparing(Appointment::getDateFromStartDateTime));
@@ -69,14 +66,14 @@ public class DailyRecurringAppointmentsGenerationService extends AbstractRecurri
                     recurringAppointmentRequest.getRecurringPattern().getFrequency() - appointmentRecurringPattern.getFrequency() + 1);
         else appointmentRecurringPattern.setEndDate(recurringAppointmentRequest.getRecurringPattern().getEndDate());
         Date endDate = getEndDate(appointmentRecurringPattern.getPeriod(), appointmentRecurringPattern.getFrequency(),
-                appointmentRecurringPattern.getEndDate());
+                appointmentRecurringPattern.getEndDate(), recurringAppointmentRequest);
         Calendar startCalendar = DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getStartDateTime());
         Calendar endCalendar = DateUtil.getCalendar(recurringAppointmentRequest.getAppointmentRequest().getEndDateTime());
         startCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
         endCalendar.add(Calendar.DAY_OF_YEAR, appointmentRecurringPattern.getPeriod());
         String uuid = recurringAppointmentRequest.getAppointmentRequest().getUuid();
         recurringAppointmentRequest.getAppointmentRequest().setUuid(null);
-        appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalendar, endCalendar),
+        appointments.addAll(createAppointments(getAppointmentDates(endDate, startCalendar, endCalendar, recurringAppointmentRequest),
                 recurringAppointmentRequest.getAppointmentRequest()));
         recurringAppointmentRequest.getAppointmentRequest().setUuid(uuid);
         addRemovedAndRelatedAppointments(appointments, appointmentRecurringPattern);
