@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.Patient;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.MailSender;
@@ -49,7 +50,10 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         if (!sendEmailToPatient) {
             log.warn(EMAIL_NOT_SENT);
         }
-        return (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) && sendEmailToPatient;
+        if (appointment.getAppointmentKind() != null && appointment.getAppointmentKind().equals(AppointmentKind.Virtual)) {
+            return sendEmailToPatient;
+        }
+        return false;
     }
 
     @Override

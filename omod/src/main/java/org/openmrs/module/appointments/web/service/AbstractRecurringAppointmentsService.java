@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.service;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
@@ -40,12 +41,16 @@ public abstract class AbstractRecurringAppointmentsService {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointment.setStartDateTime(appointmentDate.getLeft());
             appointment.setEndDateTime(appointmentDate.getRight());
-            if (appointment.getTeleconsultation() != null && appointment.getTeleconsultation()) {
+            if (isVirtual(appointment)) {
                 appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
             }
             appointments.add(appointment);
         });
         return appointments;
+    }
+
+    private boolean isVirtual(Appointment appointment) {
+        return appointment.getAppointmentKind() != null && appointment.getAppointmentKind().equals(AppointmentKind.Virtual);
     }
 
     protected List<Appointment> sort(List<Appointment> appointments) {
