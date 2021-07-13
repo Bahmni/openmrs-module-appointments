@@ -5,7 +5,7 @@ VALUES ('bahmni.sqlGet.upComingAppointments',
           app_service_type.name                                                                           AS `DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY`,
           DATE_FORMAT(start_date_time, "%d/%m/%Y")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
           CONCAT(DATE_FORMAT(start_date_time, "%l:%i %p"), " - ", DATE_FORMAT(end_date_time, "%l:%i %p")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
-          CONCAT(pn.given_name, ' ', pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
+          CONCAT(pn.given_name, " ", pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
   pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`
 FROM
   patient_appointment pa

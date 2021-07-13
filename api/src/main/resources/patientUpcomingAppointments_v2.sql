@@ -5,7 +5,7 @@ SET property_value= 'SELECT
   app_service_type.name                                                                           AS `DASHBOARD_APPOINTMENTS_SERVICE_TYPE_KEY`,
   DATE_FORMAT(pa.start_date_time, "%d/%m/%Y")                                                        AS `DASHBOARD_APPOINTMENTS_DATE_KEY`,
   CONCAT(DATE_FORMAT(pa.start_date_time, "%l:%i %p"), " - ", DATE_FORMAT(pa.end_date_time, "%l:%i %p")) AS `DASHBOARD_APPOINTMENTS_SLOT_KEY`,
-  CONCAT(pn.given_name, ' ', pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
+  CONCAT(pn.given_name, " ", pn.family_name)                                                      AS `DASHBOARD_APPOINTMENTS_PROVIDER_KEY`,
   pa.status                                                                                       AS `DASHBOARD_APPOINTMENTS_STATUS_KEY`,
   pa.appointment_kind                                                                             AS `DASHBOARD_APPOINTMENTS_KIND`,
   pa.start_date_time                                                                              AS `DASHBOARD_APPOINTMENTS_START_DATE_KEY`,
