@@ -27,7 +27,7 @@ import java.util.Date;
 import java.util.Properties;
 
 public class DefaultMailSender implements MailSender {
-    private static final String EMAIL_PROPERTIES_FILENAME = "email-notification.properties";
+    private static final String EMAIL_PROPERTIES_FILENAME = "mail-config.properties";
     private Log log = LogFactory.getLog(this.getClass());
     private volatile Session session = null;
 
