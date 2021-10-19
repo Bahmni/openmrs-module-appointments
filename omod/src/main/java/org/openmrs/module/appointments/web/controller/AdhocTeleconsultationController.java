@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
 import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
+import org.openmrs.module.appointments.web.contract.AdhocTeleconsultationResponse;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,7 +34,9 @@ public class AdhocTeleconsultationController {
 
     @RequestMapping(value = "/generateAdhocTeleconsultationLink", method = RequestMethod.GET)
     @ResponseBody
-    public ResponseEntity<String> generateAdhocTeleconsultationLink(@RequestParam(value = "patientUuid", required = true) String patientUuid, @RequestParam(value = "provider", required = true) String provider) {
-        return new ResponseEntity<>(teleconsultationAppointmentService.generateAdhocTeleconsultationLink(UUID.randomUUID().toString(), patientUuid, provider), HttpStatus.OK);
+    public ResponseEntity<AdhocTeleconsultationResponse> generateAdhocTeleconsultationLink(@RequestParam(value = "patientUuid", required = true) String patientUuid, @RequestParam(value = "provider", required = true) String provider) {
+        String uuid = UUID.randomUUID().toString();
+        String link = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(uuid, patientUuid, provider);
+        return new ResponseEntity<>(new AdhocTeleconsultationResponse(uuid, link), HttpStatus.OK);
     }
 }
