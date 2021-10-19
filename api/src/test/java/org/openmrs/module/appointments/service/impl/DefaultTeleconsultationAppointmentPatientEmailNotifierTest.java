@@ -9,9 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openmrs.Patient;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PersonAttributeType;
+import org.openmrs.*;
 import org.openmrs.api.context.Context;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
@@ -19,8 +17,15 @@ import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
 import org.openmrs.module.appointments.model.Appointment;
+import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -35,6 +40,9 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
 
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
+    private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate";
+    private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate";
+    private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_CC_EMAILS = "bahmni.appointment.adhocTeleConsultation.ccEmails";
     private AppointmentEventNotifier tcAppointmentEventNotifier;
 
     @Mock
@@ -82,6 +90,24 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
         tcAppointmentEventNotifier.sendNotification(appointment);
     }
 
+    @Ignore
+    @Test
+    public void shouldSendAdhocTeleconsultationLinkEmail() throws Exception {
+        Patient patient = buildPatient();
+        String link = "https://meet.jit.si/" + UUID.randomUUID().toString();
+        when(messageSourceService.getMessage(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT, null, null)).thenReturn("Email subject");
+        when(messageSourceService.getMessage(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE, null, null)).thenReturn("Email body");
+        when(messageSourceService.getMessage(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_CC_EMAILS, null, null)).thenReturn("someemail@gmail.com,someemail2@gmail.com");
+        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        tcAppointmentEventNotifier.sendNotification(patient, "provider", link);
+        verify(mailSender).send(
+                eq("Email subject"),
+                eq("Email body"),
+                AdditionalMatchers.aryEq(new String[]{ "someemail@gmail.com" }),
+                any(),
+                any());
+    }
+
     private Appointment buildAppointment() {
         Appointment appointment = new Appointment();
         Patient patient = new Patient();
@@ -91,6 +117,15 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
         patient.addAttribute(new PersonAttribute(personAttributeType, "someemail@gmail.com"));
         appointment.setPatient(patient);
         return appointment;
+    }
+
+    private Patient buildPatient() {
+        Patient patient = new Patient();
+        patient.setUuid("patientUuid");
+        PersonAttributeType personAttributeType = new PersonAttributeType();
+        personAttributeType.setName("email");
+        patient.addAttribute(new PersonAttribute(personAttributeType, "someemail@gmail.com"));
+        return patient;
     }
 
 }
