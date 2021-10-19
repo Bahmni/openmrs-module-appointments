@@ -96,6 +96,23 @@
 		<defaultValue>false</defaultValue>
 		<description>Whether email should be sent for tele-consultation</description>
 	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject</property>
+		<defaultValue>AdhocTeleconsultation started</defaultValue>
+		<description>Subject that will be used in the mail sent to patients for AdhocTeleconsultation</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate</property>
+		<defaultValue>
+			Hi {0}, {1} has started an adhoc tele-consultation with you! Please use this link {3}. If you have any questions, please reach out to administration for assistance. See you soon!
+		</defaultValue>
+		<description>Template to use while sending mail for AdhocTeleconsultation. Format is define like in Java MessageFormat</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.adhocTeleConsultation.ccEmails</property>
+		<defaultValue></defaultValue>
+		<description>CC Emails for AdhocTeleconsultation</description>
+	</globalProperty>
 
 </module>
 

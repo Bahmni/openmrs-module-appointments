@@ -5,6 +5,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openmrs.Patient;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
@@ -39,5 +40,17 @@ public class PatientAppointmentNotifierServiceTest {
         when(appointmentEventNotifier.sendNotification(appointment)).thenReturn(new NotificationResult("", "EMAIL", 0, "Some message"));
         notifierService.notifyAll(appointment);
         verify(appointmentEventNotifier, times(1)).sendNotification(appointment);
+    }
+
+    @Test
+    public void shouldSendEmailOnAdhocTeleconsultationEvent() throws NotificationException {
+        Patient patient = new Patient();
+        String provider = "";
+        String link = "";
+        when(appointmentEventNotifier.sendNotification(patient, provider, link))
+                .thenReturn(new NotificationResult("", "EMAIL", 0,
+                        "Some message"));
+        notifierService.notifyAll(patient, provider, link);
+        verify(appointmentEventNotifier, times(1)).sendNotification(patient, provider, link);
     }
 }

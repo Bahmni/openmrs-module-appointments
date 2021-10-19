@@ -104,6 +104,11 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
             public NotificationResult sendNotification(Appointment appointment) throws NotificationException {
                 return null;
             }
+
+            @Override
+            public NotificationResult sendNotification(Patient patient, String provider, String link) throws NotificationException {
+                return null;
+            }
         });
         Context.authenticate(manageOwnUser, manageOwnUserPassword);
         Appointment appointment = getSampleAppointment();

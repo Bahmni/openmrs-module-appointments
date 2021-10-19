@@ -25,6 +25,10 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     private final static String PROP_PATIENT_EMAIL_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
     private final static String PROP_SEND_TC_APPT_EMAIL = "bahmni.appointment.teleConsultation.sendEmail";
 
+    private final static String PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject";
+    private final static String PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate";
+    private final static String PROP_ADHOC_TELECONSULTATION_CC_EMAILS = "bahmni.appointment.adhocTeleConsultation.ccEmails";
+
     private static final String EMAIL_NOT_CONFIGURED = "Notification can not be sent to patient. Email address not configured.";
     private static final String EMAIL_SENT = "Email sent to Patient";
     private static final String MEDIUM_EMAIL = "EMAIL";
@@ -79,6 +83,33 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         }
     }
 
+    public NotificationResult sendNotification(final Patient patient, final String provider, final String link) throws NotificationException {
+        PersonAttribute patientEmailAttribute = patient.getPerson().getAttribute("email");
+        if (patientEmailAttribute != null) {
+            String patientEmail = patientEmailAttribute.getValue();
+            String patientName = patient.getGivenName();
+            String emailSubject = getAdhocTeleconsultationEmailSubject();
+            String emailBody = getAdhocTeleconsultationEmailBody(patientName, provider, link);
+            String ccEmails = getAdhocTeleconsultationCCEmails();
+            String [] ccEmailArray = null;
+            if (ccEmails != null && !("".equals(ccEmails))) {
+                ccEmailArray = ccEmails.split(",");
+            }
+
+            try {
+                log.info("Sending mail through: " +  mailSender.getClass());
+                mailSender.send(emailSubject, emailBody, new String[] { patientEmail }, ccEmailArray, null);
+                return new NotificationResult("", "EMAIL", 0, EMAIL_SENT);
+            } catch (Exception e) {
+                log.error(EMAIL_FAILURE, e);
+                throw new NotificationException(EMAIL_FAILURE, e);
+            }
+        } else {
+            log.warn(EMAIL_NOT_CONFIGURED);
+            return new NotificationResult(null, "EMAIL", 1, EMAIL_NOT_CONFIGURED);
+        }
+    }
+
     private boolean shouldSendEmailToPatient() {
         String shouldSendEmail = Context.getAdministrationService().getGlobalProperty(PROP_SEND_TC_APPT_EMAIL, "false");
         return Boolean.valueOf(shouldSendEmail);
@@ -106,6 +137,32 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
             emailSubject = Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_SUBJECT, null, LocaleUtility.getDefaultLocale());
         }
         return emailSubject;
+    }
+
+    private String getAdhocTeleconsultationEmailSubject() {
+        String adhocTeleconsultationEmailSubject = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT);
+        if (adhocTeleconsultationEmailSubject == null || "".equals(adhocTeleconsultationEmailSubject)) {
+            adhocTeleconsultationEmailSubject = Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT, null, LocaleUtility.getDefaultLocale());
+        }
+        return adhocTeleconsultationEmailSubject;
+    }
+
+    private String getAdhocTeleconsultationEmailBody(String patientName, String provider, String link) {
+        String adhocTeleconsultationEmailTemplate = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE);
+        Object[] arguments = {patientName, provider, link};
+        if (adhocTeleconsultationEmailTemplate == null || "".equals(adhocTeleconsultationEmailTemplate)) {
+            return Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE, arguments, LocaleUtility.getDefaultLocale());
+        } else {
+            return new MessageFormat(adhocTeleconsultationEmailTemplate).format(arguments);
+        }
+    }
+
+    private String getAdhocTeleconsultationCCEmails() {
+        String adhocTeleconsultationCCEmails = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_CC_EMAILS);
+        if (adhocTeleconsultationCCEmails == null || "".equals(adhocTeleconsultationCCEmails)) {
+            adhocTeleconsultationCCEmails = Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_CC_EMAILS, null, LocaleUtility.getDefaultLocale());
+        }
+        return adhocTeleconsultationCCEmails;
     }
 
     public void setMailSender(MailSender mailSender) {
