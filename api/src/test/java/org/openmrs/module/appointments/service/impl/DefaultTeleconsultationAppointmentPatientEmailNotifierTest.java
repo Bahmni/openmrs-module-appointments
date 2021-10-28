@@ -37,7 +37,7 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
     private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationSubject";
     private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.adhocTeleConsultation.patientEmailNotificationTemplate";
-    private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_CC_EMAILS = "bahmni.appointment.adhocTeleConsultation.ccEmails";
+    private static final String BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_BCC_EMAILS = "bahmni.appointment.adhocTeleConsultation.bccEmails";
     private AppointmentEventNotifier tcAppointmentEventNotifier;
 
     @Mock
@@ -59,7 +59,7 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
         when(administrationService.getGlobalProperty(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE)).thenReturn("Email body");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT)).thenReturn("Email subject");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE)).thenReturn("Email body");
-        when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_CC_EMAILS)).thenReturn("someemail1@gmail.com,someemail2@gmail.com");
+        when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_BCC_EMAILS)).thenReturn("someemail1@gmail.com,someemail2@gmail.com");
     }
 
     @Test
@@ -91,8 +91,8 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
                 eq("Email subject"),
                 eq("Email body"),
                 AdditionalMatchers.aryEq(new String[]{ "someemail@gmail.com" }),
-                AdditionalMatchers.aryEq(new String[]{ "someemail1@gmail.com", "someemail2@gmail.com" }),
-                any());
+                any(),
+                AdditionalMatchers.aryEq(new String[]{ "someemail1@gmail.com", "someemail2@gmail.com" }));
     }
 
     private Appointment buildAppointment() {

@@ -109,9 +109,15 @@
 		<description>Template to use while sending mail for AdhocTeleconsultation. Format is define like in Java MessageFormat</description>
 	</globalProperty>
 	<globalProperty>
-		<property>bahmni.appointment.adhocTeleConsultation.ccEmails</property>
+		<property>bahmni.appointment.adhocTeleConsultation.bccEmails</property>
 		<defaultValue></defaultValue>
-		<description>CC Emails for AdhocTeleconsultation</description>
+		<description>BCC Emails for AdhocTeleconsultation</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>bahmni.adhoc.teleConsultation.id</property>
+		<defaultValue>Patient Identifier</defaultValue>
+		<description>Identifier type of patient to generate AdhocTeleconsultation link eg: 'Patient Identifier' or 'National ID' etc</description>
 	</globalProperty>
 
 </module>
