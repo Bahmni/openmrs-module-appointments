@@ -1,18 +1,17 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.hibernate.type.IdentifierType;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openmrs.GlobalProperty;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PersonName;
+import org.openmrs.*;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.model.Appointment;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -60,11 +59,15 @@ public class TeleconsultationAppointmentServiceTest {
         patient.setNames(personNames);
         PatientIdentifier identifier = new PatientIdentifier();
         identifier.setIdentifier("GAN230901");
+        PatientIdentifierType patientIdentifierType = new PatientIdentifierType();
+        patientIdentifierType.setName("Patient Identifier");
+        identifier.setIdentifierType(patientIdentifierType);
         patient.setIdentifiers(new HashSet<>(Arrays.asList(identifier)));
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
         PowerMockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.serverUrlPattern")).thenReturn("https://test.server/{0}");
+        when(administrationService.getGlobalProperty("bahmni.adhoc.teleConsultation.id")).thenReturn("Patient Identifier");
     }
 
     @Test
@@ -79,16 +82,14 @@ public class TeleconsultationAppointmentServiceTest {
 
     @Test
     public void shouldGetAdhocTCLink() {
-        String uuid = UUID.randomUUID().toString();
-        String link = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(uuid, "", "");
-        assertEquals("https://test.server/"+uuid, link);
+        AdhocTeleconsultationResponse response = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patient.getUuid(), "");
+        assertEquals("https://test.server/GAN230901", response.getLink());
     }
 
     @Test
     public void shouldPublishAdhocTeleconsultationEvent() {
-        String uuid = UUID.randomUUID().toString();
-        String link = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(uuid, patient.getUuid(), "");
-        assertEquals("https://test.server/"+uuid, link);
-        verify(patientAppointmentNotifierService, times(1)).notifyAll(patient, "", link);
+        AdhocTeleconsultationResponse response = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patient.getUuid(), "");
+        assertEquals("https://test.server/GAN230901", response.getLink());
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(patient, "", response.getLink());
     }
 }
