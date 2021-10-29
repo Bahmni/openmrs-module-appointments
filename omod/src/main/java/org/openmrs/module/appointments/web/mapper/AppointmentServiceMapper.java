@@ -204,6 +204,16 @@ public class AppointmentServiceMapper {
     }
 
     private String convertTimeToString(Time time) {
-       return time != null ? time.toString() : new String();
+
+        Calendar timeCalendar = Calendar.getInstance();
+        timeCalendar.setTime(time);
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+       return time != null ? calendar.toInstant().toString()  : new String();
     }
 }
