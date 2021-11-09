@@ -28,36 +28,31 @@ public class PatientAppointmentNotifierService {
     }
 
     public List<NotificationResult> notifyAll(final Appointment appointment) {
-        if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
-        log.info("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
-        List<NotificationResult> notificationResults = new ArrayList<>();
-        for (AppointmentEventNotifier eventNotifier : eventNotifiers) {
-            try {
-                if (eventNotifier.isApplicable(appointment)) {
-                    log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
-                    NotificationResult result = eventNotifier.sendNotification(appointment);
-                    notificationResults.add(result);
-                } else {
-                    log.info(NOT_APPLICABLE + eventNotifier.getMedium());
-                }
-            } catch (NotificationException e) {
-                String msg = CANNOT_SEND_NOTIFICATION_USING_MEDIUM + eventNotifier.getMedium();
-                log.error(msg, e);
-                notificationResults.add(new NotificationResult("", eventNotifier.getMedium(), NotificationResult.GENERAL_ERROR, msg));
-            }
-        }
-        return notificationResults;
+        return notifyAll(appointment, null, null, null);
     }
 
     public List<NotificationResult> notifyAll(final Patient patient, final String provider, final String link) {
+        return notifyAll(null, patient, provider, link);
+    }
+
+    private List<NotificationResult> notifyAll(final Appointment appointment, final Patient patient, final String provider, final String link) {
         if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
         log.info("Notifying AdhocTeleconsultation. Number of notifiers:" + eventNotifiers.size());
         List<NotificationResult> notificationResults = new ArrayList<>();
         for (AppointmentEventNotifier eventNotifier : eventNotifiers) {
             try {
-                log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
-                NotificationResult result = eventNotifier.sendNotification(patient, provider, link);
-                notificationResults.add(result);
+                if (appointment == null || eventNotifier.isApplicable(appointment)) {
+                    log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
+                    NotificationResult result;
+                    if (appointment == null) {
+                        result = eventNotifier.sendNotification(patient, provider, link);
+                    } else {
+                        result = eventNotifier.sendNotification(appointment);
+                    }
+                    notificationResults.add(result);
+                } else {
+                    log.info(NOT_APPLICABLE + eventNotifier.getMedium());
+                }
             } catch (NotificationException e) {
                 String msg = CANNOT_SEND_NOTIFICATION_USING_MEDIUM + eventNotifier.getMedium();
                 log.error(msg, e);

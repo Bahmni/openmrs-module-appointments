@@ -45,9 +45,7 @@ public class TeleconsultationAppointmentService {
                         identifierType.equals(pi.getIdentifierType().getName()))
                 .findAny()
                 .orElse(null);
-        Random rnd = new Random();
-        int number = rnd.nextInt(999999);
-        String id = String.format("%06d", number);
+        String id = generateRandomID();
         if (identifier != null) {
             id = identifier.getIdentifier();
         }
@@ -57,6 +55,13 @@ public class TeleconsultationAppointmentService {
         response.setLink(link);
         notifyUpdates(response, patient, provider, link);
         return response;
+    }
+
+    private String generateRandomID() {
+        Random rnd = new Random();
+        int number = rnd.nextInt(999999);
+        String id = String.format("%06d", number) + System.currentTimeMillis();
+        return id;
     }
 
     private String getAdhocTeleConsultationLink(String uuid) {
