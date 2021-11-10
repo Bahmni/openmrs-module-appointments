@@ -13,8 +13,11 @@
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
-		<require_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</require_module>
 	</require_modules>
+	
+	<aware_of_modules>
+	    <aware_of_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</aware_of_module>
+	</aware_of_modules>
 
 	<mappingFiles>
 		Speciality.hbm.xml
