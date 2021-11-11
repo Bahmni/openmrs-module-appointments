@@ -81,7 +81,7 @@ public class TeleconsultationAppointmentServiceTest {
     }
 
     @Test
-    public void shouldGetAdhocTCLink() {
+    public void shouldGetAdhocTCLinkBasedOnPatientID() {
         AdhocTeleconsultationResponse response = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patient.getUuid(), "");
         assertEquals("https://test.server/GAN230901", response.getLink());
     }

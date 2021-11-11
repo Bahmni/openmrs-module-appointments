@@ -36,9 +36,6 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     private static final String EMAIL_FAILURE = "Failed to send email to patient";
     private static final String EMAIL_NOT_SENT = "Email notification for tele-consultation not configured to be sent to patient.";
 
-    private static final int SUCCESS = 0;
-    private static final int ERROR = 1;
-
     private Log log = LogFactory.getLog(this.getClass());
     private MailSender mailSender;
 
@@ -76,14 +73,14 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
             try {
                 log.info("Sending mail through: " +  mailSender.getClass());
                 mailSender.send(emailSubject, emailBody, new String[] { patientEmail }, null, null);
-                return new NotificationResult("", "EMAIL", SUCCESS, EMAIL_SENT);
+                return new NotificationResult("", "EMAIL", NotificationResult.SUCCESS_STATUS, EMAIL_SENT);
             } catch (Exception e) {
                 log.error(EMAIL_FAILURE, e);
                 throw new NotificationException(EMAIL_FAILURE, e);
             }
         } else {
             log.warn(EMAIL_NOT_CONFIGURED);
-            return new NotificationResult(null, "EMAIL", ERROR, EMAIL_NOT_CONFIGURED);
+            return new NotificationResult(null, "EMAIL", NotificationResult.GENERAL_ERROR, EMAIL_NOT_CONFIGURED);
         }
     }
 
@@ -91,7 +88,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         PersonAttribute patientEmailAttribute = patient.getPerson().getAttribute("email");
         if (patientEmailAttribute == null) {
             log.warn(EMAIL_NOT_CONFIGURED);
-            return new NotificationResult(null, "EMAIL", ERROR, EMAIL_NOT_CONFIGURED);
+            return new NotificationResult(null, "EMAIL", NotificationResult.GENERAL_ERROR, EMAIL_NOT_CONFIGURED);
         }
 
         String patientEmail = patientEmailAttribute.getValue();
@@ -107,7 +104,7 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         try {
             log.info("Sending mail through: " +  mailSender.getClass());
             mailSender.send(emailSubject, emailBody, new String[] { patientEmail }, null, bccEmailArray);
-            return new NotificationResult("", "EMAIL", SUCCESS, EMAIL_SENT);
+            return new NotificationResult("", "EMAIL", NotificationResult.SUCCESS_STATUS, EMAIL_SENT);
         } catch (Exception e) {
             log.error(EMAIL_FAILURE, e);
             throw new NotificationException(EMAIL_FAILURE, e);
