@@ -45,13 +45,11 @@ public class TeleconsultationAppointmentService {
                         identifierType.equals(pi.getIdentifierType().getName()))
                 .findAny()
                 .orElse(null);
-        String id = generateRandomID();
-        if (identifier != null) {
-            id = identifier.getIdentifier();
-        }
-        String link = getAdhocTeleConsultationLink(id);
+        String teleconId = null;
+        teleconId = (identifier != null) ?  identifier.getIdentifier() : generateRandomID();
+        String link = getAdhocTeleConsultationLink(teleconId);
         AdhocTeleconsultationResponse response = new AdhocTeleconsultationResponse();
-        response.setUuid(id);
+        response.setUuid(teleconId);
         response.setLink(link);
         notifyUpdates(response, patient, provider, link);
         return response;
