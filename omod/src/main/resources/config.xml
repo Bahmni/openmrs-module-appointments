@@ -96,6 +96,18 @@
 		<defaultValue>false</defaultValue>
 		<description>Whether email should be sent for tele-consultation</description>
 	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.sendSms</property>
+		<defaultValue>false</defaultValue>
+		<description>Whether sms should be sent for tele-consultation</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.patientSmsNotificationTemplate</property>
+		<defaultValue>
+			Hi {0}, Your tele-consultation appointment with {1} for {2} has been scheduled! Please use this link {3}. If you have any questions, please reach out to administration for assistance. See you soon!
+		</defaultValue>
+		<description>Template to use while sending sms. Format is define like in Java MessageFormat</description>
+	</globalProperty>
 
 </module>
 
