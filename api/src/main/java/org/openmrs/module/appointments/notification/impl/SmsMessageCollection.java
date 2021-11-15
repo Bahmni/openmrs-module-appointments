@@ -1,4 +1,6 @@
-package org.openmrs.module.appointments.notification;
+package org.openmrs.module.appointments.notification.impl;
+
+import org.openmrs.module.appointments.notification.impl.SmsMessage;
 
 import java.util.List;
 

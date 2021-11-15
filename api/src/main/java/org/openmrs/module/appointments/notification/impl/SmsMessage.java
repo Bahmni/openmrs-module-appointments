@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.notification;
+package org.openmrs.module.appointments.notification.impl;
 
 public class SmsMessage {
     private String from;

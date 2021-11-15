@@ -28,8 +28,14 @@
     <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender">
         <constructor-arg ref="adminService"/>
     </bean>
+    <bean id="defaultTCApptSmsSender" class="org.openmrs.module.appointments.notification.impl.DefaultSmsSender">
+        <constructor-arg ref="adminService"/>
+    </bean>
     <bean id="defaultPatientEmailNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier">
         <constructor-arg ref="defaultTCApptMailSender"/>
+    </bean>
+    <bean id="defaultSmsNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentSmsNotifier">
+        <constructor-arg ref="defaultTCApptSmsSender"/>
     </bean>
 
 <!--    <ref bean="defaultAppointmentMailSender"/>-->
@@ -38,6 +44,7 @@
         <property name="eventNotifiers">
             <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
                 <ref bean="defaultPatientEmailNotifier"/>
+                <ref bean="defaultSmsNotifier"/>
             </list>
         </property>
     </bean>
