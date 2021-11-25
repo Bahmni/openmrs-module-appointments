@@ -74,7 +74,15 @@
         <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
 
-    <bean id="teleconsultationAppointmentServiceImpl" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
+    <bean id="teleconsultationAppointmentServiceImpl" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService">
+        <property name="patientService">
+            <ref bean="patientService"/>
+        </property>
+
+        <property name="patientAppointmentNotifierService">
+            <ref bean="patientAppointmentNotifierService"/>
+        </property>
+    </bean>
 
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
