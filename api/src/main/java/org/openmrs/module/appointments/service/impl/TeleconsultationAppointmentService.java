@@ -9,14 +9,11 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.notification.NotificationResult;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
 
-@Component
 public class TeleconsultationAppointmentService {
 
     private final static String PROP_TC_SERVER = "bahmni.appointment.teleConsultation.serverUrlPattern";
@@ -24,11 +21,16 @@ public class TeleconsultationAppointmentService {
     private final static String DEFAULT_TC_SERVER_URL_PATTERN = "https://meet.jit.si/{0}";
     private Log log = LogFactory.getLog(this.getClass());
 
-    @Autowired
     private PatientService patientService;
+    private PatientAppointmentNotifierService patientAppointmentNotifierService;
 
-    @Autowired
-    private PatientAppointmentNotifierService appointmentNotifierService;
+    public void setPatientService(PatientService patientService) {
+        this.patientService = patientService;
+    }
+
+    public void setPatientAppointmentNotifierService(PatientAppointmentNotifierService patientAppointmentNotifierService) {
+        this.patientAppointmentNotifierService = patientAppointmentNotifierService;
+    }
 
     public String generateTeleconsultationLink(Appointment appointment) {
         String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
@@ -72,7 +74,7 @@ public class TeleconsultationAppointmentService {
     }
 
     private void notifyUpdates(AdhocTeleconsultationResponse response, Patient patient, String provider, String link) {
-        List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(patient, provider, link);
+        List<NotificationResult> notificationResults = patientAppointmentNotifierService.notifyAll(patient, provider, link);
         if (!notificationResults.isEmpty()) {
             notificationResults.stream().forEach(nr -> {
                 String notificationMsg = String.format("Appointment Notification Result - medium: %s, uuid: %s, status: %d, message: %s",
