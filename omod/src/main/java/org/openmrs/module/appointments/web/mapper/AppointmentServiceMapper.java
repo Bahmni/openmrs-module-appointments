@@ -204,16 +204,19 @@ public class AppointmentServiceMapper {
     }
 
     private String convertTimeToString(Time time) {
+        if (time == null) {
+            return new String();
+        }
 
         Calendar timeCalendar = Calendar.getInstance();
         timeCalendar.setTime(time);
 
-        Calendar calendar = Calendar.getInstance();
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
         calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, 0);
         calendar.set(Calendar.MILLISECOND, 0);
 
-       return time != null ? calendar.toInstant().toString()  : new String();
+       return calendar.toInstant().toString();
     }
 }
