@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.sql.Time;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -56,8 +57,28 @@ public class DateUtil {
         return calendar.getTime();
     }
 
+    public static Date getStartOfDayUTC() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getMinimum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getMinimum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
     public static long getEpochTime(long date) {
         Calendar calendar = getCalendar(new Date(date));
+        int hours = calendar.get(Calendar.HOUR_OF_DAY);
+        int minutes = calendar.get(Calendar.MINUTE);
+        int seconds = calendar.get(Calendar.SECOND);
+        long milliSeconds = ((hours * 3600 + minutes * 60 + seconds) * 1000);
+        return milliSeconds;
+    }
+
+    public static long getEpochTimeUTC(long date) {
+        Calendar calendar = getCalendar(new Date(date));
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
         int minutes = calendar.get(Calendar.MINUTE);
         int seconds = calendar.get(Calendar.SECOND);
@@ -71,6 +92,25 @@ public class DateUtil {
         calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
         calendar.set(Calendar.MILLISECOND, calendar.getMaximum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
+    public static Date getEndOfDayUTC() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMaximum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getMaximum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
+    public static Date convertToCurrentDateUTC(Time time) {
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, time.getHours());
+        calendar.set(Calendar.MINUTE, time.getMinutes());
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
         return calendar.getTime();
     }
 }

@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
-import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
+import static org.openmrs.module.appointments.util.DateUtil.getEpochTimeUTC;
+import static org.openmrs.module.appointments.util.DateUtil.convertToCurrentDateUTC;
 
 public class AppointmentServiceUnavailabilityConflict implements AppointmentConflict {
 
@@ -50,13 +50,13 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
                     .filter(day -> day.isSameDay(appointmentDay)).collect(Collectors.toList());
             if (!dayAvailabilities.isEmpty())
                 return dayAvailabilities.stream().allMatch(availableDay ->
-                        checkTimeAvailability(appointment, availableDay.getStartTime().getTime(), availableDay.getEndTime().getTime()));
+                        checkTimeAvailability(appointment, convertToCurrentDateUTC(availableDay.getStartTime()).getTime(), convertToCurrentDateUTC(availableDay.getEndTime()).getTime()));
             return true;
         }
         Time serviceStartTime = appointmentServiceDefinition.getStartTime();
         Time serviceEndTime = appointmentServiceDefinition.getEndTime();
-        long serviceStartMillis = serviceStartTime != null ? serviceStartTime.getTime() : DateUtil.getStartOfDay().getTime();
-        long serviceEndMillis = serviceEndTime != null ? serviceEndTime.getTime() : DateUtil.getEndOfDay().getTime();
+        long serviceStartMillis = serviceStartTime != null ? convertToCurrentDateUTC(serviceStartTime).getTime() : DateUtil.getStartOfDayUTC().getTime();
+        long serviceEndMillis = serviceEndTime != null ? convertToCurrentDateUTC(serviceEndTime).getTime() : DateUtil.getEndOfDayUTC().getTime();
         return checkTimeAvailability(appointment, serviceStartMillis, serviceEndMillis);
     }
 
@@ -65,10 +65,10 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
     }
 
     private boolean checkTimeAvailability(Appointment appointment, long serviceStartTime, long serviceEndTime) {
-        long appointmentStartTimeMilliSeconds = getEpochTime(appointment.getStartDateTime().getTime());
-        long appointmentEndTimeMilliSeconds = getEpochTime(appointment.getEndDateTime().getTime());
-        long serviceStartTimeMilliSeconds = getEpochTime(serviceStartTime);
-        long serviceEndTimeMilliSeconds = getEpochTime(serviceEndTime);
+        long appointmentStartTimeMilliSeconds = getEpochTimeUTC(appointment.getStartDateTime().getTime());
+        long appointmentEndTimeMilliSeconds = getEpochTimeUTC(appointment.getEndDateTime().getTime());
+        long serviceStartTimeMilliSeconds = getEpochTimeUTC(serviceStartTime);
+        long serviceEndTimeMilliSeconds = getEpochTimeUTC(serviceEndTime);
         boolean isConflict = (appointmentStartTimeMilliSeconds >= appointmentEndTimeMilliSeconds)
                 || ((appointmentStartTimeMilliSeconds < serviceStartTimeMilliSeconds)
                 || (appointmentEndTimeMilliSeconds > serviceEndTimeMilliSeconds));
