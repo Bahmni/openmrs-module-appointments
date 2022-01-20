@@ -9,11 +9,7 @@ import org.openmrs.module.appointments.util.DateUtil;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
@@ -23,7 +19,7 @@ import static org.openmrs.module.appointments.util.DateUtil.convertToCurrentDate
 public class AppointmentServiceUnavailabilityConflict implements AppointmentConflict {
 
     private final static String DAY_OF_WEEK_PATTERN = "EEEE";
-    private final SimpleDateFormat DayFormat = new SimpleDateFormat(DAY_OF_WEEK_PATTERN);
+    private final SimpleDateFormat DayFormat = new SimpleDateFormat(DAY_OF_WEEK_PATTERN, Locale.ENGLISH);
 
     @Override
     public AppointmentConflictType getType() {
