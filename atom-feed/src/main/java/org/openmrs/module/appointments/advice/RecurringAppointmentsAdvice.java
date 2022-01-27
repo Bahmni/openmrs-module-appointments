@@ -74,6 +74,6 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
 
     @Override
     protected boolean shouldRaiseEvent() {
-        return Boolean.valueOf(Context.getAdministrationService().getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY));
+        return Boolean.parseBoolean(Context.getAdministrationService().getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY));
     }
 }
