@@ -18,6 +18,7 @@ import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.notification.NotificationType;
 import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
@@ -101,7 +102,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
             }
 
             @Override
-            public NotificationResult sendNotification(Appointment appointment) throws NotificationException {
+            public NotificationResult sendNotification(Appointment appointment, NotificationType notificationType) throws NotificationException {
                 return null;
             }
         });

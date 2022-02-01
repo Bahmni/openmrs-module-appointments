@@ -96,6 +96,28 @@
 		<defaultValue>false</defaultValue>
 		<description>Whether email should be sent for tele-consultation</description>
 	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.emailReminderEnabled</property>
+		<defaultValue>false</defaultValue>
+		<description>Whether email reminder service should be sent for appointments</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.appointmentReminderTimeRange</property>
+		<defaultValue>30</defaultValue>
+		<description>Appointment Email Reminder time range in minutes</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.patientReminderEmailNotificationSubject</property>
+		<defaultValue>Teleconsultation appointment Reminder</defaultValue>
+		<description>Subject that will be used in the mail sent reminder to patients for their appointment</description>
+	</globalProperty>
+	<globalProperty>
+		<property>bahmni.appointment.teleConsultation.patientReminderEmailNotificationTemplate</property>
+		<defaultValue>
+			Hi {0}, Your tele-consultation appointment with {1} for {2} is going to start soon. Please use this link {3}. If you have any questions, please reach out to administration for assistance.
+		</defaultValue>
+		<description>Email body that will be used in the mail sent reminder to patients for their appointment</description>
+	</globalProperty>
 
 </module>
 

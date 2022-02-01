@@ -24,5 +24,5 @@ public interface AppointmentEventNotifier {
      */
     String getMedium();
     boolean isApplicable(final Appointment appointment);
-    NotificationResult sendNotification(final Appointment appointment) throws NotificationException;
+    NotificationResult sendNotification(final Appointment appointment, NotificationType notificationType) throws NotificationException;
 }

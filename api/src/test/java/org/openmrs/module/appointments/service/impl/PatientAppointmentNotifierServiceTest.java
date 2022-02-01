@@ -9,6 +9,7 @@ import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.notification.NotificationType;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
@@ -35,9 +36,10 @@ public class PatientAppointmentNotifierServiceTest {
     @Test
     public void shouldSendEmailOnTeleconsultationAppointmentSavedEvent() throws NotificationException {
         Appointment appointment = new Appointment();
+        NotificationType notificationType = NotificationType.Scheduled;
         when(appointmentEventNotifier.isApplicable(appointment)).thenReturn(true);
-        when(appointmentEventNotifier.sendNotification(appointment)).thenReturn(new NotificationResult("", "EMAIL", 0, "Some message"));
-        notifierService.notifyAll(appointment);
-        verify(appointmentEventNotifier, times(1)).sendNotification(appointment);
+        when(appointmentEventNotifier.sendNotification(appointment, notificationType)).thenReturn(new NotificationResult("", "EMAIL", 0, "Some message"));
+        notifierService.notifyAll(appointment, notificationType);
+        verify(appointmentEventNotifier, times(1)).sendNotification(appointment, notificationType);
     }
 }
