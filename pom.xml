@@ -32,8 +32,9 @@
 
 	<modules>
 		<module>api</module>
+		<module>atom-feed</module>
 		<module>omod</module>
-	</modules>
+    </modules>
 
 	<properties>
 		<openmrs.platform.version>2.1.1</openmrs.platform.version>
