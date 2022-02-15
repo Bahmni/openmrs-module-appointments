@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.openmrs.module.appointments.util.DateUtil.getEpochTimeUTC;
-import static org.openmrs.module.appointments.util.DateUtil.convertToCurrentDateUTC;
 
 public class AppointmentServiceUnavailabilityConflict implements AppointmentConflict {
 
@@ -46,13 +45,13 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
                     .filter(day -> day.isSameDay(appointmentDay)).collect(Collectors.toList());
             if (!dayAvailabilities.isEmpty())
                 return dayAvailabilities.stream().allMatch(availableDay ->
-                        checkTimeAvailability(appointment, convertToCurrentDateUTC(availableDay.getStartTime()).getTime(), convertToCurrentDateUTC(availableDay.getEndTime()).getTime()));
+                        checkTimeAvailability(appointment, availableDay.getStartTime().getTime(), availableDay.getEndTime().getTime()));
             return true;
         }
         Time serviceStartTime = appointmentServiceDefinition.getStartTime();
         Time serviceEndTime = appointmentServiceDefinition.getEndTime();
-        long serviceStartMillis = serviceStartTime != null ? convertToCurrentDateUTC(serviceStartTime).getTime() : DateUtil.getStartOfDayUTC().getTime();
-        long serviceEndMillis = serviceEndTime != null ? convertToCurrentDateUTC(serviceEndTime).getTime() : DateUtil.getEndOfDayUTC().getTime();
+        long serviceStartMillis = serviceStartTime != null ? serviceStartTime.getTime() : DateUtil.getStartOfDay().getTime();
+        long serviceEndMillis = serviceEndTime != null ? serviceEndTime.getTime() : DateUtil.getEndOfDay().getTime();
         return checkTimeAvailability(appointment, serviceStartMillis, serviceEndMillis);
     }
 

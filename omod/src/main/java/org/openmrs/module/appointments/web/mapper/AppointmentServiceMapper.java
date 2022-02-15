@@ -40,8 +40,8 @@ public class AppointmentServiceMapper {
         appointmentServiceDefinition.setName(appointmentServiceDescription.getName());
         appointmentServiceDefinition.setDescription(appointmentServiceDescription.getDescription());
         appointmentServiceDefinition.setDurationMins(appointmentServiceDescription.getDurationMins());
-        appointmentServiceDefinition.setStartTime(appointmentServiceDescription.getStartTime());
-        appointmentServiceDefinition.setEndTime(appointmentServiceDescription.getEndTime());
+        appointmentServiceDefinition.setStartTime(utcTimeToServerTime(appointmentServiceDescription.getStartTime()));
+        appointmentServiceDefinition.setEndTime(utcTimeToServerTime(appointmentServiceDescription.getEndTime()));
         appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServiceDescription.getMaxAppointmentsLimit());
         appointmentServiceDefinition.setColor(appointmentServiceDescription.getColor());
 
@@ -105,8 +105,8 @@ public class AppointmentServiceMapper {
         else
             availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(avb.getDayOfWeek());
-        availability.setStartTime(avb.getStartTime());
-        availability.setEndTime(avb.getEndTime());
+        availability.setStartTime(utcTimeToServerTime(avb.getStartTime()));
+        availability.setEndTime(utcTimeToServerTime(avb.getEndTime()));
         availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
         availability.setService(appointmentServiceDefinition);
         availability.setVoided(avb.isVoided());
@@ -208,15 +208,22 @@ public class AppointmentServiceMapper {
             return new String();
         }
 
-        Calendar timeCalendar = Calendar.getInstance();
-        timeCalendar.setTime(time);
-
-        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
-        calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
-        calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
-        calendar.set(Calendar.SECOND, 0);
+        // Use today's date for the returned time so that hour is adjusted considering daylight saving time
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, time.getHours());
+        calendar.set(Calendar.MINUTE, time.getMinutes());
+        calendar.set(Calendar.SECOND, time.getSeconds());
         calendar.set(Calendar.MILLISECOND, 0);
 
        return calendar.toInstant().toString();
+    }
+
+    private Time utcTimeToServerTime(Time time) {
+        Calendar serviceEndTimeUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        serviceEndTimeUtc.set(Calendar.HOUR_OF_DAY, time.getHours());
+        serviceEndTimeUtc.set(Calendar.MINUTE, time.getMinutes());
+        serviceEndTimeUtc.set(Calendar.SECOND, time.getSeconds());
+        serviceEndTimeUtc.set(Calendar.MILLISECOND, 0);
+        return new Time(serviceEndTimeUtc.getTime().getHours(), serviceEndTimeUtc.getTime().getMinutes(), serviceEndTimeUtc.getTime().getSeconds());
     }
 }
