@@ -56,6 +56,16 @@ public class DateUtil {
         return calendar.getTime();
     }
 
+    public static Date getStartOfDayUTC() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getMinimum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getMinimum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
     public static long getEpochTime(long date) {
         Calendar calendar = getCalendar(new Date(date));
         int hours = calendar.get(Calendar.HOUR_OF_DAY);
@@ -77,6 +87,16 @@ public class DateUtil {
 
     public static Date getEndOfDay() {
         Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getMaximum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getMaximum(Calendar.MILLISECOND));
+        return calendar.getTime();
+    }
+
+    public static Date getEndOfDayUTC() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeZone(TimeZone.getTimeZone("UTC"));
         calendar.set(Calendar.HOUR_OF_DAY, calendar.getMaximum(Calendar.HOUR_OF_DAY));
         calendar.set(Calendar.MINUTE, calendar.getMaximum(Calendar.MINUTE));
         calendar.set(Calendar.SECOND, calendar.getMaximum(Calendar.SECOND));

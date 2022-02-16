@@ -48,12 +48,12 @@ public class AppointmentServiceUnavailabilityConflictTest {
         Appointment appointment = new Appointment();
         appointment.setService(appointmentServiceDefinition);
         //Tuesday Appointment
-        appointment.setStartDateTime(getDate(2019, 8, 24, 11, 30, 0));
-        appointment.setEndDateTime(getDate(2019, 8, 24, 12, 0, 0));
+        appointment.setStartDateTime(getDate(2019, Calendar.JANUARY, 24, 11, 30, 0));
+        appointment.setEndDateTime(getDate(2019, Calendar.JANUARY, 24, 12, 0, 0));
         appointment.setAppointmentId(2);
 
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
+        //sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
         Date startTimeUTC = new Date(sdf.format(new Time(8, 30, 0)));
         Date endTimeUTC = new Date(sdf.format(new Time(17, 30, 0)));
         Date startTimeUTC2 = new Date(sdf.format(new Time(8, 30, 0)));
@@ -61,11 +61,11 @@ public class AppointmentServiceUnavailabilityConflictTest {
         ServiceWeeklyAvailability day1 = new ServiceWeeklyAvailability();
         day1.setStartTime(new Time(startTimeUTC.getHours(), startTimeUTC.getMinutes(), startTimeUTC.getSeconds()));
         day1.setEndTime(new Time(endTimeUTC.getHours(), endTimeUTC.getMinutes(), endTimeUTC.getSeconds()));
-        day1.setDayOfWeek(DayOfWeek.MONDAY);
+        day1.setDayOfWeek(DayOfWeek.THURSDAY);
         ServiceWeeklyAvailability day2 = new ServiceWeeklyAvailability();
         day2.setStartTime(new Time(startTimeUTC2.getHours(), startTimeUTC2.getMinutes(), startTimeUTC2.getSeconds()));
         day2.setEndTime(new Time(endTimeUTC2.getHours(), endTimeUTC2.getMinutes(), endTimeUTC2.getSeconds()));
-        day2.setDayOfWeek(DayOfWeek.TUESDAY);
+        day2.setDayOfWeek(DayOfWeek.FRIDAY);
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
 
@@ -128,34 +128,27 @@ public class AppointmentServiceUnavailabilityConflictTest {
         // All Appointments are on Monday
         Appointment appointmentOne = new Appointment();
         appointmentOne.setService(appointmentServiceDefinition);
-        appointmentOne.setStartDateTime(getDate(2019, 8, 23, 6, 30, 0));
-        appointmentOne.setEndDateTime(getDate(2019, 8, 23, 7, 0, 0));
+        appointmentOne.setStartDateTime(getDate(2019, Calendar.JANUARY, 1, 6, 30, 0));
+        appointmentOne.setEndDateTime(getDate(2019, Calendar.JANUARY, 1, 7, 0, 0));
         appointmentOne.setAppointmentId(2);
         Appointment appointmentTwo = new Appointment();
         appointmentTwo.setService(appointmentServiceDefinition);
-        appointmentTwo.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
-        appointmentTwo.setEndDateTime(getDate(2019, 8, 23, 17, 30, 0));
+        appointmentTwo.setStartDateTime(getDate(2019, Calendar.JANUARY, 1, 16, 30, 0));
+        appointmentTwo.setEndDateTime(getDate(2019, Calendar.JANUARY, 1, 17, 30, 0));
         appointmentTwo.setAppointmentId(3);
         Appointment appointmentThree = new Appointment();
         appointmentThree.setService(appointmentServiceDefinition);
-        appointmentThree.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
-        appointmentThree.setEndDateTime(getDate(2019, 8, 23, 17, 0, 0));
+        appointmentThree.setStartDateTime(getDate(2019, Calendar.JANUARY, 1, 16, 30, 0));
+        appointmentThree.setEndDateTime(getDate(2019, Calendar.JANUARY, 1, 17, 0, 0));
         appointmentThree.setAppointmentId(4);
         ServiceWeeklyAvailability day1 = new ServiceWeeklyAvailability();
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date startTimeUTC = new Date(sdf.format(new Time(6, 30, 0)));
-        Date endTimeUTC = new Date(sdf.format(new Time(14, 0, 0)));
-        Date startTimeUTC2 = new Date(sdf.format(new Time(16, 30, 0)));
-        Date endTimeUTC2 = new Date(sdf.format(new Time(19, 0, 0)));
-        day1.setStartTime(new Time(startTimeUTC.getHours(), startTimeUTC.getMinutes(), startTimeUTC.getSeconds()));
-        day1.setEndTime(new Time(endTimeUTC.getHours(), endTimeUTC.getMinutes(), endTimeUTC.getSeconds()));
-        day1.setDayOfWeek(DayOfWeek.MONDAY);
+        day1.setStartTime(new Time(6, 30, 0));
+        day1.setEndTime(new Time(14, 0, 0));
+        day1.setDayOfWeek(DayOfWeek.TUESDAY);
         ServiceWeeklyAvailability day2 = new ServiceWeeklyAvailability();
-        day2.setStartTime(new Time(startTimeUTC2.getHours(), startTimeUTC2.getMinutes(), startTimeUTC2.getSeconds()));
-        day2.setEndTime(new Time(endTimeUTC2.getHours(), endTimeUTC2.getMinutes(), endTimeUTC2.getSeconds()));
-        day2.setDayOfWeek(DayOfWeek.MONDAY);
+        day2.setStartTime(new Time(16, 30, 0));
+        day2.setEndTime(new Time(19, 0, 0));
+        day2.setDayOfWeek(DayOfWeek.TUESDAY);
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);
 
@@ -202,20 +195,13 @@ public class AppointmentServiceUnavailabilityConflictTest {
         appointment.setEndDateTime(getDate(2019, 8, 23, 11, 0, 0));
         appointment.setService(appointmentServiceDefinition);
         appointment.setAppointmentId(1);
-
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
-        sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
-        Date startTimeUTC = new Date(sdf.format(new Time(8, 30, 0)));
-        Date endTimeUTC = new Date(sdf.format(new Time(17, 0, 0)));
-        Date startTimeUTC2 = new Date(sdf.format(new Time(8, 30, 0)));
-        Date endTimeUTC2 = new Date(sdf.format(new Time(17, 0, 0)));
         ServiceWeeklyAvailability day1 = new ServiceWeeklyAvailability();
-        day1.setStartTime(new Time(startTimeUTC.getHours(), startTimeUTC.getMinutes(), startTimeUTC.getSeconds()));
-        day1.setEndTime(new Time(endTimeUTC.getHours(), endTimeUTC.getMinutes(), endTimeUTC.getSeconds()));
+        day1.setStartTime(new Time(8, 30, 0));
+        day1.setEndTime(new Time(17, 0, 0));
         day1.setDayOfWeek(DayOfWeek.MONDAY);
         ServiceWeeklyAvailability day2 = new ServiceWeeklyAvailability();
-        day2.setStartTime(new Time(startTimeUTC2.getHours(), startTimeUTC2.getMinutes(), startTimeUTC2.getSeconds()));
-        day2.setEndTime(new Time(endTimeUTC2.getHours(), endTimeUTC2.getMinutes(), endTimeUTC2.getSeconds()));
+        day2.setStartTime(new Time(8, 30, 0));
+        day2.setEndTime(new Time(17, 0, 0));
         day2.setDayOfWeek(DayOfWeek.TUESDAY);
         Set<ServiceWeeklyAvailability> availabilities = new HashSet<>(Arrays.asList(day1, day2));
         appointmentServiceDefinition.setWeeklyAvailability(availabilities);

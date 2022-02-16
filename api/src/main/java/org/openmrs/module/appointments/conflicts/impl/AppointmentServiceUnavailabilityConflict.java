@@ -50,8 +50,8 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
         }
         Time serviceStartTime = appointmentServiceDefinition.getStartTime();
         Time serviceEndTime = appointmentServiceDefinition.getEndTime();
-        long serviceStartMillis = serviceStartTime != null ? serviceStartTime.getTime() : DateUtil.getStartOfDay().getTime();
-        long serviceEndMillis = serviceEndTime != null ? serviceEndTime.getTime() : DateUtil.getEndOfDay().getTime();
+        long serviceStartMillis = serviceStartTime != null ? serviceStartTime.getTime() : DateUtil.getStartOfDayUTC().getTime();
+        long serviceEndMillis = serviceEndTime != null ? serviceEndTime.getTime() : DateUtil.getEndOfDayUTC().getTime();
         return checkTimeAvailability(appointment, serviceStartMillis, serviceEndMillis);
     }
 
