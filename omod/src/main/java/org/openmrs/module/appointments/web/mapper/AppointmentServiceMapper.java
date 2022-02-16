@@ -219,6 +219,9 @@ public class AppointmentServiceMapper {
     }
 
     private Time utcTimeToServerTime(Time time) {
+        if (time == null) {
+            return null;
+        }
         Calendar serviceEndTimeUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
         serviceEndTimeUtc.set(Calendar.HOUR_OF_DAY, time.getHours());
         serviceEndTimeUtc.set(Calendar.MINUTE, time.getMinutes());
