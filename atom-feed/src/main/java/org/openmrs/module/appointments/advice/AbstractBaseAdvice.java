@@ -5,7 +5,7 @@ import org.ict4h.atomfeed.server.repository.jdbc.AllEventRecordsQueueJdbcImpl;
 import org.ict4h.atomfeed.server.service.Event;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
-import org.joda.time.DateTime;
+import java.time.LocalDateTime;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.springframework.aop.AfterReturningAdvice;
@@ -33,7 +33,7 @@ public abstract class AbstractBaseAdvice implements AfterReturningAdvice {
 
 
     private void raiseEvent(String contents, String title, String category) {
-        final Event event = new Event(UUID.randomUUID().toString(), title, DateTime.now(), (URI) null, contents, category);
+        final Event event = new Event(UUID.randomUUID().toString(), title, LocalDateTime.now(), (URI) null, contents, category);
         atomFeedSpringTransactionManager.executeWithTransaction(
                 new AFTransactionWorkWithoutResult() {
                     @Override
