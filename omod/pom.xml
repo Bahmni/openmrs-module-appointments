@@ -17,7 +17,7 @@
 		<MODULE_NAME>${project.name}</MODULE_NAME>
 		<MODULE_VERSION>${project.version}</MODULE_VERSION>
 		<MODULE_PACKAGE>${project.groupId}.${MODULE_ID}</MODULE_PACKAGE>
-		<openmrs.platform.version>2.1.5</openmrs.platform.version>
+		<openmrs.platform.version>2.1.6</openmrs.platform.version>
 	</properties>
 
 	<dependencies>

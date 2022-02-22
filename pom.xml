@@ -37,7 +37,7 @@
     </modules>
 
 	<properties>
-		<openmrs.platform.version>2.1.5</openmrs.platform.version>
+		<openmrs.platform.version>2.1.6</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.12</junitVersion>
 		<powerMockVersion>1.6.5</powerMockVersion>
@@ -45,8 +45,8 @@
 		<mockitoVersion>1.10.19</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.7.9</jacocoVersion>
-		<openmrsAtomfeedVersion>2.5.7-SNAPSHOT</openmrsAtomfeedVersion>
-		<atomfeed.version>1.10.0-SNAPSHOT</atomfeed.version>
+		<openmrsAtomfeedVersion>2.6.0</openmrsAtomfeedVersion>
+		<atomfeed.version>1.10.0</atomfeed.version>
 	</properties>
 
 	<build>
