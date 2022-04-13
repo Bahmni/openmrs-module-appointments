@@ -75,7 +75,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         }
 
         if (StringUtils.isNotEmpty(status)) {
-            criteria.add(Restrictions.eq("status", status));
+            criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(status))); //TODO: we may need to explore Optional construct to help validate against missing enum values
         }
         return criteria.list();
     }
