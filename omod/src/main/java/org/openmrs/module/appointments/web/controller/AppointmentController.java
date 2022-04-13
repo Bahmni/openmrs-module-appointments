@@ -200,12 +200,16 @@ public class AppointmentController extends BaseRestController {
      */
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") Date forDate, @RequestParam(value = "status") String status)  {
-        if(forDate == null || StringUtils.isNotEmpty(status)) {
-            log.error("Request for appointment requires date and status");
-            throw new RuntimeException("Request for appointment requires date and status");
+    public ResponseEntity<Object> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") Date forDate, @RequestParam(value = "status") String status)  {
+        try {
+            if(forDate == null || StringUtils.isNotEmpty(status)) {
+                return new ResponseEntity<>("The request requires appointment date and status", HttpStatus.BAD_REQUEST);
+            }
+            List<Appointment> appointments = appointmentsService.getAllAppointments(forDate, status);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to fetch appointments by status and date", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        List<Appointment> appointments = appointmentsService.getAllAppointments(forDate, status);
-        return appointmentMapper.constructResponse(appointments);
     }
 }
