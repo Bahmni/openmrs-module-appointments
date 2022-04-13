@@ -198,7 +198,7 @@ public class AppointmentController extends BaseRestController {
      * @param status - the appointment status i.e. scheduled, cancelled, completed,
      * @return list
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(method = RequestMethod.GET, value = "appointmentStatus")
     @ResponseBody
     public ResponseEntity<Object> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") Date forDate, @RequestParam(value = "status") String status)  {
         try {
