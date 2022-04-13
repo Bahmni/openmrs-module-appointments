@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
@@ -50,8 +51,8 @@ public class AppointmentController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
-        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate, @RequestParam(value = "status", required = false) AppointmentStatus status) throws ParseException {
+        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate), status);
         return appointmentMapper.constructResponse(appointments);
     }
     @RequestMapping( method = RequestMethod.POST, value = "search")

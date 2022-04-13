@@ -111,6 +111,36 @@ public class AppointmentsControllerTest {
     }
 
     @Test
+    public void shouldGetAllAppointmentsByADateAndStatus() throws Exception {
+        List<Appointment> appointmentsForDate = new ArrayList<>();
+        Appointment appointment1 = new Appointment();
+        appointment1.setId(1);
+        appointment1.setUuid("uuid1");
+        appointment1.setStartDateTime(DateUtil.convertToDate("2017-03-15T16:57:09.0Z",DateUtil.DateFormatType.UTC));
+        appointment1.setStatus(AppointmentStatus.Scheduled);
+
+        Appointment appointment2 = new Appointment();
+        appointment2.setId(2);
+        appointment2.setUuid("uuid2");
+        appointment2.setStartDateTime(DateUtil.convertToDate("2017-03-15T19:57:09.0Z",DateUtil.DateFormatType.UTC));
+        appointment2.setStatus(AppointmentStatus.Scheduled);
+
+        appointmentsForDate.add(appointment1);
+        appointmentsForDate.add(appointment2);
+
+        Date searchDate = DateUtil.convertToLocalDateFromUTC("2017-03-15T16:57:09.0Z");
+
+        when(appointmentsService.getAllAppointments(searchDate, AppointmentStatus.Scheduled)).thenReturn(appointmentsForDate);
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(
+                appointmentsForDate.stream().map(as -> { return new AppointmentDefaultResponse(); }).collect(Collectors.toList()));
+
+        List<AppointmentDefaultResponse> allAppointments = appointmentsController.getAllAppointments("2017-03-15T16:57:09.0Z", AppointmentStatus.Scheduled);
+        verify(appointmentsService, times(1)).getAllAppointments(searchDate, AppointmentStatus.Scheduled);
+        verify(appointmentMapper, times(1)).constructResponse(appointmentsForDate);
+        assertEquals(2, allAppointments.size());
+    }
+
+    @Test
     public void shouldSaveAppointment() throws Exception {
 
         AppointmentRequest request = new AppointmentRequest();

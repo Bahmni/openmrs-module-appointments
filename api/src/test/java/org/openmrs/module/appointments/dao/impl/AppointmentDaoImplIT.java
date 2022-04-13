@@ -42,6 +42,14 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldGetAllNonVoidedAppointmentsByDateAndStatus() throws Exception {
+        Date forDate = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(forDate, AppointmentStatus.CheckedIn);
+        assertEquals(1, allAppointments.size());
+    }
+
+
+    @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
         assertEquals(11, allAppointments.size());

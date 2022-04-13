@@ -172,6 +172,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAllAppointments(null));
     }
 
+    @Test
+    public void shouldGetAllAppointmentsByDateAndStatusIfUserHasReadOnlyPrivilege() throws ParseException {
+        Context.authenticate(readOnlyUser, readOnlyUserPassword);
+        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC), AppointmentStatus.Scheduled);
+        assertNotNull(appointments);
+        assertEquals(1, appointments.size());
+    }
+
     @Test(expected = APIAuthenticationException.class)
     public void shouldNotGetAllAppointmentsIfUserDoesNotHaveAnyPrivilege() {
         Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
