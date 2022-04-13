@@ -507,7 +507,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
                 "\"endDate\": \"\"," +
                 "\"type\": \"Day\"" +
                 "}," +
-                "\"timeZone\": \"africa/nairobi\"" +
+                "\"timeZone\": \"asia/kolkata\"" +
                 "}";
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments/conflicts", content));
         assertNotNull(response);
