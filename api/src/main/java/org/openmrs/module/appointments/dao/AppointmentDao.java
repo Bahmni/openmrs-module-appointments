@@ -14,6 +14,7 @@ public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
     List<Appointment> getAllAppointmentsReminder(String afterTime);
 
+    List<Appointment> getAllAppointments(Date forDate, String status);
     @Transactional
     void save(Appointment appointment);
 
