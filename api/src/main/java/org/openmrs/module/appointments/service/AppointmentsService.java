@@ -32,6 +32,9 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
+    List<Appointment> getAllAppointments(Date forDate, String status);
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> search(Appointment appointment);
 
     @Transactional

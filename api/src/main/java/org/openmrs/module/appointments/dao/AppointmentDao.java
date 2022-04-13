@@ -13,6 +13,7 @@ import java.util.List;
 public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
 
+    List<Appointment> getAllAppointments(Date forDate, String status);
     @Transactional
     void save(Appointment appointment);
 
