@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
@@ -191,4 +192,24 @@ public class AppointmentController extends BaseRestController {
         }
     }
 
+    /**
+     * Returns a list of appointment on a date and status
+     * @param forDate the appointment date
+     * @param status - the appointment status i.e. scheduled, cancelled, completed,
+     * @return list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "appointmentStatus")
+    @ResponseBody
+    public ResponseEntity<Object> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") String forDate, @RequestParam(value = "status") String status)  {
+        try {
+            if(StringUtils.isEmpty(forDate) || StringUtils.isEmpty(status)) {
+                return new ResponseEntity<>("The request requires appointment date and status", HttpStatus.BAD_REQUEST);
+            }
+            List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate), status);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to fetch appointments by status and date", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

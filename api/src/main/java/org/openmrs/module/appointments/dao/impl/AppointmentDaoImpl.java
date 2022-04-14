@@ -45,6 +45,25 @@ public class AppointmentDaoImpl implements AppointmentDao {
         return criteria.list();
     }
 
+    @Override
+    public List<Appointment> getAllAppointments(Date forDate, String status) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        if (forDate != null) {
+            Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+            criteria.add(Restrictions.ge("startDateTime", forDate));
+            criteria.add(Restrictions.lt("endDateTime", maxDate));
+        }
+
+        if (StringUtils.isNotEmpty(status)) {
+            criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(status))); //TODO: we may need to explore Optional construct to help validate against missing enum values
+        }
+        return criteria.list();
+    }
+
     @Transactional
     @Override
     public void save(Appointment appointment) {

@@ -189,6 +189,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public List<Appointment> getAllAppointments(Date forDate, String status) {
+        List<Appointment> appointments = appointmentDao.getAllAppointments(forDate, status);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+
     private boolean isServiceOrServiceTypeVoided(Appointment appointment) {
         return (appointment.getService() != null && appointment.getService().getVoided()) ||
                 (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
