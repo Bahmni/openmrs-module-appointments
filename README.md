@@ -358,11 +358,7 @@ GET /ws/rest/v1/appointmentService/load?uuid=99b2ea38-e041-41eb-9ed2-25a26506876
 | `startDate` | `date`   | Date to start filtering  |
 | `endDate`   | `date`   | Date to stop filtering   |
 
-
-<p id="gdcalert1" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image1.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert2">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image1.png "image_tooltip")
+![alt_text](https://drive.google.com/uc?export=view&id=1SjbUBRPScmOzhB8YEruM1IX6tbSY5a55 "image_tooltip")
 
 
 
@@ -384,10 +380,7 @@ On this summary dashboard, users can view the daily appointments patient lists w
 
 
 
-<p id="gdcalert2" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image2.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert3">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image2.png "image_tooltip")
+![alt_text](https://drive.google.com/uc?export=view&id=1HMM2k_hD9z2FaPh0kdlClVcHwsVsWrhH "image_tooltip")
 
 
 **_Booked appointments_**
@@ -418,11 +411,7 @@ User will then attach the appointment to a service and save the appointments. Th
 This action would then add the patient to the _Clinical appointments dashboard_ under the _booked appointments_ tab for the given day.
 
 
-
-<p id="gdcalert3" ><span style="color: red; font-weight: bold">>>>>>  gd2md-html alert: inline image link here (to images/image3.png). Store image on your image server and adjust path/filename/extension if necessary. </span><br>(<a href="#">Back to top</a>)(<a href="#gdcalert4">Next alert</a>)<br><span style="color: red; font-weight: bold">>>>>> </span></p>
-
-
-![alt_text](images/image3.png "image_tooltip")
+![alt_text](https://drive.google.com/uc?export=view&id=1S6zuvVG9TbwkKJos8EUl2zmMC7KUTcvs "image_tooltip")
 
 
 **_Edit appointments_**
