@@ -56,7 +56,7 @@
             <one-to-many class="AppointmentAudit"/>
         </set>
 
-        <join table="patient_appointment_occurrence" inverse="true">
+        <join table="patient_appointment_occurrence" inverse="true" optional="true">
             <key column="patient_appointment_id"/>
             <many-to-one name="appointmentRecurringPattern" column="patient_appointment_timings_id"/>
         </join>
