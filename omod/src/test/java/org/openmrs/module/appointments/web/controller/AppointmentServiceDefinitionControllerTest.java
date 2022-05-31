@@ -63,7 +63,7 @@ public class AppointmentServiceDefinitionControllerTest {
         verify(appointmentServiceMapper, times(1)).constructResponse(mappedServicePayload);
         assertNotNull(savedAppointmentService);
         assertEquals(response, savedAppointmentService.getBody());
-        assertEquals("200", savedAppointmentService.getStatusCode().toString());
+        assertEquals(200, savedAppointmentService.getStatusCode().value());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class AppointmentServiceDefinitionControllerTest {
         ResponseEntity<Object> appointmentService = appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
 
         assertNotNull(appointmentService);
-        assertEquals("400", appointmentService.getStatusCode().toString());
+        assertEquals(400, appointmentService.getStatusCode().value());
         assertEquals("The service 'Cardio' is already present", ((RuntimeException)appointmentService.getBody()).getMessage());
     }
 

@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.never;
@@ -70,7 +71,7 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.CheckedIn);
-        when(appointmentsService.getAllAppointmentsInDateRange(any(Date.class), any(Date.class))).thenReturn(appointments);
+        when(appointmentsService.getAllAppointmentsInDateRange(nullable(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();
@@ -85,7 +86,7 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.Scheduled);
-        when(appointmentsService.getAllAppointmentsInDateRange(any(Date.class), any(Date.class))).thenReturn(appointments);
+        when(appointmentsService.getAllAppointmentsInDateRange(nullable(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();

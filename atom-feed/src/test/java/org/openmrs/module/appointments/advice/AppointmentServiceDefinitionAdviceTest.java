@@ -18,9 +18,11 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
@@ -90,7 +92,7 @@ public class AppointmentServiceDefinitionAdviceTest {
 
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -101,7 +103,7 @@ public class AppointmentServiceDefinitionAdviceTest {
 
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -116,7 +118,7 @@ public class AppointmentServiceDefinitionAdviceTest {
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(Date.class), any(URI.class), anyString(), anyString());
+        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
     }
 
     @Test
@@ -127,7 +129,7 @@ public class AppointmentServiceDefinitionAdviceTest {
         verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(Date.class), any(URI.class), anyString(), anyString());
+        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
     }
 
     @Test
@@ -139,7 +141,7 @@ public class AppointmentServiceDefinitionAdviceTest {
         verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(Date.class), any(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/%s", UUID)), eq("appointmentservice"));
+        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/%s", UUID)), eq("appointmentservice"));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }

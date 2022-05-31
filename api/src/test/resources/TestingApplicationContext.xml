@@ -10,6 +10,11 @@
     <context:component-scan base-package="org.openmrs.module.appointments"/>
 
     <bean id="sessionFactory" class="org.openmrs.api.db.hibernate.HibernateSessionFactoryBean">
+        <property name="packagesToScan">
+            <list>
+                <value>org.openmrs</value>
+            </list>
+        </property>
         <property name="configLocations">
             <list>
                 <value>classpath:hibernate.cfg.xml</value>
