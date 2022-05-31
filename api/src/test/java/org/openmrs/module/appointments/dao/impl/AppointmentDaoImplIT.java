@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -42,6 +43,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
         assertEquals(11, allAppointments.size());

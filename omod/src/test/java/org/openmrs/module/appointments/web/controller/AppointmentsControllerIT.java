@@ -56,6 +56,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveNewAppointment() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
@@ -82,6 +83,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveNewAppointmentWithGivenStatus() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
@@ -193,6 +195,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldUndoCheckedInAppointment() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"3\",  " +
@@ -222,6 +225,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldResetMissedAppointmentToScheduledStateWhenUserHasResetAppointmentStatusPrivilege() throws Exception {
         String appointmentUuid = "75504r42-3ca8-11e3-bf2b-0800271c13555";
         String content = "{ \"toStatus\": \"Scheduled\"}";
@@ -341,6 +345,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldChangeRequestedAppointmentStatusToScheduledWhenProviderAccepts() throws Exception {
         Context.authenticate("provider-response-user", "test");
         String content = "{\"uuid\":\"2bdc3f7d-jh76-401a-84e9-5494dda83e8e\",\"response\":\"ACCEPTED\"}";

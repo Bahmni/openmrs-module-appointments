@@ -564,7 +564,6 @@ public class AppointmentsServiceImplTest {
             appointmentsService.changeStatus(appointment, "Scheduled", null);
         } finally {
             verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
-            verifyStatic(AppointmentsServiceImpl.class);
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
     }
