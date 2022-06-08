@@ -89,7 +89,6 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveAppointmentsOnlyIfUserHasManageOwnPrivilege() throws Exception {
         patientAppointmentNotifierService.registerNotifier(new AppointmentEventNotifier() {
             @Override
@@ -124,7 +123,6 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         return appointment;
     }
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveAppointmentsOnlyIfUserHasManagePrivilege() throws Exception {
         Context.authenticate(manageUser, manageUserPassword);
         Appointment appointment = new Appointment();
@@ -255,14 +253,12 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldBeAbleToChangeStatusIfUserHasManagePrivilege() {
         Context.authenticate(manageUser, manageUserPassword);
         appointmentsService.changeStatus(new Appointment(), "Completed", null);
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldBeAbleToChangeStatusIfUserHasManageOwnPrivilege() {
         Context.authenticate(manageOwnUser, manageOwnUserPassword);
         appointmentsService.changeStatus(new Appointment(), "Completed", null);
@@ -330,7 +326,6 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldBeAbleToChangeStatusFromMissedToScheduledIfUserHaveResetAppointmentStatusPrivilege() {
         Context.authenticate(resetUser, resetUserPassword);
         Appointment appointment = new Appointment();

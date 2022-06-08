@@ -43,7 +43,6 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
         assertEquals(11, allAppointments.size());

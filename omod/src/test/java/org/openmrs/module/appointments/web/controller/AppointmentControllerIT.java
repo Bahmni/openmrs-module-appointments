@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -71,7 +70,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void should_SaveNewAppointment() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"1\",  " +
@@ -196,7 +194,6 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
 
     @Test
-    @Ignore // https://bahmni.atlassian.net/browse/BAH-1848
     public void shouldThrowExceptionWhenThereIsNoPriorActionToUndo() throws Exception {
         String content = "{ \"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
                 "\"appointmentNumber\": \"3\",  " +
