@@ -54,8 +54,10 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 public class AllAppointmentRecurringPatternUpdateServiceTest {
     @Mock

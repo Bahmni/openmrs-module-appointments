@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -26,6 +27,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
+@PowerMockIgnore("javax.management.*")
 @PrepareForTest({Context.class})
 @RunWith(PowerMockRunner.class)
 public class AppointmentServiceDefinitionServiceImplTest {

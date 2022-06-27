@@ -22,6 +22,7 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -62,7 +63,7 @@ public class RecurringAppointmentMapperTest {
                 .withEndDateTime(DateUtils.addDays(new Date(), 2))
                 .build();
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
-        when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
+        when(recurringPatternMapper.mapToResponse(nullable(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
         List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne, appointmentTwo, appointmentThree));
@@ -103,7 +104,7 @@ public class RecurringAppointmentMapperTest {
                 .withEndDateTime(new SimpleDateFormat("dd/MM/yyyy").parse("18/06/2019"))
                 .build();
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
-        when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
+        when(recurringPatternMapper.mapToResponse(nullable(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
         List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne, appointmentTwo));
@@ -136,7 +137,7 @@ public class RecurringAppointmentMapperTest {
                 .withEndDateTime(new SimpleDateFormat("dd/MM/yyyy").parse("17/06/2019"))
                 .build();
         when(appointmentMapper.constructResponse(any(Appointment.class))).thenReturn(new AppointmentDefaultResponse());
-        when(recurringPatternMapper.mapToResponse(any(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
+        when(recurringPatternMapper.mapToResponse(nullable(AppointmentRecurringPattern.class))).thenReturn(recurringPattern);
 
         List<RecurringAppointmentDefaultResponse> recurringAppointmentDefaultResponses =
                 recurringAppointmentMapper.constructResponse(Arrays.asList(appointmentOne));
@@ -148,6 +149,6 @@ public class RecurringAppointmentMapperTest {
                 recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getDaysOfWeek());
         assertNull(recurringAppointmentDefaultResponses.get(0).getRecurringPattern().getEndDate());
         verify(appointmentMapper).constructResponse(any(Appointment.class));
-        verify(recurringPatternMapper).mapToResponse(any(AppointmentRecurringPattern.class));
+        verify(recurringPatternMapper).mapToResponse(nullable(AppointmentRecurringPattern.class));
     }
 }

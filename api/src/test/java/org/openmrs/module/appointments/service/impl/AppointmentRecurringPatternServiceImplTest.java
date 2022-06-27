@@ -138,13 +138,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
 
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentAudit.setNotes(null);
         appointmentAudit.setAppointment(appointmentTwo);
         appointmentAudit.setStatus(CheckedIn);
-        when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
 
         recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
@@ -192,13 +190,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
 
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentAudit.setNotes(null);
         appointmentAudit.setAppointment(appointmentTwo);
         appointmentAudit.setStatus(CheckedIn);
-        when(appointmentServiceHelper.getAppointmentAuditEvent(appointmentTwo, null)).thenReturn(appointmentAudit);
 
         recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
@@ -246,12 +242,6 @@ public class AppointmentRecurringPatternServiceImplTest {
         appointmentTwo.setAppointmentRecurringPattern(appointmentRecurringPattern);
         appointmentThree.setAppointmentRecurringPattern(appointmentRecurringPattern);
         when(appointmentDao.getAppointmentByUuid(anyString())).thenReturn(appointmentTwo);
-        doNothing().when(appointmentServiceHelper).validate(appointmentTwo, editAppointmentValidators);
-
-        doAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            return null;
-        }).when(statusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
 
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentAudit.setNotes(null);
@@ -262,7 +252,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         recurringAppointmentService.changeStatus(appointmentTwo, "Cancelled", "");
         verify(appointmentDao, times(2)).save(any(Appointment.class));
         verify(appointmentServiceHelper, times(2))
-                .getAppointmentAuditEvent(any(Appointment.class), any(String.class));
+                .getAppointmentAuditEvent(any(Appointment.class), nullable(String.class));
     }
 
     @Test
@@ -276,7 +266,6 @@ public class AppointmentRecurringPatternServiceImplTest {
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
@@ -320,7 +309,7 @@ public class AppointmentRecurringPatternServiceImplTest {
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
-        verify(appointmentServiceHelper, times(2)).getAppointmentAuditEvent(any(Appointment.class), anyString());
+        verify(appointmentServiceHelper, times(2)).getAppointmentAuditEvent(any(Appointment.class), nullable(String.class));
         verify(appointmentServiceHelper, times(2)).checkAndAssignAppointmentNumber(any(Appointment.class));
         assertEquals(newAppointment, appointment);
     }

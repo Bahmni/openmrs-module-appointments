@@ -12,6 +12,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -19,11 +20,13 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+@PowerMockIgnore("javax.management.*")
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
 public class MarkAppointmentAsCompleteTaskTest {
@@ -56,7 +59,7 @@ public class MarkAppointmentAsCompleteTaskTest {
         appointments.add(appointment1);
         appointments.add(appointment2);
         appointment1.setStatus(AppointmentStatus.CheckedIn);
-        when(appointmentsService.getAllAppointmentsInDateRange(any(Date.class), any(Date.class))).thenReturn(appointments);
+        when(appointmentsService.getAllAppointmentsInDateRange(nullable(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsCompleteTask.execute();
 
         String completedStatus = AppointmentStatus.Completed.toString();

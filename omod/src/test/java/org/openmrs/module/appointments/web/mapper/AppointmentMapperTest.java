@@ -34,6 +34,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
@@ -59,6 +60,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
 

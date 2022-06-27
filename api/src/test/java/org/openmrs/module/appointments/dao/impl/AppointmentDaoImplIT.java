@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
