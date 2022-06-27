@@ -84,7 +84,7 @@
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
                                             <!-- Lowered as PowerMockito is not covered -->
-                                            <minimum>0.43</minimum>
+                                            <minimum>0.37</minimum>
                                         </limit>
                                         <limit>
                                             <counter>BRANCH</counter>
