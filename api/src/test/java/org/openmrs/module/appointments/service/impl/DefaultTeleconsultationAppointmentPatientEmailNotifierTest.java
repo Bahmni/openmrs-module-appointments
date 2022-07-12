@@ -17,6 +17,7 @@ import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
+import org.openmrs.module.appointments.notification.NotificationType;
 import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
 import org.openmrs.module.appointments.model.Appointment;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -60,7 +61,7 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
         when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT, null, null)).thenReturn("Email subject");
         when(messageSourceService.getMessage(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE, null, null)).thenReturn("Email body");
         when(Context.getMessageSourceService()).thenReturn(messageSourceService);
-        tcAppointmentEventNotifier.sendNotification(appointment);
+        tcAppointmentEventNotifier.sendNotification(appointment, NotificationType.Scheduled);
         verify(mailSender).send(
                 eq("Email subject"),
                 eq("Email body"),
@@ -79,7 +80,7 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
         when(Context.getMessageSourceService()).thenReturn(messageSourceService);
         doThrow(new NotificationException("Some error", new Exception())).when(mailSender).send(any(), any(), any(), any(), any());
         expectedException.expect(NotificationException.class);
-        tcAppointmentEventNotifier.sendNotification(appointment);
+        tcAppointmentEventNotifier.sendNotification(appointment, NotificationType.Scheduled);
     }
 
     private Appointment buildAppointment() {

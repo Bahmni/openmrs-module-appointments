@@ -6,6 +6,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.notification.NotificationType;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +27,7 @@ public class PatientAppointmentNotifierService {
         this.eventNotifiers = notifiers;
     }
 
-    public List<NotificationResult> notifyAll(final Appointment appointment) {
+    public List<NotificationResult> notifyAll(final Appointment appointment, NotificationType notificationType) {
         if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
         log.info("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
         List<NotificationResult> notificationResults = new ArrayList<>();
@@ -34,7 +35,7 @@ public class PatientAppointmentNotifierService {
             try {
                 if (eventNotifier.isApplicable(appointment)) {
                     log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
-                    NotificationResult result = eventNotifier.sendNotification(appointment);
+                    NotificationResult result = eventNotifier.sendNotification(appointment, notificationType);
                     notificationResults.add(result);
                 } else {
                     log.info(NOT_APPLICABLE + eventNotifier.getMedium());

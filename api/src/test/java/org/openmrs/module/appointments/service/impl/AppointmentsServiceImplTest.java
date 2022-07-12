@@ -33,6 +33,7 @@ import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.notification.NotificationType;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -203,7 +204,7 @@ public class AppointmentsServiceImplTest {
         appointment.setAppointmentKind(AppointmentKind.Virtual);
         appointment.setAppointmentAudits(new HashSet<>());
         appointmentsService.validateAndSave(appointment);
-        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment, NotificationType.Scheduled);
     }
 
     @Test
@@ -216,7 +217,7 @@ public class AppointmentsServiceImplTest {
         appointment.setAppointmentKind(AppointmentKind.Scheduled);
         appointment.setAppointmentAudits(new HashSet<>());
         appointmentsService.validateAndSave(appointment);
-        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
+        verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment, NotificationType.Scheduled);
     }
 
     @Test

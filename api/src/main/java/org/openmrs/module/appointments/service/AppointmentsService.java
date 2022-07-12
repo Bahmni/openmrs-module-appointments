@@ -94,5 +94,9 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndSave(Supplier<Appointment> mapper);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
+    List<Appointment> getAllAppointmentsByDate(Date startDate, Date endDate);
 }
 

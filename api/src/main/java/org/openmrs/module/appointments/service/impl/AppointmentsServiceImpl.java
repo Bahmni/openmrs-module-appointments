@@ -21,6 +21,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.notification.NotificationType;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -155,7 +156,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     private void notifyUpdates(Appointment appointment) {
-        List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
+        List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment, NotificationType.Scheduled);
         if (!notificationResults.isEmpty()) {
             notificationResults.stream().forEach(nr -> {
                 String notificationMsg = String.format("Appointment Notification Result - medium: %s, uuid: %s, status: %d, message: %s",
@@ -395,6 +396,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Transactional
+    @Override
+    public List<Appointment> getAllAppointmentsByDate(Date startDate, Date endDate) {
+        List<Appointment> appointments = appointmentDao.getAllAppointmentsByDate(startDate, endDate);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
     private void createEventInAppointmentAudit(Appointment appointment,

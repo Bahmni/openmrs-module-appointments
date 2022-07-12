@@ -7,10 +7,7 @@ import org.openmrs.PersonAttribute;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
-import org.openmrs.module.appointments.notification.MailSender;
-import org.openmrs.module.appointments.notification.NotificationException;
-import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.notification.*;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.util.LocaleUtility;
@@ -24,6 +21,9 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     private final static String PROP_PATIENT_EMAIL_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
     private final static String PROP_PATIENT_EMAIL_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
     private final static String PROP_SEND_TC_APPT_EMAIL = "bahmni.appointment.teleConsultation.sendEmail";
+
+    private final static String PROP_PATIENT_REMINDER_EMAIL_SUBJECT = "bahmni.appointment.teleConsultation.patientReminderEmailNotificationSubject";
+    private final static String PROP_PATIENT_REMINDER_EMAIL_TEMPLATE = "bahmni.appointment.teleConsultation.patientReminderEmailNotificationTemplate";
 
     private static final String EMAIL_NOT_CONFIGURED = "Notification can not be sent to patient. Email address not configured.";
     private static final String EMAIL_SENT = "Email sent to Patient";
@@ -57,14 +57,14 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     @Override
-    public NotificationResult sendNotification(final Appointment appointment) throws NotificationException {
+    public NotificationResult sendNotification(final Appointment appointment, NotificationType notificationType) throws NotificationException {
         Patient patient = appointment.getPatient();
         PersonAttribute patientEmailAttribute = patient.getPerson().getAttribute("email");
         if (patientEmailAttribute != null) {
             String patientEmail = patientEmailAttribute.getValue();
             String patientName = appointment.getPatient().getGivenName();
-            String emailSubject = getEmailSubject();
-            String emailBody = getEmailBody(patientName, appointment.getService(), appointment.getProviders(), appointment.getStartDateTime(), appointment.getTeleHealthVideoLink());
+            String emailSubject = getEmailSubject(notificationType);
+            String emailBody = getEmailBody(patientName, appointment.getService(), appointment.getProviders(), appointment.getStartDateTime(), appointment.getTeleHealthVideoLink(), notificationType);
             try {
                 log.info("Sending mail through: " +  mailSender.getClass());
                 mailSender.send(emailSubject, emailBody, new String[] { patientEmail }, null, null);
@@ -84,8 +84,9 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
         return Boolean.valueOf(shouldSendEmail);
     }
 
-    private String getEmailBody(String patientName, AppointmentServiceDefinition service, Set<AppointmentProvider> providers, Date appointmentDate, String link) {
-        String emailTemplate = Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_TEMPLATE);
+    private String getEmailBody(String patientName, AppointmentServiceDefinition service, Set<AppointmentProvider> providers, Date appointmentDate, String link, NotificationType notificationType) {
+        String emailProp = notificationType.equals(NotificationType.Reminder) ? PROP_PATIENT_REMINDER_EMAIL_TEMPLATE : PROP_PATIENT_EMAIL_TEMPLATE;
+        String emailTemplate = Context.getAdministrationService().getGlobalProperty(emailProp);
         String practitioners =
                 providers != null ?
                         providers.stream()
@@ -94,16 +95,17 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
                         : "";
         Object[] arguments = {patientName, practitioners, appointmentDate, link};
         if (emailTemplate == null || "".equals(emailTemplate)) {
-            return Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_TEMPLATE, arguments, LocaleUtility.getDefaultLocale());
+            return Context.getMessageSourceService().getMessage(emailProp, arguments, LocaleUtility.getDefaultLocale());
         } else {
             return new MessageFormat(emailTemplate).format(arguments);
         }
     }
 
-    private String getEmailSubject() {
-        String emailSubject = Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_SUBJECT);
+    private String getEmailSubject(NotificationType notificationType) {
+        String emailProp = notificationType.equals(NotificationType.Reminder) ? PROP_PATIENT_REMINDER_EMAIL_SUBJECT : PROP_PATIENT_EMAIL_SUBJECT;
+        String emailSubject = Context.getAdministrationService().getGlobalProperty(emailProp);
         if (emailSubject == null || "".equals(emailSubject)) {
-            emailSubject = Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_SUBJECT, null, LocaleUtility.getDefaultLocale());
+            emailSubject = Context.getMessageSourceService().getMessage(emailProp, null, LocaleUtility.getDefaultLocale());
         }
         return emailSubject;
     }

@@ -76,6 +76,8 @@
 
     <bean id="teleconsultationAppointmentServiceImpl" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
 
+    <bean id="sendAppointmentReminderTask" class="org.openmrs.module.appointments.scheduler.tasks.SendAppointmentReminderTask" />
+
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
