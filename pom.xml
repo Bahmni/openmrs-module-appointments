@@ -47,8 +47,8 @@
 		<jacocoVersion>0.7.9</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2-SNAPSHOT</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<javaxMail.version>1.6.2</javaxMail.version>
+		<webServices.version>2.29.0</webServices.version>
 	</properties>
 
 	<build>
@@ -177,13 +177,13 @@
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>webservices.rest-omod</artifactId>
-				<version>2.29.0</version>
+				<version>${webServices.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.openmrs.module</groupId>
 				<artifactId>webservices.rest-omod-common</artifactId>
-				<version>2.29.0</version>
+				<version>${webServices.version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
