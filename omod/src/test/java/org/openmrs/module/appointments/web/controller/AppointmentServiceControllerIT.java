@@ -57,8 +57,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("Cardiology Consultation", asResponse.get("name"));
         assertEquals("09:00:00", asResponse.get("startTime"));
         assertEquals("17:30:00", asResponse.get("endTime"));
-        assertEquals(30, asResponse.get("durationMins"));
-        assertEquals(30, asResponse.get("maxAppointmentsLimit"));
+        assertEquals(30, (int) asResponse.get("durationMins"));
+        assertEquals(30, (int) asResponse.get("maxAppointmentsLimit"));
         assertEquals("#00ff00", asResponse.get("color"));
         assertNotNull(asResponse.get("weeklyAvailability"));
         assertEquals(0, ((ArrayList)asResponse.get("weeklyAvailability")).size());
@@ -97,8 +97,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals("Cardiology Consultation", asResponse.get("name"));
         assertEquals("09:00:00", asResponse.get("startTime"));
         assertEquals("17:30:00", asResponse.get("endTime"));
-        assertEquals(30, asResponse.get("durationMins"));
-        assertEquals(30, asResponse.get("maxAppointmentsLimit"));
+        assertEquals(30, (int)asResponse.get("durationMins"));
+        assertEquals(30, (int)asResponse.get("maxAppointmentsLimit"));
         assertEquals("#0000ff", asResponse.get("color"));
         ArrayList weeklyAvailabilities = (ArrayList) asResponse.get("weeklyAvailability");
         assertNotNull(weeklyAvailabilities);

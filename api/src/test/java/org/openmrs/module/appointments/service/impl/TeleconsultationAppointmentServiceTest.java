@@ -9,6 +9,7 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -17,6 +18,7 @@ import java.util.UUID;
 import static org.junit.Assert.assertEquals;
 import static org.powermock.api.mockito.PowerMockito.when;
 
+@PowerMockIgnore("javax.management.*")
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
 public class TeleconsultationAppointmentServiceTest {

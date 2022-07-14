@@ -36,6 +36,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.ApplicationEventPublisher;
@@ -75,6 +76,7 @@ import static org.openmrs.module.appointments.model.AppointmentConflictType.SERV
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
+@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 @PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
@@ -562,7 +564,6 @@ public class AppointmentsServiceImplTest {
             appointmentsService.changeStatus(appointment, "Scheduled", null);
         } finally {
             verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
-            verifyStatic();
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
         }
     }
