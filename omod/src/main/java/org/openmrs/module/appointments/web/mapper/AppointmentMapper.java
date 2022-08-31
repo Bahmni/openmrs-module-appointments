@@ -277,6 +277,7 @@ public class AppointmentMapper {
         map.putAll(p.getActiveIdentifiers().stream()
                 .collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""),
                                             e -> e.getIdentifier())));
+
         return map;
     }
 
