@@ -15,7 +15,7 @@
         <many-to-one name="serviceType" class="org.openmrs.module.appointments.model.AppointmentServiceType" column="appointment_service_type_id"/>
 
 
-        <set name="providers" table="patient_appointment_provider" lazy="true" cascade="all-delete-orphan">
+        <set name="providers" table="patient_appointment_provider" lazy="true" inverse="true" cascade="all">
            <key column="patient_appointment_id"/>
             <one-to-many class="org.openmrs.module.appointments.model.AppointmentProvider" />
         </set>
@@ -51,7 +51,7 @@
         <many-to-one name="relatedAppointment" class="org.openmrs.module.appointments.model.Appointment"
                     column="related_appointment_id" unique="true"/>
 
-        <set name="appointmentAudits" cascade="save-update" table="patient_appointment_audit" lazy="true">
+        <set name="appointmentAudits" cascade="all" inverse="true" table="patient_appointment_audit" lazy="true">
             <key foreign-key="patient_appointment_id" column="appointment_id"/>
             <one-to-many class="AppointmentAudit"/>
         </set>
