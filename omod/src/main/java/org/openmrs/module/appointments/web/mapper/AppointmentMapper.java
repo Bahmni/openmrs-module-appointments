@@ -91,7 +91,7 @@ public class AppointmentMapper {
         if (appointmentRequest.getServiceTypeUuid() != null) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
-        if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
+        if (StringUtils.isNotBlank(appointmentRequest.getStatus())) {
             appointment.setStatus(AppointmentStatus.valueOf(appointmentRequest.getStatus()));
         }
         appointment.setServiceType(appointmentServiceType);
@@ -171,14 +171,12 @@ public class AppointmentMapper {
 
 
     private AppointmentServiceType getServiceTypeByUuid(Set<AppointmentServiceType> serviceTypes, String serviceTypeUuid) {
-        return serviceTypes.stream()
-                .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
+        return serviceTypes.stream().filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
     public Appointment mapQueryToAppointment(AppointmentQuery searchQuery) {
         Appointment appointment = new Appointment();
-        appointment.setService(
-                appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
+        appointment.setService(appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
         appointment.setPatient(patientService.getPatientByUuid(searchQuery.getPatientUuid()));
         appointment.setProvider(identifyAppointmentProvider(searchQuery.getProviderUuid()));
         appointment.setLocation(identifyAppointmentLocation(searchQuery.getLocationUuid()));
@@ -202,8 +200,7 @@ public class AppointmentMapper {
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
         response.setTeleconsultation(a.getTeleconsultation());
-        if (appointmentResponseExtension != null)
-            response.setAdditionalInfo(appointmentResponseExtension.run(a));
+        if (appointmentResponseExtension != null) response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
@@ -255,9 +252,7 @@ public class AppointmentMapper {
         map.put("identifier", p.getPatientIdentifier().getIdentifier());
         map.put("age", p.getAge());
         map.put("gender", p.getGender());
-        map.putAll(p.getActiveIdentifiers().stream()
-                .collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""),
-                                            e -> e.getIdentifier())));
+        map.putAll(p.getActiveIdentifiers().stream().filter(e -> e.getIdentifierType() != null).collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""), e -> e.getIdentifier())));
         return map;
     }
 
