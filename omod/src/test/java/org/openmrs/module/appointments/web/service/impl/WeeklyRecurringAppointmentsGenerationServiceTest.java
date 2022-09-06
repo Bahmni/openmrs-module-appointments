@@ -33,6 +33,7 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
+import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
@@ -51,6 +52,9 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
 
     @Mock
     private AppointmentMapper appointmentMapper;
+
+    @Mock
+    TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     @Before
     public void setUp() {

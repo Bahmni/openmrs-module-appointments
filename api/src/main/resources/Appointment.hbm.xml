@@ -24,7 +24,6 @@
         <many-to-one name="location" class="org.openmrs.Location" column="location_id"/>
         <property name="startDateTime" type="java.util.Date" column="start_date_time"/>
         <property name="endDateTime" type="java.util.Date" column="end_date_time"/>
-        <property name="teleconsultation" type="java.lang.Boolean" column="teleconsultation"/>
         <property name="appointmentKind" column="appointment_kind">
             <type name="org.hibernate.type.EnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentKind</param>
@@ -45,6 +44,7 @@
         <property name="voided" type="java.lang.Boolean" column="voided" length="1" not-null="true" />
         <property name="dateVoided" type="java.util.Date" column="date_voided" length="19" />
         <property name="voidReason" type="java.lang.String" column="void_reason" length="255" />
+        <property name="teleHealthVideoLink" type="java.lang.String" column="tele_health_video_link" length="255"/>
         <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
         <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
         <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
@@ -56,7 +56,7 @@
             <one-to-many class="AppointmentAudit"/>
         </set>
 
-        <join table="patient_appointment_occurrence" inverse="true">
+        <join table="patient_appointment_occurrence" inverse="true" optional="true">
             <key column="patient_appointment_id"/>
             <many-to-one name="appointmentRecurringPattern" column="patient_appointment_timings_id"/>
         </join>

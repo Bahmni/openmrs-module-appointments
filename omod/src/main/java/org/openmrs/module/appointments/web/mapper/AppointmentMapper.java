@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -57,6 +59,8 @@ public class AppointmentMapper {
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
 
+    private Log log = LogFactory.getLog(this.getClass());
+
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
     }
@@ -91,7 +95,7 @@ public class AppointmentMapper {
         if (appointmentRequest.getServiceTypeUuid() != null) {
             appointmentServiceType = getServiceTypeByUuid(appointmentServiceDefinition.getServiceTypes(true), appointmentRequest.getServiceTypeUuid());
         }
-        if (StringUtils.isNotBlank(appointmentRequest.getStatus())) {
+        if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
             appointment.setStatus(AppointmentStatus.valueOf(appointmentRequest.getStatus()));
         }
         appointment.setServiceType(appointmentServiceType);
@@ -101,7 +105,6 @@ public class AppointmentMapper {
         appointment.setStartDateTime(appointmentRequest.getStartDateTime());
         appointment.setEndDateTime(appointmentRequest.getEndDateTime());
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
-        appointment.setTeleconsultation(appointmentRequest.isTeleconsultation());
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
     }
@@ -171,12 +174,14 @@ public class AppointmentMapper {
 
 
     private AppointmentServiceType getServiceTypeByUuid(Set<AppointmentServiceType> serviceTypes, String serviceTypeUuid) {
-        return serviceTypes.stream().filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
+        return serviceTypes.stream()
+                .filter(avb -> avb.getUuid().equals(serviceTypeUuid)).findAny().get();
     }
 
     public Appointment mapQueryToAppointment(AppointmentQuery searchQuery) {
         Appointment appointment = new Appointment();
-        appointment.setService(appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
+        appointment.setService(
+                appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchQuery.getServiceUuid()));
         appointment.setPatient(patientService.getPatientByUuid(searchQuery.getPatientUuid()));
         appointment.setProvider(identifyAppointmentProvider(searchQuery.getProviderUuid()));
         appointment.setLocation(identifyAppointmentLocation(searchQuery.getLocationUuid()));
@@ -199,14 +204,31 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-        response.setTeleconsultation(a.getTeleconsultation());
-        if (appointmentResponseExtension != null) response.setAdditionalInfo(appointmentResponseExtension.run(a));
+        if (appointmentResponseExtension != null)
+            response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
-        response.setEmailIdAvailable(a.isEmailIdAvailable());
-        response.setEmailSent(a.getEmailSent());
+        HashMap extensions = new HashMap();
+        extensions.put("patientEmailDefined", isPatientEmailDefined(a));
+        response.setExtensions(extensions);
+        response.setTeleconsultationLink(a.getTeleHealthVideoLink());
+        if (a.getNotificationResults() != null) {
+            List<HashMap<String, String>> collect = a.getNotificationResults().stream().map(nr -> {
+                HashMap<String, String> notificationResult = new HashMap<>();
+                notificationResult.put("medium", nr.getMedium());
+                notificationResult.put("status", String.valueOf(nr.getStatus()));
+                return notificationResult;
+            }).collect(Collectors.toList());
+            if (!collect.isEmpty()) {
+                response.getExtensions().put("notificationResults", collect);
+            }
+        }
         return response;
+    }
+
+    private Boolean isPatientEmailDefined(Appointment a) {
+        return a.hasPatientAttribute("email");
     }
 
     private List<AppointmentProviderDetail> mapAppointmentProviders(Set<AppointmentProvider> providers) {

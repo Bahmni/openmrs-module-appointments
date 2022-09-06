@@ -10,21 +10,20 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.event.TeleconsultationAppointmentSavedEvent;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.ApplicationEventPublisherAware;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -37,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.isNull;
@@ -46,7 +46,7 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 
 
-public class AppointmentsServiceImpl implements AppointmentsService, ApplicationEventPublisherAware {
+public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
     private Log log = LogFactory.getLog(this.getClass());
@@ -64,7 +64,9 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
 
     private List<AppointmentConflict> appointmentConflicts;
 
-    private ApplicationEventPublisher applicationEventPublisher;
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
+    private PatientAppointmentNotifierService appointmentNotifierService;
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -86,16 +88,20 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
         this.appointmentServiceHelper = appointmentServiceHelper;
     }
 
-    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
-        this.applicationEventPublisher = applicationEventPublisher;
-    }
-
     public void setEditAppointmentValidators(List<AppointmentValidator> editAppointmentValidators) {
         this.editAppointmentValidators = editAppointmentValidators;
     }
 
     public void setAppointmentConflicts(List<AppointmentConflict> appointmentConflicts) {
         this.appointmentConflicts = appointmentConflicts;
+    }
+
+    public void setTeleconsultationAppointmentService(TeleconsultationAppointmentService teleconsultationAppointmentService) {
+        this.teleconsultationAppointmentService = teleconsultationAppointmentService;
+    }
+
+    public void setAppointmentNotifierService(PatientAppointmentNotifierService appointmentNotifierService) {
+        this.appointmentNotifierService = appointmentNotifierService;
     }
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
@@ -120,14 +126,46 @@ public class AppointmentsServiceImpl implements AppointmentsService, Application
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
         appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        setupTeleconsultation(appointment);
         save(appointment);
-        // TODO: #92 - remove null checking after adding a default value
-        if (appointment.getTeleconsultation() != null &&
-                appointment.getTeleconsultation()) {
-            applicationEventPublisher.publishEvent(new TeleconsultationAppointmentSavedEvent(appointment));
-        }
+        notifyUpdates(appointment);
         return appointment;
     }
+
+    @Transactional
+    @Override
+    public Appointment validateAndSave(Supplier<Appointment> mapper) {
+        Appointment appointment = mapper.get();
+        validate(appointment, appointmentValidators);
+        appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        setupTeleconsultation(appointment);
+        save(appointment);
+        notifyUpdates(appointment);
+        return appointment;
+    }
+
+    private void setupTeleconsultation(Appointment appointment) {
+        if (isVirtual(appointment)) {
+            appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
+        }
+    }
+
+    private boolean isVirtual(Appointment appointment) {
+        return appointment.getAppointmentKind() != null && appointment.getAppointmentKind().equals(AppointmentKind.Virtual);
+    }
+
+    private void notifyUpdates(Appointment appointment) {
+        List<NotificationResult> notificationResults = appointmentNotifierService.notifyAll(appointment);
+        if (!notificationResults.isEmpty()) {
+            notificationResults.stream().forEach(nr -> {
+                String notificationMsg = String.format("Appointment Notification Result - medium: %s, uuid: %s, status: %d, message: %s",
+                        nr.getMedium(), nr.getUuid(), nr.getStatus(), nr.getMessage());
+                log.info(notificationMsg);
+            });
+            appointment.setNotificationResults(notificationResults);
+        }
+    }
+
 
     private void save(Appointment appointment) {
         createAndSetAppointmentAudit(appointment);

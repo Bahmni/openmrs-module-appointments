@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>org.bahmni.module</groupId>
 		<artifactId>appointments</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>appointments-omod</artifactId>
@@ -17,13 +17,18 @@
 		<MODULE_NAME>${project.name}</MODULE_NAME>
 		<MODULE_VERSION>${project.version}</MODULE_VERSION>
 		<MODULE_PACKAGE>${project.groupId}.${MODULE_ID}</MODULE_PACKAGE>
-		<openmrs.platform.version>2.1.1</openmrs.platform.version>
+		<openmrs.platform.version>2.4.2</openmrs.platform.version>
 	</properties>
 
 	<dependencies>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-api</artifactId>
+			<version>${project.parent.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.parent.groupId}</groupId>
+			<artifactId>${project.parent.artifactId}-atom-feed</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
@@ -137,7 +142,7 @@
 							<includeGroupIds>${project.parent.groupId}</includeGroupIds>
 							<includeArtifactIds>${project.parent.artifactId}-api</includeArtifactIds>
 							<excludeTransitive>true</excludeTransitive>
-							<includes>**/*</includes>
+							<includes>**\/*.xml,**\/*.properties</includes>
 							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 						</configuration>
 					</execution>

@@ -10,6 +10,11 @@
     <context:component-scan base-package="org.openmrs.module.appointments"/>
 
     <bean id="sessionFactory" class="org.openmrs.api.db.hibernate.HibernateSessionFactoryBean">
+        <property name="packagesToScan">
+            <list>
+                <value>org.openmrs</value>
+            </list>
+        </property>
         <property name="configLocations">
             <list>
                 <value>classpath:hibernate.cfg.xml</value>
@@ -156,6 +161,9 @@
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
                 </property>
+                <property name="appointmentNotifierService">
+                    <ref bean="patientAppointmentNotifierService"/>
+                </property>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -165,6 +173,8 @@
             <ref bean="transactionAttributeSource"/>
         </property>
     </bean>
+
+    <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService"/>
 
     <bean parent="serviceContext">
         <property name="moduleService">

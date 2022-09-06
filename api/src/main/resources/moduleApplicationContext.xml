@@ -23,15 +23,27 @@
   		    http://www.springframework.org/schema/util
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <context:component-scan base-package="org.openmrs.module.appointments"/>
-    <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>
-    <bean parent="serviceContext">
-        <property name="moduleService">
-            <list merge="true">
-                <value>org.openmrs.api.AdministrationService</value>
-                <ref bean="administrationService"/>
+
+    <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
+    <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender">
+        <constructor-arg ref="adminService"/>
+    </bean>
+    <bean id="defaultPatientEmailNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier">
+        <constructor-arg ref="defaultTCApptMailSender"/>
+    </bean>
+
+<!--    <ref bean="defaultAppointmentMailSender"/>-->
+
+    <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService">
+        <property name="eventNotifiers">
+            <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
+                <ref bean="defaultPatientEmailNotifier"/>
             </list>
         </property>
     </bean>
+
+    <bean id="defaultAppointmentStatusChangeValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentStatusChangeValidator"/>
+    <bean id="defaultAppointmentValidator" class="org.openmrs.module.appointments.validator.impl.DefaultAppointmentValidator"/>
 
     <bean id="specialityService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
@@ -61,6 +73,8 @@
     <bean id="patientDoubleBookingConflict" class="org.openmrs.module.appointments.conflicts.impl.PatientDoubleBookingConflict">
         <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
+
+    <bean id="teleconsultationAppointmentServiceImpl" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService"/>
 
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
@@ -97,6 +111,12 @@
                         <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
+                </property>
+                <property name="teleconsultationAppointmentService">
+                    <ref bean="teleconsultationAppointmentServiceImpl"/>
+                </property>
+                <property name="appointmentNotifierService">
+                    <ref bean="patientAppointmentNotifierService"/>
                 </property>
             </bean>
         </property>
@@ -235,12 +255,6 @@
     <bean id="appointmentAuditDao" class="org.openmrs.module.appointments.dao.impl.AppointmentAuditDaoImpl">
         <property name="sessionFactory">
             <ref bean="sessionFactory"/>
-        </property>
-    </bean>
-
-    <bean id="teleconsultationAppointmentNotificationService" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentNotificationServiceImpl">
-        <property name="emailNotificationService">
-            <ref bean="emailNotificationService"/>
         </property>
     </bean>
 

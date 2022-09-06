@@ -3,8 +3,10 @@ package org.openmrs.module.appointments.web.service;
 import org.apache.commons.lang3.tuple.Pair;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.RecurringAppointmentRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
@@ -24,6 +26,9 @@ public abstract class AbstractRecurringAppointmentsService {
     @Autowired
     private AppointmentMapper appointmentMapper;
 
+    @Autowired
+    private TeleconsultationAppointmentService teleconsultationAppointmentService;
+
     public abstract List<Appointment> generateAppointments(RecurringAppointmentRequest recurringAppointmentRequest);
 
     public abstract List<Appointment> addAppointments(AppointmentRecurringPattern appointmentRecurringPattern,
@@ -36,9 +41,16 @@ public abstract class AbstractRecurringAppointmentsService {
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
             appointment.setStartDateTime(appointmentDate.getLeft());
             appointment.setEndDateTime(appointmentDate.getRight());
+            if (isVirtual(appointment)) {
+                appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment));
+            }
             appointments.add(appointment);
         });
         return appointments;
+    }
+
+    private boolean isVirtual(Appointment appointment) {
+        return appointment.getAppointmentKind() != null && appointment.getAppointmentKind().equals(AppointmentKind.Virtual);
     }
 
     protected List<Appointment> sort(List<Appointment> appointments) {

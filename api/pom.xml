@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.bahmni.module</groupId>
 		<artifactId>appointments</artifactId>
-		<version>1.3.0-SNAPSHOT</version>
+		<version>1.6.0-SNAPSHOT</version>
 	</parent>
 
 	<artifactId>appointments-api</artifactId>
@@ -87,7 +87,7 @@
 										<limit>
 											<counter>BRANCH</counter>
 											<value>COVEREDRATIO</value>
-											<minimum>0.68</minimum>
+											<minimum>0.65</minimum>
 										</limit>
 									</limits>
 								</rule>
@@ -132,29 +132,17 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.bahmni.module</groupId>
-			<artifactId>email-notification-omod</artifactId>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>servlet-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.ict4h.openmrs</groupId>
-			<artifactId>openmrs-atomfeed-common</artifactId>
-			<version>${openmrsAtomfeedVersion}</version>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.ict4h</groupId>
-			<artifactId>atomfeed-server</artifactId>
-			<version>${atomfeed.version}</version>
-			<scope>provided</scope>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>${javaxMail.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<!-- End OpenMRS core -->
-
 	</dependencies>
 
 </project>
