@@ -21,7 +21,7 @@
             date_changed DATETIME NULL ,
             changed_by INT NULL ,
             uuid  VARCHAR(38) NOT NULL UNIQUE,
-            voided TINYINT(1) DEFAULT 0 ,
+            voided TINYINT NULL ,
             PRIMARY KEY (speciality_id) ,
             UNIQUE INDEX name_UNIQUE (name ASC) )
 
@@ -50,7 +50,7 @@
             creator INT NOT NULL ,
             date_changed DATETIME NULL ,
             changed_by INT NULL ,
-            voided TINYINT(1) DEFAULT 0 ,
+            voided TINYINT NULL ,
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
@@ -104,7 +104,7 @@
             end_time TIME NULL ,
             max_appointments_limit INT NULL ,
             uuid  VARCHAR(38) NOT NULL UNIQUE,
-            voided TINYINT(1) DEFAULT 0,
+            voided TINYINT NULL ,
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
@@ -136,7 +136,7 @@
             creator INT NOT NULL ,
             date_changed DATETIME NULL ,
             changed_by INT NULL ,
-            voided TINYINT(1) DEFAULT 0 ,
+            voided TINYINT NULL ,
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
@@ -176,7 +176,7 @@
             creator                     INT          NOT NULL,
             date_changed                DATETIME     NULL,
             changed_by                  INT          NULL,
-            voided                      TINYINT(1)   NOT NULL DEFAULT 0,
+            voided                      TINYINT      NULL,
             voided_by                   INT,
             date_voided                 DATETIME,
             void_reason                 VARCHAR(255),
@@ -251,7 +251,7 @@
             creator INT NOT NULL,
             date_changed DATETIME NULL,
             changed_by INT NULL,
-            voided TINYINT(1) DEFAULT 0,
+            voided TINYINT NULL,
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
@@ -463,7 +463,7 @@
             creator INT NOT NULL,
             date_changed DATETIME NULL,
             changed_by INT NULL,
-            voided TINYINT(1) DEFAULT 0,
+            voided TINYINT NULL,
             voided_by INT,
             date_voided DATETIME,
             void_reason VARCHAR(255),
@@ -633,5 +633,26 @@
             <columnExists tableName="patient_appointment" columnName="teleconsultation" />
         </preConditions>
         <dropColumn  tableName="patient_appointment" columnName="teleconsultation"/>
+    </changeSet>
+    <changeSet id="appointments_sql_diff" author="Nathan Ruhanga">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="appointment_speciality" columnName="voided"/>
+            <columnExists tableName="appointment_service" columnName="voided"/>
+            <columnExists tableName="appointment_service_weekly_availability" columnName="voided"/>
+            <columnExists tableName="appointment_service_type" columnName="voided"/>
+            <columnExists tableName="patient_appointment" columnName="voided"/>
+            <columnExists tableName="patient_appointment_audit" columnName="voided"/>
+            <columnExists tableName="patient_appointment_provider" columnName="voided"/>
+        </preConditions>
+        <comment>Modifying boolean field to be explicitly BOOLEAN</comment>
+        <sql>
+            ALTER TABLE appointment_speciality MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service_weekly_availability MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service_type MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment_audit MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment_provider MODIFY voided TINYINT(1) DEFAULT 0;
+        </sql>
     </changeSet>
 </databaseChangeLog>
