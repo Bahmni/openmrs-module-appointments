@@ -21,6 +21,7 @@ import java.util.Calendar;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -548,7 +549,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnNineAppointmentsOnUpdateFromSix() throws Exception {
-
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         executeDataSet("recurringAppointmentUpdateTestData.xml");
 
         String payload = "{\n" +
@@ -583,8 +584,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         assertEquals(200, response.getStatus());
         List<RecurringAppointmentDefaultResponse> appointmentDefaultResponse = deserialize(response, new TypeReference<List<RecurringAppointmentDefaultResponse>>() {
         });
-        assertEquals(9, appointmentDefaultResponse.size());
-
+        assertEquals(10, appointmentDefaultResponse.size());
     }
 
     @Test

@@ -5,14 +5,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentConflictType;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentsSummary;
@@ -25,10 +23,10 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
@@ -224,6 +222,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldNotUpdateAppointmentMetadataOnConflictsCall() throws Exception {
+        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
         String content = "{" +
                 "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a7\"," +
                 "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
@@ -244,18 +243,13 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         Map<String, List<AppointmentDefaultResponse>> appointmentDefaultResponse = deserialize(response, new TypeReference<Map<String, List<AppointmentDefaultResponse>>>() {
         });
         assertEquals(1, appointmentDefaultResponse.get(AppointmentConflictType.SERVICE_UNAVAILABLE.name()).size());
-        Appointment appointment = appointmentsService.getAppointmentByUuid("c36006e5-9fbb-4f20-866b-0ece245615a7");
-        assertEquals("2107-07-15 17:00:00.0", appointment.getStartDateTime().toString());
-        assertEquals("2107-07-15 18:00:00.0", appointment.getEndDateTime().toString());
 
         MockHttpServletResponse editResponse = handle(newPostRequest("/rest/v1/appointment", content));
         assertNotNull(editResponse);
         assertEquals(200, editResponse.getStatus());
-        AppointmentDefaultResponse  appointmentEditResponse = deserialize(editResponse, new TypeReference<AppointmentDefaultResponse>() {
-        });
+        AppointmentDefaultResponse  appointmentEditResponse = deserialize(editResponse, new TypeReference<AppointmentDefaultResponse>() {});
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a7", appointmentEditResponse.getUuid());
-        //As client is in IST we are receiving response in IST - 17:30 UTC = 23:00 IST
-        assertEquals("Fri Jul 15 23:00:00 IST 2107", appointmentEditResponse.getStartDateTime().toString());
-        assertEquals("Sat Jul 16 00:00:00 IST 2107", appointmentEditResponse.getEndDateTime().toString());
+        assertEquals("Fri Jul 15 17:30:00 UTC 2107", appointmentEditResponse.getStartDateTime().toString());
+        assertEquals("Fri Jul 15 18:30:00 UTC 2107", appointmentEditResponse.getEndDateTime().toString());
     }
 }
