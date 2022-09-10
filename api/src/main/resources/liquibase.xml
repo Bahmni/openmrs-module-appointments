@@ -634,4 +634,25 @@
         </preConditions>
         <dropColumn  tableName="patient_appointment" columnName="teleconsultation"/>
     </changeSet>
+    <changeSet id="appointments_sql_diff" author="Nathan Ruhanga">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="appointment_speciality" columnName="voided"/>
+            <columnExists tableName="appointment_service" columnName="voided"/>
+            <columnExists tableName="appointment_service_weekly_availability" columnName="voided"/>
+            <columnExists tableName="appointment_service_type" columnName="voided"/>
+            <columnExists tableName="patient_appointment" columnName="voided"/>
+            <columnExists tableName="patient_appointment_audit" columnName="voided"/>
+            <columnExists tableName="patient_appointment_provider" columnName="voided"/>
+        </preConditions>
+        <comment>Enforcing BOOLEAN datatype for boolean fields</comment>
+        <sql>
+            ALTER TABLE appointment_speciality MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service_weekly_availability MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE appointment_service_type MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment_audit MODIFY voided TINYINT(1) DEFAULT 0;
+            ALTER TABLE patient_appointment_provider MODIFY voided TINYINT(1) DEFAULT 0;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
