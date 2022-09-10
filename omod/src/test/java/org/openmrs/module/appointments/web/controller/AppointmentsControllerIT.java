@@ -3,8 +3,10 @@ package org.openmrs.module.appointments.web.controller;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.rules.ExpectedException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
@@ -237,11 +239,13 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnDayConflictsForAnAppointment() throws Exception {
-        String content = "{\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
-                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
-                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
-                "\"startDateTime\": \"2019-09-24T11:30:00\"," +
-                "\"endDateTime\": \"2019-09-24T12:00:00\"," +
+        String content = "{" +
+                "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00\"," +
                 "\"providers\": [{" +
                 "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
                 "\"response\": \"ACCEPTED\"," +
@@ -260,11 +264,13 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnTimeSlotConflictsForAnAppointment() throws Exception {
-        String content = "{\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
-                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
-                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
-                "\"startDateTime\": \"2019-09-23T13:30:00\"," +
-                "\"endDateTime\": \"2019-09-23T14:00:00\"," +
+        String content = "{" +
+                "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00\"," +
                 "\"providers\": [{" +
                 "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
                 "\"response\": \"ACCEPTED\"," +
@@ -283,11 +289,13 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnPatientDoubleBookingConflictsForAnAppointment() throws Exception {
-        String content = "{\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
-                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
-                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
-                "\"startDateTime\": \"2107-07-15T11:30:00\"," +
-                "\"endDateTime\": \"2107-07-15T12:30:00\"," +
+        String content = "{" +
+                "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00\"," +
                 "\"providers\": [{" +
                 "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
                 "\"response\": \"ACCEPTED\"," +
@@ -307,12 +315,13 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnPatientDoubleBookingConflictsForExistingAppointment() throws Exception {
-        String content = "{ \"uuid\": \"75504r42-3ca8-11e3-bf2b-0800271c13545\"," +
+        String content = "{" +
+                "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
                 "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
-                "\"serviceUuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
-                "\"serviceTypeUuid\": \"678906e5-9fbb-4f20-866b-0ece24564578\"," +
-                "\"startDateTime\": \"2107-07-15T11:30:00\"," +
-                "\"endDateTime\": \"2107-07-15T12:30:00\"," +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
+                "\"startDateTime\": \"2107-07-15T17:30:00\"," +
+                "\"endDateTime\": \"2107-07-15T18:30:00\"," +
                 "\"providers\": [{" +
                 "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
                 "\"response\": \"ACCEPTED\"," +
