@@ -6,6 +6,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.webservices.rest.web.RestConstants;
+import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/adhocTeleconsultation")
-public class AdhocTeleconsultationController {
+public class AdhocTeleconsultationController extends BaseRestController {
 
     private Log log = LogFactory.getLog(this.getClass());
 
