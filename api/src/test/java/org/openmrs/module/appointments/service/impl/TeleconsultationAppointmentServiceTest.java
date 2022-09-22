@@ -75,7 +75,7 @@ public class TeleconsultationAppointmentServiceTest {
         Appointment appointment = new Appointment();
         UUID uuid = UUID.randomUUID();
         appointment.setUuid(uuid.toString());
-        String link = teleconsultationAppointmentService.generateTeleconsultationLink(appointment);
+        String link = teleconsultationAppointmentService.generateTeleconsultationLink(appointment.getUuid());
         assertEquals("https://test.server/"+appointment.getUuid(), link);
 
     }

@@ -7,7 +7,6 @@ import org.openmrs.PatientIdentifier;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
-import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.notification.NotificationResult;
 
 import java.text.MessageFormat;
@@ -32,12 +31,12 @@ public class TeleconsultationAppointmentService {
         this.patientAppointmentNotifierService = patientAppointmentNotifierService;
     }
 
-    public String generateTeleconsultationLink(Appointment appointment) {
+    public String generateTeleconsultationLink(String uuid) {
         String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
         if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
             tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
         }
-        return new MessageFormat(tcServerUrl).format(new Object[] {appointment.getUuid()} );
+        return new MessageFormat(tcServerUrl).format(new Object[] {uuid} );
     }
 
     public AdhocTeleconsultationResponse generateAdhocTeleconsultationLink(String patientUuid, String provider) {
@@ -47,11 +46,10 @@ public class TeleconsultationAppointmentService {
                         identifierType.equals(pi.getIdentifierType().getName()))
                 .findAny()
                 .orElse(null);
-        String teleconId = null;
-        teleconId = (identifier != null) ?  identifier.getIdentifier() : generateRandomID();
-        String link = getAdhocTeleConsultationLink(teleconId);
+        String teleConsultationId = (identifier != null) ? identifier.getIdentifier() : generateRandomID();
+        String link = generateTeleconsultationLink(teleConsultationId);
         AdhocTeleconsultationResponse response = new AdhocTeleconsultationResponse();
-        response.setUuid(teleconId);
+        response.setUuid(teleConsultationId);
         response.setLink(link);
         notifyUpdates(response, patient, provider, link);
         return response;
@@ -62,15 +60,6 @@ public class TeleconsultationAppointmentService {
         int number = rnd.nextInt(999999);
         String id = String.format("%06d", number) + System.currentTimeMillis();
         return id;
-    }
-
-    private String getAdhocTeleConsultationLink(String uuid) {
-        String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
-        if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
-            tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
-        }
-        String link = new MessageFormat(tcServerUrl).format(new Object[] {uuid});
-        return link;
     }
 
     private void notifyUpdates(AdhocTeleconsultationResponse response, Patient patient, String provider, String link) {
