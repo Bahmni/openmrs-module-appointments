@@ -27,7 +27,7 @@ public class AdhocTeleconsultationControllerIT extends BaseIntegrationTest {
         AdhocTeleconsultationResponse asResponses
                 = deserialize(handle(newGetRequest("/rest/v1/adhocTeleconsultation/generateAdhocTeleconsultationLink",
                         new Parameter("patientUuid", "2c33920f-7aa6-48d6-998a-60412d8ff7d5"),
-                        new Parameter("provider", "superman"))),
+                        new Parameter("provider", "doctor"))),
                 new TypeReference<AdhocTeleconsultationResponse>() {
                 });
         assertEquals("https://meet.jit.si/GAN200000", asResponses.getLink());
