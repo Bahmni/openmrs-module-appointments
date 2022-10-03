@@ -11,3 +11,4 @@ omod/.classpath
 omod/.project
 omod/.settings/
 target/
+.DS_Store

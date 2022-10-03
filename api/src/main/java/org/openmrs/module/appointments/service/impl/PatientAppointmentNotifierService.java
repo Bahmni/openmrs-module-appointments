@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Patient;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
@@ -27,14 +28,27 @@ public class PatientAppointmentNotifierService {
     }
 
     public List<NotificationResult> notifyAll(final Appointment appointment) {
+        return notifyAll(appointment, null, null, null);
+    }
+
+    public List<NotificationResult> notifyAll(final Patient patient, final String provider, final String link) {
+        return notifyAll(null, patient, provider, link);
+    }
+
+    private List<NotificationResult> notifyAll(final Appointment appointment, final Patient patient, final String provider, final String link) {
         if ((eventNotifiers == null) || eventNotifiers.isEmpty()) return Collections.emptyList();
-        log.info("Notifying TC Appointment. Number of notifiers:" + eventNotifiers.size());
+        log.info("Notifying AdhocTeleconsultation. Number of notifiers:" + eventNotifiers.size());
         List<NotificationResult> notificationResults = new ArrayList<>();
         for (AppointmentEventNotifier eventNotifier : eventNotifiers) {
             try {
-                if (eventNotifier.isApplicable(appointment)) {
+                if (appointment == null || eventNotifier.isApplicable(appointment)) {
                     log.debug("Invoking Appointment Notifier: " + eventNotifier.getClass());
-                    NotificationResult result = eventNotifier.sendNotification(appointment);
+                    NotificationResult result;
+                    if (appointment == null) {
+                        result = eventNotifier.sendNotification(patient, provider, link);
+                    } else {
+                        result = eventNotifier.sendNotification(appointment);
+                    }
                     notificationResults.add(result);
                 } else {
                     log.info(NOT_APPLICABLE + eventNotifier.getMedium());

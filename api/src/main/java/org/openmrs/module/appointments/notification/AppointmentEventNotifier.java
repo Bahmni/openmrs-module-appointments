@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.notification;
 
+import org.openmrs.Patient;
 import org.openmrs.module.appointments.model.Appointment;
 
 /**
@@ -25,4 +26,5 @@ public interface AppointmentEventNotifier {
     String getMedium();
     boolean isApplicable(final Appointment appointment);
     NotificationResult sendNotification(final Appointment appointment) throws NotificationException;
+    NotificationResult sendNotification(final Patient patient,  final String provider, final String link) throws NotificationException;
 }
