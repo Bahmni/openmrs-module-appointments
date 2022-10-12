@@ -141,6 +141,12 @@
 			<artifactId>javax.mail</artifactId>
 			<version>${javaxMail.version}</version>
 		</dependency>
+		<dependency>
+			<groupId>com.sun.mail</groupId>
+			<artifactId>javax.mail</artifactId>
+			<version>${javaxMail.version}</version>
+			<scope>test</scope>
+		</dependency>
 		<!-- End OpenMRS core -->
 	</dependencies>
 
