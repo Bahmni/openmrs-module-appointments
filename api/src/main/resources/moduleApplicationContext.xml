@@ -25,11 +25,8 @@
     <context:component-scan base-package="org.openmrs.module.appointments"/>
 
     <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
-    <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender">
-        <constructor-arg ref="adminService"/>
-    </bean>
     <bean id="defaultPatientEmailNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier">
-        <constructor-arg ref="defaultTCApptMailSender"/>
+        <constructor-arg index="0" ref="defaultMailSender"/>
     </bean>
 
 <!--    <ref bean="defaultAppointmentMailSender"/>-->
