@@ -49,6 +49,7 @@
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<webServices.version>2.29.0</webServices.version>
+		<bahmniCommons.version>0.2-SNAPSHOT</bahmniCommons.version>
 	</properties>
 
 	<build>
@@ -190,6 +191,12 @@
 				<groupId>org.openmrs.web</groupId>
 				<artifactId>openmrs-web</artifactId>
 				<version>${openmrs.platform.version}</version>
+				<scope>provided</scope>
+			</dependency>
+			<dependency>
+				<groupId>org.bahmni.module</groupId>
+				<artifactId>bahmni-commons-api</artifactId>
+				<version>${bahmniCommons.version}</version>
 				<scope>provided</scope>
 			</dependency>
 
