@@ -113,11 +113,11 @@ public class DefaultMailSender implements MailSender {
      */
     private Properties mailSessionPropertiesFromOMRS() {
         Properties p = new Properties();
-        p.put("mail.transport.protocol", administrationService.getGlobalProperty("mail.transport_protocol", "smtp"));
+        p.put("mail.transport.protocol", administrationService.getGlobalProperty("mail.transport_protocol", "smtps"));
         p.put("mail.smtp.host", administrationService.getGlobalProperty("mail.smtp_host", ""));
         p.put("mail.smtp.port", administrationService.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
         p.put("mail.smtp.auth", administrationService.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
-        p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
+        p.put("mail.smtp.ssl.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
         p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
         p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
         p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
