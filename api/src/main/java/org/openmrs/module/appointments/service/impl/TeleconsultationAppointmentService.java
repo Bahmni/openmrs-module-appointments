@@ -8,6 +8,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.teleconsultation.api.TeleconsultationService;
 
 import java.text.MessageFormat;
 import java.util.List;
@@ -47,7 +48,7 @@ public class TeleconsultationAppointmentService {
                 .findAny()
                 .orElse(null);
         String teleConsultationId = (identifier != null) ? identifier.getIdentifier() : generateRandomID();
-        String link = generateTeleconsultationLink(teleConsultationId);
+        String link = Context.getService(TeleconsultationService.class).generateTeleconsultationLink(teleConsultationId);
         AdhocTeleconsultationResponse response = new AdhocTeleconsultationResponse();
         response.setUuid(teleConsultationId);
         response.setLink(link);
