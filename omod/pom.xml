@@ -40,7 +40,6 @@
 			<groupId>org.openmrs.module</groupId>
 			<artifactId>teleconsultation-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
-			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
