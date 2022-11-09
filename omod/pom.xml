@@ -37,9 +37,10 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.openmrs.module</groupId>
+			<groupId>org.bahmni.module</groupId>
 			<artifactId>teleconsultation-api</artifactId>
 			<version>1.0.0-SNAPSHOT</version>
+			<type>jar</type>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>

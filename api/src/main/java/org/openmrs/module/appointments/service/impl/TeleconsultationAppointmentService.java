@@ -8,7 +8,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.notification.NotificationResult;
-import org.openmrs.module.teleconsultation.api.TeleconsultationService;
+import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 
 import java.text.MessageFormat;
 import java.util.List;
