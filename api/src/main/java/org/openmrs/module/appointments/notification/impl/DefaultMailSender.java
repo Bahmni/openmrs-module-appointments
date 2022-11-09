@@ -61,7 +61,13 @@ public class DefaultMailSender implements MailSender {
             Multipart multipart = new MimeMultipart();
             multipart.addBodyPart(mimeBodyPart);
             mail.setContent(multipart);
-            Transport.send(mail);
+
+            Transport transport = session.getTransport();
+            log.info("Sending Mail");
+            transport.connect(session.getProperty("mail.smtp.host"), session.getProperty("mail.user"), session.getProperty("mail.password"));
+            transport.sendMessage(mail, mail.getAllRecipients());
+            log.info("Mail Sent");
+            transport.close();
         }
         catch (Exception e) {
             throw new RuntimeException("Error occurred while sending email", e);
@@ -118,6 +124,7 @@ public class DefaultMailSender implements MailSender {
         p.put("mail.smtp.port", administrationService.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
         p.put("mail.smtp.auth", administrationService.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
         p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
+        p.put("mail.smtp.ssl.enable", administrationService.getGlobalProperty("mail.smtp.ssl.enable", "true"));
         p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
         p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
         p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
