@@ -48,7 +48,7 @@ public class DefaultMailSenderTest {
 
         expectedEx.expect(RuntimeException.class);
         expectedEx.expectMessage("Error occurred while sending email");
-        expectedEx.expectCause(instanceOf(javax.mail.internet.AddressException.class));
+        expectedEx.expectCause(instanceOf(java.lang.NullPointerException.class));
         mailSender.send("test", "nothing", new String[] {""}, null, null);
     }
 
