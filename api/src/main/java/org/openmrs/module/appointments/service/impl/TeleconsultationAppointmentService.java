@@ -10,7 +10,6 @@ import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 
-import java.text.MessageFormat;
 import java.util.List;
 import java.util.Random;
 
@@ -33,11 +32,7 @@ public class TeleconsultationAppointmentService {
     }
 
     public String generateTeleconsultationLink(String uuid) {
-        String tcServerUrl = Context.getAdministrationService().getGlobalProperty(PROP_TC_SERVER);
-        if ((tcServerUrl == null) || "".equals(tcServerUrl)) {
-            tcServerUrl = DEFAULT_TC_SERVER_URL_PATTERN;
-        }
-        return new MessageFormat(tcServerUrl).format(new Object[] {uuid} );
+        return Context.getService(TeleconsultationService.class).generateTeleconsultationLink(uuid);
     }
 
     public AdhocTeleconsultationResponse generateAdhocTeleconsultationLink(String patientUuid, String provider) {
@@ -48,7 +43,7 @@ public class TeleconsultationAppointmentService {
                 .findAny()
                 .orElse(null);
         String teleConsultationId = (identifier != null) ? identifier.getIdentifier() : generateRandomID();
-        String link = Context.getService(TeleconsultationService.class).generateTeleconsultationLink(teleConsultationId);
+        String link = generateTeleconsultationLink(teleConsultationId);
         AdhocTeleconsultationResponse response = new AdhocTeleconsultationResponse();
         response.setUuid(teleConsultationId);
         response.setLink(link);

@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,7 +15,6 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
-import org.openmrs.module.appointments.model.Appointment;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -23,7 +23,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
@@ -34,8 +33,12 @@ import static org.powermock.api.mockito.PowerMockito.when;
 @PrepareForTest(Context.class)
 @RunWith(PowerMockRunner.class)
 public class TeleconsultationAppointmentServiceTest {
+    public static final String PATIENT_IDENTIFIER = "GAN230901";
     @Mock
     private AdministrationService administrationService;
+
+    @Mock
+    private TeleconsultationService teleconsultationService;
 
     @Mock
     private PatientService patientService;
@@ -59,7 +62,7 @@ public class TeleconsultationAppointmentServiceTest {
         personNames.add(name);
         patient.setNames(personNames);
         PatientIdentifier identifier = new PatientIdentifier();
-        identifier.setIdentifier("GAN230901");
+        identifier.setIdentifier(PATIENT_IDENTIFIER);
         PatientIdentifierType patientIdentifierType = new PatientIdentifierType();
         patientIdentifierType.setName("Patient Identifier");
         identifier.setIdentifierType(patientIdentifierType);
@@ -67,24 +70,16 @@ public class TeleconsultationAppointmentServiceTest {
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
         PowerMockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(Context.getService(TeleconsultationService.class)).thenReturn(teleconsultationService);
         when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.serverUrlPattern")).thenReturn("https://test.server/{0}");
         when(administrationService.getGlobalProperty("bahmni.adhoc.teleConsultation.id")).thenReturn("Patient Identifier");
+        when(teleconsultationService.generateTeleconsultationLink(PATIENT_IDENTIFIER)).thenReturn("https://test.server/GAN230901");
     }
 
     @Test
-    public void shouldGenerateTCLinkForAppointment() {
-        Appointment appointment = new Appointment();
-        UUID uuid = UUID.randomUUID();
-        appointment.setUuid(uuid.toString());
-        String link = teleconsultationAppointmentService.generateTeleconsultationLink(appointment.getUuid());
-        assertEquals("https://test.server/"+appointment.getUuid(), link);
-
-    }
-
-    @Test
-    public void shouldGetAdhocTCLinkBasedOnPatientID() {
-        AdhocTeleconsultationResponse response = teleconsultationAppointmentService.generateAdhocTeleconsultationLink(patient.getUuid(), "");
-        assertEquals("https://test.server/GAN230901", response.getLink());
+    public void shouldGetTCLink() {
+        String link = teleconsultationAppointmentService.generateTeleconsultationLink(PATIENT_IDENTIFIER);
+        assertEquals("https://test.server/GAN230901", link);
     }
 
     @Test
