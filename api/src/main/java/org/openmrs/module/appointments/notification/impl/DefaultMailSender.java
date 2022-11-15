@@ -24,6 +24,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Date;
+import java.util.Objects;
 import java.util.Properties;
 
 public class DefaultMailSender implements MailSender {
@@ -41,6 +42,7 @@ public class DefaultMailSender implements MailSender {
     public void send(String subject, String bodyText, String[] to, String[] cc, String[] bcc) {
         try {
             MimeMessage mail = new MimeMessage(getSession());
+            if(!Objects.equals(mail.getSession().getProperty("mail.send"), "true")) return;
             mail.setFrom(new InternetAddress(this.administrationService.getGlobalProperty("mail.from", "")));
             Address[] toAddresses = new Address[1];
             toAddresses[0] = new InternetAddress(to[0]);
