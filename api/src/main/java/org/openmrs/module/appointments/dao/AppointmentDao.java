@@ -27,6 +27,8 @@ public interface AppointmentDao {
 
 	Appointment getAppointmentByUuid(String uuid);
 
+    Appointment getAppointmentById(Integer id);
+
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);

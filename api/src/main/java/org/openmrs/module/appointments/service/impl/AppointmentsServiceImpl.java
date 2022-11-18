@@ -265,6 +265,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Transactional
     @Override
+    public Appointment getAppointmentById(Integer id) {
+        Appointment appointment = appointmentDao.getAppointmentById(id);
+        return appointment;
+    }
+
+    @Transactional
+    @Override
     public void changeStatus(Appointment appointment, String status, Date onDate) throws APIException {
         AppointmentStatus appointmentStatus = AppointmentStatus.valueOf(status);
         validateUserPrivilege(appointment, appointmentStatus);

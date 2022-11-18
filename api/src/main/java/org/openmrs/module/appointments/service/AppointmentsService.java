@@ -59,6 +59,10 @@ public interface AppointmentsService {
     Appointment getAppointmentByUuid(String uuid);
 
     @Transactional
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
+    Appointment getAppointmentById(Integer id);
+
+    @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     void changeStatus(Appointment appointment, String status, Date onDate);
 

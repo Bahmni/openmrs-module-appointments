@@ -156,6 +156,18 @@ public class AppointmentController extends BaseRestController {
         return appointmentMapper.constructResponse(appointment);
     }
 
+
+    @RequestMapping(method = RequestMethod.GET)
+    @ResponseBody
+    public AppointmentDefaultResponse getAppointmentById(@RequestParam(value = "id") Integer id) {
+        Appointment appointment = appointmentsService.getAppointmentById(id);
+        if(appointment == null) {
+            log.error("Invalid. Related appointment does not exist. ID - " + id);
+            throw new RuntimeException("Related appointment does not exist");
+        }
+        return appointmentMapper.constructResponse(appointment);
+    }
+
     @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/providerResponse")
     @ResponseBody
     public ResponseEntity<Object> updateAppointmentProviderResponse(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
