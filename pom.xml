@@ -45,7 +45,7 @@
 		<mockitoVersion>3.5.11</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.7.9</jacocoVersion>
-		<openmrsAtomfeedVersion>2.6.2-SNAPSHOT</openmrsAtomfeedVersion>
+		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<webServices.version>2.29.0</webServices.version>
