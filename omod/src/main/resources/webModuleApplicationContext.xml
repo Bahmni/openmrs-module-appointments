@@ -29,6 +29,6 @@
 	</bean>
 
 	<context:component-scan base-package="org.openmrs.module.appointments.web.controller" />
-<!--	<bean class="org.openmrs.module.appointments.coverter.IntegerToAppointmentConverter" />-->
+<!--	 -->
 
 </beans>
