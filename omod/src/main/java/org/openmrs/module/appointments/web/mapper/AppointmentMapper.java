@@ -26,6 +26,7 @@ import org.openmrs.module.appointments.web.extension.AppointmentResponseExtensio
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.openmrs.PersonAttribute;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -272,9 +273,17 @@ public class AppointmentMapper {
         map.put("name", p.getPersonName().getFullName());
         map.put("uuid", p.getUuid());
         map.put("identifier", p.getPatientIdentifier().getIdentifier());
-        map.put("age", p.getAge());
-        map.put("gender", p.getGender());
         map.putAll(p.getActiveIdentifiers().stream().filter(e -> e.getIdentifierType() != null).collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""), e -> e.getIdentifier())));
+        map.put("gender", p.getGender());
+        PersonAttribute patientPhoneAttribute = p.getPerson().getAttribute("Telephone contact");
+        if (patientPhoneAttribute != null) {
+            String phone = patientPhoneAttribute.getValue();
+            map.put("phoneNumber", phone);
+        } else {
+            map.put("phoneNumber", "");
+        }
+        map.put("dob", p.getBirthdate());
+        map.put("age", p.getAge());
         return map;
     }
 
