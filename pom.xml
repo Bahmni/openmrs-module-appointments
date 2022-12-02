@@ -32,7 +32,6 @@
 
 	<modules>
 		<module>api</module>
-		<module>atom-feed</module>
 		<module>omod</module>
     </modules>
 
@@ -45,8 +44,6 @@
 		<mockitoVersion>1.10.19</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.7.9</jacocoVersion>
-		<openmrsAtomfeedVersion>2.6.1</openmrsAtomfeedVersion>
-		<atomfeed.version>1.10.1</atomfeed.version>
 	</properties>
 
 	<build>

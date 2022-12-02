@@ -143,6 +143,13 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
+    public Appointment getAppointmentById(Integer id) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class, "appointment");
+        criteria.add(Restrictions.eq("id", id));
+        return (Appointment) criteria.uniqueResult();
+    }
+
+    @Override
     public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
         criteria.add(Restrictions.eq("voided", false));

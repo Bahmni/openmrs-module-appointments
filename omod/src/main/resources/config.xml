@@ -15,22 +15,6 @@
 		<require_module>org.openmrs.module.webservices.rest</require_module>
 	</require_modules>
 
-	<aware_of_modules>
-		<aware_of_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</aware_of_module>
-	</aware_of_modules>
-
-	<conditional_resources>
-		<conditionalResource>
-			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
-			<modules>
-				<module>
-					<moduleId>org.ict4h.openmrs.openmrs-atomfeed</moduleId>
-					<version>${openmrsAtomfeedVersion}</version>
-				</module>
-			</modules>
-		</conditionalResource>
-	</conditional_resources>
-
 	<mappingFiles>
 		Speciality.hbm.xml
 		AppointmentServiceDefinition.hbm.xml
@@ -57,21 +41,6 @@
 		<file>messages_es.properties</file>
 	</messages>
 	<!-- /Internationalization -->
-
-	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</point>
-		<class>org.openmrs.module.appointments.advice.AppointmentServiceDefinitionAdvice</class>
-	</advice>
-
-	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
-		<class>org.openmrs.module.appointments.advice.AppointmentAdvice</class>
-	</advice>
-
-	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</point>
-		<class>org.openmrs.module.appointments.advice.RecurringAppointmentsAdvice</class>
-	</advice>
 
 	<globalProperty>
 		<property>disableDefaultAppointmentValidations</property>
