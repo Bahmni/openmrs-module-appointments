@@ -4,6 +4,12 @@ import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Example;
+import org.hibernate.Session;
+import org.hibernate.criterion.DetachedCriteria;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Property;
+import org.hibernate.criterion.Conjunction;
+import org.hibernate.criterion.Disjunction;
 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -16,6 +22,8 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
+import org.openmrs.Patient;
+import org.openmrs.Visit;
 
 import java.util.Date;
 import java.util.List;
@@ -62,6 +70,115 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(status))); //TODO: we may need to explore Optional construct to help validate against missing enum values
         }
         return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> getPendingAppointments(Date forDate) {
+        /**
+         * SELECT * FROM patient_appointment
+            where start_date_time >= '2023-01-10T00:00:00.000' and start_date_time <= '2023-01-11T00:00:00.000' and patient_id not in
+            (SELECT patient_id FROM visit where date_started >= '2023-01-10T00:00:00.000' and date_started <= '2023-01-11T00:00:00.000');
+         */
+        Session session = sessionFactory.getCurrentSession();
+        Criteria criteria = session.createCriteria(Appointment.class);
+        Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+        criteria.add(Restrictions.ge("startDateTime", forDate));
+        criteria.add(Restrictions.lt("startDateTime", maxDate));
+        DetachedCriteria subquery = DetachedCriteria.forClass(Visit.class, "sub_v");
+        // subquery.add(Restrictions.or(Restrictions.and(Restrictions.le("sub_v.startDatetime", forDate), Restrictions.or(Restrictions.ge("sub_v.stopDatetime", forDate), Restrictions.isNull("sub_v.stopDatetime"))), Restrictions.between("sub_v.startDatetime", forDate, maxDate)));
+        subquery.add(Restrictions.between("sub_v.startDatetime", forDate, maxDate));
+        subquery.setProjection(Projections.property("sub_v.patient"));
+        criteria.add(Property.forName("patient").notIn(subquery));
+        List<Appointment> results = criteria.list();
+        // Appointment fofo = new Appointment();
+        // fofo.getPatient();
+        // Visit v = new Visit();
+        // v.getStopDatetime();
+        // v.getStartDatetime();
+        return(results);
+    }
+
+    @Override
+    public List<Appointment> getHonouredAppointments(Date forDate) {
+        /**
+         * SELECT * FROM patient_appointment
+            where start_date_time >= '2023-01-10T00:00:00.000' and start_date_time <= '2023-01-11T00:00:00.000' and patient_id in
+            (SELECT patient_id FROM visit where date_started >= '2023-01-10T00:00:00.000' and date_started <= '2023-01-11T00:00:00.000');
+         */
+        Session session = sessionFactory.getCurrentSession();
+        Criteria criteria = session.createCriteria(Appointment.class);
+        Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+        criteria.add(Restrictions.ge("startDateTime", forDate));
+        criteria.add(Restrictions.lt("startDateTime", maxDate));
+        DetachedCriteria subquery = DetachedCriteria.forClass(Visit.class, "sub_v");
+        // subquery.add(Restrictions.or(Restrictions.and(Restrictions.le("sub_v.startDatetime", forDate), Restrictions.or(Restrictions.ge("sub_v.stopDatetime", forDate), Restrictions.isNull("sub_v.stopDatetime"))), Restrictions.between("sub_v.startDatetime", forDate, maxDate)));
+        subquery.add(Restrictions.between("sub_v.startDatetime", forDate, maxDate));
+        subquery.setProjection(Projections.property("sub_v.patient"));
+        criteria.add(Property.forName("patient").in(subquery));
+        List<Appointment> results = criteria.list();
+        // Appointment fofo = new Appointment();
+        // fofo.getPatient();
+        // Visit v = new Visit();
+        // v.getStopDatetime();
+        // v.getStartDatetime();
+        return(results);
+    }
+
+    @Override
+    public List<Appointment> getCameEarlyAppointments(Date forDate) {
+        /**
+         * SELECT * FROM patient_appointment
+            where start_date_time >= '2023-01-10T00:00:00.000' and start_date_time <= '2023-01-11T00:00:00.000' and patient_id not in
+            (SELECT patient_id FROM visit where (date_started <= '2023-01-10T00:00:00.000' and (date_stopped >= '2023-01-10T00:00:00.000' or date_stopped is null)) or (date_started >= '2023-01-10T00:00:00.000' and date_started <= '2023-01-11T00:00:00.000'));
+         */
+        Session session = sessionFactory.getCurrentSession();
+        Criteria criteria = session.createCriteria(Appointment.class);
+        Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+        criteria.add(Restrictions.ge("startDateTime", forDate));
+        criteria.add(Restrictions.lt("startDateTime", maxDate));
+        DetachedCriteria subquery = DetachedCriteria.forClass(Visit.class, "sub_v");
+
+        //subquery.add(Restrictions.or(Restrictions.isNull("sub_v.stopDatetime"), Restrictions.and(Restrictions.ge("sub_v.startDatetime", forDate), Restrictions.lt("sub_v.startDatetime", maxDate))));
+        Conjunction conjunction = Restrictions.conjunction();
+        conjunction.add(Restrictions.le("sub_v.startDatetime", forDate));
+        conjunction.add(Restrictions.or(Restrictions.ge("sub_v.stopDatetime", forDate), Restrictions.isNull("sub_v.stopDatetime")));
+        subquery.add(conjunction);
+
+        Disjunction disjunction = Restrictions.disjunction();
+        disjunction.add(Restrictions.between("sub_v.startDatetime", forDate, maxDate));
+        subquery.add(disjunction);
+
+        subquery.setProjection(Projections.property("sub_v.patient"));
+        criteria.add(Property.forName("patient").in(subquery));
+        List<Appointment> results = criteria.list();
+        // Appointment fofo = new Appointment();
+        // fofo.getPatient();
+        // Visit v = new Visit();
+        // v.getStopDatetime();
+        // v.getStartDatetime();
+        return(results);
+    }
+
+    @Override
+    public List<Appointment> getRescheduledAppointments(Date forDate) {
+        /**
+         * Added new status Rescheduled
+         * AppointmentStatus.java - L4
+         * */
+        Session session = sessionFactory.getCurrentSession();
+        Criteria criteria = session.createCriteria(Appointment.class);
+        Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+        criteria.add(Restrictions.ge("startDateTime", forDate));
+        criteria.add(Restrictions.lt("startDateTime", maxDate));
+        // criteria.add(Restrictions.eq("status", "rescheduled"));
+        criteria.add(Restrictions.eq("status", AppointmentStatus.Rescheduled));
+        List<Appointment> results = criteria.list();
+        // Appointment fofo = new Appointment();
+        // fofo.getPatient();
+        // Visit v = new Visit();
+        // v.getStopDatetime();
+        // v.getStartDatetime();
+        return(results);
     }
 
     @Transactional
