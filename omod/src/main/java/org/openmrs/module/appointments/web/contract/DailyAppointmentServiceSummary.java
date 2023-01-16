@@ -9,11 +9,21 @@ public class DailyAppointmentServiceSummary {
     private Date appointmentDate;
     private String appointmentServiceUuid;
 
+    private String appointmentServiceName;
+
     public DailyAppointmentServiceSummary(Date appointmentDate, String appointmentServiceUuid, Integer allAppointmentsCount, Integer missedAppointmentsCount) {
         this.allAppointmentsCount = allAppointmentsCount;
         this.missedAppointmentsCount = missedAppointmentsCount;
         this.appointmentDate = appointmentDate;
         this.appointmentServiceUuid = appointmentServiceUuid;
+    }
+
+    public DailyAppointmentServiceSummary(Date appointmentDate, String appointmentServiceUuid, Integer allAppointmentsCount, Integer missedAppointmentsCount, String appointmentServiceName) {
+        this.allAppointmentsCount = allAppointmentsCount;
+        this.missedAppointmentsCount = missedAppointmentsCount;
+        this.appointmentDate = appointmentDate;
+        this.appointmentServiceUuid = appointmentServiceUuid;
+        this.appointmentServiceName = appointmentServiceName;
     }
 
     public Integer getAllAppointmentsCount() {
@@ -46,5 +56,12 @@ public class DailyAppointmentServiceSummary {
 
     public void setAppointmentServiceUuid(String appointmentServiceUuid) {
         this.appointmentServiceUuid = appointmentServiceUuid;
+    }
+
+    public String getAppointmentServiceName() {
+        return appointmentServiceName;
+    }
+    public void setAppointmentServiceName(String appointmentServiceName) {
+        this.appointmentServiceName = appointmentServiceName;
     }
 }
