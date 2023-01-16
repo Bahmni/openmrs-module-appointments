@@ -274,7 +274,7 @@ public class AppointmentMapper {
         for (PatientIdentifier patientIdentifier : p.getIdentifiers()) {
             if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Unique Patient Number")) {
                 map.put("identifier", patientIdentifier.getIdentifier());
-            } else (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Patient Clinic Number")) {
+            } else if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Patient Clinic Number")) {
                 map.put("identifier", patientIdentifier.getIdentifier());
             }
         }
