@@ -1,7 +1,7 @@
 name: deploy to prod 8600
 on:
   push:
-    branches: [ master ]
+    branches: [ openmrs-3x ]
 jobs:
 
   build:
@@ -18,12 +18,12 @@ jobs:
         command_timeout: 3000m
         script: |
           cd /apps/github-workflows/kenyaemr-modules
-          sudo rm -rf openmrs-module-kenyaEMRChart 
-          sudo mkdir openmrs-module-kenyaEMRChart 
-          sudo chown -R cicd2:cicd2 openmrs-module-kenyaEMRChart
-          git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-kenyaEMRChart      
-          cd openmrs-module-kenyaEMRChart
-          git clone https://github.com/palladiumkenya/openmrs-module-kenyaEMRChart.git .
+          sudo rm -rf openmrs-module-appointments 
+          sudo mkdir openmrs-module-appointments 
+          sudo chown -R cicd2:cicd2 openmrs-module-appointments
+          git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-appointments      
+          cd openmrs-module-appointments
+          git clone -b openmrs-3x https://github.com/palladiumkenya/openmrs-module-kenyaEMRChart.git .
           git status
           mvn clean install -DskipTests
   deploy:
