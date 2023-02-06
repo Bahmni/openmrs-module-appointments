@@ -23,7 +23,7 @@ jobs:
           sudo chown -R cicd2:cicd2 openmrs-module-appointments
           git config --global --add safe.directory /apps/github-workflows/kenyaemr-modules/openmrs-module-appointments      
           cd openmrs-module-appointments
-          git clone -b openmrs-3x https://github.com/palladiumkenya/openmrs-module-kenyaEMRChart.git .
+          git clone -b openmrs-3x https://github.com/palladiumkenya/openmrs-module-appointments.git .
           git status
           mvn clean install -DskipTests
   deploy:
