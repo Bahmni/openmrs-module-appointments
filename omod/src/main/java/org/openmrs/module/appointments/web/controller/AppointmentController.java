@@ -3,7 +3,16 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.codehaus.jackson.node.ArrayNode;
+import org.codehaus.jackson.node.JsonNodeFactory;
+import org.codehaus.jackson.node.ObjectNode;
+import org.openmrs.Patient;
+import org.openmrs.PatientIdentifier;
+import org.openmrs.PersonAttribute;
+import org.openmrs.Visit;
 import org.openmrs.api.APIException;
+import org.openmrs.api.PatientService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -29,6 +38,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 @Controller
@@ -267,4 +277,70 @@ public class AppointmentController extends BaseRestController {
         return appointmentsSummaryList;
     }
 
+
+     /**
+     * Returns a list of unscheduled appointment on a date
+     * @param forDate the appointment date
+     * @return list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "unScheduledAppointment")
+    @ResponseBody
+    public ResponseEntity<Object> getUnScheduledAppointments(@RequestParam(value = "forDate") String forDate)  {
+        try {
+            if(StringUtils.isEmpty(forDate)) {
+                return new ResponseEntity<>("The request requires appointment date", HttpStatus.BAD_REQUEST);
+            }
+            SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+            Date maxDate = new Date(DateUtil.convertToLocalDateFromUTC(forDate).getTime()+ TimeUnit.DAYS.toMillis(1));
+            Date minDate = formatter.parse(forDate);
+            List<Integer> visitPatientIds = new ArrayList<>();
+            List<Integer> appointmentPatientIds = new ArrayList<>();
+            List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+            List<Visit> visits = Context.getVisitService().getVisits(null, null, null, null, minDate, maxDate, null, null, null, false, false);
+            PatientService patientService = Context.getPatientService();
+            ArrayNode unScheduledPatients = JsonNodeFactory.instance.arrayNode();
+            appointments.stream().forEach(p -> {
+                appointmentPatientIds.add(p.getPatient().getPatientId());
+             });
+
+             visits.stream().forEach(v -> {
+                visitPatientIds.add(v.getPatient().getPatientId());
+             });
+
+            List<Integer> unScheduledAppPatientIds = visitPatientIds.stream()
+            .filter(v -> !appointmentPatientIds.contains(v))
+            .collect(Collectors.toList());
+
+            unScheduledAppPatientIds.stream().forEach(v -> {
+                ObjectNode patientObj = JsonNodeFactory.instance.objectNode();
+                Patient patient = patientService.getPatient(v);
+                patientObj.put("uuid", patient.getUuid());
+                patientObj.put("name", patient.getPersonName().getFullName());
+                patientObj.put("gender", patient.getGender());
+                patientObj.put("dob", patient.getBirthdate().toString());
+
+                PersonAttribute patientPhoneAttribute = patient.getPerson().getAttribute("Telephone contact");
+                if (patientPhoneAttribute != null) {
+                    String phone = patientPhoneAttribute.getValue();
+                    patientObj.put("phoneNumber", phone);
+                } else {
+                    patientObj.put("phoneNumber", "");
+                }
+                for (PatientIdentifier patientIdentifier : patient.getIdentifiers()) {
+                         if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Unique Patient Number")) {
+                             patientObj.put("identifier", patientIdentifier.getIdentifier());
+                         } else if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Patient Clinic Number")) {
+                            patientObj.put("identifier", patientIdentifier.getIdentifier());
+                         }
+                     }
+                patientObj.put("age", patient.getAge());
+                unScheduledPatients.add(patientObj);
+             });
+
+            return new ResponseEntity<>(unScheduledPatients, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to fetch appointments by date", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }
