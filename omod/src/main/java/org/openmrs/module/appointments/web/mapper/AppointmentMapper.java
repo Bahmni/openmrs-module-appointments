@@ -3,9 +3,7 @@ package org.openmrs.module.appointments.web.mapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.Provider;
+import org.openmrs.*;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
@@ -18,6 +16,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.PatientUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
@@ -26,8 +25,6 @@ import org.openmrs.module.appointments.web.extension.AppointmentResponseExtensio
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.openmrs.PersonAttribute;
-import org.openmrs.PatientIdentifier;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -195,7 +192,7 @@ public class AppointmentMapper {
     private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
         response.setUuid(a.getUuid());
         response.setAppointmentNumber(a.getAppointmentNumber());
-        response.setPatient(createPatientMap(a.getPatient()));
+        response.setPatient(PatientUtil.patientMap(a.getPatient()));
         response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
         //response.setProvider(createProviderMap(a.getProvider()));
