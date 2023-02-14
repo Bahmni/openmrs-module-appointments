@@ -21,6 +21,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
+import org.openmrs.module.appointments.util.PatientUtil;
 import org.openmrs.module.appointments.web.contract.*;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
@@ -61,33 +62,43 @@ public class AppointmentController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "all")
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
-        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+    public List<AppointmentDefaultResponse> getAllAppointments(
+            @RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
+        List<Appointment> appointments = appointmentsService
+                .getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
         return appointmentMapper.constructResponse(appointments);
     }
-    @RequestMapping( method = RequestMethod.POST, value = "search")
+
+    @RequestMapping(method = RequestMethod.POST, value = "search")
     @ResponseBody
-    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
+    public List<AppointmentDefaultResponse> searchAppointments(@Valid @RequestBody AppointmentQuery searchQuery)
+            throws IOException {
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
         if (searchQuery.getStatus() == null) {
             appointment.setStatus(null);
         }
-        List<Appointment> appointments =  appointmentsService.search(appointment);
+        List<Appointment> appointments = appointmentsService.search(appointment);
         return appointmentMapper.constructResponse(appointments);
     }
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
-    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
+    public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) {
         try {
             /**
-             * The above code has been done so because to make appointment save within a transaction boundary.
-             * calling appointmentMapper starts a transaction and persistent object is modified, which when
-             * appointmentService.validateAndSave() is called was being written to DB, as calling validateAndSave() will
-             * start another transaction, and before that the dirty persistent entity will be flushed to DB.
-             * appointmentMapper should be fixed and validateAndSave() signature should be changed.
+             * The above code has been done so because to make appointment save within a
+             * transaction boundary.
+             * calling appointmentMapper starts a transaction and persistent object is
+             * modified, which when
+             * appointmentService.validateAndSave() is called was being written to DB, as
+             * calling validateAndSave() will
+             * start another transaction, and before that the dirty persistent entity will
+             * be flushed to DB.
+             * appointmentMapper should be fixed and validateAndSave() signature should be
+             * changed.
              */
-            Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
+            Appointment appointment = appointmentsService
+                    .validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
@@ -95,57 +106,68 @@ public class AppointmentController extends BaseRestController {
         }
     }
 
-    @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
+    @RequestMapping(method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(@RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
-        AppointmentServiceType appointmentServiceType = appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid(serviceTypeUuid);
-        List<Appointment> appointments = appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
+    public List<AppointmentDefaultResponse> getAllFututreAppointmentsForGivenServiceType(
+            @RequestParam(value = "appointmentServiceTypeUuid", required = true) String serviceTypeUuid) {
+        AppointmentServiceType appointmentServiceType = appointmentServiceDefinitionService
+                .getAppointmentServiceTypeByUuid(serviceTypeUuid);
+        List<Appointment> appointments = appointmentsService
+                .getAllFutureAppointmentsForServiceType(appointmentServiceType);
         return appointmentMapper.constructResponse(appointments);
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "appointmentSummary")
     @ResponseBody
-    public List<AppointmentsSummary> getAllAppointmentsSummary(@RequestParam(value = "startDate") String startDateString, @RequestParam(value = "endDate") String endDateString) throws ParseException {
+    public List<AppointmentsSummary> getAllAppointmentsSummary(
+            @RequestParam(value = "startDate") String startDateString,
+            @RequestParam(value = "endDate") String endDateString) throws ParseException {
         List<AppointmentsSummary> appointmentsSummaryList = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService
+                .getAllAppointmentServices(false);
         for (AppointmentServiceDefinition appointmentServiceDefinition : appointmentServiceDefinitions) {
-            List<Appointment> appointmentsForService =
-                    appointmentsService.getAppointmentsForService(
-                            appointmentServiceDefinition, startDate, endDate,
-                            Arrays.asList(
-                                    AppointmentStatus.Requested,
-                                    AppointmentStatus.Completed,
-                                    AppointmentStatus.Scheduled,
-                                    AppointmentStatus.CheckedIn,
-                                    AppointmentStatus.Missed));
+            List<Appointment> appointmentsForService = appointmentsService.getAppointmentsForService(
+                    appointmentServiceDefinition, startDate, endDate,
+                    Arrays.asList(
+                            AppointmentStatus.Requested,
+                            AppointmentStatus.Completed,
+                            AppointmentStatus.Scheduled,
+                            AppointmentStatus.CheckedIn,
+                            AppointmentStatus.Missed));
 
-            Map<Date, List<Appointment>> appointmentsGroupedByDate =
-                    appointmentsForService.stream().collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime));
+            Map<Date, List<Appointment>> appointmentsGroupedByDate = appointmentsForService.stream()
+                    .collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime));
 
             Map<String, DailyAppointmentServiceSummary> appointmentCountMap = new LinkedHashMap<>();
             for (Map.Entry<Date, List<Appointment>> appointmentDateMap : appointmentsGroupedByDate.entrySet()) {
                 List<Appointment> appointments = appointmentDateMap.getValue();
-                Long missedAppointmentsCount = appointments.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
+                Long missedAppointmentsCount = appointments.stream()
+                        .filter(s -> s.getStatus().equals(AppointmentStatus.Missed)).count();
                 DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
-                        appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid(), appointments.size(),Math.toIntExact(missedAppointmentsCount));
-                appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), dailyAppointmentServiceSummary);
+                        appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid(), appointments.size(),
+                        Math.toIntExact(missedAppointmentsCount));
+                appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()),
+                        dailyAppointmentServiceSummary);
             }
 
-            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition), appointmentCountMap);
+            AppointmentsSummary appointmentsSummary = new AppointmentsSummary(
+                    appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition),
+                    appointmentCountMap);
             appointmentsSummaryList.add(appointmentsSummary);
         }
         return appointmentsSummaryList;
     }
 
-    @RequestMapping(method = RequestMethod.POST, value="undoStatusChange/{appointmentUuid}")
+    @RequestMapping(method = RequestMethod.POST, value = "undoStatusChange/{appointmentUuid}")
     @ResponseBody
-    public ResponseEntity<Object> undoStatusChange(@PathVariable("appointmentUuid")String appointmentUuid) throws ParseException {
-        try{
+    public ResponseEntity<Object> undoStatusChange(@PathVariable("appointmentUuid") String appointmentUuid)
+            throws ParseException {
+        try {
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment == null){
+            if (appointment == null) {
                 throw new RuntimeException("Appointment does not exist");
             }
             appointmentsService.undoStatusChange(appointment);
@@ -158,55 +180,58 @@ public class AppointmentController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public AppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid)  {
+    public AppointmentDefaultResponse getAppointmentByUuid(@RequestParam(value = "uuid") String uuid) {
         Appointment appointment = appointmentsService.getAppointmentByUuid(uuid);
-        if(appointment == null) {
+        if (appointment == null) {
             log.error("Invalid. Appointment does not exist. UUID - " + uuid);
             throw new RuntimeException("Appointment does not exist");
         }
         return appointmentMapper.constructResponse(appointment);
     }
 
-
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public AppointmentDefaultResponse getAppointmentById(@RequestParam(value = "id") Integer id) {
         Appointment appointment = appointmentsService.getAppointmentById(id);
-        if(appointment == null) {
+        if (appointment == null) {
             log.error("Invalid. Related appointment does not exist. ID - " + id);
             throw new RuntimeException("Related appointment does not exist");
         }
         return appointmentMapper.constructResponse(appointment);
     }
 
-    @RequestMapping(method = RequestMethod.POST, value="/{appointmentUuid}/providerResponse")
+    @RequestMapping(method = RequestMethod.POST, value = "/{appointmentUuid}/providerResponse")
     @ResponseBody
-    public ResponseEntity<Object> updateAppointmentProviderResponse(@PathVariable("appointmentUuid")String appointmentUuid, @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
+    public ResponseEntity<Object> updateAppointmentProviderResponse(
+            @PathVariable("appointmentUuid") String appointmentUuid,
+            @RequestBody AppointmentProviderDetail providerResponse) throws ParseException {
         try {
             Appointment appointment = appointmentsService.getAppointmentByUuid(appointmentUuid);
-            if(appointment == null){
+            if (appointment == null) {
                 throw new RuntimeException("Appointment does not exist");
             }
-            AppointmentProvider appointmentProviderProvider = appointmentMapper.mapAppointmentProvider(providerResponse);
+            AppointmentProvider appointmentProviderProvider = appointmentMapper
+                    .mapAppointmentProvider(providerResponse);
             appointmentsService.updateAppointmentProviderResponse(appointmentProviderProvider);
             return new ResponseEntity<>(HttpStatus.OK);
-        }catch (RuntimeException e) {
+        } catch (RuntimeException e) {
             log.error("Runtime error while trying to update appointment provider response", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
 
-    //TODO write test
-    @RequestMapping(method = RequestMethod.POST, value="/{uuid}/reschedule")
+    // TODO write test
+    @RequestMapping(method = RequestMethod.POST, value = "/{uuid}/reschedule")
     @ResponseBody
     public ResponseEntity<Object> rescheduleAppointment(@PathVariable("uuid") String prevAppointmentUuid,
-                                                        @Valid @RequestBody AppointmentRequest appointmentRequest,
-                                                        @RequestParam(value = "retainNumber", required = false, defaultValue = "false") boolean retainAppointmentNumber)
+            @Valid @RequestBody AppointmentRequest appointmentRequest,
+            @RequestParam(value = "retainNumber", required = false, defaultValue = "false") boolean retainAppointmentNumber)
             throws ParseException {
         try {
             appointmentRequest.setUuid(null);
             Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            Appointment rescheduledAppointment = appointmentsService.reschedule(prevAppointmentUuid, appointment, false);
+            Appointment rescheduledAppointment = appointmentsService.reschedule(prevAppointmentUuid, appointment,
+                    false);
             return new ResponseEntity<>(appointmentMapper.constructResponse(rescheduledAppointment), HttpStatus.OK);
         } catch (RuntimeException e) {
             log.error("Runtime error while trying to create new appointment", e);
@@ -216,131 +241,121 @@ public class AppointmentController extends BaseRestController {
 
     /**
      * Returns a list of appointment on a date and status
+     * 
      * @param forDate the appointment date
-     * @param status - the appointment status i.e. scheduled, cancelled, completed,
+     * @param status  - the appointment status i.e. scheduled, cancelled, completed,
      * @return list
      */
     @RequestMapping(method = RequestMethod.GET, value = "/appointmentStatus")
     @ResponseBody
-    public ResponseEntity<Object> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") String forDate, @RequestParam(value = "status") String status)  {
+    public ResponseEntity<Object> getAppointmentByDateAndStatus(@RequestParam(value = "forDate") String forDate,
+            @RequestParam(value = "status") String status) {
         try {
-            if(StringUtils.isEmpty(forDate) || StringUtils.isEmpty(status)) {
+            if (StringUtils.isEmpty(forDate) || StringUtils.isEmpty(status)) {
                 return new ResponseEntity<>("The request requires appointment date and status", HttpStatus.BAD_REQUEST);
             }
-            List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate), status);
+            List<Appointment> appointments = appointmentsService
+                    .getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate), status);
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to fetch appointments by status and date", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @RequestMapping(method = RequestMethod.GET, value = "appointmentCalendar")
     @ResponseBody
-    public List<AppointmentsSummary> getAllAppointmentsSummaryForAllServices(@RequestParam(value = "startDate") String startDateString, @RequestParam(value = "endDate") String endDateString) throws ParseException {
+    public List<AppointmentsSummary> getAllAppointmentsSummaryForAllServices(
+            @RequestParam(value = "startDate") String startDateString,
+            @RequestParam(value = "endDate") String endDateString) throws ParseException {
         List<AppointmentsSummary> appointmentsSummaryList = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        List<Appointment> allAppointmentsInDateRange =
-                appointmentsService.getAllAppointmentsInDateRange(startDate, endDate);
+        List<Appointment> allAppointmentsInDateRange = appointmentsService.getAllAppointmentsInDateRange(startDate,
+                endDate);
 
         String appointmentDate = new String();
-        
 
-        Map<Date, Map<AppointmentServiceDefinition, List<Appointment>>> groupAppointmentByDateAndService = allAppointmentsInDateRange.stream().collect (
-                Collectors.groupingBy(Appointment::getDateFromStartDateTime,Collectors.groupingBy(Appointment::getService)));
+        Map<Date, Map<AppointmentServiceDefinition, List<Appointment>>> groupAppointmentByDateAndService = allAppointmentsInDateRange
+                .stream().collect(
+                        Collectors.groupingBy(Appointment::getDateFromStartDateTime,
+                                Collectors.groupingBy(Appointment::getService)));
 
-
-        for (Map.Entry<Date, Map<AppointmentServiceDefinition, List<Appointment>>> appointmentDateMap : groupAppointmentByDateAndService.entrySet()) {
+        for (Map.Entry<Date, Map<AppointmentServiceDefinition, List<Appointment>>> appointmentDateMap : groupAppointmentByDateAndService
+                .entrySet()) {
             List<DailyAppointmentServiceSummary> services = new ArrayList<>();
             appointmentDate = simpleDateFormat.format(appointmentDateMap.getKey());
             Integer totalServiceCount = 0;
 
             Map<AppointmentServiceDefinition, List<Appointment>> appointmentsBySevice = appointmentDateMap.getValue();
 
-
-            for (Map.Entry<AppointmentServiceDefinition, List<Appointment>> appointmentDef : appointmentsBySevice.entrySet()) {
+            for (Map.Entry<AppointmentServiceDefinition, List<Appointment>> appointmentDef : appointmentsBySevice
+                    .entrySet()) {
                 List<Appointment> appointmentsByService = appointmentDef.getValue();
                 DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
                         null, appointmentDef.getKey().getUuid(), appointmentsByService.size(),
                         null, appointmentDef.getKey().getName());
-                       
+
                 services.add(dailyAppointmentServiceSummary);
                 totalServiceCount += appointmentsByService.size();
 
             }
-            AppointmentsSummary dailAappointmentsSummary = new AppointmentsSummary(services,appointmentDate,totalServiceCount);
+            AppointmentsSummary dailAappointmentsSummary = new AppointmentsSummary(services, appointmentDate,
+                    totalServiceCount);
             appointmentsSummaryList.add(dailAappointmentsSummary);
         }
 
         return appointmentsSummaryList;
     }
 
-
-     /**
+    /**
      * Returns a list of unscheduled appointment on a date
+     * 
      * @param forDate the appointment date
      * @return list
      */
     @RequestMapping(method = RequestMethod.GET, value = "unScheduledAppointment")
     @ResponseBody
-    public ResponseEntity<Object> getUnScheduledAppointments(@RequestParam(value = "forDate") String forDate)  {
+    public ResponseEntity<Object> getUnScheduledAppointments(@RequestParam(value = "forDate") String forDate) {
         try {
-            if(StringUtils.isEmpty(forDate)) {
+            if (StringUtils.isEmpty(forDate)) {
                 return new ResponseEntity<>("The request requires appointment date", HttpStatus.BAD_REQUEST);
             }
             SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-            Date maxDate = new Date(DateUtil.convertToLocalDateFromUTC(forDate).getTime()+ TimeUnit.DAYS.toMillis(1));
+            Date maxDate = new Date(DateUtil.convertToLocalDateFromUTC(forDate).getTime() + TimeUnit.DAYS.toMillis(1));
             Date minDate = formatter.parse(forDate);
             List<Integer> visitPatientIds = new ArrayList<>();
             List<Integer> appointmentPatientIds = new ArrayList<>();
-            List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
-            List<Visit> visits = Context.getVisitService().getVisits(null, null, null, null, minDate, maxDate, null, null, null, false, false);
+            List<Appointment> appointments = appointmentsService
+                    .getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+            List<Visit> visits = Context.getVisitService().getVisits(null, null, null, null, minDate, maxDate, null,
+                    null, null, false, false);
             PatientService patientService = Context.getPatientService();
-            ArrayNode unScheduledPatients = JsonNodeFactory.instance.arrayNode();
+            List<Object> unScheduledPatients = new ArrayList<>();
             appointments.stream().forEach(p -> {
                 appointmentPatientIds.add(p.getPatient().getPatientId());
-             });
+            });
 
-             visits.stream().forEach(v -> {
+            visits.stream().forEach(v -> {
                 visitPatientIds.add(v.getPatient().getPatientId());
-             });
+            });
 
             List<Integer> unScheduledAppPatientIds = visitPatientIds.stream()
-            .filter(v -> !appointmentPatientIds.contains(v))
-            .collect(Collectors.toList());
+                    .filter(v -> !appointmentPatientIds.contains(v))
+                    .collect(Collectors.toList());
 
-            unScheduledAppPatientIds.stream().forEach(v -> {
-                ObjectNode patientObj = JsonNodeFactory.instance.objectNode();
-                Patient patient = patientService.getPatient(v);
-                patientObj.put("uuid", patient.getUuid());
-                patientObj.put("name", patient.getPersonName().getFullName());
-                patientObj.put("gender", patient.getGender());
-                patientObj.put("dob", patient.getBirthdate().toString());
+            unScheduledAppPatientIds.stream().forEach(patientId -> {
+                unScheduledPatients.add(PatientUtil.patientMap(patientService.getPatient(patientId)));
 
-                PersonAttribute patientPhoneAttribute = patient.getPerson().getAttribute("Telephone contact");
-                if (patientPhoneAttribute != null) {
-                    String phone = patientPhoneAttribute.getValue();
-                    patientObj.put("phoneNumber", phone);
-                } else {
-                    patientObj.put("phoneNumber", "");
-                }
-                for (PatientIdentifier patientIdentifier : patient.getIdentifiers()) {
-                         if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Unique Patient Number")) {
-                             patientObj.put("identifier", patientIdentifier.getIdentifier());
-                         } else if (patientIdentifier.getIdentifierType().getName().equalsIgnoreCase("Patient Clinic Number")) {
-                            patientObj.put("identifier", patientIdentifier.getIdentifier());
-                         }
-                     }
-                patientObj.put("age", patient.getAge());
-                unScheduledPatients.add(patientObj);
-             });
+            });
 
             return new ResponseEntity<>(unScheduledPatients, HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to fetch appointments by date", e);
-            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
