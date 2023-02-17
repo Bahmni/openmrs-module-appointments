@@ -277,35 +277,38 @@ public class AppointmentController extends BaseRestController {
                 endDate);
 
         String appointmentDate = new String();
+        if (allAppointmentsInDateRange != null && allAppointmentsInDateRange.size() > 0) {
+            Map<Date, Map<AppointmentServiceDefinition, List<Appointment>>> groupAppointmentByDateAndService = allAppointmentsInDateRange
+            .stream().filter(appt -> appt.getDateFromStartDateTime()!= null && appt.getService() != null)
+            .collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime,Collectors.groupingBy(Appointment::getService)));
 
-        Map<Date, Map<AppointmentServiceDefinition, List<Appointment>>> groupAppointmentByDateAndService = allAppointmentsInDateRange
-                .stream().collect(
-                        Collectors.groupingBy(Appointment::getDateFromStartDateTime,
-                                Collectors.groupingBy(Appointment::getService)));
-
-        for (Map.Entry<Date, Map<AppointmentServiceDefinition, List<Appointment>>> appointmentDateMap : groupAppointmentByDateAndService
-                .entrySet()) {
-            List<DailyAppointmentServiceSummary> services = new ArrayList<>();
-            appointmentDate = simpleDateFormat.format(appointmentDateMap.getKey());
-            Integer totalServiceCount = 0;
-
-            Map<AppointmentServiceDefinition, List<Appointment>> appointmentsBySevice = appointmentDateMap.getValue();
-
-            for (Map.Entry<AppointmentServiceDefinition, List<Appointment>> appointmentDef : appointmentsBySevice
+            for (Map.Entry<Date, Map<AppointmentServiceDefinition, List<Appointment>>> appointmentDateMap : groupAppointmentByDateAndService
                     .entrySet()) {
-                List<Appointment> appointmentsByService = appointmentDef.getValue();
-                DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
-                        null, appointmentDef.getKey().getUuid(), appointmentsByService.size(),
-                        null, appointmentDef.getKey().getName());
+                List<DailyAppointmentServiceSummary> services = new ArrayList<>();
+                appointmentDate = simpleDateFormat.format(appointmentDateMap.getKey());
+                Integer totalServiceCount = 0;
 
-                services.add(dailyAppointmentServiceSummary);
-                totalServiceCount += appointmentsByService.size();
+                Map<AppointmentServiceDefinition, List<Appointment>> appointmentsBySevice = appointmentDateMap.getValue();
 
+                for (Map.Entry<AppointmentServiceDefinition, List<Appointment>> appointmentDef : appointmentsBySevice
+                        .entrySet()) {
+                    List<Appointment> appointmentsByService = appointmentDef.getValue();
+                    DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
+                            null, appointmentDef.getKey().getUuid(), appointmentsByService.size(),
+                            null, appointmentDef.getKey().getName());
+
+                    services.add(dailyAppointmentServiceSummary);
+                    totalServiceCount += appointmentsByService.size();
+
+                }
+                AppointmentsSummary dailAappointmentsSummary = new AppointmentsSummary(services, appointmentDate,
+                        totalServiceCount);
+                appointmentsSummaryList.add(dailAappointmentsSummary);
             }
-            AppointmentsSummary dailAappointmentsSummary = new AppointmentsSummary(services, appointmentDate,
-                    totalServiceCount);
-            appointmentsSummaryList.add(dailAappointmentsSummary);
+
+
         }
+
 
         return appointmentsSummaryList;
     }
