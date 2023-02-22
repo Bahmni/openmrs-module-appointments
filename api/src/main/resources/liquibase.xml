@@ -567,6 +567,20 @@
         </sql>
 
     </changeSet>
+    <changeSet id="add_visit_date_patient_appointment_20230222" author="makombe">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="visit_date" tableName="patient_appointment"/>
+            </not>
+        </preConditions>
+        <sql>
+            ALTER TABLE patient_appointment
+            ADD COLUMN visit_date DATETIME NULL;
+        </sql>
+
+    </changeSet>
+
+
     <changeSet id="add_initial_appointment_status_appointment_service" author="Dubey">
         <preConditions onFail="MARK_RAN">
             <not>
