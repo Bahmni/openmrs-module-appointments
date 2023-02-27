@@ -348,9 +348,22 @@ public class AppointmentController extends BaseRestController {
             List<Integer> unScheduledAppPatientIds = visitPatientIds.stream()
                     .filter(v -> !appointmentPatientIds.contains(v))
                     .collect(Collectors.toList());
+            unScheduledAppPatientIds.stream().distinct().forEach(patientId -> {
+                Map visitDetails = new HashMap();
+                Map unscheduledPatientMap = new HashMap();
+                if (!visits.isEmpty()) {
+                    visits.forEach(visit -> {
+                        if(visit.getPatient().getPatientId() == patientId) {
+                            visitDetails.put("startDateTime",visit.getStartDatetime());
+                            visitDetails.put("visitType", visit.getVisitType().getName());
+                            visitDetails.put("stopDateTime", visit.getStopDatetime());
 
-            unScheduledAppPatientIds.stream().forEach(patientId -> {
-                unScheduledPatients.add(PatientUtil.patientMap(patientService.getPatient(patientId)));
+                        }
+                    });
+                }                
+                unscheduledPatientMap.put("visit", visitDetails);
+                unscheduledPatientMap.putAll(PatientUtil.patientMap(patientService.getPatient(patientId)));
+                unScheduledPatients.add(unscheduledPatientMap);
 
             });
 
