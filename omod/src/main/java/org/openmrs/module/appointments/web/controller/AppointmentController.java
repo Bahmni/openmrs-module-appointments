@@ -322,6 +322,7 @@ public class AppointmentController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET, value = "unScheduledAppointment")
     @ResponseBody
     public ResponseEntity<Object> getUnScheduledAppointments(@RequestParam(value = "forDate") String forDate) {
+        
         try {
             if (StringUtils.isEmpty(forDate)) {
                 return new ResponseEntity<>("The request requires appointment date", HttpStatus.BAD_REQUEST);
@@ -368,6 +369,31 @@ public class AppointmentController extends BaseRestController {
             });
 
             return new ResponseEntity<>(unScheduledPatients, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to fetch appointments by date", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+     /**
+     * Returns a list of of those who came early for their appointment on a particular date
+     * 
+     * @param forDate the appointment date
+     * @return list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "/earlyAppointment")
+    @ResponseBody
+    public ResponseEntity<Object> getAllEarlyAppointmentsByDate(@RequestParam(value = "forDate") String forDate) {
+        try {
+            if (StringUtils.isEmpty(forDate)) {
+                return new ResponseEntity<>("The request requires appointment date", HttpStatus.BAD_REQUEST);
+            }
+            Date appointmentDate = DateUtil.convertToLocalDateFromUTC(forDate);
+            List<Appointment> appointments = appointmentsService
+                    .getAllCameEarlyAppointments(appointmentDate);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to fetch appointments by date", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
