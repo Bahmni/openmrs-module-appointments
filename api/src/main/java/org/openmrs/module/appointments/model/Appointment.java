@@ -27,6 +27,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Location location;
     private Date startDateTime;
     private Date endDateTime;
+    private Date visitDate;
     private AppointmentKind appointmentKind;
     private AppointmentStatus status;
     private String comments;
@@ -151,6 +152,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public void setStartDateTime(Date startDateTime) {
         this.startDateTime = startDateTime;
+    }
+
+    public Date getVisitDate() {
+        return visitDate;
+    }
+
+    public void setVisitDate(Date visitDate) {
+        this.visitDate = visitDate;
     }
 
     public Date getEndDateTime() {
