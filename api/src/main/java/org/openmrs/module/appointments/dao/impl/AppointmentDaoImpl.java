@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.openmrs.Patient;
 import org.openmrs.Visit;
 
+
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -341,6 +342,24 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("patient.personVoided", false));
         criteria.add(Restrictions.ge("startDateTime", DateUtil.getStartOfDay()));
 
+        return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> getAllCameEarlyAppointments(Date forDate) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        if (forDate != null) {
+            Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+            Date startOfDay = DateUtil.getStartOfDayByDate(forDate);
+            criteria.add(Restrictions.isNotNull("visitDate"));
+            criteria.add(Restrictions.lt("visitDate", maxDate));
+            criteria.add(Restrictions.ge("visitDate", startOfDay ));
+
+        }
         return criteria.list();
     }
 }
