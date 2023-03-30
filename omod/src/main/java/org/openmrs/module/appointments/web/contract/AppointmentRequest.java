@@ -18,6 +18,7 @@ public class AppointmentRequest {
     private String locationUuid;
     private Date startDateTime;
     private Date endDateTime;
+    private Date visitDate;
     private String status;
     private String appointmentKind;
     private String comments;
@@ -93,6 +94,13 @@ public class AppointmentRequest {
 
     public void setEndDateTime(Date endDateTime) {
         this.endDateTime = endDateTime;
+    }
+    public Date getVisitDate() {
+        return visitDate;
+    }
+
+    public void setVisitDate(Date visitDate) {
+        this.visitDate = visitDate;
     }
 
     public String getAppointmentKind() {

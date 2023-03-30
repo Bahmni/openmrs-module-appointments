@@ -105,6 +105,7 @@ public class AppointmentMapper {
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
+        appointment.setVisitDate(appointmentRequest.getVisitDate());
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {
