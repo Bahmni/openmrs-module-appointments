@@ -383,7 +383,7 @@ public class AppointmentController extends BaseRestController {
      * @param forDate the appointment date
      * @return list
      */
-    @RequestMapping(method = RequestMethod.GET, value = "/earlyAppointment")
+    @RequestMapping(method = RequestMethod.GET, value = "earlyAppointment")
     @ResponseBody
     public ResponseEntity<Object> getAllEarlyAppointmentsByDate(@RequestParam(value = "forDate") String forDate) {
         try {
@@ -399,5 +399,24 @@ public class AppointmentController extends BaseRestController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+ /**
+     * Returns a list of all appointments in a given date range
+     * 
+     * @param startDate the start date
+     *  @param endDate the end date
+     * @return list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "appointmentsInDateRange")
+    @ResponseBody
+    public List<AppointmentDefaultResponse> getAllAppointmentsByDateRange(
+        @RequestParam(value = "startDate") String startDateString,
+        @RequestParam(value = "endDate") String endDateString) throws ParseException {
+            Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+            Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+            List<Appointment> allAppointmentsInDateRange = appointmentsService.getAllAppointmentsInDateRange(startDate,
+                    endDate);
+        return appointmentMapper.constructResponse(allAppointmentsInDateRange);
     }
 }
