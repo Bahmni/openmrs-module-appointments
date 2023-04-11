@@ -415,8 +415,13 @@ public class AppointmentController extends BaseRestController {
         @RequestParam(value = "endDate") String endDateString) throws ParseException {
             Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
             Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+            List<AppointmentDefaultResponse> appointmentsDefaultResponse = new ArrayList<>();
             List<Appointment> allAppointmentsInDateRange = appointmentsService.getAllAppointmentsInDateRange(startDate,
                     endDate);
-        return appointmentMapper.constructResponse(allAppointmentsInDateRange);
+            if (allAppointmentsInDateRange != null && allAppointmentsInDateRange.size() > 0) {
+                appointmentsDefaultResponse = appointmentMapper.constructResponse(allAppointmentsInDateRange);
+            }
+        
+        return appointmentsDefaultResponse;
     }
 }
