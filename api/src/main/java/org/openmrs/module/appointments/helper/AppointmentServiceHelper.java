@@ -55,7 +55,7 @@ public class AppointmentServiceHelper {
         appointmentJson.put("endDateTime", appointment.getEndDateTime().toInstant().toString());
         appointmentJson.put("appointmentKind", appointment.getAppointmentKind().name());
         appointmentJson.put("appointmentNotes", appointment.getComments());
-        appointmentJson.put("visitDate", appointment.getVisitDate().toInstant().toString());
+        appointmentJson.put("visitDate", appointment.getVisitDate() != null ? appointment.getVisitDate().toInstant().toString(): null);
         ObjectMapper mapperObj = new ObjectMapper();
         return String.format("%s", mapperObj.writeValueAsString(appointmentJson));
     }
