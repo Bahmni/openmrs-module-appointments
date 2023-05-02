@@ -36,6 +36,12 @@
                 <param name="useNamed">true</param>
             </type>
         </property>
+        <property name="priority" column="priority">
+            <type name="org.hibernate.type.EnumType">
+                <param name="enumClass">org.openmrs.module.appointments.model.AppointmentPriority</param>
+                <param name="useNamed">true</param>
+            </type>
+        </property>
         <property name="comments" type="java.lang.String" column="comments"/>
 
         <property name="dateCreated" type="java.util.Date" column="date_created"/>

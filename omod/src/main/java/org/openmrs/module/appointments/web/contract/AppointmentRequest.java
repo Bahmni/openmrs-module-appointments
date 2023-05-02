@@ -22,6 +22,7 @@ public class AppointmentRequest {
     private String appointmentKind;
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
+    private String priority;
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -125,5 +126,13 @@ public class AppointmentRequest {
 
     public void setProviders(List<AppointmentProviderDetail> providers) {
         this.providers = providers;
+    }
+
+    public String getPriority() {
+        return priority;
+    }
+
+    public void setPriority(String priority) {
+        this.priority = priority;
     }
 }
