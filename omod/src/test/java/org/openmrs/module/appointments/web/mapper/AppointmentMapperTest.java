@@ -237,6 +237,13 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentPriority.Routine, appointment.getPriority());
     }
 
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenPayloadHasInvalidAppointmentPriority() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setPriority("abcd");
+        appointmentMapper.fromRequest(appointmentRequest);
+    }
+
     @Test
     public void shouldGetExistingAppointmentBookedAgainstVoidedServiceTypeFromPayload() throws Exception {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
