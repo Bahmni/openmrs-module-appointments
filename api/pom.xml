@@ -8,7 +8,7 @@
     	<version>1.8.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>appointments-api</artifactId>
+	<artifactId>appointments-ipd-api</artifactId>
 	<packaging>jar</packaging>
 	<name>appointments API</name>
 	<description>API project for Bahmni Appointment Scheduling</description>
