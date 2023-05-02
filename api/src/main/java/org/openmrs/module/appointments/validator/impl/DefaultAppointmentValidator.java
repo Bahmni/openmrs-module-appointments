@@ -16,5 +16,8 @@ public class DefaultAppointmentValidator implements AppointmentValidator {
 			errors.add("Appointment cannot be created without Patient");
 		if (appointment.getService() == null)
 			errors.add("Appointment cannot be created without Service");
+		if (appointment.getPriority() != null && appointment.getPriority() == AppointmentPriority.Invalid) {
+			errors.add("Appointment cannot be created for invalid priority");
+		}
 	}
 }
