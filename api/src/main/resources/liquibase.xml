@@ -671,4 +671,17 @@
             ALTER TABLE patient_appointment_provider MODIFY voided TINYINT(1) DEFAULT 0;
         </sql>
     </changeSet>
+    <changeSet id="create-column-priority-for-appointment-202304191703" author="Kavitha, Umair">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+            <not>
+                <columnExists tableName="patient_appointment" columnName="priority" />
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="priority" type="varchar(45)">
+                <constraints nullable="true"/>
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

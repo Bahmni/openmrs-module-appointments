@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.validator.impl;
 
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 
 import java.util.List;
@@ -26,5 +27,8 @@ public class DefaultEditAppointmentValidator implements AppointmentValidator {
         }
         if (requestAppointment.getService() == null)
             errors.add("Appointment cannot be updated without Service");
+        if (requestAppointment.getPriority() != null && requestAppointment.getPriority() == AppointmentPriority.Invalid) {
+            errors.add("Appointment cannot be updated for invalid priority");
+        }
     }
 }

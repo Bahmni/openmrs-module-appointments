@@ -11,6 +11,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -106,6 +107,15 @@ public class AppointmentMapper {
         appointment.setEndDateTime(appointmentRequest.getEndDateTime());
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
+        if (appointmentRequest.getPriority() != null) {
+            if (Stream.of(AppointmentPriority.values())
+                    .filter(priority -> priority.name().equalsIgnoreCase(appointmentRequest.getPriority()))
+                    .count() == 0) {
+                appointment.setPriority(AppointmentPriority.Invalid);
+            } else {
+                appointment.setPriority(AppointmentPriority.valueOf(appointmentRequest.getPriority()));
+            }
+        }
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
     }
 
@@ -204,6 +214,7 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
+        response.setPriority(a.getPriority() != null ? a.getPriority().name() : null);
         if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
