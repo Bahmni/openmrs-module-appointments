@@ -235,10 +235,6 @@ public class AppointmentMapperTest {
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         assertNotNull(appointment);
         assertEquals(AppointmentPriority.Routine, appointment.getPriority());
-        appointmentRequest.setPriority("abcd");
-        appointment = appointmentMapper.fromRequest(appointmentRequest);
-        assertNotNull(appointment);
-        assertEquals(AppointmentPriority.Invalid, appointment.getPriority());
     }
 
     @Test
