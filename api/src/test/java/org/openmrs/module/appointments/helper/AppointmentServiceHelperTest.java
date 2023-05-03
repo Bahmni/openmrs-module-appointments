@@ -9,12 +9,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -134,7 +129,7 @@ public class AppointmentServiceHelperTest {
         String notes = "{\"serviceTypeUuid\":\""+ serviceType.getUuid() +"\",\"startDateTime\":\""+
                 startDateTime.toInstant().toString() +"\",\"locationUuid\":null,\"appointmentKind\":\"Scheduled\"," +
                 "\"providerUuid\":null,\"endDateTime\":\""+ endDateTime.toInstant().toString()
-                +"\",\"serviceUuid\":\""+ service.getUuid() +"\",\"appointmentNotes\":null}";
+                +"\",\"priority\":null,\"serviceUuid\":\""+ service.getUuid() +"\",\"appointmentNotes\":null}";
         assertEquals(notes, jsonString);
     }
 

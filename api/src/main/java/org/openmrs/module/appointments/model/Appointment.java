@@ -29,6 +29,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Date endDateTime;
     private AppointmentKind appointmentKind;
     private AppointmentStatus status;
+    private AppointmentPriority priority;
     private String comments;
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
@@ -175,6 +176,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public AppointmentPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(AppointmentPriority priority) {
+        this.priority = priority;
     }
 
     public String getComments() {
