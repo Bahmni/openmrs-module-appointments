@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>appointments-atom-feed</artifactId>
+    <artifactId>appointments-atom-feed-ipd</artifactId>
     <packaging>jar</packaging>
     <name>appointments AtomFeed</name>
     <description>AtomFeed connectors for Bahmni Appointment Scheduling</description>

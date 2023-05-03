@@ -7,7 +7,7 @@
 		<version>1.8.0-SNAPSHOT</version>
 	</parent>
 
-	<artifactId>appointments-omod</artifactId>
+	<artifactId>appointments-ipd-omod</artifactId>
 	<packaging>jar</packaging>
 	<name>appointments OMOD</name>
 	<description>OpenMRS module project for Bahmni Appointment Scheduling</description>
@@ -23,12 +23,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>${project.parent.artifactId}-api</artifactId>
+			<artifactId>${project.parent.artifactId}-ipd-api</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>${project.parent.artifactId}-atom-feed</artifactId>
+			<artifactId>${project.parent.artifactId}-atom-feed-ipd</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
