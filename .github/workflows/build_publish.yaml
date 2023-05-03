@@ -1,7 +1,7 @@
 name: Build and Publish package
 on:
   push:
-    branches: [ Bahmni-IPD-master, pom-workflow-changes ]
+    branches: [ Bahmni-IPD-master ]
 
 jobs:
   Trivy:
