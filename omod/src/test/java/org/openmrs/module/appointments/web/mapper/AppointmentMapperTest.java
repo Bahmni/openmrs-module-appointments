@@ -238,10 +238,13 @@ public class AppointmentMapperTest {
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         assertNotNull(appointment);
         assertEquals(AppointmentPriority.Routine, appointment.getPriority());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenPayloadHasInvalidAppointmentPriority() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
         appointmentRequest.setPriority("abcd");
-        appointment = appointmentMapper.fromRequest(appointmentRequest);
-        assertNotNull(appointment);
-        assertEquals(AppointmentPriority.Invalid, appointment.getPriority());
+        appointmentMapper.fromRequest(appointmentRequest);
     }
 
     @Test

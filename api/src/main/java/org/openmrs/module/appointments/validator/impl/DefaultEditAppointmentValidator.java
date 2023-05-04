@@ -27,8 +27,5 @@ public class DefaultEditAppointmentValidator implements AppointmentValidator {
         }
         if (requestAppointment.getService() == null)
             errors.add("Appointment cannot be updated without Service");
-        if (requestAppointment.getPriority() != null && requestAppointment.getPriority() == AppointmentPriority.Invalid) {
-            errors.add("Appointment cannot be updated for invalid priority");
-        }
     }
 }

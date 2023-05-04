@@ -100,21 +100,4 @@ public class DefaultEditAppointmentValidatorTest {
         assertEquals(1, errors.size());
         assertEquals("Appointment cannot be updated without Service", errors.get(0));
     }
-
-    @Test
-    public void shouldThrowErrorWhenPriorityIsInvalidInAppointment() {
-        Patient patient = new Patient();
-        patient.setUuid("patient");
-        String appointmentUuid = "uuid";
-        Appointment requestAppointment = createAppointment(appointmentUuid, patient);
-        requestAppointment.setPriority(AppointmentPriority.Invalid);
-        Appointment savedAppointment = createAppointment(appointmentUuid, patient);
-        List<String> errors = new ArrayList<>();
-        when(appointmentDao.getAppointmentByUuid(appointmentUuid)).thenReturn(savedAppointment);
-
-        defaultEditAppointmentValidator.validate(requestAppointment, errors);
-
-        assertEquals(1, errors.size());
-        assertEquals("Appointment cannot be updated for invalid priority", errors.get(0));
-    }
 }
