@@ -684,4 +684,16 @@
             </column>
         </addColumn>
     </changeSet>
+    <changeSet id="remove-not-null-constraint-202304211826" author="Kavitha, Umair">
+        <preConditions onFail="MARK_RAN">
+            <tableExists tableName="patient_appointment" />
+            <columnExists tableName="patient_appointment" columnName="start_date_time" />
+            <columnExists tableName="patient_appointment" columnName="end_date_time" />
+        </preConditions>
+        <comment>Update start and end date time of patient appointment table to be nullable</comment>
+        <sql>
+            ALTER TABLE patient_appointment MODIFY start_date_time datetime;
+            ALTER TABLE patient_appointment MODIFY end_date_time datetime;
+        </sql>
+    </changeSet>
 </databaseChangeLog>
