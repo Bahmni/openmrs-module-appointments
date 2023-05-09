@@ -354,11 +354,10 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("patient.personVoided", false));
         if (forDate != null) {
             Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
-            Date startOfDay = DateUtil.getStartOfDayByDate(forDate);
+            criteria.add(Restrictions.ge("startDateTime", forDate));
+            criteria.add(Restrictions.lt("endDateTime", maxDate));
             criteria.add(Restrictions.isNotNull("visitDate"));
-            criteria.add(Restrictions.lt("visitDate", maxDate));
-            criteria.add(Restrictions.ge("visitDate", startOfDay ));
-
+            criteria.add(Restrictions.lt("visitDate", forDate));
         }
         return criteria.list();
     }
