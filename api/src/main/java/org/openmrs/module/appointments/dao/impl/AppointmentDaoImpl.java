@@ -356,8 +356,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
             Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
             criteria.add(Restrictions.ge("startDateTime", forDate));
             criteria.add(Restrictions.lt("endDateTime", maxDate));
-            criteria.add(Restrictions.isNotNull("visitDate"));
-            criteria.add(Restrictions.lt("visitDate", forDate));
+            criteria.add(Restrictions.isNotNull("dateHonored"));
+            criteria.add(Restrictions.lt("dateHonored", forDate));
         }
         return criteria.list();
     }
