@@ -105,7 +105,7 @@ public class AppointmentMapper {
         appointment.setAppointmentKind(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()));
         appointment.setComments(appointmentRequest.getComments());
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
-        appointment.setVisitDate(appointmentRequest.getVisitDate());
+        appointment.setDateHonored(appointmentRequest.getDateHonored());
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {
@@ -205,7 +205,7 @@ public class AppointmentMapper {
         response.setAppointmentKind(a.getAppointmentKind().name());
         response.setStatus(a.getStatus().name());
         response.setComments(a.getComments());
-        response.setVisitDate(a.getVisitDate());
+        response.setDateHonored(a.getDateHonored());
         if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
