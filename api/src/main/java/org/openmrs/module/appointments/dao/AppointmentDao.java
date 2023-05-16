@@ -46,4 +46,6 @@ public interface AppointmentDao {
 
     List<Appointment> getAllCameEarlyAppointments(Date forDate);
 
+    List<Appointment> getCompletedAppointments(Date forDate);
+
 }
