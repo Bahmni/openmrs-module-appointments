@@ -199,6 +199,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Transactional
     @Override
+    public List<Appointment> getCompletedAppointments(Date forDate){
+        List<Appointment> appointments = appointmentDao.getCompletedAppointments(forDate);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
     public List<Appointment> getAllAppointments(Date forDate, String status) {
         List<Appointment> appointments = new ArrayList<Appointment>();
         if (status.trim().equalsIgnoreCase("pending")) {
