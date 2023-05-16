@@ -401,6 +401,30 @@ public class AppointmentController extends BaseRestController {
         }
     }
 
+    /**
+     * Returns a list of those who honored their appointments and have been checked out
+     *
+     * @param forDate the appointment date
+     * @return list
+     */
+    @RequestMapping(method = RequestMethod.GET, value = "completedAppointment")
+    @ResponseBody
+    public ResponseEntity<Object> getAllCompletedAppointments(@RequestParam(value = "forDate") String forDate) {
+        try {
+            if (StringUtils.isEmpty(forDate)) {
+                return new ResponseEntity<>("The request requires appointment date", HttpStatus.BAD_REQUEST);
+            }
+            Date appointmentDate = DateUtil.convertToLocalDateFromUTC(forDate);
+            List<Appointment> appointments = appointmentsService
+                    .getCompletedAppointments(appointmentDate);
+            return new ResponseEntity<>(appointmentMapper.constructResponse(appointments), HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("Runtime error while trying to fetch completed appointments", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
  /**
      * Returns a list of all appointments in a given date range
      * 
