@@ -51,9 +51,9 @@ public class AppointmentServiceHelper {
         appointmentJson.put("providerUuid", providerUuid);
         String locationUuid = appointment.getLocation() != null ? appointment.getLocation().getUuid() : null;
         appointmentJson.put("locationUuid", locationUuid);
-        String startDate = appointment.getStartDateTime() != null ? appointment.getStartDateTime().toInstant().toString() : null;
+        String startDate = (appointment.getStatus() == AppointmentStatus.WaitList && appointment.getStartDateTime() == null) ? null : appointment.getStartDateTime().toInstant().toString();
         appointmentJson.put("startDateTime", startDate);
-        String endDate = appointment.getEndDateTime() != null ? appointment.getEndDateTime().toInstant().toString() : null;
+        String endDate = (appointment.getStatus() == AppointmentStatus.WaitList && appointment.getStartDateTime() == null) ? null : appointment.getEndDateTime().toInstant().toString();
         appointmentJson.put("endDateTime", endDate);
         appointmentJson.put("appointmentKind", appointment.getAppointmentKind().name());
         appointmentJson.put("appointmentNotes", appointment.getComments());
