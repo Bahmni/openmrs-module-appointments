@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
+    private Date dateCreated;
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -229,6 +230,16 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public List<NotificationResult> getNotificationResults() {
         return notificationResults;
+    }
+
+    @Override
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    @Override
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }
 

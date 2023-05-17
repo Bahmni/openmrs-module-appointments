@@ -8,6 +8,7 @@ import java.util.Map;
 public class AppointmentDefaultResponse {
 	private String uuid;
 	private String appointmentNumber;
+	private Date dateCreated;
 	private Map patient;
 	private AppointmentServiceDefaultResponse service;
 	private Map serviceType;
@@ -175,5 +176,13 @@ public class AppointmentDefaultResponse {
 
 	public String getTeleconsultationLink() {
 		return teleconsultationLink;
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
 	}
 }
