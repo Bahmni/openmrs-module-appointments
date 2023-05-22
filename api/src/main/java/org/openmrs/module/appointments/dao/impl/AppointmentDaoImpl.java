@@ -45,6 +45,22 @@ public class AppointmentDaoImpl implements AppointmentDao {
         return criteria.list();
     }
 
+    @Override
+    public List<Appointment> getAllAppointmentsReminder(String hours) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        if (hours != null) {
+            Date minDate=new Date(System.currentTimeMillis()+TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
+            Date maxDate = new Date(minDate.getTime() + TimeUnit.HOURS.toMillis(1));
+            criteria.add(Restrictions.ge("startDateTime", minDate));
+            criteria.add(Restrictions.lt("endDateTime", maxDate));
+        }
+        return criteria.list();
+    }
+
     @Transactional
     @Override
     public void save(Appointment appointment) {

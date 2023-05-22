@@ -189,6 +189,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
+    @Transactional
+    @Override
+    public List<Appointment> getAllAppointmentsReminder(String hours) {
+        List<Appointment> appointments = appointmentDao.getAllAppointmentsReminder(hours);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+
+    }
+
     private boolean isServiceOrServiceTypeVoided(Appointment appointment) {
         return (appointment.getService() != null && appointment.getService().getVoided()) ||
                 (appointment.getServiceType() != null && appointment.getServiceType().getVoided());
