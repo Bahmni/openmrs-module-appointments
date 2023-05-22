@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Date;
 
 
-@Service
+@Transactional
 public class AppointmentReminderServiceImpl implements AppointmentReminderService {
     private SMSService smsService;
 //    @Autowired
@@ -22,7 +22,6 @@ public class AppointmentReminderServiceImpl implements AppointmentReminderServic
 //    SMSService smsService;
 
     @Override
-    @Transactional(readOnly = true)
     public Object sendAppointmentReminderSMS(Appointment appointment) {
         String message = smsService.getAppointmentMessage(appointment.getPatient().getGivenName(), appointment.getPatient().getFamilyName(), appointment.getPatient().getId(), appointment.getDateFromStartDateTime(), appointment.getStartDateTime().getTime(), appointment.getService().getName(), appointment.getProvider().getName(), "+91987654321");
         return smsService.sendSMS(appointment.getPatient().getAttribute("phoneNumber").getValue(), message);
