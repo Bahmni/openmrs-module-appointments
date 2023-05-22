@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.util;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -39,6 +40,16 @@ public class DateUtil {
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DateUtil.DateFormatType.UTC.dateFormat);
         simpleDateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
         return simpleDateFormat.parse(dateString);
+    }
+
+    public static String convertUTCToGivenFormat(Date dateTime, String format, String timeZone) {
+        if (dateTime == null || StringUtils.isEmpty(format) || StringUtils.isEmpty(timeZone)) {
+            return null;
+        }
+        DateFormat givenFormat = new SimpleDateFormat(format);
+        TimeZone givenTimeZone = TimeZone.getTimeZone(timeZone);
+        givenFormat.setTimeZone(givenTimeZone);
+        return givenFormat.format(dateTime);
     }
 
     public static Calendar getCalendar(Date date) {

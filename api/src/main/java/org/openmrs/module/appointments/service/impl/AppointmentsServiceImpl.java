@@ -28,14 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -67,6 +60,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     private PatientAppointmentNotifierService appointmentNotifierService;
+
+    private SMSService smsService;
+
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
         this.appointmentDao = appointmentDao;
@@ -104,6 +100,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.appointmentNotifierService = appointmentNotifierService;
     }
 
+    public void setSmsService(SMSService smsService) {
+        this.smsService = smsService;
+    }
+
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
                 isAppointmentNotAssignedToAnyProvider(appointment) ||
@@ -119,6 +119,23 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return providers.stream()
                 .anyMatch(provider -> provider.getProvider().getPerson().
                         equals(Context.getAuthenticatedUser().getPerson()));
+    }
+    @Transactional
+    @Override
+    public Object sendAppointmentReminderSMS(Appointment appointment) {
+        String givenName = appointment.getPatient().getGivenName();
+        String familyName = appointment.getPatient().getFamilyName();
+        int patientID = appointment.getPatient().getId();
+        Date date = appointment.getStartDateTime();
+        String service = appointment.getService().getName();
+        List<AppointmentProvider> appointmentProviderList =new ArrayList<>(appointment.getProviders());
+        List<String> providers=new ArrayList<>();
+        for (AppointmentProvider appointmentProvider: appointmentProviderList) {
+            providers.add(appointmentProvider.getProvider().getName());
+        }
+        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers);
+        return smsService.sendSMS(appointment.getPatient().getAttribute("phoneNumber").getValue(), message);
+
     }
 
     @Transactional
@@ -187,6 +204,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public List<Appointment> getAllAppointments(Date forDate) {
         List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public List<Appointment> getAllAppointmentsReminder(String hours) {
+        List<Appointment> appointments = appointmentDao.getAllAppointmentsReminder(hours);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+
     }
 
     private boolean isServiceOrServiceTypeVoided(Appointment appointment) {

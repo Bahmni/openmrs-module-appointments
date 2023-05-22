@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
+    List<Appointment> getAllAppointmentsReminder(String afterTime);
 
     @Transactional
     void save(Appointment appointment);
