@@ -289,6 +289,22 @@
         </sql>
     </changeSet>
 
+    <changeSet id="create-appointment-status-change-task-201709121099999" author="Anubhav">
+        <preConditions>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Reminder of scheduled appointment";
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO
+                scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+                                      start_on_startup, created_by, date_created, uuid)
+            VALUES
+                ('Reminder of scheduled appointment', 'Reminder of scheduled appointment', 'org.openmrs.module.appointments.scheduler.tasks.ReminderForAppointment',
+                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 3600, TRUE, 1, NOW(), UUID());
+        </sql>
+    </changeSet>
+
     <changeSet id="Create-privilege-view-appointments-201709201603"  author="Santhosh, Pramida">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">select count(*) from privilege where privilege='View Appointments'</sqlCheck>

@@ -109,6 +109,16 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.bahmni.module</groupId>
+			<artifactId>web-clients</artifactId>
+			<version>0.94.3</version>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.3.4</version>
+		</dependency>
+		<dependency>
 			<groupId>org.openmrs.api</groupId>
 			<artifactId>openmrs-api</artifactId>
 		</dependency>
