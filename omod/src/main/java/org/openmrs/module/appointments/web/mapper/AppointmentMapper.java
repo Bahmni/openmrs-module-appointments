@@ -198,6 +198,7 @@ public class AppointmentMapper {
     private AppointmentDefaultResponse mapToDefaultResponse(Appointment a, AppointmentDefaultResponse response) {
         response.setUuid(a.getUuid());
         response.setAppointmentNumber(a.getAppointmentNumber());
+        response.setDateCreated(a.getDateCreated());
         response.setPatient(createPatientMap(a.getPatient()));
         response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
