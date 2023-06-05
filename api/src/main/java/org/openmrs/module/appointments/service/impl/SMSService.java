@@ -15,6 +15,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.connection.OpenmrsLogin;
 import org.openmrs.module.appointments.model.SMSRequest;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -66,9 +67,9 @@ public class SMSService {
         } else {
             if (providers.isEmpty()) {
                 arguments.remove(3);
-                message = String.format(smsTemplateNoProvider, arguments.toArray()).replace("\\n", System.lineSeparator());
+                message=new MessageFormat(smsTemplateNoProvider).format(arguments.toArray()).replace("\\n", System.lineSeparator());
             } else {
-                message = String.format(smsTemplate, arguments.toArray()).replace("\\n", System.lineSeparator());
+                message =new MessageFormat(smsTemplate).format(arguments.toArray()).replace("\\n", System.lineSeparator());
             }
         }
         return message;

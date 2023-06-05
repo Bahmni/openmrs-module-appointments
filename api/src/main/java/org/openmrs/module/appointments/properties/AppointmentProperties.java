@@ -11,12 +11,18 @@ import java.util.Properties;
 public class AppointmentProperties {
 
 
-    private static Properties properties;
+    public static Properties properties;
     private static Log log = LogFactory.getLog(AppointmentProperties.class);
 
     public static void load() {
-        String propertyFile = new File(OpenmrsUtil.getApplicationDataDirectory(), "appointment.properties").getAbsolutePath();
-        log.info(String.format("Reading openmrs properties from : %s", propertyFile));
+        String propertyFilePath = new File(OpenmrsUtil.getApplicationDataDirectory(), "appointment.properties").getAbsolutePath();
+        File propertyFile = new File(propertyFilePath);
+
+        if (!propertyFile.exists()) {
+            log.warn(String.format("Property file not found: %s", propertyFilePath));
+            return;
+        }
+        log.info(String.format("Reading openmrs properties from: %s", propertyFilePath));
         try {
             properties = new Properties(System.getProperties());
             properties.load(new FileInputStream(propertyFile));
