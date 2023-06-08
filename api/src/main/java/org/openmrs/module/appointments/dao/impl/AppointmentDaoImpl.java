@@ -48,16 +48,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> getAllAppointmentsReminder(String hours) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
         criteria.createAlias("patient", "patient");
         criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.eq("patient.personVoided", false));
         if (hours != null) {
-            Date minDate=new Date(System.currentTimeMillis()+TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
+            Date minDate = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
             Date maxDate = new Date(minDate.getTime() + TimeUnit.HOURS.toMillis(1));
             criteria.add(Restrictions.ge("startDateTime", minDate));
             criteria.add(Restrictions.lt("startDateTime", maxDate));
         }
+        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
         return criteria.list();
     }
 
@@ -72,16 +72,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
                 Example.create(appointment).excludeProperty("uuid"));
 
-        if(appointment.getPatient()!=null) criteria.createCriteria("patient").add(
+        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
                 Example.create(appointment.getPatient()));
 
-        if(appointment.getLocation()!=null) criteria.createCriteria("location").add(
+        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
                 Example.create(appointment.getLocation()));
 
-        if(appointment.getService()!=null) criteria.createCriteria("service").add(
+        if (appointment.getService() != null) criteria.createCriteria("service").add(
                 Example.create(appointment.getService()));
 
-        if(appointment.getProvider()!=null) criteria.createCriteria("provider").add(
+        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
                 Example.create(appointment.getProvider()));
 
         return criteria.list();
@@ -128,7 +128,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
             criteria.add(Restrictions.in("status", appointmentStatusFilterList));
         }
-        return  criteria.list();
+        return criteria.list();
 
     }
 

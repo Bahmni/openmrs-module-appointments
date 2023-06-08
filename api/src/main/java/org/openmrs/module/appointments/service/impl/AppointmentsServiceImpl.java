@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Location;
 import org.openmrs.Person;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
@@ -125,7 +126,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public Object sendAppointmentReminderSMS(Appointment appointment) {
         String givenName = appointment.getPatient().getGivenName();
         String familyName = appointment.getPatient().getFamilyName();
-        int patientID = appointment.getPatient().getId();
+        String patientID = appointment.getPatient().getPatientIdentifier().getIdentifier();
         Date date = appointment.getStartDateTime();
         String service = appointment.getService().getName();
         List<AppointmentProvider> appointmentProviderList =new ArrayList<>(appointment.getProviders());
@@ -133,7 +134,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         for (AppointmentProvider appointmentProvider: appointmentProviderList) {
             providers.add(appointmentProvider.getProvider().getName());
         }
-        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers);
+        Location location=appointment.getLocation();
+        String clinicName = (location == null) ? "none" : location.getName();
+        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,clinicName);
         return smsService.sendSMS(appointment.getPatient().getAttribute("phoneNumber").getValue(), message);
 
     }
