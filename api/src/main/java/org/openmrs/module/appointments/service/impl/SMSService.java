@@ -38,14 +38,13 @@ public class SMSService {
         this.openmrsLogin = openmrsLogin;
     }
 
-    public String getAppointmentMessage(String name, String familyName, int id, Date appointmentDate, String service, List<String> providers) {
+    public String getAppointmentMessage(String name, String familyName, String id, Date appointmentDate, String service, List<String> providers,String clinicName) {
         String smsTemplate = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE);
         String smsTemplateNoProvider = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER);
         String smsTimeZone = Context.getMessageSourceService().getMessage(SMS_TIMEZONE, null, new Locale("en"));
         String smsDateFormat = Context.getMessageSourceService().getMessage(SMS_DATEFORMAT, null, new Locale("en"));
         String date =convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
-        String clinicName=Context.getAdministrationService().getGlobalPropertyObject("clinic.clinicName").getPropertyValue();
 
         List<Object> arguments = new ArrayList<>();
         arguments.add(name + " " + familyName);
