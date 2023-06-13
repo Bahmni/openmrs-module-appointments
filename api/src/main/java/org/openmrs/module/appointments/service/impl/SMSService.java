@@ -11,41 +11,54 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import org.bahmni.webclients.ClientCookies;
+import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.connection.OpenmrsLogin;
 import org.openmrs.module.appointments.model.SMSRequest;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
 
 public class SMSService {
 
-    private OpenmrsLogin openmrsLogin;
     private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE = "bahmni.appointmentReminderSMSTemplate";
     private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "bahmni.appointmentReminderSMSTemplateWithoutProvider";
     private final static String SMS_TIMEZONE = "bahmni.sms.timezone";
     private final static String SMS_DATEFORMAT = "bahmni.sms.dateformat";
     private final static String SMS_URL = "bahmni.sms.url";
     private static Logger logger = LogManager.getLogger(SMSService.class);
+    private OpenmrsLogin openmrsLogin;
+    private AppointmentVisitLocation appointmentVisitLocation;
 
     public void setOpenmrsLogin(OpenmrsLogin openmrsLogin) {
         this.openmrsLogin = openmrsLogin;
     }
 
-    public String getAppointmentMessage(String name, String familyName, String id, Date appointmentDate, String service, List<String> providers,String clinicName) {
+    public void setAppointmentVisitLocation(AppointmentVisitLocation appointmentVisitLocation) {
+        this.appointmentVisitLocation = appointmentVisitLocation;
+    }
+
+    public String getAppointmentMessage(String name, String familyName, String id, Date appointmentDate, String service, List<String> providers, Location location) {
         String smsTemplate = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE);
         String smsTemplateNoProvider = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER);
         String smsTimeZone = Context.getMessageSourceService().getMessage(SMS_TIMEZONE, null, new Locale("en"));
         String smsDateFormat = Context.getMessageSourceService().getMessage(SMS_DATEFORMAT, null, new Locale("en"));
         String date =convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
-
+        LocationTag abc = Context.getLocationService().getLocationTagByName("Visit Location");
+        List<Location> locations = Context.getLocationService().getLocationsHavingAnyTag(Collections.singletonList(abc));
+        String clinicName = (abc != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
+        if (location != null) {
+            String cName = appointmentVisitLocation.getClinicName(location.getUuid());
+            if (StringUtils.isNotEmpty(cName)) {
+                clinicName = cName;
+            }
+        }
         List<Object> arguments = new ArrayList<>();
         arguments.add(name + " " + familyName);
         arguments.add(id);

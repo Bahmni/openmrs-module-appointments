@@ -25,13 +25,19 @@ import org.openmrs.module.appointments.properties.AppointmentProperties;
 public class AppointmentsActivator extends BaseModuleActivator {
 	
 	private Log log = LogFactory.getLog(this.getClass());
-	
-	public void startup() {
-		log.info("Starting Appointments Module");
+
+	@Override
+	public void willStart(){
 		AppointmentProperties.load();
 	}
-	
-	public void shutdown() {
+
+	@Override
+	public void started() {
+		log.info("Starting Appointments Module");
+	}
+
+	@Override
+	public void stopped() {
 		log.info("Shutting down Appointments Module");
 	}
 	
