@@ -41,4 +41,8 @@ public class AppointmentProperties {
     public static void initalize(Properties props) {
         properties = props;
     }
+
+    public static void setProperties(Properties properties) {
+        AppointmentProperties.properties =properties;
+    }
 }

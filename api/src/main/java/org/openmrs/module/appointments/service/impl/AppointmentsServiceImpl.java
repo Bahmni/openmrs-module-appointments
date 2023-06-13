@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Person;
+import org.openmrs.PersonAttribute;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -135,10 +136,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             providers.add(appointmentProvider.getProvider().getName());
         }
         Location location=appointment.getLocation();
-        String clinicName = (location == null) ? "none" : location.getName();
-        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,clinicName);
-        return smsService.sendSMS(appointment.getPatient().getAttribute("phoneNumber").getValue(), message);
-
+        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,location);
+        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
+        return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
     }
 
     @Transactional

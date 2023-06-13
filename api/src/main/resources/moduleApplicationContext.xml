@@ -38,13 +38,7 @@
         <property name="location" value="classpath:appointment.properties" />
     </bean>
 
-    <bean id="connectionDetails" class="org.openmrs.module.appointments.connection.ConnectionDetails" depends-on="openmrsProperties">
-        <property name="authUri" value="${openmrs.auth.uri}" />
-        <property name="openmrsUser" value="${openmrs.user}" />
-        <property name="openmrsPassword" value="${openmrs.password}"/>
-        <property name="openmrsWebclientConnectTimeout" value="${openmrs.connectionTimeoutInMilliseconds}" />
-        <property name="openmrsWebclientReadTimeout" value="${openmrs.replyTimeoutInMilliseconds}" />
-    </bean>
+
 
     <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService">
         <property name="eventNotifiers">
@@ -95,11 +89,23 @@
             <ref bean="patientAppointmentNotifierService"/>
         </property>
     </bean>
+    <bean id="connectionDetails" class="org.openmrs.module.appointments.connection.ConnectionDetails" depends-on="openmrsProperties">
+        <property name="authUri" value="${openmrs.auth.uri}" />
+        <property name="openmrsUser" value="${openmrs.user}" />
+        <property name="openmrsPassword" value="${openmrs.password}"/>
+        <property name="openmrsWebclientConnectTimeout" value="${openmrs.connectionTimeoutInMilliseconds}" />
+        <property name="openmrsWebclientReadTimeout" value="${openmrs.replyTimeoutInMilliseconds}" />
+    </bean>
+
+    <bean id="appointmentVisitLoaction" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
+        <property name="baseURL" value="${openmrs.root.uri}"/>
+    </bean>
 
     <bean id="openmrsLogin" class="org.openmrs.module.appointments.connection.OpenmrsLogin"/>
 
-    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService">
+    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" >
         <property name="openmrsLogin" ref="openmrsLogin"/>
+        <property name="appointmentVisitLocation" ref="appointmentVisitLoaction"/>
     </bean>
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
