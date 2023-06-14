@@ -223,4 +223,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
         return criteria.list();
     }
+
+    @Override
+    public List<Appointment> getDatelessAppointments() {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.isNull("startDateTime"));
+        criteria.add(Restrictions.isNull("endDateTime"));
+        return criteria.list();
+    }
 }

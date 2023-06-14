@@ -60,6 +60,10 @@ public class AppointmentController extends BaseRestController {
     @RequestMapping( method = RequestMethod.POST, value = "search")
     @ResponseBody
     public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
+        if(searchQuery.getIsDatelessAppointments()) {
+            List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments();
+            return appointmentMapper.constructResponse(datelessAppointments);
+        }
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
         if (searchQuery.getStatus() == null) {
             appointment.setStatus(null);
