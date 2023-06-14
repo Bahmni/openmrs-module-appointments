@@ -144,6 +144,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return appointment;
     }
 
+    @Override
+    public List<Appointment> searchDatelessAppointments() {
+        return appointmentDao.getDatelessAppointments();
+    }
+
     private void setupTeleconsultation(Appointment appointment) {
         if (isVirtual(appointment)) {
             appointment.setTeleHealthVideoLink(teleconsultationAppointmentService.generateTeleconsultationLink(appointment.getUuid()));
