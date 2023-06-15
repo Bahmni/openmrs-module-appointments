@@ -158,6 +158,15 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void should_SearchForDatelessAppointments() throws Exception {
+        String content = "{ \"isDatelessAppointments\": true }";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/search", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
     public void shouldCreateAuditEventsWhenDetailsChangesOnEditAppointment() throws Exception {
         String content = "{ \"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
                 "\"appointmentNumber\": \"1\",  " +
