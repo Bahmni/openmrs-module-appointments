@@ -776,4 +776,10 @@ public class AppointmentsServiceImplTest {
 
         appointmentsService.updateAppointmentProviderResponse(providerRequest);
     }
+
+    @Test
+    public void shouldGetDatelessAppointments() {
+        appointmentsService.searchDatelessAppointments();
+        verify(appointmentDao, times(1)).getDatelessAppointments();
+    }
 }

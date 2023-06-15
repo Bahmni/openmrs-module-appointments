@@ -243,6 +243,34 @@ public class AppointmentControllerTest {
     }
 
     @Test
+    public void shouldSearchForDatelessAppointments() throws Exception{
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuid");
+        Patient patient = new Patient();
+        patient.setUuid("somePatientUuid");
+        appointment.setPatient(patient);
+        appointments.add(appointment);
+        AppointmentQuery appointmentQuery = new AppointmentQuery();
+        appointmentQuery.setIsDatelessAppointments(true);
+
+
+        AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
+        appointmentDefaultResponse.setUuid("appointmentUuid1");
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
+        appointmentDefaultResponses.add(appointmentDefaultResponse);
+
+        when(appointmentsService.searchDatelessAppointments()).thenReturn(appointments);
+        when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
+
+        List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
+        AppointmentDefaultResponse appointmentResponse = appointmentResponses.get(0);
+        AppointmentDefaultResponse expectedAppointmentResponse = appointmentDefaultResponses.get(0);
+        assertEquals(expectedAppointmentResponse.getUuid(), appointmentResponse.getUuid());
+    }
+
+    @Test
     public void shouldSaveAnAppointment() throws Exception{
         AppointmentRequest appointmentRequest = new AppointmentRequest();
         appointmentRequest.setPatientUuid("somePatientUuid");
