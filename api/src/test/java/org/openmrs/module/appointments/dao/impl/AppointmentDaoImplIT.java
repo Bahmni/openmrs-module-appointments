@@ -260,4 +260,11 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
     }
+
+    @Test
+    public void shouldReturnDateLessAppointments() {
+        List<Appointment> appointments = appointmentDao.getDatelessAppointments();
+        assertNotNull(appointments);
+        assertEquals(3, appointments.size());
+    }
 }
