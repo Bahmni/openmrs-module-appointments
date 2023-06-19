@@ -31,7 +31,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
-        assertEquals(11, allAppointmentServices.size());
+        assertEquals(13, allAppointmentServices.size());
     }
 
     @Test
@@ -44,12 +44,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(11, allAppointments.size());
+        assertEquals(13, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(12, allAppointments.size());
+        assertEquals(14, allAppointments.size());
     }
 
     @Test
@@ -140,7 +140,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointmentsWhenNoDateRangeIsProvided() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointmentsInDateRange(null, null);
-        assertEquals(11, allAppointmentServices.size());
+        assertEquals(13, allAppointmentServices.size());
     }
 
     @Test
@@ -156,7 +156,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         appointment.setService(allAppointments.get(0).getService());
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
-        assertEquals(1, searchedAppointmentList.size());
+        assertEquals(3, searchedAppointmentList.size());
     }
 
     @Test
@@ -245,7 +245,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(11, appointments.size());
+        assertEquals(13, appointments.size());
     }
 
     @Test
