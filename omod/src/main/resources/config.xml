@@ -14,8 +14,28 @@
 
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
-		<require_module>org.bahmni.module.teleconsultation</require_module>
 	</require_modules>
+
+	<aware_of_modules>
+		<aware_of_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</aware_of_module>
+		<aware_of_module version="${teleconsultation.version}">org.bahmni.module.teleconsultation</aware_of_module>
+	</aware_of_modules>
+
+	<conditional_resources>
+		<conditionalResource>
+			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
+			<modules>
+				<module>
+					<moduleId>org.ict4h.openmrs.openmrs-atomfeed</moduleId>
+					<version>${openmrsAtomfeedVersion}</version>
+				</module>
+				<module>
+					<moduleId>org.bahmni.module.teleconsultation</moduleId>
+					<version>${teleconsultation.version}</version>
+				</module>
+			</modules>
+		</conditionalResource>
+	</conditional_resources>
 
 	<mappingFiles>
 		Speciality.hbm.xml
