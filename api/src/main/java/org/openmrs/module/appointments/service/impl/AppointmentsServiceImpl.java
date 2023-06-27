@@ -213,9 +213,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         } else if (status.trim().equalsIgnoreCase("honoured")) {
             appointments = appointmentDao.getHonouredAppointments(forDate);
         } else if (status.trim().equalsIgnoreCase("cameEarly")) {
-            appointments = appointmentDao.getCameEarlyAppointments(forDate);
-        } else if (status.trim().equalsIgnoreCase("rescheduled")) {
-            appointments = appointmentDao.getRescheduledAppointments(forDate);
+            appointments = appointmentDao.getAllCameEarlyAppointments(forDate);
         } else {
             appointments = appointmentDao.getAllAppointments(forDate, status);
         }
@@ -262,13 +260,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public Appointment getAppointmentByUuid(String uuid) {
         Appointment appointment = appointmentDao.getAppointmentByUuid(uuid);
-        return appointment;
-    }
-
-    @Transactional
-    @Override
-    public Appointment getAppointmentById(Integer id) {
-        Appointment appointment = appointmentDao.getAppointmentById(id);
         return appointment;
     }
 
@@ -413,7 +404,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
         try {
             //cancel the previous appointment
-            // changeStatus(prevAppointment, AppointmentStatus.Cancelled.toString(), new Date());
             changeStatus(prevAppointment, AppointmentStatus.Rescheduled.toString(), new Date());
             createEventInAppointmentAudit(prevAppointment,
                     appointmentServiceHelper.getAppointmentAsJsonString(prevAppointment));

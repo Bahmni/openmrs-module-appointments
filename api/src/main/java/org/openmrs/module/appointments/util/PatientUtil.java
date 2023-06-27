@@ -44,7 +44,6 @@ public class PatientUtil {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            // Log the exception here
         }
 
         return map;

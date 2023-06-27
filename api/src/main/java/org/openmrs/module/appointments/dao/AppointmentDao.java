@@ -19,10 +19,6 @@ public interface AppointmentDao {
 
     List<Appointment> getHonouredAppointments(Date forDate);
 
-    List<Appointment> getCameEarlyAppointments(Date forDate);
-
-    List<Appointment> getRescheduledAppointments(Date forDate);
-
     @Transactional
     void save(Appointment appointment);
 
@@ -35,8 +31,6 @@ public interface AppointmentDao {
     List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList);
 
 	Appointment getAppointmentByUuid(String uuid);
-
-    Appointment getAppointmentById(Integer id);
 
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
 

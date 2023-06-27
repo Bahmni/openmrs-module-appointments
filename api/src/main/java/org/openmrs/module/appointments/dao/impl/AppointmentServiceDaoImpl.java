@@ -11,7 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
+public class AppointmentServiceDaoImpl implements AppointmentServiceDao {
 
     private SessionFactory sessionFactory;
 
