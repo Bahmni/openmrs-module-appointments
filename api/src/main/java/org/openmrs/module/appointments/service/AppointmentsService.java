@@ -27,6 +27,11 @@ public interface AppointmentsService {
     Object sendAppointmentReminderSMS(Appointment appointment);
 
     @Transactional
+    @Authorized({MANAGE_APPOINTMENTS})
+    Object sendAppointmentBookingSMS(Appointment appointment);
+
+
+    @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndSave(Appointment appointment);
 

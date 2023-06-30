@@ -3,6 +3,8 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -91,6 +93,10 @@ public class RecurringAppointmentsController extends BaseRestController {
             if (appointmentsList.isEmpty())
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
+            AdministrationService administrationService = Context.getService(AdministrationService.class);
+            boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
+            if (bookSMS){
+                appointmentsService.sendAppointmentBookingSMS(appointmentRecurringPattern.getAppointments().iterator().next());}
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
         } catch (RuntimeException e) {

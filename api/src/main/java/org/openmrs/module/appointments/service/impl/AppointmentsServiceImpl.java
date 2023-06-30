@@ -3,7 +3,6 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Location;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.APIAuthenticationException;
@@ -125,18 +124,15 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Transactional
     @Override
     public Object sendAppointmentReminderSMS(Appointment appointment) {
-        String givenName = appointment.getPatient().getGivenName();
-        String familyName = appointment.getPatient().getFamilyName();
-        String patientID = appointment.getPatient().getPatientIdentifier().getIdentifier();
-        Date date = appointment.getStartDateTime();
-        String service = appointment.getService().getName();
-        List<AppointmentProvider> appointmentProviderList =new ArrayList<>(appointment.getProviders());
-        List<String> providers=new ArrayList<>();
-        for (AppointmentProvider appointmentProvider: appointmentProviderList) {
-            providers.add(appointmentProvider.getProvider().getName());
-        }
-        Location location=appointment.getLocation();
-        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,location);
+        String message = smsService.getAppointmentReminderMessage(appointment);
+        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
+        return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
+    }
+
+    @Transactional
+    @Override
+    public Object sendAppointmentBookingSMS(Appointment appointment) {
+        String message = smsService.getAppointmentBookingMessage(appointment);
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
         return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
     }

@@ -3,6 +3,8 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -77,6 +79,10 @@ public class AppointmentController extends BaseRestController {
              * appointmentMapper should be fixed and validateAndSave() signature should be changed.
              */
             Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
+            AdministrationService administrationService = Context.getService(AdministrationService.class);
+            boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
+            if (bookSMS){
+            appointmentsService.sendAppointmentBookingSMS(appointment);}
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
