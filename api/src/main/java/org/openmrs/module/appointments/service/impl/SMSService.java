@@ -26,8 +26,8 @@ import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFor
 
 public class SMSService {
 
-    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE = "bahmni.appointmentReminderSMSTemplate";
-    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "bahmni.appointmentReminderSMSTemplateWithoutProvider";
+    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE = "sms.appointmentReminderSMSTemplate";
+    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "sms.appointmentReminderSMSTemplateWithoutProvider";
     private final static String SMS_TIMEZONE = "bahmni.sms.timezone";
     private final static String SMS_DATEFORMAT = "bahmni.sms.dateformat";
     private final static String SMS_URL = "bahmni.sms.url";
