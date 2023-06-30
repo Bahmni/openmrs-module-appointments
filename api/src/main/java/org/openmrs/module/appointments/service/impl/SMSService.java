@@ -25,6 +25,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.openmrs.module.appointments.properties.AppointmentProperties;
 
 import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
 
@@ -168,8 +169,8 @@ public class SMSService {
             ObjectMapper Obj = new ObjectMapper();
             String jsonObject = Obj.writeValueAsString(smsRequest);
             StringEntity params = new StringEntity(jsonObject);
-
-            HttpPost request = new HttpPost(Context.getMessageSourceService().getMessage(SMS_URL, null, new Locale("en")));
+            String smsUrl = StringUtils.isBlank(AppointmentProperties.getProperty("sms.uri")) ? SMS_URL : AppointmentProperties.getProperty("sms.uri");
+            HttpPost request = new HttpPost(Context.getMessageSourceService().getMessage(smsUrl, null, new Locale("en")));
             request.addHeader("content-type", "application/json");
             request.setEntity(params);
             openmrsLogin.getConnection();
