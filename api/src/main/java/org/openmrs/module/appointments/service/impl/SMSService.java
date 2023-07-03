@@ -28,9 +28,6 @@ public class SMSService {
 
     private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE = "sms.appointmentReminderSMSTemplate";
     private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "sms.appointmentReminderSMSTemplateWithoutProvider";
-    private final static String SMS_TIMEZONE = "bahmni.sms.timezone";
-    private final static String SMS_DATEFORMAT = "bahmni.sms.dateformat";
-    private final static String SMS_URL = "bahmni.sms.url";
     private static Logger logger = LogManager.getLogger(SMSService.class);
     private OpenmrsLogin openmrsLogin;
     private AppointmentVisitLocation appointmentVisitLocation;
@@ -46,17 +43,17 @@ public class SMSService {
     public String getAppointmentMessage(String name, String familyName, String id, Date appointmentDate, String service, List<String> providers, Location location) {
         String smsTemplate = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE);
         String smsTemplateNoProvider = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER);
-        String smsTimeZone = Context.getMessageSourceService().getMessage(SMS_TIMEZONE, null, new Locale("en"));
-        String smsDateFormat = Context.getMessageSourceService().getMessage(SMS_DATEFORMAT, null, new Locale("en"));
+        String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.timezone"), null, new Locale("en"));
+        String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.dateformat"), null, new Locale("en"));
         String date =convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
         LocationTag abc = Context.getLocationService().getLocationTagByName("Visit Location");
         List<Location> locations = Context.getLocationService().getLocationsHavingAnyTag(Collections.singletonList(abc));
-        String clinicName = (abc != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
+        String facilityName = (abc != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
         if (location != null) {
-            String cName = appointmentVisitLocation.getClinicName(location.getUuid());
+            String cName = appointmentVisitLocation.getFacilityName(location.getUuid());
             if (StringUtils.isNotEmpty(cName)) {
-                clinicName = cName;
+                facilityName = cName;
             }
         }
         List<Object> arguments = new ArrayList<>();
@@ -65,7 +62,7 @@ public class SMSService {
         arguments.add(date);
         arguments.add(org.springframework.util.StringUtils.collectionToCommaDelimitedString(providers));
         arguments.add(service);
-        arguments.add(clinicName);
+        arguments.add(facilityName);
         arguments.add(helpdeskNumber);
 
         String message;
@@ -87,7 +84,7 @@ public class SMSService {
         return message;
     }
 
-    public Object sendSMS(String phoneNumber, String message) {
+    public String sendSMS(String phoneNumber, String message) {
         try {
             SMSRequest smsRequest = new SMSRequest();
             smsRequest.setPhoneNumber(phoneNumber);
@@ -97,7 +94,7 @@ public class SMSService {
             String jsonObject = Obj.writeValueAsString(smsRequest);
             StringEntity params = new StringEntity(jsonObject);
 
-            HttpPost request = new HttpPost(Context.getMessageSourceService().getMessage(SMS_URL, null, new Locale("en")));
+            HttpPost request = new HttpPost(Context.getAdministrationService().getGlobalProperty("bahmni.sms.url"));
             request.addHeader("content-type", "application/json");
             request.setEntity(params);
             openmrsLogin.getConnection();
@@ -107,7 +104,7 @@ public class SMSService {
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpResponse response = httpClient.execute(request);
             httpClient.close();
-            return response.getStatusLine();
+            return response.getStatusLine().getReasonPhrase();
         } catch (Exception e) {
             logger.error("Exception occured in sending sms ", e);
             throw new RuntimeException("Exception occured in sending sms ", e);

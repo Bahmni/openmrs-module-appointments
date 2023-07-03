@@ -35,10 +35,10 @@ public class AppointmentVisitLocationTest {
     }
 
     @Test
-    public void shouldGetClinicName() throws IOException {
+    public void shouldGetFacilityName() throws IOException {
         String locationUuid = "12345";
 
         BufferedReader reader = mock(BufferedReader.class);
-        String clinicName = appointmentVisitLocation.getClinicName(locationUuid);
+        String clinicName = appointmentVisitLocation.getFacilityName(locationUuid);
     }
 }

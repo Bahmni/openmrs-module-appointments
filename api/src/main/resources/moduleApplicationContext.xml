@@ -97,7 +97,7 @@
         <property name="openmrsWebclientReadTimeout" value="${openmrs.replyTimeoutInMilliseconds}" />
     </bean>
 
-    <bean id="appointmentVisitLoaction" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
+    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
         <property name="baseURL" value="${openmrs.root.uri}"/>
     </bean>
 
@@ -105,7 +105,7 @@
 
     <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" >
         <property name="openmrsLogin" ref="openmrsLogin"/>
-        <property name="appointmentVisitLocation" ref="appointmentVisitLoaction"/>
+        <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
     </bean>
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">

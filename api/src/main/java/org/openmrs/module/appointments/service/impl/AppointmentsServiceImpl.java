@@ -124,7 +124,11 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
     @Transactional
     @Override
-    public Object sendAppointmentReminderSMS(Appointment appointment) {
+    public String sendAppointmentReminderSMS(Appointment appointment) {
+        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
+        if (null==phoneNumber){
+            log.info("Since no mobile number found for the patient. SMS not sent.");
+            return null;}
         String givenName = appointment.getPatient().getGivenName();
         String familyName = appointment.getPatient().getFamilyName();
         String patientID = appointment.getPatient().getPatientIdentifier().getIdentifier();
@@ -137,8 +141,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         }
         Location location=appointment.getLocation();
         String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,location);
-        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
+        return smsService.sendSMS(phoneNumber.getValue(), message);
     }
 
     @Transactional
