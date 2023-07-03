@@ -93,7 +93,7 @@
 	<globalProperty>
 	<property>SchedulerReminderBeforeHours</property>
 	<defaultValue>24</defaultValue>
-	<description>Before how many hours the reminder is to be scheduled for appointment</description>
+	<description>How many hours before the appointment should the reminder SMS be sent</description>
 	</globalProperty>
 
 	<globalProperty>
