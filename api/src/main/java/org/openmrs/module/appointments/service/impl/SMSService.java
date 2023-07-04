@@ -37,8 +37,6 @@ public class SMSService {
     private final static String APPOINTMENT_PROVIDER_TEMPLATE = "sms.providersTemplate";
     private final static String APPOINTMENT_TELECONSULTATION_LINK_TEMPLATE = "sms.teleconsultationLinkTemplate";
     private final static String RECURRING_APPOINTMENT_BOOKING_SMS_TEMPLATE= "sms.recurringAppointmentTemplate";
-    private final static String SMS_TIMEZONE = "bahmni.sms.timezone";
-    private final static String SMS_DATEFORMAT = "bahmni.sms.dateformat";
     private final static String SMS_URL = "bahmni.sms.url";
     private static Logger logger = LogManager.getLogger(SMSService.class);
     private OpenmrsLogin openmrsLogin;
@@ -126,8 +124,8 @@ public class SMSService {
         Date appointmentDate = appointment.getStartDateTime();
         String service = appointment.getService().getName();
         String teleLink=appointment.getTeleHealthVideoLink();
-        String smsTimeZone = Context.getMessageSourceService().getMessage(SMS_TIMEZONE, null, new Locale("en"));
-        String smsDateFormat = Context.getMessageSourceService().getMessage(SMS_DATEFORMAT, null, new Locale("en"));
+        String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.timezone"), null, new Locale("en"));
+        String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.dateformat"), null, new Locale("en"));
         String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
         String facilityName = getFacilityName(appointment);

@@ -289,7 +289,7 @@
         </sql>
     </changeSet>
 
-    <changeSet id="create-appointment-status-change-task-201709121099999" author="Anubhav">
+    <changeSet id="create-appointment-status-change-task-201709121099999" author="Bahmni">
         <preConditions>
             <sqlCheck expectedResult="0">
                 SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Reminder of scheduled appointment";
