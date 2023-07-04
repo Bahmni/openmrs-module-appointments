@@ -121,20 +121,29 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                 .anyMatch(provider -> provider.getProvider().getPerson().
                         equals(Context.getAuthenticatedUser().getPerson()));
     }
+
     @Transactional
     @Override
-    public Object sendAppointmentReminderSMS(Appointment appointment) {
-        String message = smsService.getAppointmentReminderMessage(appointment);
+    public void sendAppointmentReminderSMS(Appointment appointment) {
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
+        if (null == phoneNumber) {
+            log.info("Since no mobile number found for the patient. SMS not sent.");
+            return;
+        }
+        String message = smsService.getAppointmentReminderMessage(appointment);
+        smsService.sendSMS(phoneNumber.getValue(), message);
     }
 
     @Transactional
     @Override
-    public Object sendAppointmentBookingSMS(Appointment appointment) {
-        String message = smsService.getAppointmentBookingMessage(appointment);
+    public void sendAppointmentBookingSMS(Appointment appointment) {
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        return (phoneNumber != null) ? smsService.sendSMS(phoneNumber.getValue(), message) : null;
+        if (null == phoneNumber) {
+            log.info("Since no mobile number found for the patient. SMS not sent.");
+            return;
+        }
+        String message = smsService.getAppointmentBookingMessage(appointment);
+        smsService.sendSMS(phoneNumber.getValue(), message);
     }
 
     @Transactional

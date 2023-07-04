@@ -130,37 +130,37 @@ public class SMSService {
         String smsDateFormat = Context.getMessageSourceService().getMessage(SMS_DATEFORMAT, null, new Locale("en"));
         String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
-        String clinicName = getClinicName(appointment);
+        String facilityName = getFacilityName(appointment);
 
         arguments.put("patientname", givenName + " " + familyName);
         arguments.put("identifier", identifier);
         arguments.put("date", date);
         arguments.put("service", service);
-        arguments.put("clinicname", clinicName);
+        arguments.put("facilityname", facilityName);
         arguments.put("teleconsultationlink", teleLink);
         arguments.put("helpdesknumber", helpdeskNumber);
 
         return arguments;
     }
 
-    public String getClinicName(Appointment appointment) {
+    public String getFacilityName(Appointment appointment) {
         Location location = appointment.getLocation();
         LocationTag visitLocationTag = Context.getLocationService().getLocationTagByName("Visit Location");
         List<Location> locations = Context.getLocationService().getLocationsHavingAnyTag(Collections.singletonList(visitLocationTag));
-        String clinicName = (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
+        String facilityName = (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
 
         if (location != null) {
-            String clinicNameFromVisitLocation = appointmentVisitLocation.getClinicName(location.getUuid());
+            String facilityNameFromVisitLocation = appointmentVisitLocation.getFacilityName(location.getUuid());
 
-            if (StringUtils.isNotEmpty(clinicNameFromVisitLocation)) {
-                clinicName = clinicNameFromVisitLocation;
+            if (StringUtils.isNotEmpty(facilityNameFromVisitLocation)) {
+                facilityName = facilityNameFromVisitLocation;
             }
         }
-        return clinicName;
+        return facilityName;
     }
 
 
-    public Object sendSMS(String phoneNumber, String message) {
+    public String sendSMS(String phoneNumber, String message) {
         try {
             SMSRequest smsRequest = new SMSRequest();
             smsRequest.setPhoneNumber(phoneNumber);
@@ -180,7 +180,7 @@ public class SMSService {
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpResponse response = httpClient.execute(request);
             httpClient.close();
-            return response.getStatusLine();
+            return response.getStatusLine().getReasonPhrase();
         } catch (Exception e) {
             logger.error("Exception occured in sending sms ", e);
             throw new RuntimeException("Exception occured in sending sms ", e);

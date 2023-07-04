@@ -24,11 +24,11 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_APPOINTMENTS})
-    Object sendAppointmentReminderSMS(Appointment appointment);
+    void sendAppointmentReminderSMS(Appointment appointment);
 
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS})
-    Object sendAppointmentBookingSMS(Appointment appointment);
+    void sendAppointmentBookingSMS(Appointment appointment);
 
 
     @Transactional

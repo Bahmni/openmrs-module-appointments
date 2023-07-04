@@ -48,7 +48,7 @@ public class AppointmentVisitLocation {
         this.openmrsBaseurl = baseURL;
     }
 
-    public String getClinicName(String locationUuid) {
+    public String getFacilityName(String locationUuid) {
         String baseUrl = openmrsBaseurl + "/bahmnicore/facilityLocation/";
         String visitLocationName = sendGetRequest(baseUrl + locationUuid);
         return visitLocationName;
