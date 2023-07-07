@@ -26,8 +26,8 @@ import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFor
 
 public class SMSService {
 
-    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE = "sms.appointmentReminderSMSTemplate";
-    private final static String APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "sms.appointmentReminderSMSTemplateWithoutProvider";
+    private final static String APPOINTMENT_REMINDER_SMS_TEMPLATE = "sms.appointmentReminderSMSTemplate";
+    private final static String APPOINTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER = "sms.appointmentReminderSMSTemplateWithoutProvider";
     private static Logger logger = LogManager.getLogger(SMSService.class);
     private OpenmrsLogin openmrsLogin;
     private AppointmentVisitLocation appointmentVisitLocation;
@@ -41,8 +41,8 @@ public class SMSService {
     }
 
     public String getAppointmentMessage(String name, String familyName, String id, Date appointmentDate, String service, List<String> providers, Location location) {
-        String smsTemplate = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE);
-        String smsTemplateNoProvider = Context.getAdministrationService().getGlobalProperty(APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER);
+        String smsTemplate = Context.getAdministrationService().getGlobalProperty(APPOINTMENT_REMINDER_SMS_TEMPLATE);
+        String smsTemplateNoProvider = Context.getAdministrationService().getGlobalProperty(APPOINTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER);
         String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.timezone"), null, new Locale("en"));
         String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.dateformat"), null, new Locale("en"));
         String date =convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
@@ -69,9 +69,9 @@ public class SMSService {
         if (StringUtils.isBlank(smsTemplate)) {
             if (providers.isEmpty()) {
                 arguments.remove(3);
-                message = Context.getMessageSourceService().getMessage(APPOINMTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER, arguments.toArray(), new Locale("en")).replace("\\n", System.lineSeparator());
+                message = Context.getMessageSourceService().getMessage(APPOINTMENT_REMINDER_SMS_TEMPLATE_NO_PROVIDER, arguments.toArray(), new Locale("en")).replace("\\n", System.lineSeparator());
             } else {
-                message = Context.getMessageSourceService().getMessage(APPOINMTMENT_REMINDER_SMS_TEMPLATE, arguments.toArray(), new Locale("en")).replace("\\n", System.lineSeparator());
+                message = Context.getMessageSourceService().getMessage(APPOINTMENT_REMINDER_SMS_TEMPLATE, arguments.toArray(), new Locale("en")).replace("\\n", System.lineSeparator());
             }
         } else {
             if (providers.isEmpty()) {
