@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import org.hibernate.Criteria;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -14,11 +15,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentDao appointmentDao;
+
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
@@ -259,5 +263,30 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(null);
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
+    }
+    @Test
+    public void testGetAllAppointments() {
+        Date forDate = new Date();
+        List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
+        assertNotNull(appointments);
+        assertEquals(0,appointments.size());
+    }
+
+
+    @Test
+    public void testGetAllAppointmentsReminder() {
+        String hours = "24";
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testSearch() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        appointmentSearchRequest.setStartDate(new Date());
+        appointmentSearchRequest.setEndDate(new Date());
+        List<Appointment> result = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(0, result.size());
     }
 }
