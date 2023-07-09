@@ -34,6 +34,12 @@
 
 <!--    <ref bean="defaultAppointmentMailSender"/>-->
 
+    <bean id="openmrsProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location" value="classpath:appointment.properties" />
+    </bean>
+
+
+
     <bean id="patientAppointmentNotifierService" class="org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService">
         <property name="eventNotifiers">
             <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
@@ -83,7 +89,24 @@
             <ref bean="patientAppointmentNotifierService"/>
         </property>
     </bean>
+    <bean id="connectionDetails" class="org.openmrs.module.appointments.connection.ConnectionDetails" depends-on="openmrsProperties">
+        <property name="authUri" value="${openmrs.auth.uri}" />
+        <property name="openmrsUser" value="${openmrs.user}" />
+        <property name="openmrsPassword" value="${openmrs.password}"/>
+        <property name="openmrsWebclientConnectTimeout" value="${openmrs.connectionTimeoutInMilliseconds}" />
+        <property name="openmrsWebclientReadTimeout" value="${openmrs.replyTimeoutInMilliseconds}" />
+    </bean>
 
+    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
+        <property name="baseURL" value="${openmrs.root.uri}"/>
+    </bean>
+
+    <bean id="openmrsLogin" class="org.openmrs.module.appointments.connection.OpenmrsLogin"/>
+
+    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" >
+        <property name="openmrsLogin" ref="openmrsLogin"/>
+        <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
+    </bean>
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
@@ -125,6 +148,9 @@
                 </property>
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
+                </property>
+                <property name="smsService">
+                        <ref bean="smsService"/>
                 </property>
             </bean>
         </property>
@@ -265,5 +291,4 @@
             <ref bean="sessionFactory"/>
         </property>
     </bean>
-
 </beans>

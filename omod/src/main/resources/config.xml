@@ -90,6 +90,11 @@
 		<defaultValue>false</defaultValue>
 		<description>Scheduler marks scheduled appointments as missed when it is turned on</description>
 	</globalProperty>
+	<globalProperty>
+	<property>SchedulerReminderBeforeHours</property>
+	<defaultValue>24</defaultValue>
+	<description>How many hours before the appointment should the reminder SMS be sent</description>
+	</globalProperty>
 
 	<globalProperty>
 		<property>bahmni.appointment.teleConsultation.patientEmailNotificationSubject</property>
@@ -138,4 +143,3 @@
 	</globalProperty>
 
 </module>
-

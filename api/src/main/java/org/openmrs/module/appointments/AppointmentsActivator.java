@@ -17,6 +17,7 @@ package org.openmrs.module.appointments;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.BaseModuleActivator;
+import org.openmrs.module.appointments.properties.AppointmentProperties;
 
 /**
  * This class contains the logic that is run every time this module is either started or shutdown
@@ -24,12 +25,19 @@ import org.openmrs.module.BaseModuleActivator;
 public class AppointmentsActivator extends BaseModuleActivator {
 	
 	private Log log = LogFactory.getLog(this.getClass());
-	
-	public void startup() {
+
+	@Override
+	public void willStart(){
+		AppointmentProperties.load();
+	}
+
+	@Override
+	public void started() {
 		log.info("Starting Appointments Module");
 	}
-	
-	public void shutdown() {
+
+	@Override
+	public void stopped() {
 		log.info("Shutting down Appointments Module");
 	}
 	
