@@ -266,23 +266,58 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertEquals(0, appointments.size());
     }
     @Test
-    public void testGetAllAppointments() {
+    public void shouldReturnEmptyListWhenThereAreNoAppointmentsForGivenDate() {
         Date forDate = new Date();
         List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
         assertNotNull(appointments);
         assertEquals(0,appointments.size());
     }
 
-
     @Test
-    public void testGetAllAppointmentsReminder() {
+    public void shouldReturnEmptyListWhenThereAreNoAppointmentReminders() {
         String hours = "24";
         List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
         assertEquals(0, result.size());
     }
 
     @Test
-    public void testGetAllAppointmentsReminder_MultipleAppointments() {
+    public void shouldReturnAllAppointmentRemindersForGivenHours() {
+        String hours = "24";
+
+        long currentTimeMillisAftertwentyFourHrs = System.currentTimeMillis()+ TimeUnit.HOURS.toMillis(24);
+        long appointmentStartMillis = currentTimeMillisAftertwentyFourHrs + TimeUnit.MINUTES.toMillis(30);
+
+        List<Appointment> allAppointments=appointmentDao.getAllAppointments(null);
+        Appointment apt = new Appointment();
+        apt.setPatient(allAppointments.get(0).getPatient());
+        apt.setStartDateTime(new Date(appointmentStartMillis));
+        apt.setStatus(AppointmentStatus.Scheduled);
+        appointmentDao.save(apt);
+
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenTheAppointmentScheduledIsCancelled(){
+        String hours = "24";
+
+        long currentTimeMillisAftertwentyFourHrs = System.currentTimeMillis()+ TimeUnit.HOURS.toMillis(24);
+        long appointmentStartMillis = currentTimeMillisAftertwentyFourHrs + TimeUnit.MINUTES.toMillis(30);
+
+        List<Appointment> allAppointments=appointmentDao.getAllAppointments(null);
+        Appointment apt = new Appointment();
+        apt.setPatient(allAppointments.get(0).getPatient());
+        apt.setStartDateTime(new Date(appointmentStartMillis));
+        apt.setStatus(AppointmentStatus.Cancelled);
+        appointmentDao.save(apt);
+
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldReturnAllScheduledAppointmentsFromGivenNumberOfAppointments(){
         String hours = "24";
 
         long currentTimeMillisAftertwentyFourHrs = System.currentTimeMillis()+ TimeUnit.HOURS.toMillis(24);
