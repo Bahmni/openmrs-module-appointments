@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
@@ -281,6 +282,40 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void testGetAllAppointmentsReminder_MultipleAppointments() {
+        String hours = "24";
+
+        long currentTimeMillisAftertwentyFourHrs = System.currentTimeMillis()+ TimeUnit.HOURS.toMillis(24);
+        long appointment1StartMillis = currentTimeMillisAftertwentyFourHrs + TimeUnit.MINUTES.toMillis(30);
+        long appointment2StartMillis = currentTimeMillisAftertwentyFourHrs +TimeUnit.MINUTES.toMillis(38);
+        long appointment3StartMillis = currentTimeMillisAftertwentyFourHrs + TimeUnit.MINUTES.toMillis(40);
+
+        List<Appointment> allAppointments=appointmentDao.getAllAppointments(null);
+        Appointment apt = new Appointment();
+        apt.setPatient(allAppointments.get(0).getPatient());
+        apt.setStartDateTime(new Date(appointment1StartMillis));
+        apt.setStatus(AppointmentStatus.Scheduled);
+        appointmentDao.save(apt);
+
+        Appointment apt2 = new Appointment();
+        apt2.setPatient(allAppointments.get(1).getPatient());
+        apt2.setStartDateTime(new Date(appointment2StartMillis));
+        apt2.setStatus(AppointmentStatus.Cancelled);
+        appointmentDao.save(apt2);
+
+        Appointment apt3 = new Appointment();
+        apt3.setPatient(allAppointments.get(2).getPatient());
+        apt3.setStartDateTime(new Date(appointment3StartMillis));
+        apt3.setStatus(AppointmentStatus.Scheduled);
+        appointmentDao.save(apt3);
+
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertEquals(2, result.size());
+    }
+
+
+
+    @Test
     public void testSearch() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         appointmentSearchRequest.setStartDate(new Date());
@@ -288,5 +323,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> result = appointmentDao.search(appointmentSearchRequest);
 
         assertEquals(0, result.size());
+        AppointmentSearchRequest appointmentSearchRequestVaild = new AppointmentSearchRequest();
+        List<Appointment> allAppointments=appointmentDao.getAllAppointments(null);
+
+        appointmentSearchRequestVaild.setStartDate(allAppointments.get(0).getStartDateTime());
+        appointmentSearchRequestVaild.setEndDate(allAppointments.get(0).getEndDateTime());
+       List<Appointment> validResult= appointmentDao.search(appointmentSearchRequestVaild);
+        assertEquals(11, validResult.size());
     }
 }
