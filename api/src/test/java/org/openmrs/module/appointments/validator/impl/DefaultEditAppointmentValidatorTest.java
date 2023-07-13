@@ -8,7 +8,6 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 
 import java.util.ArrayList;
