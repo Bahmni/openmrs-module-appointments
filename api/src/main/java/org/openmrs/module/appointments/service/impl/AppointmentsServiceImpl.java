@@ -25,6 +25,7 @@ import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -122,7 +123,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                         equals(Context.getAuthenticatedUser().getPerson()));
     }
 
-    @Transactional
     @Override
     public void sendAppointmentReminderSMS(Appointment appointment) {
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
@@ -134,7 +134,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         smsService.sendSMS(phoneNumber.getValue(), message);
     }
 
-    @Transactional
     @Override
     public void sendAppointmentBookingSMS(Appointment appointment) {
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");

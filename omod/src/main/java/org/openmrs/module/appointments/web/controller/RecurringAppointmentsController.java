@@ -93,10 +93,6 @@ public class RecurringAppointmentsController extends BaseRestController {
             if (appointmentsList.isEmpty())
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern);
-            AdministrationService administrationService = Context.getService(AdministrationService.class);
-            boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
-            if (bookSMS){
-                appointmentsService.sendAppointmentBookingSMS(appointmentRecurringPattern.getAppointments().iterator().next());}
             return new ResponseEntity<>(recurringAppointmentMapper.constructResponse(
                     new ArrayList<>(appointmentRecurringPattern.getAppointments())), HttpStatus.OK);
         } catch (RuntimeException e) {

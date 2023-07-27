@@ -9,6 +9,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
@@ -22,12 +23,11 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.VIEW_
 
 public interface AppointmentsService {
 
-    @Transactional
+
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_APPOINTMENTS})
     void sendAppointmentReminderSMS(Appointment appointment);
 
-    @Transactional
-    @Authorized({MANAGE_APPOINTMENTS})
+    @Authorized({MANAGE_APPOINTMENTS, MANAGE_APPOINTMENTS})
     void sendAppointmentBookingSMS(Appointment appointment);
 
 

@@ -122,10 +122,8 @@
     </bean>
 
     <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" lazy-init="true" depends-on="openmrsProperties"/>
-    <bean id="openmrsLogin" class="org.openmrs.module.appointments.connection.OpenmrsLogin"/>
 
     <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" lazy-init="true">
-        <property name="openmrsLogin" ref="openmrsLogin"/>
         <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
     </bean>
 

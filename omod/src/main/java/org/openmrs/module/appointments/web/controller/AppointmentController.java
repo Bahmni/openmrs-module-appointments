@@ -22,6 +22,7 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestControlle
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,7 @@ public class AppointmentController extends BaseRestController {
         return appointmentMapper.constructResponse(appointments);
     }
 
+
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest){
@@ -79,16 +81,24 @@ public class AppointmentController extends BaseRestController {
              * appointmentMapper should be fixed and validateAndSave() signature should be changed.
              */
             Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
-            AdministrationService administrationService = Context.getService(AdministrationService.class);
-            boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
-            if (bookSMS){
-            appointmentsService.sendAppointmentBookingSMS(appointment);}
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         } catch (Exception e) {
             log.error("Runtime error while trying to create new appointment", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+    @RequestMapping( method = RequestMethod.POST, value = "sendAppointmentBookingSMS/{appointmentUuid}")
+    @ResponseBody
+    public void sendSmsForBookingAppointment(@PathVariable("appointmentUuid")String appointmentUuid) {
+        AdministrationService administrationService = Context.getService(AdministrationService.class);
+        boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
+        if (bookSMS){
+            Appointment appointment=appointmentsService.getAppointmentByUuid(appointmentUuid);
+            appointmentsService.sendAppointmentBookingSMS(appointment);}
+        else
+            log.info("SMS not sent because SMS property is not enabled from configuration");
+    }
+
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody

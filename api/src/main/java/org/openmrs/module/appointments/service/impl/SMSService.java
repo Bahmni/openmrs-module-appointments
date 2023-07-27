@@ -10,12 +10,10 @@ import org.apache.http.impl.client.HttpClients;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import org.bahmni.webclients.ClientCookies;
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.connection.OpenmrsLogin;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.SMSRequest;
@@ -39,12 +37,9 @@ public class SMSService {
     private final static String RECURRING_APPOINTMENT_BOOKING_SMS_TEMPLATE= "sms.recurringAppointmentTemplate";
     private final static String SMS_URL = "bahmni.sms.url";
     private static Logger logger = LogManager.getLogger(SMSService.class);
-    private OpenmrsLogin openmrsLogin;
+
     private AppointmentVisitLocation appointmentVisitLocation;
 
-    public void setOpenmrsLogin(OpenmrsLogin openmrsLogin) {
-        this.openmrsLogin = openmrsLogin;
-    }
 
     public void setAppointmentVisitLocation(AppointmentVisitLocation appointmentVisitLocation) {
         this.appointmentVisitLocation = appointmentVisitLocation;
@@ -163,18 +158,14 @@ public class SMSService {
             SMSRequest smsRequest = new SMSRequest();
             smsRequest.setPhoneNumber(phoneNumber);
             smsRequest.setMessage(message);
-
             ObjectMapper Obj = new ObjectMapper();
             String jsonObject = Obj.writeValueAsString(smsRequest);
             StringEntity params = new StringEntity(jsonObject);
             String smsUrl = StringUtils.isBlank(AppointmentProperties.getProperty("sms.uri")) ? SMS_URL : AppointmentProperties.getProperty("sms.uri");
             HttpPost request = new HttpPost(Context.getMessageSourceService().getMessage(smsUrl, null, new Locale("en")));
             request.addHeader("content-type", "application/json");
+            request.addHeader("Authorization", "Bearer " +AppointmentProperties.getProperty("sms-service.token"));
             request.setEntity(params);
-            openmrsLogin.getConnection();
-            ClientCookies clientCookies = openmrsLogin.getCookies();
-            request.setHeader("Cookie", "reporting_session=" + clientCookies.entrySet().iterator().next().getValue());
-
             CloseableHttpClient httpClient = HttpClients.createDefault();
             HttpResponse response = httpClient.execute(request);
             httpClient.close();
