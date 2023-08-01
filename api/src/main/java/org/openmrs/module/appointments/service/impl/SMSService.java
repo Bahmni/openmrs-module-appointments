@@ -18,7 +18,13 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.SMSRequest;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -167,6 +173,7 @@ public class SMSService {
             request.addHeader("Authorization", "Bearer " +AppointmentProperties.getProperty("sms-service.token"));
             request.setEntity(params);
             CloseableHttpClient httpClient = HttpClients.createDefault();
+            Context.getUserContext().hasPrivilege("");
             HttpResponse response = httpClient.execute(request);
             httpClient.close();
             return response.getStatusLine().getReasonPhrase();
