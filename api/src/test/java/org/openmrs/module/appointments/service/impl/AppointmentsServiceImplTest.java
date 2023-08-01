@@ -10,6 +10,7 @@ import org.openmrs.*;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
@@ -123,7 +124,8 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
-
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -212,6 +214,8 @@ public class AppointmentsServiceImplTest {
         appointment.setStartDateTime(new Date());
         appointment.setEndDateTime(new Date());
         appointment.setProviders( new HashSet<>());
+        when(Context.getUserContext()).thenReturn(userContext);
+        when(userContext.hasPrivilege("Send Appointment Reminder SMS")).thenReturn(true);
         appointmentsService.sendAppointmentReminderSMS(appointment);
     }
 
