@@ -25,7 +25,6 @@ import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -132,7 +131,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             return;
         }
         String message = smsService.getAppointmentReminderMessage(appointment);
-        smsService.sendSMS(phoneNumber.getValue(), message);
+        log.info("SMS response: "+smsService.sendSMS(phoneNumber.getValue(), message));
     }
         else
             log.info("SMS not sent because current user does not have the required privileges");

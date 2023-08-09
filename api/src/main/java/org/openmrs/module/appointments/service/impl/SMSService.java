@@ -18,6 +18,9 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.SMSRequest;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -158,28 +161,35 @@ public class SMSService {
         return facilityName;
     }
 
-
     public String sendSMS(String phoneNumber, String message) {
         try {
             SMSRequest smsRequest = new SMSRequest();
             smsRequest.setPhoneNumber(phoneNumber);
             smsRequest.setMessage(message);
-            ObjectMapper Obj = new ObjectMapper();
-            String jsonObject = Obj.writeValueAsString(smsRequest);
+            ObjectMapper objMapper = new ObjectMapper();
+            String jsonObject = objMapper.writeValueAsString(smsRequest);
             StringEntity params = new StringEntity(jsonObject);
+
+
             String smsUrl = StringUtils.isBlank(AppointmentProperties.getProperty("sms.uri")) ? SMS_URL : AppointmentProperties.getProperty("sms.uri");
             HttpPost request = new HttpPost(Context.getMessageSourceService().getMessage(smsUrl, null, new Locale("en")));
             request.addHeader("content-type", "application/json");
-            request.addHeader("Authorization", "Bearer " +AppointmentProperties.getProperty("sms-service.token"));
+            String smsPropertiesPath = AppointmentProperties.getProperty("sms.token.path");
+            BufferedReader bufferedReader;
+            try (FileReader reader = new FileReader(smsPropertiesPath)) {
+                bufferedReader = new BufferedReader(reader);
+                request.addHeader("Authorization", "Bearer " + bufferedReader.readLine());
+            } catch (IOException e) {
+                throw new RuntimeException("Error loading SMS properties file.", e);
+            }
             request.setEntity(params);
             CloseableHttpClient httpClient = HttpClients.createDefault();
-            Context.getUserContext().hasPrivilege("");
             HttpResponse response = httpClient.execute(request);
             httpClient.close();
             return response.getStatusLine().getReasonPhrase();
         } catch (Exception e) {
-            logger.error("Exception occured in sending sms ", e);
-            throw new RuntimeException("Exception occured in sending sms ", e);
+            logger.error("Exception occurred in sending SMS", e);
+            throw new RuntimeException("Exception occurred in sending SMS", e);
         }
     }
 }
