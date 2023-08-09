@@ -149,8 +149,7 @@
 
 	<globalProperty>
 		<property>sms.appointmentReminderSMSTemplate</property>
-		<defaultValue>This is a reminder for upcoming Appointment for {patientName}:{identifier}\non Date:{date} for {service}
-			at {facilityname}.
+		<defaultValue>This is a reminder for upcoming Appointment for {patientName}:{identifier}\non Date:{date} for {service} at {facilityname}.
 		</defaultValue>
 		<description>Global property of message to send as appointment reminder</description>
 	</globalProperty>
@@ -175,16 +174,14 @@
 
 	<globalProperty>
 		<property>sms.teleconsultationLinkTemplate</property>
-		<defaultValue>As you have chosen to book a teleconsultation-appointment click on the link {teleconsultationLink} on
-			{date} to join the consultation.
+		<defaultValue>As you have chosen to book a teleconsultation-appointment click on the link {teleconsultationLink} on {date} to join the consultation.
 		</defaultValue>
 		<description>Global property to be used to fetch teleconsultation template</description>
 	</globalProperty>
 
 	<globalProperty>
 		<property>sms.recurringAppointmentTemplate</property>
-		<defaultValue>A recurring appointment for {patientName}, {identifier} for {service} is booked for every
-			{recurringPeriod} {recurringType} at {facilityname}. Your next appointment is at {date}.
+		<defaultValue>A recurring appointment for {patientName}, {identifier} for {service} is booked for every {recurringPeriod} {recurringType} at {facilityname}. Your next appointment is at {date}.
 		</defaultValue>
 		<description>Global property for appointment recurring template</description>
 	</globalProperty>

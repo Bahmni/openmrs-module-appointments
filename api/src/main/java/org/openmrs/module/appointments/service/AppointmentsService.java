@@ -25,7 +25,7 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.APPOI
 public interface AppointmentsService {
 
 
-    @Authorized({MANAGE_APPOINTMENTS, VIEW_APPOINTMENTS,APPOINTMENT_REMINDER_SMS })
+    @Authorized({MANAGE_APPOINTMENTS, VIEW_APPOINTMENTS })
     void sendAppointmentReminderSMS(Appointment appointment);
 
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_APPOINTMENTS,APPOINTMENT_BOOKING_SMS})

@@ -125,14 +125,15 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public void sendAppointmentReminderSMS(Appointment appointment) {
-        if (Context.getUserContext().hasPrivilege("Send Appointment Reminder SMS")){
+        if (appointment.getCreator().hasPrivilege("Send Appointment Reminder SMS")){
         PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
         if (null == phoneNumber) {
             log.info("Since no mobile number found for the patient. SMS not sent.");
             return;
         }
         String message = smsService.getAppointmentReminderMessage(appointment);
-        smsService.sendSMS(phoneNumber.getValue(), message);}
+        smsService.sendSMS(phoneNumber.getValue(), message);
+    }
         else
             log.info("SMS not sent because current user does not have the required privileges");
     }
