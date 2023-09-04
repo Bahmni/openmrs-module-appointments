@@ -11,13 +11,13 @@ The output is the OMOD file:
 
 # Setup instructions
 
-This module is incompatiable with the default openmrs-appointment-scheduling module, please ensure you remove it either from the admin-page or running this command below from where your modules are located in tomcat directory i.e `/var/lib/OpenMRS/modules` on linux system
+This module is incompatiable with the openmrs-appointment-scheduling module, please ensure you remove it either from the admin-page or running this command below from where your modules are located in tomcat directory i.e `/var/lib/OpenMRS/modules` on linux system
 
 ```
 sudo rm appointmentscheduling-1.13.0.omod
 ```
 
-If you get database error while running the module, remove this tables below. by running the following sql statements.
+In order to avoid conflicting tables in the database, please drop the tables below. by running the following sql statements.
 
 ```
 set foreign_key_checks=0;
@@ -39,13 +39,13 @@ set foreign_key_checks=1;
 
 The appointment scheduling module aims at supporting 3.x users in creating and tracking patient appointments in order to do proper planning and follow up for the services that are being offered in a clinical set-up.
 
-It will also support some other actions; Edit, Cancel and Synchronize appointments.
+It will also support some other actions; Edit, Cancel and Synchronization of appointments.
 
 # **Where to find it**
 
-The widget will be available on the left nav home page and it will be named **Clinical Appointments**.
+The widget will be available on the left nav home page, and it will be named **Clinical Appointments**.
 
-# **Appointments module schema**
+# **Appointments module tables**
 
 Below is a diagram to show a schema of the appointments scheduling module.
 
