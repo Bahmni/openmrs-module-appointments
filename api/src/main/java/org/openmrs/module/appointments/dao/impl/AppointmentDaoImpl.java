@@ -84,6 +84,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
          */
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Appointment.class);
+        // Add a check for date_honored being null
+        criteria.add(Restrictions.isNull("dateHonored"));
         Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
         criteria.add(Restrictions.ge("startDateTime", forDate));
         criteria.add(Restrictions.lt("startDateTime", maxDate));
@@ -110,6 +112,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
          */
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Appointment.class);
+        // Add a check for date_honored being null
+        criteria.add(Restrictions.isNull("dateHonored"));
         Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
         criteria.add(Restrictions.ge("startDateTime", forDate));
         criteria.add(Restrictions.lt("startDateTime", maxDate));
@@ -136,6 +140,9 @@ public class AppointmentDaoImpl implements AppointmentDao {
          */
         Session session = sessionFactory.getCurrentSession();
         Criteria criteria = session.createCriteria(Appointment.class);
+        // Add a check for date_honored not being null
+        criteria.add(Restrictions.isNotNull("dateHonored"));
+
         Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
         criteria.add(Restrictions.ge("startDateTime", forDate));
         criteria.add(Restrictions.lt("startDateTime", maxDate));
