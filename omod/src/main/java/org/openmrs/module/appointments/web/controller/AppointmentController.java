@@ -87,17 +87,6 @@ public class AppointmentController extends BaseRestController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
-    @RequestMapping( method = RequestMethod.POST, value = "sendAppointmentBookingSMS/{appointmentUuid}")
-    @ResponseBody
-    public void sendSmsForBookingAppointment(@PathVariable("appointmentUuid")String appointmentUuid) {
-        AdministrationService administrationService = Context.getService(AdministrationService.class);
-        boolean bookSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert").getPropertyValue());
-        if (bookSMS){
-            Appointment appointment=appointmentsService.getAppointmentByUuid(appointmentUuid);
-            appointmentsService.sendAppointmentBookingSMS(appointment);}
-        else
-            log.info("SMS not sent because SMS property is not enabled from configuration");
-    }
 
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")

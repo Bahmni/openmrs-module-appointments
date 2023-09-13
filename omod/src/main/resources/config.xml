@@ -90,11 +90,6 @@
 		<defaultValue>false</defaultValue>
 		<description>Scheduler marks scheduled appointments as missed when it is turned on</description>
 	</globalProperty>
-	<globalProperty>
-	<property>SchedulerReminderBeforeHours</property>
-	<defaultValue>24</defaultValue>
-	<description>How many hours before the appointment should the reminder SMS be sent</description>
-	</globalProperty>
 
 	<globalProperty>
 		<property>bahmni.appointment.teleConsultation.patientEmailNotificationSubject</property>
@@ -140,70 +135,6 @@
 		<property>bahmni.adhoc.teleConsultation.id</property>
 		<defaultValue>Patient Identifier</defaultValue>
 		<description>Identifier type of patient to generate AdhocTeleconsultation link eg: 'Patient Identifier' or 'National ID' et</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.enableAppointmentBookingSMSAlert</property>
-		<defaultValue>false</defaultValue>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.appointmentReminderSMSTemplate</property>
-		<defaultValue>This is a reminder for upcoming Appointment for {patientName}:{identifier}\non Date:{date} for {service} at {facilityname}.
-		</defaultValue>
-		<description>Global property of message to send as appointment reminder</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.helpdeskTemplate</property>
-		<defaultValue>For any queries call us on {helpdeskNumber}.</defaultValue>
-		<description>Global property to be used to fetch helpdesk template</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.providersTemplate</property>
-		<defaultValue>Your appointment is booked with {providerName}.</defaultValue>
-		<description>Global property to be used to fetch providers template</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.appointmentBookingSMSTemplate</property>
-		<defaultValue>Appointment for {patientName}, {identifier} on {date} for {service} is booked at {facilityname}.</defaultValue>
-		<description>Global property of message to send when appointment booking is done</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.teleconsultationLinkTemplate</property>
-		<defaultValue>As you have chosen to book a teleconsultation-appointment click on the link {teleconsultationLink} on {date} to join the consultation.
-		</defaultValue>
-		<description>Global property to be used to fetch teleconsultation template</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.recurringAppointmentTemplate</property>
-		<defaultValue>A recurring appointment for {patientName}, {identifier} for {service} is booked for every {recurringPeriod} {recurringType} at {facilityname}. Your next appointment is at {date}.
-		</defaultValue>
-		<description>Global property for appointment recurring template</description>
-	</globalProperty>
-
-	<globalProperty>
-		<property>sms.enableAppointmentReminderSMSAlert</property>
-		<defaultValue>false</defaultValue>
-	</globalProperty>
-
-	<globalProperty>
-		<property>bahmni.sms.timezone</property>
-		<defaultValue>IST</defaultValue>
-	</globalProperty>
-
-	<globalProperty>
-		<property>bahmni.sms.url</property>
-		<defaultValue>http://sms-service:8080/notification/sms</defaultValue>
-	</globalProperty>
-
-	<globalProperty>
-		<property>bahmni.sms.dateformat</property>
-		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
 	</globalProperty>
 
 </module>

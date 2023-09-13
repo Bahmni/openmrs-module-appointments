@@ -120,9 +120,6 @@ public class AppointmentsServiceImplTest {
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     @Mock
-    private SMSService smsService;
-
-    @Mock
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
     @Mock
     private UserContext userContext;
@@ -199,25 +196,6 @@ public class AppointmentsServiceImplTest {
         verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
 
-    @Test
-    public void shouldSendAppointmentReminderSMS() {
-        Appointment appointment = new Appointment();
-        PatientIdentifier identifier = new PatientIdentifier();
-        identifier.setIdentifier("123456789");
-        identifier.setIdentifierType(new PatientIdentifierType());
-        Set<PatientIdentifier> identifiers = new HashSet<>();
-        Patient patient = new Patient();
-        patient.setIdentifiers(identifiers);
-        identifiers.add(identifier);
-        appointment.setPatient(patient);
-        appointment.setService(new AppointmentServiceDefinition());
-        appointment.setStartDateTime(new Date());
-        appointment.setEndDateTime(new Date());
-        appointment.setProviders( new HashSet<>());
-        when(Context.getUserContext()).thenReturn(userContext);
-        when(userContext.hasPrivilege("Send Appointment Reminder SMS")).thenReturn(true);
-        appointmentsService.sendAppointmentReminderSMS(appointment);
-    }
 
     @Test
     public void shouldNotPublishTeleconsultationAppointmentSavedEventIfNotTeleconsultation() {

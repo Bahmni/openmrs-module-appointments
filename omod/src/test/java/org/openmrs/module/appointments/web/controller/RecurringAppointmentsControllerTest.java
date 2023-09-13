@@ -101,7 +101,6 @@ public class RecurringAppointmentsControllerTest {
         PowerMockito.mockStatic(Context.class);
         Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
-        when(administrationService.getGlobalPropertyObject("sms.enableAppointmentBookingSMSAlert")).thenReturn(new GlobalProperty("sms.enableAppointmentBookingSMSAlert", "true"));
     }
 
     @Test

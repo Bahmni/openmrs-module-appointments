@@ -90,12 +90,31 @@
         </property>
     </bean>
 
-    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
-        <property name="baseURL" value="${openmrs.root.uri}"/>
-    </bean>
 
-    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" >
-        <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
+
+    <bean id="appointmentVisitLocation" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocationImpl">
+                <property name="baseURL" value="${openmrs.root.uri}"/>
+            </bean>
+        </property>
+    </bean>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.appointments.service.AppointmentVisitLocation</value>
+                <ref bean="appointmentVisitLocation" />
+            </list>
+        </property>
     </bean>
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
@@ -138,9 +157,6 @@
                 </property>
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
-                </property>
-                <property name="smsService">
-                        <ref bean="smsService"/>
                 </property>
             </bean>
         </property>

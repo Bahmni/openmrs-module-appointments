@@ -6,12 +6,13 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.json.JSONObject;
 import org.openmrs.module.appointments.properties.AppointmentProperties;
+import org.openmrs.module.appointments.service.AppointmentVisitLocation;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
-public class AppointmentVisitLocation {
+public class AppointmentVisitLocationImpl implements AppointmentVisitLocation {
 
     private static String openmrsBaseurl;
 
@@ -37,6 +38,7 @@ public class AppointmentVisitLocation {
         }
     }
 
+    @Override
     public void setBaseURL(String baseURL) {
         if (AppointmentProperties.properties != null) {
             String baseUriProperty = AppointmentProperties.properties.getProperty("openmrs.root.uri");
@@ -48,6 +50,7 @@ public class AppointmentVisitLocation {
         this.openmrsBaseurl = baseURL;
     }
 
+    @Override
     public String getFacilityName(String locationUuid) {
         String baseUrl = openmrsBaseurl + "/bahmnicore/facilityLocation/";
         String visitLocationName = sendGetRequest(baseUrl + locationUuid);

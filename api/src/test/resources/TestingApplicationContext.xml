@@ -121,12 +121,6 @@
         <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
 
-    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" lazy-init="true" depends-on="openmrsProperties"/>
-
-    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" lazy-init="true">
-        <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
-    </bean>
-
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
@@ -170,9 +164,6 @@
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
                 </property>
-<!--                <property name="smsService">-->
-<!--                    <ref bean="smsService"/>-->
-<!--                </property>-->
             </bean>
         </property>
         <property name="preInterceptors">

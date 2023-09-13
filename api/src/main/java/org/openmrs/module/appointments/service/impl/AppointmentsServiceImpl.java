@@ -62,7 +62,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private PatientAppointmentNotifierService appointmentNotifierService;
 
-    private SMSService smsService;
 
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
@@ -101,9 +100,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.appointmentNotifierService = appointmentNotifierService;
     }
 
-    public void setSmsService(SMSService smsService) {
-        this.smsService = smsService;
-    }
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
@@ -120,35 +116,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return providers.stream()
                 .anyMatch(provider -> provider.getProvider().getPerson().
                         equals(Context.getAuthenticatedUser().getPerson()));
-    }
-
-    @Override
-    public void sendAppointmentReminderSMS(Appointment appointment) {
-        if (appointment.getCreator().hasPrivilege("Send Appointment Reminder SMS")){
-        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        if (null == phoneNumber) {
-            log.info("Since no mobile number found for the patient. SMS not sent.");
-            return;
-        }
-        String message = smsService.getAppointmentReminderMessage(appointment);
-        log.info("SMS response: "+smsService.sendSMS(phoneNumber.getValue(), message));
-    }
-        else
-            log.info("SMS not sent because current user does not have the required privileges");
-    }
-
-    @Override
-    public void sendAppointmentBookingSMS(Appointment appointment) {
-        if (Context.getUserContext().hasPrivilege("Send Appointment Booking SMS")){
-        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        if (null == phoneNumber) {
-            log.info("Since no mobile number found for the patient. SMS not sent.");
-            return;
-        }
-        String message = smsService.getAppointmentBookingMessage(appointment);
-        smsService.sendSMS(phoneNumber.getValue(), message);}
-        else
-            log.info("SMS not sent because current user does not have the required privileges");
     }
 
     @Transactional

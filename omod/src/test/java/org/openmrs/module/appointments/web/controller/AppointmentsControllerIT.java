@@ -48,7 +48,6 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
         Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "false");
-        Context.getAdministrationService().setGlobalProperty("sms.enableAppointmentBookingSMSAlert", "true");
     }
 
     @Test

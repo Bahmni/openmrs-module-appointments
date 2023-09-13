@@ -23,7 +23,7 @@ public class AppointmentVisitLocationTest {
     private HttpResponse httpResponse;
 
     @InjectMocks
-    private AppointmentVisitLocation appointmentVisitLocation;
+    private AppointmentVisitLocationImpl appointmentVisitLocation;
 
     @Before
     public void setUp() {
