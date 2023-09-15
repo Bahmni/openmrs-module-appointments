@@ -602,7 +602,6 @@ public class AppointmentMapperTest {
     @Test
     public void shouldReturnEmptyListWhenProvidersListIsEmptyForAnAppointment() throws ParseException {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
-//        when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
         Appointment appointment = createAppointment();
         appointment.setUuid(appointmentUuid);
         when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
