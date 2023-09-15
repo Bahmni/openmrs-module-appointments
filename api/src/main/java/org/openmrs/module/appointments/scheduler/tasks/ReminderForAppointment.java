@@ -15,7 +15,7 @@ public class ReminderForAppointment extends AbstractTask {
     public void execute() {
         AdministrationService administrationService = Context.getService(AdministrationService.class);
 
-        boolean scheduleSMS = Boolean.valueOf(administrationService.getGlobalPropertyObject("sms.enableAppointmentReminderSMSAlert").getPropertyValue());
+        boolean scheduleSMS = Boolean.parseBoolean(administrationService.getGlobalProperty("sms.enableAppointmentReminderSMSAlert", "false"));
 
         if (!scheduleSMS) {
             return;
