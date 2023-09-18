@@ -2,6 +2,11 @@
 
 This repository acts as the back end for the **Bahmni Appointment Scheduling**.
 
+## License
+
+[MPL 2.0 w/ HD](http://openmrs.org/license/) © [OpenMRS Inc](http://www.openmrs.org/).
+
+For further details, refer [OpenMRS License FAQ](https://wiki.openmrs.org/display/RES/OpenMRS+License+FAQ).
 ## Packaging
 
 `mvn clean package`
