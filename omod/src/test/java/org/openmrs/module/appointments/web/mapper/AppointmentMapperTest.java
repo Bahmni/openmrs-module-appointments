@@ -107,7 +107,7 @@ public class AppointmentMapperTest {
     private Provider provider;
     private Location location;
 
-    private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY = "appointments.personAttributeTypes";
+    private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY = "appointments.customPersonAttributeTypes";
 
     private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES = "attributeA,attributeB,attributeC,attributeD";
 
