@@ -289,7 +289,7 @@ public class AppointmentMapper {
 
     private static Map<String, String> mapAttributeTypes(Patient p) {
         String customPersonAttributeTypes = Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes");
-        String[] attributeTypes = customPersonAttributeTypes.split(",");
+        String[] attributeTypes = customPersonAttributeTypes != null ? customPersonAttributeTypes.split(",") : new String[0];
         Map<String, String> customAttributesMap = new HashMap<>();
         for (String attributeType : attributeTypes) {
             if (p.getAttribute(attributeType) != null) {
