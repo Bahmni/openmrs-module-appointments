@@ -640,10 +640,9 @@ public class AppointmentMapperTest {
 
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
 
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided(), false);
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse(),
-                AppointmentProviderResponse.ACCEPTED);
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoidReason(), null);
+        assertFalse(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided());
+        assertEquals( AppointmentProviderResponse.ACCEPTED,((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse());
+      assertNull(((AppointmentProvider) appointment.getProviders().toArray()[0]).getVoidReason());
     }
 
     @Test
