@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -9,13 +10,9 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 
 import java.sql.Time;
+import java.text.SimpleDateFormat;
 import java.time.DayOfWeek;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -27,6 +24,12 @@ public class AppointmentServiceUnavailabilityConflictTest {
     @InjectMocks
     private AppointmentServiceUnavailabilityConflict appointmentServiceUnavailabilityConflict;
 
+
+    @BeforeClass
+    public static void setupLocalToUS(){
+//        the locale should be set to avoid issue with dayOfWeek Translation.
+        Locale.setDefault(Locale.US);
+    }
     @Test
     public void shouldReturnServiceUnavailableDayConflicts() {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
@@ -114,6 +117,10 @@ public class AppointmentServiceUnavailabilityConflictTest {
 
     @Test
     public void shouldNotReturnServiceUnavailableConflictsForMoreSlotsInSingleDay() {
+
+        Date date=getDate(2019, 8, 23, 6, 30, 0);
+        String eeee = new SimpleDateFormat("EEEE").format(date);
+
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         // All Appointments are on Monday
         Appointment appointmentOne = new Appointment();
