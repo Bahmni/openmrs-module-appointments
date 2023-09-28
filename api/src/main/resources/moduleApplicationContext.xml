@@ -92,7 +92,7 @@
 
 
 
-    <bean id="appointmentVisitLocation" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+    <bean id="appointmentArgumentsMapper" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
             <ref bean="transactionManager"/>
         </property>
@@ -103,16 +103,15 @@
             <ref bean="transactionAttributeSource"/>
         </property>
         <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocationImpl">
-                <property name="baseURL" value="${openmrs.root.uri}"/>
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentArgumentsMapperImpl">
             </bean>
         </property>
     </bean>
     <bean parent="serviceContext">
         <property name="moduleService">
             <list>
-                <value>org.openmrs.module.appointments.service.AppointmentVisitLocation</value>
-                <ref bean="appointmentVisitLocation" />
+                <value>org.openmrs.module.appointments.service.AppointmentArgumentsMapper</value>
+                <ref bean="appointmentArgumentsMapper" />
             </list>
         </property>
     </bean>
