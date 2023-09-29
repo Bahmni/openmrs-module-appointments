@@ -1,13 +1,13 @@
-package org.openmrs.module.appointments.advice;
+package org.openmrs.module.appointments.events.advice;
 
 import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.bahmni.module.bahmnicommons.api.model.BahmniEventType;
-import org.bahmni.module.bahmnicommons.api.eventPublisher.BahmniEventPublisher;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.events.publisher.AppointmentEventPublisher;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentEvent;
+import org.openmrs.module.appointments.events.AppointmentBookingEvent;
+import org.openmrs.module.appointments.events.AppointmentEventType;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
 
@@ -16,21 +16,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
-import static org.bahmni.module.bahmnicommons.api.model.BahmniEventType.BAHMNI_APPOINTMENT_CREATED;
-import static org.bahmni.module.bahmnicommons.api.model.BahmniEventType.BAHMNI_APPOINTMENT_UPDATED;
+import static org.openmrs.module.appointments.events.AppointmentEventType.BAHMNI_APPOINTMENT_CREATED;
+import static org.openmrs.module.appointments.events.AppointmentEventType.BAHMNI_APPOINTMENT_UPDATED;
 
-public class AppointentAdviceEvents implements AfterReturningAdvice, MethodBeforeAdvice {
-	
-	private final Logger log = LogManager.getLogger(AppointentAdviceEvents.class);
-	private final BahmniEventPublisher eventPublisher;
+public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBeforeAdvice {
+
+	private final Logger log = LogManager.getLogger(AppointmentEventsAdvice.class);
+	private final AppointmentEventPublisher eventPublisher;
 	private final ThreadLocal<Map<String,Integer>> threadLocal = new ThreadLocal<>();
 	private final String APPOINTMENT_ID_KEY = "appointmentId";
 	private final Set<String> adviceMethodNames = Sets.newHashSet("validateAndSave");
-	private final AppointmentEvent appointmentEvent;
+	private final AppointmentBookingEvent appointmentEvent;
 
-	public AppointentAdviceEvents() {
-		this.eventPublisher = Context.getRegisteredComponent("bahmniEventPublisher", BahmniEventPublisher.class);
-		this.appointmentEvent = Context.getRegisteredComponent("appointmentEvent", AppointmentEvent.class);
+	public AppointmentEventsAdvice() {
+		this.eventPublisher=Context.getRegisteredComponent("appointmentEventPublisher",AppointmentEventPublisher.class);
+		this.appointmentEvent = Context.getRegisteredComponent("appointmentBookingEvent", AppointmentBookingEvent.class);
 	}
 
 	@Override
@@ -38,15 +38,12 @@ public class AppointentAdviceEvents implements AfterReturningAdvice, MethodBefor
 		if (adviceMethodNames.contains(method.getName())) {
 			Map<String, Integer> patientInfo = threadLocal.get();
 			if (patientInfo != null) {
-				BahmniEventType eventType = patientInfo.get(APPOINTMENT_ID_KEY) == null ? BAHMNI_APPOINTMENT_CREATED : BAHMNI_APPOINTMENT_UPDATED;
+				AppointmentEventType eventType = patientInfo.get(APPOINTMENT_ID_KEY) == null ? BAHMNI_APPOINTMENT_CREATED : BAHMNI_APPOINTMENT_UPDATED;
 				threadLocal.remove();
 
 				Appointment appointment = (Appointment) returnValue;
-//
-//				Object representation = ConversionUtil.convertToRepresentation(patient, Representation.FULL);
 				appointmentEvent.createAppointmentEvent(eventType, appointment);
 				eventPublisher.publishEvent(appointmentEvent);
-
 				log.info("Successfully published event with uuid : " + appointment.getUuid());
 			}
 		}

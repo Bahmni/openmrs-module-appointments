@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.bahmni.module.bahmnicommons.api.visitlocation.BahmniVisitLocationService;
+//import org.bahmni.module.bahmnicommons.api.visitlocation.BahmniVisitLocationService;
+
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;
@@ -14,25 +15,27 @@ import org.springframework.util.StringUtils;
 
 import java.util.*;
 
-import static org.bahmni.module.communication.util.DateUtil.convertUTCToGivenFormat;
+import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
 
 public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMapper {
 
     @Autowired
-    BahmniVisitLocationService bahmniVisitLocationService;
+    AppointmentVisitLocation appointmentVisitLocation;
+
     @Override
     public Map<String, String> createArgumentsMapForRecurringAppointmentBooking(Appointment appointment) {
         Map<String, String> arguments = createArgumentsMapForAppointmentBooking(appointment);
-        arguments.put("recurringperiod",appointment.getAppointmentRecurringPattern().getPeriod().toString());
-        arguments.put("recurringtype",appointment.getAppointmentRecurringPattern().getType().toString());
-        arguments.put("recurringdays",appointment.getAppointmentRecurringPattern().getDaysOfWeek().toString());
+        arguments.put("recurringperiod", appointment.getAppointmentRecurringPattern().getPeriod().toString());
+        arguments.put("recurringtype", appointment.getAppointmentRecurringPattern().getType().toString());
+        arguments.put("recurringdays", appointment.getAppointmentRecurringPattern().getDaysOfWeek().toString());
         if (appointment.getAppointmentRecurringPattern().getFrequency() != null)
-            arguments.put("recurringfrequency",appointment.getAppointmentRecurringPattern().getFrequency().toString());
+            arguments.put("recurringfrequency", appointment.getAppointmentRecurringPattern().getFrequency().toString());
 
         return arguments;
     }
-@Override
-    public List<String> getProvidersNameInString(Appointment appointment){
+
+    @Override
+    public List<String> getProvidersNameInString(Appointment appointment) {
         List<AppointmentProvider> appointmentProviderList = new ArrayList<>();
         if (appointment.getProviders() != null) {
             appointmentProviderList.addAll(appointment.getProviders());
@@ -43,6 +46,7 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         }
         return providersName;
     }
+
     @Override
     public Map<String, String> createArgumentsMapForAppointmentBooking(Appointment appointment) {
         Map<String, String> arguments = new HashMap<>();
@@ -51,9 +55,9 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         String familyName = patient.getFamilyName();
         String identifier = patient.getPatientIdentifier().getIdentifier();
         Date appointmentDate = appointment.getStartDateTime();
-        String appointmentKind=appointment.getAppointmentKind().getValue();
+        String appointmentKind = appointment.getAppointmentKind().getValue();
         String service = appointment.getService().getName();
-        String teleLink=appointment.getTeleHealthVideoLink();
+        String teleLink = appointment.getTeleHealthVideoLink();
         String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.timezone"), null, new Locale("en"));
         String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.dateformat"), null, new Locale("en"));
         String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
@@ -67,7 +71,7 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         arguments.put("facilityname", facilityName);
         arguments.put("teleconsultationlink", teleLink);
         arguments.put("helpdesknumber", helpdeskNumber);
-        arguments.put("appointmentKind",appointmentKind);
+        arguments.put("appointmentKind", appointmentKind);
         return arguments;
     }
 
@@ -78,7 +82,7 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         String facilityName = (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
 
         if (location != null) {
-			String facilityNameFromVisitLocation = bahmniVisitLocationService.getParentVisitLocationUuid(location).getName();
+            String facilityNameFromVisitLocation = appointmentVisitLocation.getFacilityName(location.getUuid());
 
 			if (!StringUtils.isEmpty(facilityNameFromVisitLocation)) {
 				facilityName = facilityNameFromVisitLocation;

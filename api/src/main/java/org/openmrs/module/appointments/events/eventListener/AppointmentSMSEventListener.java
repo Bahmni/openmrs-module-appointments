@@ -1,18 +1,18 @@
-package org.openmrs.module.appointments.eventListener;
+package org.openmrs.module.appointments.events.eventListener;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.bahmni.module.bahmnicommons.api.model.BahmniEventType;
 import org.bahmni.module.communication.service.CommunicationService;
 import org.bahmni.module.communication.service.MessageBuilderService;
 import org.openmrs.Patient;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.events.AppointmentEventType;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentEvent;
-import org.openmrs.module.appointments.model.RecurringAppointmentEvent;
+import org.openmrs.module.appointments.events.AppointmentBookingEvent;
+import org.openmrs.module.appointments.events.RecurringAppointmentEvent;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -30,11 +30,11 @@ public class AppointmentSMSEventListener {
 
     @Async("AppointmentsAsyncThreadExecutor")
     @EventListener
-    public void onApplicationEvent(AppointmentEvent event) {
+    public void onApplicationEvent(AppointmentBookingEvent event) {
         try {
             Context.openSession();
             Context.setUserContext(event.getUserContext());
-            if (event.getEventType() == BahmniEventType.BAHMNI_APPOINTMENT_CREATED) {
+            if (event.getEventType() == AppointmentEventType.BAHMNI_APPOINTMENT_CREATED) {
                 handleAppointmentCreatedEvent(event.getAppointment());
             }
         } catch (Exception e) {
@@ -50,7 +50,7 @@ public class AppointmentSMSEventListener {
         try {
             Context.openSession();
             Context.setUserContext(event.getUserContext());
-            if (event.getEventType() == BahmniEventType.BAHMNI_RECURRING_APPOINTMENT_CREATED) {
+            if (event.getEventType() == AppointmentEventType.BAHMNI_RECURRING_APPOINTMENT_CREATED) {
                 handleRecurringAppointmentCreatedEvent(event.getAppointmentRecurringPattern().getAppointments().iterator().next());
             }
         } catch (Exception e) {

@@ -79,12 +79,12 @@
 
 	<advice>
 		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
-		<class>org.openmrs.module.appointments.advice.AppointentAdviceEvents</class>
+		<class>org.openmrs.module.appointments.events.advice.AppointmentEventsAdvice</class>
 	</advice>
 
 	<advice>
 		<point>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</point>
-		<class>org.openmrs.module.appointments.advice.RecurringAppointentAdviceEvents</class>
+		<class>org.openmrs.module.appointments.events.advice.RecurringAppointmentEventsAdvice</class>
 	</advice>
 
 	<globalProperty>
