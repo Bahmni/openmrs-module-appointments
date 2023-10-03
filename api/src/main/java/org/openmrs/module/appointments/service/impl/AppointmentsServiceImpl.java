@@ -30,15 +30,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -226,13 +218,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         List<Appointment> appointments = appointmentDao.getAllAppointmentsReminder(hours);
         return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
 
-    }
-
-    @Transactional
-    @Override
-    public List<Appointment> getAllAppointments(Date forDate, AppointmentStatus status) {
-        List<Appointment> appointments = appointmentDao.getAllAppointments(forDate, status);
-        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
     }
 
     private boolean isServiceOrServiceTypeVoided(Appointment appointment) {

@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Arrays;
 import java.util.concurrent.TimeUnit;
 
 public class AppointmentDaoImpl implements AppointmentDao {
@@ -33,7 +32,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
-        return this.getAllAppointments(forDate, null);
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        if (forDate != null) {
+            Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
+            criteria.add(Restrictions.ge("startDateTime", forDate));
+            criteria.add(Restrictions.lt("endDateTime", maxDate));
+        }
+        return criteria.list();
     }
 
     @Override
@@ -49,32 +58,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.add(Restrictions.lt("startDateTime", maxDate));
         }
         criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
-    }
-
-    /**
-     * Retrieves a list of appointments based on the specified date and status criteria.
-     *
-     * @param forDate The date for filtering appointments. Null to ignore date filtering.
-     * @param status The status for filtering appointments. Null to ignore status filtering.
-     * @return A list of matching appointments, possibly empty.
-     */
-    @Override
-    public List<Appointment> getAllAppointments(Date forDate, AppointmentStatus status) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        if (forDate != null) {
-            Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
-            criteria.add(Restrictions.ge("startDateTime", forDate));
-            criteria.add(Restrictions.lt("endDateTime", maxDate));
-        }
-
-        if (status != null) {
-            criteria.add(Restrictions.eq("status", status));
-        }
         return criteria.list();
     }
 
@@ -182,6 +165,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setPatientCriteria(appointmentSearchRequest, criteria);
         setLimitCriteria(appointmentSearchRequest, criteria);
         setProviderCriteria(appointmentSearchRequest, criteria);
+        setStatusCriteria(appointmentSearchRequest, criteria);
 
         return criteria.list();
     }
@@ -217,6 +201,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.setMaxResults(appointmentSearchRequest.getLimit());
         } else if (appointmentSearchRequest.getEndDate() == null) {
             criteria.setMaxResults(APPOINTMENT_SEARCH_DEFAULT_LIMIT);
+        }
+    }
+
+    private void setStatusCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if(appointmentSearchRequest.getStatus() != null) {
+            criteria.add(Restrictions.eq("status", appointmentSearchRequest.getStatus()));
         }
     }
 

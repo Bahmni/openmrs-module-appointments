@@ -97,7 +97,7 @@ public class AppointmentControllerTest {
         appointmentList.add(appointment);
         when(appointmentsService.getAllAppointments(null)).thenReturn(appointmentList);
 
-        appointmentController.getAllAppointments(null, null);
+        appointmentController.getAllAppointments(null);
         verify(appointmentsService, times(1)).getAllAppointments(null);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
     }
@@ -112,26 +112,10 @@ public class AppointmentControllerTest {
 
         when(appointmentsService.getAllAppointments(forDate)).thenReturn(appointmentList);
 
-        appointmentController.getAllAppointments(dateString, null);
+        appointmentController.getAllAppointments(dateString);
         verify(appointmentsService, times(1)).getAllAppointments(forDate);
         verify(appointmentMapper, times(1)).constructResponse(appointmentList);
     }
-
-    @Test
-    public void shouldGetAllAppointmentsByDateAndStatus() throws Exception {
-        Appointment appointment = new Appointment();
-        List<Appointment> appointmentList = new ArrayList<>();
-        appointmentList.add(appointment);
-        String dateString = "2017-08-15T00:00:00.0Z";
-        Date forDate = DateUtil.convertToLocalDateFromUTC(dateString);
-
-        when(appointmentsService.getAllAppointments(forDate, AppointmentStatus.Scheduled)).thenReturn(appointmentList);
-
-        appointmentController.getAllAppointments(dateString, AppointmentStatus.Scheduled);
-        verify(appointmentsService, times(1)).getAllAppointments(forDate, AppointmentStatus.Scheduled);
-        verify(appointmentMapper, times(1)).constructResponse(appointmentList);
-    }
-
 
     @Test
     public void shouldGetAllAppointmentsSummary() throws ParseException {

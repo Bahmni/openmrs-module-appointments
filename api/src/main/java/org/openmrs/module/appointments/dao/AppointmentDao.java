@@ -12,9 +12,6 @@ import java.util.List;
 
 public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
-
-    List<Appointment> getAllAppointments(Date forDate, AppointmentStatus status);
-
     List<Appointment> getAllAppointmentsReminder(String afterTime);
 
     @Transactional
