@@ -1,7 +1,5 @@
 package org.openmrs.module.appointments.service.impl;
 
-//import org.bahmni.module.bahmnicommons.api.visitlocation.BahmniVisitLocationService;
-
 import org.openmrs.Location;
 import org.openmrs.LocationTag;
 import org.openmrs.Patient;

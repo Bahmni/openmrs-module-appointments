@@ -127,10 +127,6 @@
 			<artifactId>openmrs-api</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.bahmni.module</groupId>
-			<artifactId>bahmni-commons-api</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.openmrs.web</groupId>
 			<artifactId>openmrs-web</artifactId>
 		</dependency>

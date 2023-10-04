@@ -15,7 +15,6 @@
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
 		<require_module>org.bahmni.module.teleconsultation</require_module>
-		<require_module>org.bahmni.module.bahmnicommons</require_module>
 		<require_module>org.bahmni.module.communication</require_module>
 	</require_modules>
 

@@ -5,19 +5,14 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.bahmni.module.communication.service.CommunicationService;
 import org.bahmni.module.communication.service.MessageBuilderService;
-import org.openmrs.Location;
-import org.openmrs.Patient;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.scheduler.tasks.AbstractTask;
 
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 public class ReminderForAppointment extends AbstractTask {
