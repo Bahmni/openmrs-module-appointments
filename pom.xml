@@ -49,6 +49,7 @@
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<webServices.version>2.29.0</webServices.version>
+		<communications.version>1.2.0-SNAPSHOT</communications.version>
 	</properties>
 
 	<build>
@@ -175,7 +176,7 @@
 			<dependency>
 				<groupId>org.bahmni.module</groupId>
 				<artifactId>communication-api</artifactId>
-				<version>1.2.0-SNAPSHOT</version>
+				<version>${communications.version}</version>
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
