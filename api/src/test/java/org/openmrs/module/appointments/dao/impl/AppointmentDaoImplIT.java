@@ -240,6 +240,20 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldReturnAppointmentsForPatientBetweenGivenDatesForASpecificStatus() throws ParseException {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        appointmentSearchRequest.setStatus(AppointmentStatus.Scheduled);
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(3, appointments.size());
+    }
+
+    @Test
     public void shouldReturnAllAppointmentsInNoGivenDates() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
 
