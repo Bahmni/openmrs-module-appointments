@@ -34,8 +34,8 @@ public class AppointmentSMSEventListener {
     public void onApplicationEvent(AppointmentBookingEvent event) {
         try {
             Context.openSession();
-            Context.setUserContext(event.getUserContext());
-            if (event.getEventType() == AppointmentEventType.BAHMNI_APPOINTMENT_CREATED) {
+            Context.setUserContext(event.userContext);
+            if (event.eventType == AppointmentEventType.BAHMNI_APPOINTMENT_CREATED) {
                 handleAppointmentCreatedEvent(event.getAppointment());
             }
         } catch (Exception e) {
@@ -50,8 +50,8 @@ public class AppointmentSMSEventListener {
     public void onApplicationEvent(RecurringAppointmentEvent event) {
         try {
             Context.openSession();
-            Context.setUserContext(event.getUserContext());
-            if (event.getEventType() == AppointmentEventType.BAHMNI_RECURRING_APPOINTMENT_CREATED) {
+            Context.setUserContext(event.userContext);
+            if (event.eventType == AppointmentEventType.BAHMNI_RECURRING_APPOINTMENT_CREATED) {
                 handleRecurringAppointmentCreatedEvent(event.getAppointmentRecurringPattern().getAppointments().iterator().next());
             }
         } catch (Exception e) {

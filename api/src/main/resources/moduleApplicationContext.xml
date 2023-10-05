@@ -166,9 +166,6 @@
             <ref bean="transactionAttributeSource"/>
         </property>
     </bean>
-    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
-        <property name="baseURL" value="${openmrs.root.uri}"/>
-    </bean>
 
     <bean id="recurringAppointmentService"
           class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">

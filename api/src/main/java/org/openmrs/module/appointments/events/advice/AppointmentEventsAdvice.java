@@ -4,6 +4,7 @@ import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.events.AppointmentEvent;
 import org.openmrs.module.appointments.events.publisher.AppointmentEventPublisher;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.events.AppointmentBookingEvent;
@@ -26,11 +27,9 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 	private final ThreadLocal<Map<String,Integer>> threadLocal = new ThreadLocal<>();
 	private final String APPOINTMENT_ID_KEY = "appointmentId";
 	private final Set<String> adviceMethodNames = Sets.newHashSet("validateAndSave");
-	private final AppointmentBookingEvent appointmentEvent;
 
 	public AppointmentEventsAdvice() {
 		this.eventPublisher=Context.getRegisteredComponent("appointmentEventPublisher",AppointmentEventPublisher.class);
-		this.appointmentEvent = Context.getRegisteredComponent("appointmentBookingEvent", AppointmentBookingEvent.class);
 	}
 
 	@Override
@@ -42,9 +41,9 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 				threadLocal.remove();
 
 				Appointment appointment = (Appointment) returnValue;
-				appointmentEvent.createAppointmentEvent(eventType, appointment);
+				AppointmentBookingEvent appointmentEvent =new AppointmentBookingEvent(eventType,appointment);
 				eventPublisher.publishEvent(appointmentEvent);
-				log.info("Successfully published event with uuid : " + appointment.getUuid());
+				log.info("Successfully published event with uuid : " + appointmentEvent.payloadId);
 			}
 		}
 	}

@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.Location;
+import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
@@ -8,12 +9,7 @@ import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Date;
-import java.util.Map;
-import java.util.Locale;
+import java.util.*;
 
 
 import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
@@ -74,12 +70,18 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
     }
 
     public String getFacilityName(Location location) {
+        if(location==null){
+            LocationTag visitLocationTag = Context.getLocationService().getLocationTagByName("Visit Location");
+            List<Location> locations = Context.getLocationService().getLocationsHavingAnyTag(
+                    Collections.singletonList(visitLocationTag));
+            return (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
+        }
         Location facilityLocation = getParentVisitLocationUuid(location);
         return facilityLocation.getName();
     }
 
     private Location getParentVisitLocationUuid(Location location) {
-        if(isVisitLocation(location)) {
+            if(isVisitLocation(location)) {
             return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : location;
         } else {
             return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : null;

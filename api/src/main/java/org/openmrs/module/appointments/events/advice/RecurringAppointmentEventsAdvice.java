@@ -26,11 +26,9 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
     private final ThreadLocal<Map<String, Integer>> threadLocal = new ThreadLocal<>();
     private final String RECURRING_APPOINTMENT_ID_KEY = "recurringAppointmentId";
     private final Set<String> adviceMethodNames = Sets.newHashSet("validateAndSave");
-    private final RecurringAppointmentEvent recurringAppointmentEvent;
 
     public RecurringAppointmentEventsAdvice() {
         this.eventPublisher = Context.getRegisteredComponent("appointmentEventPublisher", AppointmentEventPublisher.class);
-        this.recurringAppointmentEvent = Context.getRegisteredComponent("recurringAppointmentEvent", RecurringAppointmentEvent.class);
     }
 
     @Override
@@ -41,9 +39,9 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
                 AppointmentEventType eventType = appointmentInfo.get(RECURRING_APPOINTMENT_ID_KEY) == null ? BAHMNI_RECURRING_APPOINTMENT_CREATED : BAHMNI_RECURRING_APPOINTMENT_UPDATED;
                 threadLocal.remove();
                 AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) returnValue;
-                recurringAppointmentEvent.createRecurringAppointmentEvent(eventType, appointmentRecurringPattern);
+                RecurringAppointmentEvent recurringAppointmentEvent = new RecurringAppointmentEvent(eventType, appointmentRecurringPattern);
                 eventPublisher.publishEvent(recurringAppointmentEvent);
-                log.info("Successfully published event with uuid : " + recurringAppointmentEvent.getPayloadId());
+                log.info("Successfully published event with uuid : " + recurringAppointmentEvent.payloadId);
             }
         }
     }

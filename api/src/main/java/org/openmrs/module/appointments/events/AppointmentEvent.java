@@ -1,35 +1,25 @@
 package org.openmrs.module.appointments.events;
 
+import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
-import org.openmrs.module.appointments.events.AppointmentEventType;
-import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
-@Component
 public class AppointmentEvent {
     private static final long version = 1L;
     public UserContext userContext;
-    public String eventId;
-    public AppointmentEventType eventType;
+    public final String eventId;
+    public final AppointmentEventType eventType;
     public String payloadId;
     public LocalDateTime publishedDateTime;
-
-    public UserContext getUserContext() {
-        return userContext;
-    }
-    public String getEventId() {
-        return eventId;
-    }
-    public AppointmentEventType getEventType() {
-        return eventType;
-    }
-    public String getPayloadId() {
-        return payloadId;
-    }
-    public LocalDateTime getPublishedDateTime() {
-        return publishedDateTime;
-    }
+	public AppointmentEvent(AppointmentEventType eventType) {
+		this.eventType = eventType;
+		this.eventId = UUID.randomUUID().toString();
+		this.publishedDateTime = LocalDateTime.now();
+		this.userContext= Context.getUserContext();
+        this.payloadId="";
+	}
 }
 
 
