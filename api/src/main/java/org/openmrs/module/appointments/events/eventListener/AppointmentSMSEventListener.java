@@ -18,7 +18,8 @@ import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.List;
+
 
 @Component
 public class AppointmentSMSEventListener {
@@ -62,7 +63,7 @@ public class AppointmentSMSEventListener {
 
     private void handleAppointmentCreatedEvent(Appointment appointment) {
         String phoneNumber=getPhoneNumber(appointment.getPatient());
-        if (checkGlobalCondition())return;
+        if (!checkGlobalCondition()||phoneNumber==null)return;
         MessageBuilderService messageBuilderService = Context.getRegisteredComponent("messageBuilderService", MessageBuilderService.class);
         CommunicationService communicationService = Context.getRegisteredComponent("communicationService", CommunicationService.class);
         List<String> providersName = appointmentArgumentsMapper.getProvidersNameInString(appointment);
@@ -72,7 +73,7 @@ public class AppointmentSMSEventListener {
 
     private void handleRecurringAppointmentCreatedEvent(Appointment appointment) {
         String phoneNumber=getPhoneNumber(appointment.getPatient());
-        if (checkGlobalCondition())return;
+        if (!checkGlobalCondition()||phoneNumber==null)return;
         MessageBuilderService messageBuilderService = Context.getRegisteredComponent("messageBuilderService", MessageBuilderService.class);
         CommunicationService communicationService = Context.getRegisteredComponent("communicationService", CommunicationService.class);
         List<String> providersName = appointmentArgumentsMapper.getProvidersNameInString(appointment);
@@ -81,7 +82,7 @@ public class AppointmentSMSEventListener {
     }
     private boolean checkGlobalCondition() {
         AdministrationService administrationService = Context.getService(AdministrationService.class);
-        return !Boolean.parseBoolean(administrationService.getGlobalProperty("sms.enableAppointmentBookingSMSAlert", "false"));
+        return Boolean.parseBoolean(administrationService.getGlobalProperty("sms.enableAppointmentBookingSMSAlert", "false"));
     }
     private String getPhoneNumber(Patient patient) {
         PersonAttribute phoneNumber = patient.getAttribute("phoneNumber");

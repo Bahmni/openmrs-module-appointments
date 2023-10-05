@@ -1,24 +1,24 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.Location;
-import org.openmrs.LocationTag;
 import org.openmrs.Patient;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.util.StringUtils;
 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Date;
+import java.util.Map;
+import java.util.Locale;
+
 
 import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
 
 public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMapper {
-
-    @Autowired
-    AppointmentVisitLocation appointmentVisitLocation;
 
     @Override
     public Map<String, String> createArgumentsMapForRecurringAppointmentBooking(Appointment appointment) {
@@ -74,18 +74,19 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
     }
 
     public String getFacilityName(Location location) {
-        LocationTag visitLocationTag = Context.getLocationService().getLocationTagByName("Visit Location");
-        List<Location> locations = Context.getLocationService().getLocationsHavingAnyTag(
-                Collections.singletonList(visitLocationTag));
-        String facilityName = (visitLocationTag != null && !locations.isEmpty()) ? locations.get(0).getName() : "xxxxx";
+        Location facilityLocation = getParentVisitLocationUuid(location);
+        return facilityLocation.getName();
+    }
 
-        if (location != null) {
-            String facilityNameFromVisitLocation = appointmentVisitLocation.getFacilityName(location.getUuid());
-
-			if (!StringUtils.isEmpty(facilityNameFromVisitLocation)) {
-				facilityName = facilityNameFromVisitLocation;
-			}
+    private Location getParentVisitLocationUuid(Location location) {
+        if(isVisitLocation(location)) {
+            return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : location;
+        } else {
+            return location.getParentLocation() != null ? getParentVisitLocationUuid(location.getParentLocation()) : null;
         }
-        return facilityName;
+    }
+
+    private Boolean isVisitLocation(Location location) {
+        return (location.getTags().size() > 0 && location.getTags().stream().filter(tag -> tag.getName().equalsIgnoreCase("Visit Location")).count() != 0);
     }
 }
