@@ -21,7 +21,8 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         Map<String, String> arguments = createArgumentsMapForAppointmentBooking(appointment);
         arguments.put("recurringperiod", appointment.getAppointmentRecurringPattern().getPeriod().toString());
         arguments.put("recurringtype", appointment.getAppointmentRecurringPattern().getType().toString());
-        arguments.put("recurringdays", appointment.getAppointmentRecurringPattern().getDaysOfWeek().toString());
+        if (appointment.getAppointmentRecurringPattern().getDaysOfWeek() != null)
+            arguments.put("recurringdays", appointment.getAppointmentRecurringPattern().getDaysOfWeek().toString());
         if (appointment.getAppointmentRecurringPattern().getFrequency() != null)
             arguments.put("recurringfrequency", appointment.getAppointmentRecurringPattern().getFrequency().toString());
 
