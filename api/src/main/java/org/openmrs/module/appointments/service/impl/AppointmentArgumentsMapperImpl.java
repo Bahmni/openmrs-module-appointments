@@ -9,7 +9,13 @@ import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Map;
+import java.util.List;
+import java.util.HashMap;
+import java.util.Date;
+import java.util.Locale;
+import java.util.Collections;
 
 
 import static org.openmrs.module.appointments.util.DateUtil.convertUTCToGivenFormat;
@@ -52,8 +58,8 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         String appointmentKind = appointment.getAppointmentKind().getValue();
         String service = appointment.getService().getName();
         String teleLink = appointment.getTeleHealthVideoLink();
-        String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.timezone"), null, new Locale("en"));
-        String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("bahmni.sms.dateformat"), null, new Locale("en"));
+        String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("sms.timezone"), null, new Locale("en"));
+        String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("sms.dateformat"), null, new Locale("en"));
         String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
         String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
         String facilityName = getFacilityName(appointment.getLocation());

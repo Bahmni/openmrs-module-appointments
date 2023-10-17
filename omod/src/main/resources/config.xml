@@ -170,12 +170,12 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>bahmni.sms.timezone</property>
+		<property>sms.timezone</property>
 		<defaultValue>IST</defaultValue>
 	</globalProperty>
 
 	<globalProperty>
-		<property>bahmni.sms.dateformat</property>
+		<property>sms.dateformat</property>
 		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
 	</globalProperty>
 
