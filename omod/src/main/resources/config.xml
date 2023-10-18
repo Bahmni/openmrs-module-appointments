@@ -163,11 +163,6 @@
 		<defaultValue>false</defaultValue>
 	</globalProperty>
 
-	<globalProperty>
-		<property>clinic.clinicTimings</property>
-		<defaultValue>Mon-Fri (09:00-22:00), Sat-Sun CLOSED</defaultValue>
-		<description>Global property having timings of particular clinic</description>
-	</globalProperty>
 
 	<globalProperty>
 		<property>sms.timezone</property>
