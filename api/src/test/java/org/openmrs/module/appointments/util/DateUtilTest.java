@@ -98,4 +98,70 @@ public class DateUtilTest {
         long milliSeconds = getEpochTime(-10000);
         assertEquals(19790000, milliSeconds);
     }
+
+    @Test
+    public void shouldReturnNullIfAnyParameterIsNull() {
+        Date dateTime = new Date();
+        String format = "yyyy-MM-dd HH:mm:ss";
+        String timeZone = null;
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnFormattedDateForValidParameters() {
+        Date dateTime = new Date();
+        String format = "yyyy-MM-dd HH:mm:ss";
+        String timeZone = "GMT+00:00";
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNotNull(result);
+    }
+    @Test
+    public void shouldReturnNullWhenDateTimeIsNull() {
+        Date dateTime = null;
+        String format = "yyyy-MM-dd HH:mm:ss";
+        String timeZone = "GMT+00:00";
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenFormatIsEmpty() {
+        Date dateTime = new Date();
+        String format = "";
+        String timeZone = "GMT+00:00";
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenTimeZoneIsEmpty() {
+        Date dateTime = new Date();
+        String format = "yyyy-MM-dd HH:mm:ss";
+        String timeZone = "";
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNull(result);
+    }
+
+    @Test
+    public void shouldReturnNullWhenDateTimeIsNullAndFormatIsEmpty() {
+        Date dateTime = null;
+        String format = "";
+        String timeZone = "GMT+00:00";
+
+        String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
+
+        assertNull(result);
+    }
+
 }

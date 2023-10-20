@@ -23,10 +23,6 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.VIEW_
 public interface AppointmentsService {
 
     @Transactional
-    @Authorized({MANAGE_APPOINTMENTS, MANAGE_APPOINTMENTS})
-    Object sendAppointmentReminderSMS(Appointment appointment);
-
-    @Transactional
     @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
     Appointment validateAndSave(Appointment appointment);
 

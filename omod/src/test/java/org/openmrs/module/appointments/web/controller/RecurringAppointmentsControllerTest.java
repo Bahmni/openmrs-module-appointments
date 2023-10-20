@@ -4,11 +4,15 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.openmrs.GlobalProperty;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -25,6 +29,10 @@ import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsSer
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -44,7 +52,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
 import static org.powermock.api.mockito.PowerMockito.when;
-
+@PowerMockIgnore("javax.management.*")
+@PrepareForTest(Context.class)
+@RunWith(PowerMockRunner.class)
 public class RecurringAppointmentsControllerTest {
 
     @InjectMocks
@@ -70,6 +80,8 @@ public class RecurringAppointmentsControllerTest {
 
     @Mock
     private AppointmentMapper appointmentMapper;
+    @Mock
+    private AdministrationService administrationService;
 
     @Mock
     private SingleAppointmentRecurringPatternUpdateService singleAppointmentRecurringPatternUpdateService;
@@ -86,6 +98,9 @@ public class RecurringAppointmentsControllerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        PowerMockito.mockStatic(Context.class);
+        Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
     }
 
     @Test
