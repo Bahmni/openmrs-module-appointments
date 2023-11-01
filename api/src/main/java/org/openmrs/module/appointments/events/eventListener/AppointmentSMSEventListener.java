@@ -77,7 +77,7 @@ public class AppointmentSMSEventListener {
         MessageBuilderService messageBuilderService = Context.getRegisteredComponent("messageBuilderService", MessageBuilderService.class);
         CommunicationService communicationService = Context.getRegisteredComponent("communicationService", CommunicationService.class);
         List<String> providersName = appointmentArgumentsMapper.getProvidersNameInString(appointment);
-        String message = messageBuilderService.getAppointmentBookingMessage(appointmentArgumentsMapper.createArgumentsMapForRecurringAppointmentBooking(appointment), providersName);
+        String message = messageBuilderService.getRecurringAppointmentBookingMessage(appointmentArgumentsMapper.createArgumentsMapForRecurringAppointmentBooking(appointment), providersName);
         communicationService.sendSMS(phoneNumber, message);
     }
     private boolean shouldSendEmailForBookingAppointment() {
