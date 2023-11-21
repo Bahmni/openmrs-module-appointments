@@ -4,13 +4,13 @@ import com.google.common.collect.Sets;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.events.AppointmentEvent;
 import org.openmrs.module.appointments.events.publisher.AppointmentEventPublisher;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.events.AppointmentBookingEvent;
 import org.openmrs.module.appointments.events.AppointmentEventType;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.aop.MethodBeforeAdvice;
+import org.springframework.lang.Nullable;
 
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -48,9 +48,24 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 		}
 	}
 	@Override
-	public void before(Method method, Object[] objects, Object o) {
+	public void before(Method method, Object[] objects, @Nullable Object o) {
 		if (adviceMethodNames.contains(method.getName())) {
-			Appointment appointment = ((Supplier<Appointment>) objects[0]).get();
+			Appointment appointment = null;
+
+			Object firstArg = objects[0];
+			if (firstArg instanceof Supplier<?>) {
+				Object result = ((Supplier<?>) firstArg).get();
+				if (result instanceof Appointment) {
+					appointment = (Appointment) result;
+				}
+			} else if (firstArg instanceof Appointment) {
+				appointment = (Appointment) firstArg;
+			}
+
+			if (appointment == null) {
+				return;
+			}
+
 			Map<String, Integer> appointmentInfo = new HashMap<>(1);
 			appointmentInfo.put(APPOINTMENT_ID_KEY, appointment.getId());
 			threadLocal.set(appointmentInfo);
