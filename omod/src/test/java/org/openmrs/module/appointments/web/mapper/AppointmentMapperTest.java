@@ -8,11 +8,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.openmrs.Location;
-import org.openmrs.Patient;
-import org.openmrs.PatientIdentifier;
-import org.openmrs.PersonName;
-import org.openmrs.Provider;
+import org.openmrs.*;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
@@ -48,6 +44,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -110,9 +107,17 @@ public class AppointmentMapperTest {
         Set<PersonName> personNames = new HashSet<>();
         personNames.add(name);
         patient.setNames(personNames);
+        PatientIdentifierType patientIdentifierType=new PatientIdentifierType(1);
+        patientIdentifierType.setName("PatientId");
         PatientIdentifier identifier = new PatientIdentifier();
         identifier.setIdentifier("GAN230901");
-        patient.setIdentifiers(new HashSet<>(Arrays.asList(identifier)));
+        identifier.setIdentifierType(patientIdentifierType);
+        identifier.setPreferred(true);
+//        A patient can have 2 identifiers from the same type
+        PatientIdentifier secondIdentifier = new PatientIdentifier();
+        secondIdentifier.setIdentifier("GAN230901FromMerge");
+        secondIdentifier.setIdentifierType(patientIdentifierType);
+        patient.setIdentifiers(new HashSet<>(Arrays.asList(secondIdentifier,identifier)));
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
         service = new AppointmentServiceDefinition();
         service.setUuid("serviceUuid");
@@ -299,6 +304,7 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getAppointmentNumber(), response.getAppointmentNumber());
         assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
+        assertEquals(appointment.getPatient().getPatientIdentifier().getIdentifier(), response.getPatient().get("identifier"));
         assertEquals(serviceDefaultResponse, response.getService());
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
@@ -329,6 +335,11 @@ public class AppointmentMapperTest {
         assertEquals(appointment.getAppointmentNumber(), response.getAppointmentNumber());
         assertEquals(appointment.getPatient().getPersonName().getFullName(), response.getPatient().get("name"));
         assertEquals(appointment.getPatient().getUuid(), response.getPatient().get("uuid"));
+        Set<PatientIdentifierType> patientIdentifiers = appointment.getPatient().getActiveIdentifiers().stream().map(PatientIdentifier::getIdentifierType).collect(Collectors.toSet());
+        for (PatientIdentifierType type:patientIdentifiers){
+            assertEquals(appointment.getPatient().getPatientIdentifier(type).getIdentifier(), response.getPatient().get(type.getName()));
+
+        }
         assertEquals(serviceDefaultResponse, response.getService());
         assertEquals(appointment.getServiceType().getName(), response.getServiceType().get("name"));
         assertEquals(appointment.getServiceType().getUuid(), response.getServiceType().get("uuid"));
@@ -422,10 +433,43 @@ public class AppointmentMapperTest {
         Set<PersonName> personNames = new HashSet<>();
         personNames.add(name);
         Patient patient = new Patient();
+        patient.setNames(personNames);
+
+        PatientIdentifierType patientIdentifierType=new PatientIdentifierType(1);
+        patientIdentifierType.setName("PatientId");
+
         PatientIdentifier identifier = new PatientIdentifier();
         identifier.setIdentifier("GAN230901");
-        patient.setNames(personNames);
-        patient.setIdentifiers(Collections.singleton(identifier));
+        identifier.setPreferred(true);
+        identifier.setVoided(false);
+        identifier.setIdentifierType(patientIdentifierType);
+        //        A patient can have 2 identifiers from the same type
+        PatientIdentifier secondIdentifier = new PatientIdentifier();
+        secondIdentifier.setIdentifier("GAN230901FromMerge");
+        secondIdentifier.setPreferred(false);
+        secondIdentifier.setVoided(false);
+        secondIdentifier.setIdentifierType(patientIdentifierType);
+
+
+        PatientIdentifierType cardIdType=new PatientIdentifierType(2);
+        cardIdType.setName("CardId");
+
+        PatientIdentifier cardIdIdentifier = new PatientIdentifier();
+        cardIdIdentifier.setIdentifier("CardId");
+        cardIdIdentifier.setIdentifierType(cardIdType);
+        cardIdIdentifier.setVoided(false);
+        cardIdIdentifier.setPreferred(true);
+
+        PatientIdentifier cardIdIdentifierVoided = new PatientIdentifier();
+        cardIdIdentifierVoided.setIdentifier("CardIdVoided");
+        cardIdIdentifierVoided.setVoided(true);
+//        normally won't be the case in openmrs
+        cardIdIdentifierVoided.setPreferred(true);
+        cardIdIdentifierVoided.setIdentifierType(cardIdType);
+
+        patient.setIdentifiers(new HashSet<>(Arrays.asList(secondIdentifier,identifier,cardIdIdentifier,cardIdIdentifierVoided)));
+        assertEquals(4, patient.getIdentifiers().size());
+        assertEquals(3, patient.getActiveIdentifiers().size());
         appointment.setUuid("appointmentUuid");
         appointment.setPatient(patient);
         appointment.setService(service);
@@ -596,10 +640,9 @@ public class AppointmentMapperTest {
 
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
 
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided(), false);
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse(),
-                AppointmentProviderResponse.ACCEPTED);
-        assertEquals(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoidReason(), null);
+        assertFalse(((AppointmentProvider)appointment.getProviders().toArray()[0]).getVoided());
+        assertEquals( AppointmentProviderResponse.ACCEPTED,((AppointmentProvider)appointment.getProviders().toArray()[0]).getResponse());
+      assertNull(((AppointmentProvider) appointment.getProviders().toArray()[0]).getVoidReason());
     }
 
     @Test
