@@ -9,6 +9,7 @@ import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentPriority;
@@ -275,13 +276,27 @@ public class AppointmentMapper {
 
     private Map createPatientMap(Patient p) {
         Map map = new HashMap();
+        Map<String, String> customAttributesMap = mapAttributeTypes(p);
         map.put("name", p.getPersonName().getFullName());
         map.put("uuid", p.getUuid());
         map.put("identifier", p.getPatientIdentifier().getIdentifier());
         map.put("age", p.getAge());
         map.put("gender", p.getGender());
+        map.put("customAttributes", customAttributesMap);
         map.putAll(p.getActiveIdentifiers().stream().filter(e -> e.getIdentifierType() != null).collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""), e -> e.getIdentifier(), (e1, e2) -> e1 + "," + e2)));
         return map;
+    }
+
+    private static Map<String, String> mapAttributeTypes(Patient p) {
+        String customPersonAttributeTypes = Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes");
+        String[] attributeTypes = customPersonAttributeTypes != null ? customPersonAttributeTypes.split(",") : new String[0];
+        Map<String, String> customAttributesMap = new HashMap<>();
+        for (String attributeType : attributeTypes) {
+            if (p.getAttribute(attributeType) != null) {
+                customAttributesMap.put(attributeType, p.getAttribute(attributeType).toString());
+            }
+        }
+        return customAttributesMap;
     }
 
     public AppointmentProvider mapAppointmentProvider(AppointmentProviderDetail providerDetail) {
