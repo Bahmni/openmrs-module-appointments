@@ -11,6 +11,7 @@ import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
+import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.Provider;
@@ -57,7 +58,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -613,6 +616,8 @@ public class AppointmentMapperTest {
         assertEquals(Collections.EMPTY_LIST, appointmentDefaultResponse.getProviders());
     }
 
+
+
     @Test
     public void shouldChangeTheResponseAndVoidedDataWhenProviderIsVoidedAndAddedAgain() throws ParseException {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
@@ -675,5 +680,46 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
         assertEquals(AppointmentStatus.Scheduled, appointment.getStatus());
         assertEquals(appointmentRequest.getComments(), appointment.getComments());
+    }
+
+    @Test
+    public void shouldNotFailIfPatientHasMultipleIdentifiersOfTheSameIdentifierType() throws Exception {
+        Appointment appointment = createAppointment();
+
+        Set<PatientIdentifier> identifiers = new HashSet<>();
+        PatientIdentifierType type = new PatientIdentifierType();
+        type.setId(1);
+        type.setName("Basic Identifier Type");
+        PatientIdentifier identifier1 = new PatientIdentifier();
+        identifier1.setIdentifierType(type);
+        identifier1.setIdentifier("identifier1");
+        identifiers.add(identifier1);
+
+        PatientIdentifier identifier2 = new PatientIdentifier();
+        identifier2.setIdentifierType(type);
+        identifier2.setIdentifier("identifier2");
+        identifiers.add(identifier2);
+
+        PatientIdentifier identifier3 = new PatientIdentifier();
+        identifier3.setIdentifierType(type);
+        identifier3.setIdentifier("identifier3");
+        identifiers.add(identifier3);
+
+        appointment.getPatient().setIdentifiers(identifiers);
+
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponse = appointmentMapper.constructResponse(appointmentList);
+        AppointmentDefaultResponse response = appointmentDefaultResponse.get(0);
+        assertEquals(appointment.getUuid(), response.getUuid());
+
+        List<String> basicIdentifiers = Arrays.asList(response.getPatient().get("BasicIdentifierType").toString().split(","));
+        assertTrue(basicIdentifiers.contains("identifier1"));
+        assertTrue(basicIdentifiers.contains("identifier2"));
+        assertTrue(basicIdentifiers.contains("identifier3"));
     }
 }
