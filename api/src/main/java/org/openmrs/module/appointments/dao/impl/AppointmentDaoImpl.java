@@ -8,6 +8,7 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
@@ -160,13 +161,20 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
 
         criteria.add(Restrictions.eq("voided", false));
-        criteria.addOrder(Order.asc("startDateTime"));
+        if (appointmentSearchRequest.getStartDate() != null) {
+            criteria.addOrder(Order.asc("startDateTime"));
+        } else {
+            criteria.addOrder(Order.asc("dateCreated"));
+        }
         setDateCriteria(appointmentSearchRequest, criteria);
         setPatientCriteria(appointmentSearchRequest, criteria);
         setLimitCriteria(appointmentSearchRequest, criteria);
         setProviderCriteria(appointmentSearchRequest, criteria);
         setStatusCriteria(appointmentSearchRequest, criteria);
 
+        String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+        if(StringUtils.isNotEmpty(limit))
+            criteria.setMaxResults(Integer.parseInt(limit));
         return criteria.list();
     }
 
