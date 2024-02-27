@@ -9,6 +9,7 @@ import org.mockito.*;
 import org.openmrs.*;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.api.context.UserContext;
 import org.openmrs.messagesource.MessageSourceService;
@@ -123,6 +124,10 @@ public class AppointmentsServiceImplTest {
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
     @Mock
     private UserContext userContext;
+
+    @Mock
+    private AdministrationService administrationService;
+
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -502,6 +507,8 @@ public class AppointmentsServiceImplTest {
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(endDate);
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
 
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
@@ -516,7 +523,8 @@ public class AppointmentsServiceImplTest {
         Date endDate = Date.from(Instant.now());
         appointmentSearchRequest.setStartDate(null);
         appointmentSearchRequest.setEndDate(endDate);
-
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
         verify(appointmentDao, never()).search(appointmentSearchRequest);
@@ -532,6 +540,8 @@ public class AppointmentsServiceImplTest {
 
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
         verify(appointmentDao, times(1)).search(appointmentSearchRequest);
@@ -778,8 +788,10 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldGetDatelessAppointments() {
-        appointmentsService.searchDatelessAppointments();
-        verify(appointmentDao, times(1)).getDatelessAppointments();
+    public void shouldGetAppointmentsWithoutDates() {
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
+        appointmentsService.searchAppointmentsWithoutDates();
+        verify(appointmentDao, times(1)).getAppointmentsWithoutDates(20);
     }
 }

@@ -243,7 +243,7 @@ public class AppointmentControllerTest {
     }
 
     @Test
-    public void shouldSearchForDatelessAppointments() throws Exception{
+    public void shouldSearchForAppointmentsWithoutDates() throws Exception{
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment = new Appointment();
         appointment.setUuid("appointmentUuid");
@@ -252,7 +252,7 @@ public class AppointmentControllerTest {
         appointment.setPatient(patient);
         appointments.add(appointment);
         AppointmentQuery appointmentQuery = new AppointmentQuery();
-        appointmentQuery.setIsDatelessAppointments(true);
+        appointmentQuery.setWithoutDates(true);
 
 
         AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
@@ -261,7 +261,7 @@ public class AppointmentControllerTest {
         List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
         appointmentDefaultResponses.add(appointmentDefaultResponse);
 
-        when(appointmentsService.searchDatelessAppointments()).thenReturn(appointments);
+        when(appointmentsService.searchAppointmentsWithoutDates()).thenReturn(appointments);
         when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
 
         List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);

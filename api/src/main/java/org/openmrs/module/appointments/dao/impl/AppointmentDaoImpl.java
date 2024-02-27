@@ -8,7 +8,6 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
@@ -163,7 +162,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("voided", false));
         if (appointmentSearchRequest.getStartDate() != null) {
             criteria.addOrder(Order.asc("startDateTime"));
-        } else {
+        }
+        if (appointmentSearchRequest.getStatus() != null && appointmentSearchRequest.getStatus().name().equals(AppointmentStatus.WaitList.name())) {
             criteria.addOrder(Order.asc("dateCreated"));
         }
         setDateCriteria(appointmentSearchRequest, criteria);
@@ -172,9 +172,6 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setProviderCriteria(appointmentSearchRequest, criteria);
         setStatusCriteria(appointmentSearchRequest, criteria);
 
-        String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-        if(StringUtils.isNotEmpty(limit))
-            criteria.setMaxResults(Integer.parseInt(limit));
         return criteria.list();
     }
 
@@ -233,10 +230,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDatelessAppointments() {
+    public List<Appointment> getAppointmentsWithoutDates(Integer limit) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
         criteria.add(Restrictions.isNull("startDateTime"));
         criteria.add(Restrictions.isNull("endDateTime"));
+        criteria.addOrder(Order.asc("dateCreated"));
+        if (limit != null) {
+            criteria.setMaxResults(limit);
+        }
         return criteria.list();
     }
 }
