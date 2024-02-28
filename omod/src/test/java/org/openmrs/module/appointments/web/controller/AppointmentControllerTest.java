@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -155,10 +156,15 @@ public class AppointmentControllerTest {
         assertEquals(1, allAppointmentsSummary.size());
         assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
         assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountMap().size());
-        DailyAppointmentServiceSummary dailyAppointmentServiceSummary = (DailyAppointmentServiceSummary)allAppointmentsSummary.get(0).getAppointmentCountMap().get("2017-08-15");
+
+        // This truncation is needed for compatibility with Appointment.getDateFromStartDateTime, which removes the time component from the date
+        Date appointmentSummaryDate = DateUtils.truncate(startDate, Calendar.DAY_OF_MONTH);
+        String appointmentSummaryDateStr = simpleDateFormat.format(appointmentSummaryDate);
+
+        DailyAppointmentServiceSummary dailyAppointmentServiceSummary = allAppointmentsSummary.get(0).getAppointmentCountMap().get(appointmentSummaryDateStr);
         assertEquals(1, dailyAppointmentServiceSummary.getAllAppointmentsCount(), 0);
         assertEquals(0, dailyAppointmentServiceSummary.getMissedAppointmentsCount(), 0);
-        assertEquals(simpleDateFormat.parse(startDateString), dailyAppointmentServiceSummary.getAppointmentDate());
+        assertEquals(appointmentSummaryDate, dailyAppointmentServiceSummary.getAppointmentDate());
         assertEquals("someUuid", dailyAppointmentServiceSummary.getAppointmentServiceUuid());
     }
 
