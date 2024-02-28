@@ -138,4 +138,26 @@
 		<description>Identifier type of patient to generate AdhocTeleconsultation link eg: 'Patient Identifier' or 'National ID' etc</description>
 	</globalProperty>
 
+	<globalProperty>
+		<property>sms.enableAppointmentBookingSMSAlert</property>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>sms.enableAppointmentReminderSMSAlert</property>
+		<defaultValue>false</defaultValue>
+	</globalProperty>
+
+
+	<globalProperty>
+		<property>sms.timezone</property>
+		<defaultValue>IST</defaultValue>
+	</globalProperty>
+
+	<globalProperty>
+		<property>sms.dateformat</property>
+		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
+	</globalProperty>
+
+
 </module>
