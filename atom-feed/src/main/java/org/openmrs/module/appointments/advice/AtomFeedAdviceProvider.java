@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.advice;
 import org.aopalliance.aop.Advice;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.annotation.OpenmrsProfile;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
@@ -15,6 +16,7 @@ import org.springframework.context.ApplicationContextAware;
  * Registers AOP advice when the context starts up.
  * This is done instead of declaring advice in config.xml in order to allow it to be conditionally loaded
  */
+@OpenmrsProfile(modules = { "openmrs-atomfeed:*" })
 public class AtomFeedAdviceProvider implements ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(AtomFeedAdviceProvider.class);
