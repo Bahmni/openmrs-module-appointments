@@ -60,13 +60,6 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacocoVersion}</version>
-				<executions>
 					<execution>
 						<id>check</id>
 						<goals>
@@ -114,6 +107,10 @@
 			<version>0.94.3</version>
 		</dependency>
 		<dependency>
+			<groupId>org.bahmni.module</groupId>
+			<artifactId>communication-api</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.14</version>
@@ -150,13 +147,15 @@
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>${servletApi.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 			<version>${javaxMail.version}</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>

@@ -89,23 +89,31 @@
             <ref bean="patientAppointmentNotifierService"/>
         </property>
     </bean>
-    <bean id="connectionDetails" class="org.openmrs.module.appointments.connection.ConnectionDetails" depends-on="openmrsProperties">
-        <property name="authUri" value="${openmrs.auth.uri}" />
-        <property name="openmrsUser" value="${openmrs.user}" />
-        <property name="openmrsPassword" value="${openmrs.password}"/>
-        <property name="openmrsWebclientConnectTimeout" value="${openmrs.connectionTimeoutInMilliseconds}" />
-        <property name="openmrsWebclientReadTimeout" value="${openmrs.replyTimeoutInMilliseconds}" />
+
+
+
+    <bean id="appointmentArgumentsMapper" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentArgumentsMapperImpl">
+            </bean>
+        </property>
     </bean>
-
-    <bean id="appointmentVisitLocation" class="org.openmrs.module.appointments.service.impl.AppointmentVisitLocation" depends-on="openmrsProperties">
-        <property name="baseURL" value="${openmrs.root.uri}"/>
-    </bean>
-
-    <bean id="openmrsLogin" class="org.openmrs.module.appointments.connection.OpenmrsLogin"/>
-
-    <bean id="smsService" class="org.openmrs.module.appointments.service.impl.SMSService" >
-        <property name="openmrsLogin" ref="openmrsLogin"/>
-        <property name="appointmentVisitLocation" ref="appointmentVisitLocation"/>
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list>
+                <value>org.openmrs.module.appointments.service.AppointmentArgumentsMapper</value>
+                <ref bean="appointmentArgumentsMapper" />
+            </list>
+        </property>
     </bean>
     <bean id="appointmentsService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
@@ -149,9 +157,6 @@
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
                 </property>
-                <property name="smsService">
-                        <ref bean="smsService"/>
-                </property>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -161,7 +166,6 @@
             <ref bean="transactionAttributeSource"/>
         </property>
     </bean>
-
 
     <bean id="recurringAppointmentService"
           class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">

@@ -10,6 +10,7 @@ import org.openmrs.*;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
@@ -119,11 +120,9 @@ public class AppointmentsServiceImplTest {
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     @Mock
-    private SMSService smsService;
-
-    @Mock
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
-
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -197,23 +196,6 @@ public class AppointmentsServiceImplTest {
         verify(patientAppointmentNotifierService, times(1)).notifyAll(appointment);
     }
 
-    @Test
-    public void shouldSendAppointmentReminderSMS() {
-        Appointment appointment = new Appointment();
-        PatientIdentifier identifier = new PatientIdentifier();
-        identifier.setIdentifier("123456789");
-        identifier.setIdentifierType(new PatientIdentifierType());
-        Set<PatientIdentifier> identifiers = new HashSet<>();
-        Patient patient = new Patient();
-        patient.setIdentifiers(identifiers);
-        identifiers.add(identifier);
-        appointment.setPatient(patient);
-        appointment.setService(new AppointmentServiceDefinition());
-        appointment.setStartDateTime(new Date());
-        appointment.setEndDateTime(new Date());
-        appointment.setProviders( new HashSet<>());
-        appointmentsService.sendAppointmentReminderSMS(appointment);
-    }
 
     @Test
     public void shouldNotPublishTeleconsultationAppointmentSavedEventIfNotTeleconsultation() {

@@ -17,7 +17,6 @@
 		<MODULE_NAME>${project.name}</MODULE_NAME>
 		<MODULE_VERSION>${project.version}</MODULE_VERSION>
 		<MODULE_PACKAGE>${project.groupId}.${MODULE_ID}</MODULE_PACKAGE>
-		<openmrs.platform.version>2.4.2</openmrs.platform.version>
 	</properties>
 
 	<dependencies>
@@ -46,7 +45,7 @@
 		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
-			<version>3.0.1</version>
+			<version>${servletApi.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -72,11 +71,6 @@
 			<artifactId>openmrs-api</artifactId>
 			<version>${openmrs.platform.version}</version>
 			<type>test-jar</type>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.servlet</groupId>
-			<artifactId>servlet-api</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -170,14 +164,6 @@
 							<goal>prepare-agent</goal>
 						</goals>
 					</execution>
-				</executions>
-			</plugin>
-
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacocoVersion}</version>
-				<executions>
 					<execution>
 						<id>check</id>
 						<goals>

@@ -48,7 +48,11 @@
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
+		<servletApi.version>3.0.1</servletApi.version>
 		<webServices.version>2.29.0</webServices.version>
+		<communications.version>1.2.0-SNAPSHOT</communications.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
 
 	<build>
@@ -164,12 +168,12 @@
 				<type>pom</type>
 				<scope>test</scope>
 			</dependency>
-
 			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>2.5</version>
-				<scope>test</scope>
+				<groupId>org.bahmni.module</groupId>
+				<artifactId>communication-api</artifactId>
+				<version>${communications.version}</version>
+				<type>jar</type>
+				<scope>provided</scope>
 			</dependency>
 
 			<dependency>
@@ -202,6 +206,12 @@
 				<artifactId>openmrs-web</artifactId>
 				<version>${openmrs.platform.version}</version>
 				<scope>provided</scope>
+				<exclusions>
+					<exclusion>
+						<groupId>javax.servlet</groupId>
+						<artifactId>servlet-api</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -247,25 +257,7 @@
 				<version>2.3.1</version>
 				<scope>test</scope>
 			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>${mockitoVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.openmrs.api</groupId>
-				<artifactId>openmrs-api</artifactId>
-				<version>${openmrs.platform.version}</version>
-				<type>jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>javax.servlet</groupId>
-				<artifactId>servlet-api</artifactId>
-				<version>3.0.1</version>
-				<scope>provided</scope>
-			</dependency>
+
 		</dependencies>
 	</dependencyManagement>
 

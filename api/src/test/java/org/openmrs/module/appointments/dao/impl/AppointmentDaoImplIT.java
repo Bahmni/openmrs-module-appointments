@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import org.hibernate.Criteria;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -14,11 +15,14 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentDao appointmentDao;
+
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
@@ -240,6 +244,20 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldReturnAppointmentsForPatientBetweenGivenDatesForASpecificStatus() throws ParseException {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-16T18:29:59.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        appointmentSearchRequest.setStatus(AppointmentStatus.Scheduled);
+
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(3, appointments.size());
+    }
+
+    @Test
     public void shouldReturnAllAppointmentsInNoGivenDates() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
 
@@ -259,5 +277,30 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(null);
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
+    }
+    @Test
+    public void testGetAllAppointments() {
+        Date forDate = new Date();
+        List<Appointment> appointments = appointmentDao.getAllAppointments(forDate);
+        assertNotNull(appointments);
+        assertEquals(0,appointments.size());
+    }
+
+
+    @Test
+    public void testGetAllAppointmentsReminder() {
+        String hours = "24";
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void testSearch() {
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        appointmentSearchRequest.setStartDate(new Date());
+        appointmentSearchRequest.setEndDate(new Date());
+        List<Appointment> result = appointmentDao.search(appointmentSearchRequest);
+
+        assertEquals(0, result.size());
     }
 }

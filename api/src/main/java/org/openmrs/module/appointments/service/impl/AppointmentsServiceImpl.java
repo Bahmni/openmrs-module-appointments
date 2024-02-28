@@ -3,7 +3,6 @@ package org.openmrs.module.appointments.service.impl;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Location;
 import org.openmrs.Person;
 import org.openmrs.PersonAttribute;
 import org.openmrs.api.APIAuthenticationException;
@@ -63,7 +62,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private PatientAppointmentNotifierService appointmentNotifierService;
 
-    private SMSService smsService;
 
 
     public void setAppointmentDao(AppointmentDao appointmentDao) {
@@ -102,9 +100,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         this.appointmentNotifierService = appointmentNotifierService;
     }
 
-    public void setSmsService(SMSService smsService) {
-        this.smsService = smsService;
-    }
 
     private boolean validateIfUserHasSelfOrAllAppointmentsAccess(Appointment appointment) {
         return Context.hasPrivilege(MANAGE_APPOINTMENTS) ||
@@ -121,27 +116,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         return providers.stream()
                 .anyMatch(provider -> provider.getProvider().getPerson().
                         equals(Context.getAuthenticatedUser().getPerson()));
-    }
-    @Transactional
-    @Override
-    public String sendAppointmentReminderSMS(Appointment appointment) {
-        PersonAttribute phoneNumber = appointment.getPatient().getAttribute("phoneNumber");
-        if (null==phoneNumber){
-            log.info("Since no mobile number found for the patient. SMS not sent.");
-            return null;}
-        String givenName = appointment.getPatient().getGivenName();
-        String familyName = appointment.getPatient().getFamilyName();
-        String patientID = appointment.getPatient().getPatientIdentifier().getIdentifier();
-        Date date = appointment.getStartDateTime();
-        String service = appointment.getService().getName();
-        List<AppointmentProvider> appointmentProviderList =new ArrayList<>(appointment.getProviders());
-        List<String> providers=new ArrayList<>();
-        for (AppointmentProvider appointmentProvider: appointmentProviderList) {
-            providers.add(appointmentProvider.getProvider().getName());
-        }
-        Location location=appointment.getLocation();
-        String message = smsService.getAppointmentMessage(givenName, familyName, patientID, date, service, providers,location);
-        return smsService.sendSMS(phoneNumber.getValue(), message);
     }
 
     @Transactional

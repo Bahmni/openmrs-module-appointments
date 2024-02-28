@@ -128,6 +128,21 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldSearchAppointmentsGivenDateRangeAndStatus() throws Exception {
+        String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
+                "\"endDate\":\"2108-08-15T18:29:59.000Z\"," +
+                "\"status\":\"Scheduled\"," +
+                "\"limit\":4}";
+
+        List<AppointmentDefaultResponse> response = deserialize(
+                handle(newPostRequest("/rest/v1/appointments/search", requestBodyJson)),
+                new TypeReference<List<AppointmentDefaultResponse>>() {
+                });
+
+        assertEquals(1, response.size());
+    }
+
+    @Test
     public void shouldSearchAcceptProviderUuidToSearchAppointments() throws Exception {
         String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
                 "\"providerUuid\":\"provider-uuid\"}";
