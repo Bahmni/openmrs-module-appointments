@@ -19,15 +19,33 @@ public class AtomFeedAdviceProvider implements ApplicationContextAware {
 
     private static final Log log = LogFactory.getLog(AtomFeedAdviceProvider.class);
 
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        addAdvice(AppointmentServiceDefinitionService.class, new AppointmentServiceDefinitionAdvice());
-        addAdvice(AppointmentsService.class, new AppointmentAdvice());
-        addAdvice(AppointmentRecurringPatternService.class, new RecurringAppointmentsAdvice());
+    private final AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice;
+
+    private final AppointmentAdvice appointmentAdvice;
+
+    private final RecurringAppointmentsAdvice recurringAppointmentsAdvice;
+
+    public AtomFeedAdviceProvider() {
+        this(new AppointmentServiceDefinitionAdvice(), new AppointmentAdvice(), new RecurringAppointmentsAdvice());
     }
 
-    private void addAdvice(Class<?> advicePoint, Advice advice) {
-        log.info("Adding AOP: " + advicePoint.getSimpleName() + " -> " + advice.getClass().getSimpleName());
+    public AtomFeedAdviceProvider(AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice,
+                                  AppointmentAdvice appointmentAdvice,
+                                  RecurringAppointmentsAdvice recurringAppointmentsAdvice) {
+        this.appointmentServiceDefinitionAdvice = appointmentServiceDefinitionAdvice;
+        this.appointmentAdvice = appointmentAdvice;
+        this.recurringAppointmentsAdvice = recurringAppointmentsAdvice;
+    }
+
+    protected void addAdvice(Class<?> advicePoint, Advice advice) {
+        log.info("Adding AOP: " + advicePoint + " -> " + advice);
         Context.addAdvice(advicePoint, advice);
+    }
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        addAdvice(AppointmentServiceDefinitionService.class, appointmentServiceDefinitionAdvice);
+        addAdvice(AppointmentsService.class, appointmentAdvice);
+        addAdvice(AppointmentRecurringPatternService.class, recurringAppointmentsAdvice);
     }
 }
