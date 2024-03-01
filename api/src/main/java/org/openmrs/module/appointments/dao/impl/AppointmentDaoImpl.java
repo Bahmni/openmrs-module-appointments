@@ -160,12 +160,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
 
         criteria.add(Restrictions.eq("voided", false));
-        if (appointmentSearchRequest.getStartDate() != null) {
-            criteria.addOrder(Order.asc("startDateTime"));
-        }
-        if (appointmentSearchRequest.getStatus() != null && appointmentSearchRequest.getStatus().name().equals(AppointmentStatus.WaitList.name())) {
-            criteria.addOrder(Order.asc("dateCreated"));
-        }
+        criteria.addOrder(Order.asc("startDateTime"));
         setDateCriteria(appointmentSearchRequest, criteria);
         setPatientCriteria(appointmentSearchRequest, criteria);
         setLimitCriteria(appointmentSearchRequest, criteria);
