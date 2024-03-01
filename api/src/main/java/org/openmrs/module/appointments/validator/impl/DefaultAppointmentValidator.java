@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.validator.impl;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.stereotype.Component;
 
