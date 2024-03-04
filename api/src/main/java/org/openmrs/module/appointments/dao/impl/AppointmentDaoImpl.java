@@ -223,4 +223,19 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
         return criteria.list();
     }
+
+    @Override
+    public List<Appointment> getAppointmentsWithoutDates(Integer limit) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        criteria.add(Restrictions.isNull("startDateTime"));
+        criteria.add(Restrictions.isNull("endDateTime"));
+        criteria.addOrder(Order.asc("dateCreated"));
+        if (limit != null) {
+            criteria.setMaxResults(limit);
+        }
+        return criteria.list();
+    }
 }

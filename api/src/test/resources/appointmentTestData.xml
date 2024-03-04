@@ -102,5 +102,7 @@
     <patient patient_id="3" creator="1" date_created="2008-08-15 11:10:35.0" voided="true" void_reason=""/>
     <patient_identifier patient_identifier_id="2" patient_id="2" identifier="GAN300000" identifier_type="1" preferred="1" location_id="1" creator="1" date_created="2006-01-01 00:00:00.0" voided="false" uuid="35f46473-9ed1-4812-8f3a-4740c13dc54f"/>
     <patient_appointment patient_appointment_id="16" patient_id ="3" appointment_service_id="1" appointment_service_type_id="2" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="aeead7f2-fc3d-48bb-9c63-e861aaea4a9c"/>
+    <patient_appointment patient_appointment_id="17" patient_id ="1" creator="1" date_created="2008-08-16 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b87" location_id = "1" appointment_service_id="1"/>
+    <patient_appointment patient_appointment_id="18" patient_id ="1" creator="1" date_created="2008-08-17 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1b98" location_id = "1" appointment_service_id="1"/>
 
 </dataset>

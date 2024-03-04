@@ -51,10 +51,14 @@ public class AppointmentServiceHelper {
         appointmentJson.put("providerUuid", providerUuid);
         String locationUuid = appointment.getLocation() != null ? appointment.getLocation().getUuid() : null;
         appointmentJson.put("locationUuid", locationUuid);
-        appointmentJson.put("startDateTime", appointment.getStartDateTime().toInstant().toString());
-        appointmentJson.put("endDateTime", appointment.getEndDateTime().toInstant().toString());
+        String startDate = appointment.getStartDateTime() == null ? null : appointment.getStartDateTime().toInstant().toString();
+        appointmentJson.put("startDateTime", startDate);
+        String endDate = appointment.getStartDateTime() == null ? null : appointment.getEndDateTime().toInstant().toString();
+        appointmentJson.put("endDateTime", endDate);
         appointmentJson.put("appointmentKind", appointment.getAppointmentKind().name());
         appointmentJson.put("appointmentNotes", appointment.getComments());
+        String priority = appointment.getPriority() != null ? appointment.getPriority().name() : null;
+        appointmentJson.put("priority", priority);
         ObjectMapper mapperObj = new ObjectMapper();
         return String.format("%s", mapperObj.writeValueAsString(appointmentJson));
     }

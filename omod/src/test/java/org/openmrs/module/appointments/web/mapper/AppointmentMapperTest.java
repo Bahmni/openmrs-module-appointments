@@ -19,6 +19,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -198,6 +199,7 @@ public class AppointmentMapperTest {
         assertEquals(appointmentRequest.getEndDateTime(), appointment.getEndDateTime());
         assertEquals(AppointmentKind.valueOf(appointmentRequest.getAppointmentKind()), appointment.getAppointmentKind());
         assertEquals(appointmentRequest.getComments(), appointment.getComments());
+        assertNull(appointment.getPriority());
     }
 
     @Test
@@ -227,6 +229,22 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentStatus.Requested, appointment.getStatus());
         assertEquals(appointmentRequest.getComments(), appointment.getComments());
 
+    }
+
+    @Test
+    public void shouldMapExistingAppointmentWhenPayloadHasAppointmentPriority() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setPriority("Routine");
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+        assertNotNull(appointment);
+        assertEquals(AppointmentPriority.Routine, appointment.getPriority());
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void shouldThrowExceptionWhenPayloadHasInvalidAppointmentPriority() throws ParseException {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setPriority("abcd");
+        appointmentMapper.fromRequest(appointmentRequest);
     }
 
     @Test

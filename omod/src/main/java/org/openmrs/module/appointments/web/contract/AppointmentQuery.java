@@ -12,6 +12,7 @@ public class AppointmentQuery {
     private String patientUuid;
     private String status;
     private String appointmentKind;
+    private Boolean withoutDates = false;
 
     public String getAppointmentKind() {
         return appointmentKind;
@@ -67,5 +68,13 @@ public class AppointmentQuery {
 
     public void setServiceTypeUuid(String serviceTypeUuid) {
         this.serviceTypeUuid = serviceTypeUuid;
+    }
+
+    public Boolean isWithoutDates() {
+        return withoutDates;
+    }
+
+    public void setWithoutDates(Boolean withoutDates) {
+        this.withoutDates = withoutDates;
     }
 }

@@ -20,6 +20,7 @@ import java.util.stream.Collectors;
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
+    private Date dateCreated;
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -29,6 +30,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Date endDateTime;
     private AppointmentKind appointmentKind;
     private AppointmentStatus status;
+    private AppointmentPriority priority;
     private String comments;
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
@@ -177,6 +179,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.status = status;
     }
 
+    public AppointmentPriority getPriority() {
+        return priority;
+    }
+
+    public void setPriority(AppointmentPriority priority) {
+        this.priority = priority;
+    }
+
     public String getComments() {
         return comments;
     }
@@ -229,6 +239,16 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
 
     public List<NotificationResult> getNotificationResults() {
         return notificationResults;
+    }
+
+    @Override
+    public Date getDateCreated() {
+        return dateCreated;
+    }
+
+    @Override
+    public void setDateCreated(Date dateCreated) {
+        this.dateCreated = dateCreated;
     }
 }
 

@@ -8,6 +8,7 @@ import java.util.Map;
 public class AppointmentDefaultResponse {
 	private String uuid;
 	private String appointmentNumber;
+	private Date dateCreated;
 	private Map patient;
 	private AppointmentServiceDefaultResponse service;
 	private Map serviceType;
@@ -25,6 +26,7 @@ public class AppointmentDefaultResponse {
 	private Boolean voided;
 	private HashMap extensions;
 	private String teleconsultationLink;
+	private String priority;
 
 	public String getUuid() {
 		return uuid;
@@ -175,5 +177,21 @@ public class AppointmentDefaultResponse {
 
 	public String getTeleconsultationLink() {
 		return teleconsultationLink;
+	}
+
+	public void setPriority(String priority) {
+		this.priority = priority;
+	}
+
+	public String getPriority() {
+		return priority;
+	}
+
+	public Date getDateCreated() {
+		return dateCreated;
+	}
+
+	public void setDateCreated(Date dateCreated) {
+		this.dateCreated = dateCreated;
 	}
 }

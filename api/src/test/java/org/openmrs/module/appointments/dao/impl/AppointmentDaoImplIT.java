@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.hibernate.Criteria;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -15,14 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentDao appointmentDao;
-
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
@@ -35,7 +31,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
-        assertEquals(11, allAppointmentServices.size());
+        assertEquals(13, allAppointmentServices.size());
     }
 
     @Test
@@ -48,12 +44,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(11, allAppointments.size());
+        assertEquals(13, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(12, allAppointments.size());
+        assertEquals(14, allAppointments.size());
     }
 
     @Test
@@ -144,7 +140,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointmentsWhenNoDateRangeIsProvided() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointmentsInDateRange(null, null);
-        assertEquals(11, allAppointmentServices.size());
+        assertEquals(13, allAppointmentServices.size());
     }
 
     @Test
@@ -160,7 +156,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         appointment.setService(allAppointments.get(0).getService());
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
-        assertEquals(1, searchedAppointmentList.size());
+        assertEquals(3, searchedAppointmentList.size());
     }
 
     @Test
@@ -263,7 +259,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(11, appointments.size());
+        assertEquals(13, appointments.size());
     }
 
     @Test
@@ -278,6 +274,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
     }
+
     @Test
     public void testGetAllAppointments() {
         Date forDate = new Date();
@@ -285,7 +282,6 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(0,appointments.size());
     }
-
 
     @Test
     public void testGetAllAppointmentsReminder() {
@@ -302,5 +298,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         List<Appointment> result = appointmentDao.search(appointmentSearchRequest);
 
         assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsWithoutDates() {
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(20);
+        assertNotNull(appointments);
+        assertEquals(3, appointments.size());
     }
 }
