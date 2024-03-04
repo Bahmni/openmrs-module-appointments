@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Person;
@@ -28,14 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
 import java.time.Instant;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -145,8 +139,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> searchDatelessAppointments() {
-        return appointmentDao.getDatelessAppointments();
+    public List<Appointment> searchAppointmentsWithoutDates() {
+        String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+        Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
+        return appointmentDao.getAppointmentsWithoutDates(limit);
     }
 
     private void setupTeleconsultation(Appointment appointment) {
@@ -295,6 +291,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
         if (isNull(appointmentSearchRequest.getStartDate())) {
             return null;
+        }
+        if (!isNull(appointmentSearchRequest.getLimit())) {
+            String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+            if (StringUtils.isNotEmpty(limit)) {
+                appointmentSearchRequest.setLimit(Integer.parseInt(limit));
+            }
         }
         return appointmentDao.search(appointmentSearchRequest);
     }

@@ -3,6 +3,8 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -20,6 +22,7 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestControlle
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -57,9 +60,9 @@ public class AppointmentController extends BaseRestController {
     @RequestMapping( method = RequestMethod.POST, value = "search")
     @ResponseBody
     public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
-        if(searchQuery.getIsDatelessAppointments()) {
-            List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments();
-            return appointmentMapper.constructResponse(datelessAppointments);
+        if(searchQuery.isWithoutDates()) {
+            List<Appointment> appointmentsWithoutDates = appointmentsService.searchAppointmentsWithoutDates();
+            return appointmentMapper.constructResponse(appointmentsWithoutDates);
         }
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
         if (searchQuery.getStatus() == null) {
@@ -68,6 +71,7 @@ public class AppointmentController extends BaseRestController {
         List<Appointment> appointments =  appointmentsService.search(appointment);
         return appointmentMapper.constructResponse(appointments);
     }
+
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -87,6 +91,7 @@ public class AppointmentController extends BaseRestController {
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }
+
 
     @RequestMapping( method = RequestMethod.GET, value = "futureAppointmentsForServiceType")
     @ResponseBody

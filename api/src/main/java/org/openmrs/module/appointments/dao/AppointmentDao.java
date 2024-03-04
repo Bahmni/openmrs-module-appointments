@@ -12,6 +12,7 @@ import java.util.List;
 
 public interface AppointmentDao {
     List<Appointment> getAllAppointments(Date forDate);
+    List<Appointment> getAllAppointmentsReminder(String afterTime);
 
     @Transactional
     void save(Appointment appointment);
@@ -32,5 +33,5 @@ public interface AppointmentDao {
 
     List<Appointment> getAppointmentsForPatient(Integer patientId);
 
-    List<Appointment> getDatelessAppointments();
+    List<Appointment> getAppointmentsWithoutDates(Integer limit);
 }

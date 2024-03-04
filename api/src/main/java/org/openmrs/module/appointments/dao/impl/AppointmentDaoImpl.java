@@ -8,7 +8,6 @@ import org.hibernate.criterion.Example;
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.sql.JoinType;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
@@ -57,16 +56,16 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
                 Example.create(appointment).excludeProperty("uuid"));
 
-        if(appointment.getPatient()!=null) criteria.createCriteria("patient").add(
+        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
                 Example.create(appointment.getPatient()));
 
-        if(appointment.getLocation()!=null) criteria.createCriteria("location").add(
+        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
                 Example.create(appointment.getLocation()));
 
-        if(appointment.getService()!=null) criteria.createCriteria("service").add(
+        if (appointment.getService() != null) criteria.createCriteria("service").add(
                 Example.create(appointment.getService()));
 
-        if(appointment.getProvider()!=null) criteria.createCriteria("provider").add(
+        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
                 Example.create(appointment.getProvider()));
 
         return criteria.list();
@@ -113,7 +112,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
             criteria.add(Restrictions.in("status", appointmentStatusFilterList));
         }
-        return  criteria.list();
+        return criteria.list();
 
     }
 
@@ -203,7 +202,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDatelessAppointments() {
+    public List<Appointment> getAppointmentsWithoutDates(Integer limit) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
         criteria.createAlias("patient", "patient");
         criteria.add(Restrictions.eq("patient.voided", false));
@@ -211,9 +210,9 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.isNull("startDateTime"));
         criteria.add(Restrictions.isNull("endDateTime"));
         criteria.addOrder(Order.asc("dateCreated"));
-        String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-        if(StringUtils.isNotEmpty(limit))
-            criteria.setMaxResults(Integer.parseInt(limit));
+        if (limit != null) {
+            criteria.setMaxResults(limit);
+        }
         return criteria.list();
     }
 }
