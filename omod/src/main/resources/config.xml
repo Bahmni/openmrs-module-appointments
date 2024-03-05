@@ -62,21 +62,6 @@
 	<!-- /Internationalization -->
 
 	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</point>
-		<class>org.openmrs.module.appointments.advice.AppointmentServiceDefinitionAdvice</class>
-	</advice>
-
-	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
-		<class>org.openmrs.module.appointments.advice.AppointmentAdvice</class>
-	</advice>
-
-	<advice>
-		<point>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</point>
-		<class>org.openmrs.module.appointments.advice.RecurringAppointmentsAdvice</class>
-	</advice>
-
-	<advice>
 		<point>org.openmrs.module.appointments.service.AppointmentsService</point>
 		<class>org.openmrs.module.appointments.events.advice.AppointmentEventsAdvice</class>
 	</advice>
