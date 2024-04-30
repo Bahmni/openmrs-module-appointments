@@ -263,7 +263,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnDateLessAppointments() {
-        List<Appointment> appointments = appointmentDao.getDatelessAppointments();
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<Appointment> appointments = appointmentDao.getDatelessAppointments(searchQuery);
         assertNotNull(appointments);
         assertEquals(3, appointments.size());
     }
