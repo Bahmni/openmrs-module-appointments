@@ -2,12 +2,7 @@ package org.openmrs.module.appointments.service;
 
 
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -77,6 +72,10 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest);
+
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
+    List<Appointment> search(AppointmentSearchRequestModel searchQuery);
 
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Map<Enum, List<Appointment>> getAppointmentConflicts(Appointment appointment);
