@@ -7,14 +7,11 @@ import org.hibernate.criterion.Example;
 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
+import org.hibernate.criterion.Disjunction;
 import org.hibernate.sql.JoinType;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentDao;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,6 +66,13 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if(appointment.getProvider()!=null) criteria.createCriteria("provider").add(
                 Example.create(appointment.getProvider()));
 
+        return criteria.list();
+    }
+
+    @Override
+    public List<Appointment> search(AppointmentSearchRequestModel searchQuery) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        addSearchCriteria(criteria, searchQuery);
         return criteria.list();
     }
 
