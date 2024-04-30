@@ -712,4 +712,22 @@
             ALTER TABLE patient_appointment MODIFY end_date_time datetime default null;
         </sql>
     </changeSet>
+    <changeSet id="add-patient-appointment-encounter-map-table-20240429" author="mgoodrich">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_encounter_map" />
+            </not>
+        </preConditions>
+        <comment>Add the map table to link appointments to encounter</comment>
+        <sql>
+            CREATE TABLE IF NOT EXISTS patient_appointment_encounter_map (
+                patient_appointment_id int(11) NOT NULL,
+                encounter_id int(11) NOT NULL,
+                PRIMARY KEY (`patient_appointment_id`,`encounter_id`),
+                KEY `patient_appointment_encounter_map_encounter_id` (`encounter_id`),
+                CONSTRAINT `paitent_appointment_enconuter_map_patient_appointment` FOREIGN KEY (`patient_appointment_id`) REFERENCES `patient_appointment` (`patient_appointment_id`),
+                CONSTRAINT `paitent_appointment_enconuter_map_encounter` FOREIGN KEY (`encounter_id`) REFERENCES `encounter` (`encounter_id`)
+            )
+        </sql>
+    </changeSet>
 </databaseChangeLog>

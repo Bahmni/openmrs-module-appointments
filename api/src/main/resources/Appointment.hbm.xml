@@ -62,6 +62,13 @@
             <one-to-many class="AppointmentAudit"/>
         </set>
 
+        <set name="encounters" table="patient_appointment_encounter_map" lazy="true" cascade="none">
+            <key column="patient_appointment_id" />
+            <many-to-many class="org.openmrs.Encounter">
+                <column name="encounter_id" />
+            </many-to-many>
+        </set>
+
         <join table="patient_appointment_occurrence" inverse="true" optional="true">
             <key column="patient_appointment_id"/>
             <many-to-one name="appointmentRecurringPattern" column="patient_appointment_timings_id"/>

@@ -306,4 +306,13 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(3, appointments.size());
     }
+
+    @Test
+    public void shouldReturnAppointmentWithEncounters() {
+        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        assertNotNull(appointment);
+        assertEquals(2, appointment.getEncounters().size());
+
+    }
 }
