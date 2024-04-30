@@ -5,10 +5,15 @@ import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties
 public class AppointmentQuery {
+    @Deprecated
     private String providerUuid;
+    @Deprecated
     private String serviceUuid;
+    @Deprecated
     private String serviceTypeUuid;
+    @Deprecated
     private String locationUuid;
+    @Deprecated
     private String patientUuid;
     private String status;
     private String appointmentKind;
