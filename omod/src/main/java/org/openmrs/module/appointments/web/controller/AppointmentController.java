@@ -3,11 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceType;
-import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -56,9 +52,9 @@ public class AppointmentController extends BaseRestController {
     }
     @RequestMapping( method = RequestMethod.POST, value = "search")
     @ResponseBody
-    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
-        if(searchQuery.getIsDatelessAppointments()) {
-            List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments();
+    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentSearchRequestModel searchQuery) throws IOException {
+        if(searchQuery.isWithoutDates()) {
+            List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments(searchQuery);
             return appointmentMapper.constructResponse(datelessAppointments);
         }
         Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
