@@ -57,11 +57,8 @@ public class AppointmentController extends BaseRestController {
             List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments(searchQuery);
             return appointmentMapper.constructResponse(datelessAppointments);
         }
-        Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
-        if (searchQuery.getStatus() == null) {
-            appointment.setStatus(null);
-        }
-        List<Appointment> appointments =  appointmentsService.search(appointment);
+
+        List<Appointment> appointments =  appointmentsService.search(searchQuery);
         return appointmentMapper.constructResponse(appointments);
     }
 
