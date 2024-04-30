@@ -207,11 +207,9 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDatelessAppointments() {
+    public List<Appointment> getDatelessAppointments(AppointmentSearchRequestModel searchQuery) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        addSearchCriteria(criteria, searchQuery);
         criteria.add(Restrictions.isNull("startDateTime"));
         criteria.add(Restrictions.isNull("endDateTime"));
         criteria.addOrder(Order.asc("dateCreated"));
@@ -220,4 +218,70 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.setMaxResults(Integer.parseInt(limit));
         return criteria.list();
     }
+
+    private void addSearchCriteria(Criteria criteria, AppointmentSearchRequestModel searchQuery) {
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        criteria.createAlias("service", "service");
+
+        if (searchQuery != null) {
+            if (searchQuery.getPatientUuids() != null && !searchQuery.getPatientUuids().isEmpty()) {
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getPatientUuids().stream()
+                        .map(patientUuid -> Restrictions.eq("patient.uuid", patientUuid))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+
+            if (searchQuery.getServiceUuids() != null && !searchQuery.getServiceUuids().isEmpty()) {
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getServiceUuids().stream()
+                        .map(serviceUuid -> Restrictions.eq("service.uuid", serviceUuid))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+
+            if (searchQuery.getServiceTypeUuids() != null && !searchQuery.getServiceTypeUuids().isEmpty()) {
+                criteria.createAlias("serviceType", "serviceType");
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getServiceTypeUuids().stream()
+                        .map(serviceTypeUuid -> Restrictions.eq("serviceType.uuid", serviceTypeUuid))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+
+            if (searchQuery.getStatus() != null) {
+                criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(searchQuery.getStatus())));
+            }
+
+            if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
+                criteria.createAlias("providers", "providers");
+                criteria.createAlias("providers.provider", "provider");
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getProviderUuids().stream()
+                        .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+
+            if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
+                criteria.createAlias("location", "location");
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getLocationUuids().stream()
+                        .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+
+            if (searchQuery.getPriorities() != null && !searchQuery.getPriorities().isEmpty()) {
+                Disjunction disjunction = Restrictions.disjunction();
+                searchQuery.getPriorities().stream()
+                        .map(priority -> Restrictions.eq("priority", AppointmentPriority.valueOf(priority)))
+                        .forEach(disjunction::add);
+                criteria.add(disjunction);
+            }
+        }
+    }
+
 }
