@@ -31,5 +31,5 @@ public interface AppointmentDao {
 
     List<Appointment> getAppointmentsForPatient(Integer patientId);
 
-    List<Appointment> getDatelessAppointments();
+    List<Appointment> getDatelessAppointments(AppointmentSearchRequestModel searchQuery);
 }
