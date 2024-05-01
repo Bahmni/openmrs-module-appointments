@@ -62,10 +62,10 @@
             <one-to-many class="AppointmentAudit"/>
         </set>
 
-        <set name="encounters" table="patient_appointment_encounter_map" lazy="true" cascade="none">
+        <set name="fulfillingEncounters" table="patient_appointment_fulfilling_encounter_map" lazy="true" cascade="none">
             <key column="patient_appointment_id" />
             <many-to-many class="org.openmrs.Encounter">
-                <column name="encounter_id" />
+                <column name="fulfilling_encounter_id" />
             </many-to-many>
         </set>
 

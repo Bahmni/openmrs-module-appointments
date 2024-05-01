@@ -44,7 +44,7 @@
     <patient_appointment patient_appointment_id="8" patient_id ="1" appointment_service_type_id="1" start_date_time="2108-08-15 14:00:00.0" end_date_time="2108-08-15 15:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13347"/>
     <patient_appointment patient_appointment_id="9" patient_id ="1" appointment_service_type_id="1" start_date_time="2108-08-16 14:00:00.0" end_date_time="2108-08-16 15:00:00.0" status="Cancelled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13348"/>
 
-    <patient_appointment patient_appointment_id="10" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13349"/>
+    <patient_appointment patient_appointment_id="10" patient_id ="1" appointment_service_id="1" appointment_service_type_id="1" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Scheduled" appointment_kind="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13349"/>
     <patient_appointment patient_appointment_id="11" patient_id ="1" appointment_service_id="1" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13350"/>
     <patient_appointment patient_appointment_id="12" patient_id ="1" appointment_service_id="1" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Completed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13351"/>
     <patient_appointment patient_appointment_id="13" patient_id ="1" appointment_service_id="1" appointment_service_type_id="2" start_date_time="2017-08-08 14:00:00.0" end_date_time="2017-08-10 15:00:00.0" status="Cancelled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13222"/>
@@ -52,8 +52,8 @@
     <encounter encounter_id="1001"  patient_id="1" encounter_type="1" encounter_datetime="2017-08-08 14:00:00.0" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="f303e49f-24a9-41bb-810b-5d07b881c0e0"/>
     <encounter encounter_id="1002"  patient_id="1" encounter_type="2" encounter_datetime="2017-08-08 14:30:00.0" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="785826c1-f137-4b4f-bb2f-07b5c546d139"/>
 
-    <patient_appointment_encounter_map patient_appointment_id="10" encounter_id="1001"/>
-    <patient_appointment_encounter_map patient_appointment_id="10" encounter_id="1002"/>
+    <patient_appointment_fulfilling_encounter_map patient_appointment_id="10" fulfilling_encounter_id="1001"/>
+    <patient_appointment_fulfilling_encounter_map patient_appointment_id="10" fulfilling_encounter_id="1002"/>
 
     <patient_appointment_audit patient_appointment_audit_id="1" appointment_id="2" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="26104r42-3ca8-11e3-bf2b-0800271c13222"/>
     <patient_appointment_audit patient_appointment_audit_id="2" appointment_id="3" status="CheckedIn" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="26104r42-3ca8-11e3-bf2b-0800271c13233"/>

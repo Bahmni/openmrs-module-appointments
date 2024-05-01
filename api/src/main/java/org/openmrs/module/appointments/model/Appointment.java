@@ -40,7 +40,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Appointment relatedAppointment;
     private String teleHealthVideoLink;
     @Independent
-    private Set<Encounter> encounters;
+    private Set<Encounter> fulfillingEncounters;
 
     /**
      * This attribute is not a entity property. Just a placeholder for the clients to prepare response relevant  to notification
@@ -255,12 +255,12 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.dateCreated = dateCreated;
     }
 
-    public Set<Encounter> getEncounters() {
-        return encounters;
+    public Set<Encounter> getFulfillingEncounters() {
+        return fulfillingEncounters;
     }
 
-    public void setEncounters(Set<Encounter> encounters) {
-        this.encounters = encounters;
+    public void setFulfillingEncounters(Set<Encounter> fulfillingEncounters) {
+        this.fulfillingEncounters = fulfillingEncounters;
     }
 }
 

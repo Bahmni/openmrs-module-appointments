@@ -1,7 +1,11 @@
 package org.openmrs.module.appointments.dao.impl;
 
+import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.Encounter;
+import org.openmrs.api.EncounterService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
@@ -22,6 +26,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
+
+    @Autowired
+    EncounterService encounterService;
+
+    @Autowired
+    SessionFactory sessionFactory;
 
     @Before
     public void setUp() throws Exception {
@@ -312,7 +322,39 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
         Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
         assertNotNull(appointment);
-        assertEquals(2, appointment.getEncounters().size());
+        assertEquals(2, appointment.getFulfillingEncounters().size());
+    }
 
+    @Test
+    public void voidingAppointmentShouldNotVoidFulfillingEncounters() {
+        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        appointment.setVoided(true);
+        appointmentDao.save(appointment);
+        Context.flushSession();
+        Context.clearSession();
+
+        appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        assertTrue(appointment.getVoided());
+        Encounter enc1 = encounterService.getEncounterByUuid("f303e49f-24a9-41bb-810b-5d07b881c0e0");
+        assertFalse(enc1.getVoided());
+        Encounter enc2 = encounterService.getEncounterByUuid("785826c1-f137-4b4f-bb2f-07b5c546d139");
+        assertFalse(enc2.getVoided());
+    }
+
+    @Test
+    public void deletingAppointmentShouldNotDeleteFulfillingEncounters() {
+        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
+        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);;
+        sessionFactory.getCurrentSession().delete(appointment);
+        Context.flushSession();
+        Context.clearSession();
+
+        appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
+        assertNull(appointment);
+        Encounter enc1 = encounterService.getEncounterByUuid("f303e49f-24a9-41bb-810b-5d07b881c0e0");
+        assertNotNull(enc1);
+        Encounter enc2 = encounterService.getEncounterByUuid("785826c1-f137-4b4f-bb2f-07b5c546d139");
+        assertNotNull(enc2);
     }
 }
