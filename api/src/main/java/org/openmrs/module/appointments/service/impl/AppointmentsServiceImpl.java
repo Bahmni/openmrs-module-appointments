@@ -14,14 +14,15 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
@@ -143,10 +144,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> searchAppointmentsWithoutDates() {
-        String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-        Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
-        return appointmentDao.getAppointmentsWithoutDates(limit);
+    public List<Appointment> searchDatelessAppointments(AppointmentSearchRequestModel searchQuery) {
+        return appointmentDao.getDatelessAppointments(searchQuery);
     }
 
     private void setupTeleconsultation(Appointment appointment) {
@@ -217,6 +216,13 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     @Override
     public List<Appointment> search(Appointment appointment) {
         List<Appointment> appointments = appointmentDao.search(appointment);
+        return appointments.stream().filter(searchedAppointment -> !isServiceOrServiceTypeVoided(searchedAppointment)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
+    public List<Appointment> search(AppointmentSearchRequestModel searchQuery) {
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
         return appointments.stream().filter(searchedAppointment -> !isServiceOrServiceTypeVoided(searchedAppointment)).collect(Collectors.toList());
     }
 
