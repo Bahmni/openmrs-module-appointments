@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.hibernate.Criteria;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -15,14 +14,11 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentDao appointmentDao;
-
 
     @Autowired
     AppointmentServiceDao appointmentServiceDao;
@@ -267,7 +263,8 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnAppointmentsWithoutDates() {
-        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(20);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(searchQuery, 20);
         assertNotNull(appointments);
         assertEquals(3, appointments.size());
     }

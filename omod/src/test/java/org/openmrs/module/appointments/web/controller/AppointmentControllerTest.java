@@ -228,6 +228,16 @@ public class AppointmentControllerTest {
         appointmentQuery.setProviderUuid("someProviderUuid");
         appointmentQuery.setServiceUuid("someServiceUuid");
 
+        AppointmentSearchRequestModel appointmentSearchRequestQuery = new AppointmentSearchRequestModel();
+        List<String> locationUuids =  Arrays.asList("location-uuid-1");
+        appointmentSearchRequestQuery.setLocationUuids(locationUuids);
+        List<String> patientUuids =  Arrays.asList("patient-uuid-1");
+        appointmentSearchRequestQuery.setPatientUuids(patientUuids);
+        List<String> providerUuids = Arrays.asList("provider-uuid-1");
+        appointmentSearchRequestQuery.setProviderUuids(providerUuids);
+        List<String> serviceUuids = Arrays.asList("service-uuid-1");
+        appointmentSearchRequestQuery.setServiceUuids(serviceUuids);
+
         AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
         appointmentDefaultResponse.setUuid("appointmentUuid1");
 
@@ -237,7 +247,7 @@ public class AppointmentControllerTest {
         when(appointmentMapper.mapQueryToAppointment(appointmentQuery)).thenReturn(appointment);
         when(appointmentsService.search(appointment)).thenReturn(appointments);
         when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
-        List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
+        List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentSearchRequestQuery);
         AppointmentDefaultResponse appointmentResponse = appointmentDefaultResponses.get(0);
         assertEquals("appointmentUuid1", appointmentResponse.getUuid());
     }
@@ -251,17 +261,15 @@ public class AppointmentControllerTest {
         patient.setUuid("somePatientUuid");
         appointment.setPatient(patient);
         appointments.add(appointment);
-        AppointmentQuery appointmentQuery = new AppointmentQuery();
+        AppointmentSearchRequestModel appointmentQuery = new AppointmentSearchRequestModel();
         appointmentQuery.setWithoutDates(true);
-
-
         AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
         appointmentDefaultResponse.setUuid("appointmentUuid1");
 
         List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
         appointmentDefaultResponses.add(appointmentDefaultResponse);
 
-        when(appointmentsService.searchAppointmentsWithoutDates()).thenReturn(appointments);
+        when(appointmentsService.searchAppointmentsWithoutDates(appointmentQuery)).thenReturn(appointments);
         when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
 
         List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
@@ -280,7 +288,7 @@ public class AppointmentControllerTest {
         patient.setUuid("somePatientUuid");
         appointment.setPatient(patient);
         appointments.add(appointment);
-        AppointmentQuery appointmentQuery = new AppointmentQuery();
+        AppointmentSearchRequestModel appointmentQuery = new AppointmentSearchRequestModel();
         appointmentQuery.setStatus("WaitList");
 
 
