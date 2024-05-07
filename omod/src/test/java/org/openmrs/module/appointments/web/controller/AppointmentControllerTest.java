@@ -298,8 +298,7 @@ public class AppointmentControllerTest {
         List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
         appointmentDefaultResponses.add(appointmentDefaultResponse);
 
-        when(appointmentMapper.mapQueryToAppointment(appointmentQuery)).thenReturn(appointment);
-        when(appointmentsService.search(appointment)).thenReturn(appointments);
+        when(appointmentsService.search(appointmentQuery)).thenReturn(appointments);
         when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
 
         List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
