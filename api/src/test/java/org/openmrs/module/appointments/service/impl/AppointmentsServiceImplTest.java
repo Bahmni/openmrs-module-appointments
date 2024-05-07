@@ -25,14 +25,15 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -790,7 +791,8 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldGetDatelessAppointments() {
-        appointmentsService.searchDatelessAppointments();
-        verify(appointmentDao, times(1)).getDatelessAppointments();
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        appointmentsService.searchDatelessAppointments(searchQuery);
+        verify(appointmentDao, times(1)).getDatelessAppointments(searchQuery);
     }
 }
