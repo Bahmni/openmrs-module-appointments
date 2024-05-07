@@ -122,6 +122,10 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
+
+    @Mock
+    private AdministrationService administrationService;
+
     @Mock
     private UserContext userContext;
     @InjectMocks
