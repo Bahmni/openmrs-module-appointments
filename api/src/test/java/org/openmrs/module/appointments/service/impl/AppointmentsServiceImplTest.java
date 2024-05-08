@@ -312,6 +312,17 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
+    public void shouldSearchForAnAppointmentBasedOnAppointmentSearchRequestModel() {
+        AppointmentSearchRequestModel appointmentSearchRequestModel = new AppointmentSearchRequestModel();
+        appointmentSearchRequestModel.setStatus("Scheduled");
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        when(appointmentDao.search(appointmentSearchRequestModel)).thenReturn(appointmentList);
+        appointmentsService.search(appointmentSearchRequestModel);
+        verify(appointmentDao, times(1)).search(appointmentSearchRequestModel);
+    }
+
+    @Test
     public void shouldThrowExceptionIfValidationFailsOnAppointmentSave() {
         String errorMessage = "Appointment cannot be created without Patient";
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
