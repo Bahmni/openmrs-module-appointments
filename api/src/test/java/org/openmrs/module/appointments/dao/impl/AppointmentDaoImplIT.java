@@ -268,4 +268,77 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(3, appointments.size());
     }
+
+    @Test
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelPatientAndLocation() {
+
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> patientUuids=new ArrayList<>();
+        patientUuids.add(allAppointments.get(0).getPatient().getUuid());
+        List<String> locationUuids=new ArrayList<>();
+        locationUuids.add(allAppointments.get(0).getLocation().getUuid());
+
+        searchQuery.setPatientUuids(patientUuids);
+        searchQuery.setLocationUuids(locationUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(3, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelServiceAndServiceType() {
+
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> serviceUuids=new ArrayList<>();
+        serviceUuids.add(allAppointments.get(0).getService().getUuid());
+        List<String> serviceTypeUuids=new ArrayList<>();
+        serviceTypeUuids.add(allAppointments.get(0).getServiceType().getUuid());
+
+        searchQuery.setServiceUuids(serviceUuids);
+        searchQuery.setServiceTypeUuids(serviceTypeUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelPriority() {
+
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> priorities=new ArrayList<>();
+        priorities.add("AsNeeded");
+
+        searchQuery.setPriorities(priorities);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(1, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyAppointmentsBasedOnAppointmentSearchRequestModelProviderWhenNoAppointmentsAreAssignedToProvider() {
+
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> providerUuids=new ArrayList<>();
+        providerUuids.add(UUID.randomUUID().toString());
+
+        searchQuery.setProviderUuids(providerUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
 }
