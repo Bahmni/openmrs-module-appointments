@@ -16,7 +16,9 @@ import org.openmrs.Provider;
 import org.openmrs.User;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.api.context.UserContext;
 import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.conflicts.AppointmentConflict;
 import org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict;
@@ -48,13 +50,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -75,7 +71,6 @@ import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
@@ -136,6 +131,11 @@ public class AppointmentsServiceImplTest {
     @Mock
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
 
+    @Mock
+    private AdministrationService administrationService;
+
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -525,6 +525,8 @@ public class AppointmentsServiceImplTest {
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(endDate);
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
 
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
@@ -539,7 +541,8 @@ public class AppointmentsServiceImplTest {
         Date endDate = Date.from(Instant.now());
         appointmentSearchRequest.setStartDate(null);
         appointmentSearchRequest.setEndDate(endDate);
-
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
         verify(appointmentDao, never()).search(appointmentSearchRequest);
@@ -555,6 +558,8 @@ public class AppointmentsServiceImplTest {
 
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
         verify(appointmentDao, times(1)).search(appointmentSearchRequest);
@@ -801,9 +806,11 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldGetDatelessAppointments() {
+    public void shouldGetAppointmentsWithoutDates() {
         AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
-        appointmentsService.searchDatelessAppointments(searchQuery);
-        verify(appointmentDao, times(1)).getDatelessAppointments(searchQuery);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
+        appointmentsService.searchAppointmentsWithoutDates(searchQuery);
+        verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);
     }
 }

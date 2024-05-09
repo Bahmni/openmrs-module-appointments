@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Person;
@@ -146,8 +147,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> searchDatelessAppointments(AppointmentSearchRequestModel searchQuery) {
-        return appointmentDao.getDatelessAppointments(searchQuery);
+    public List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery) {
+        String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+        Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
+        return appointmentDao.getAppointmentsWithoutDates(searchQuery, limit);
     }
 
     private void setupTeleconsultation(Appointment appointment) {
@@ -303,6 +306,12 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
         if (isNull(appointmentSearchRequest.getStartDate())) {
             return null;
+        }
+        if (!isNull(appointmentSearchRequest.getLimit())) {
+            String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+            if (StringUtils.isNotEmpty(limit)) {
+                appointmentSearchRequest.setLimit(Integer.parseInt(limit));
+            }
         }
         return appointmentDao.search(appointmentSearchRequest);
     }

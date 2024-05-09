@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.model;
 
 public enum AppointmentPriority {
-    AsNeeded("AsNeeded"), Routine("Routine"), Emergency("Emergency"), Invalid("Invalid");
+    AsNeeded("AsNeeded"), Routine("Routine"), Emergency("Emergency");
 
     private final String value;
 

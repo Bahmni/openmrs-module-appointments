@@ -158,8 +158,17 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void should_SearchForDatelessAppointments() throws Exception {
+    public void should_SearchForAppointmentsWithoutDates() throws Exception {
         String content = "{ \"withoutDates\": true }";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/search", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void should_SearchForWaitListAppointments() throws Exception {
+        String content = "{ \"status\": \"WaitList\" }";
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointment/search", content));
         assertNotNull(response);

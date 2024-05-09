@@ -17,7 +17,7 @@ public class AppointmentQuery {
     private String patientUuid;
     private String status;
     private String appointmentKind;
-    private Boolean isDatelessAppointments = false;
+    private Boolean withoutDates = false;
 
     public String getAppointmentKind() {
         return appointmentKind;
@@ -75,11 +75,11 @@ public class AppointmentQuery {
         this.serviceTypeUuid = serviceTypeUuid;
     }
 
-    public Boolean getIsDatelessAppointments() {
-        return isDatelessAppointments;
+    public Boolean isWithoutDates() {
+        return withoutDates;
     }
 
-    public void setIsDatelessAppointments(Boolean datelessAppointments) {
-        isDatelessAppointments = datelessAppointments;
+    public void setWithoutDates(Boolean withoutDates) {
+        this.withoutDates = withoutDates;
     }
 }
