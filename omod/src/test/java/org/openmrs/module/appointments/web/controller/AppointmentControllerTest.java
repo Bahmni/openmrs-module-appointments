@@ -276,7 +276,36 @@ public class AppointmentControllerTest {
         List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
         appointmentDefaultResponses.add(appointmentDefaultResponse);
 
-        when(appointmentsService.searchDatelessAppointments(appointmentQuery)).thenReturn(appointments);
+        when(appointmentsService.searchAppointmentsWithoutDates(appointmentQuery)).thenReturn(appointments);
+        when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
+
+        List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);
+        AppointmentDefaultResponse appointmentResponse = appointmentResponses.get(0);
+        AppointmentDefaultResponse expectedAppointmentResponse = appointmentDefaultResponses.get(0);
+        assertEquals(expectedAppointmentResponse.getUuid(), appointmentResponse.getUuid());
+    }
+
+    @Test
+    public void shouldSearchForWaitListAppointments() throws Exception{
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setUuid("appointmentUuid");
+        appointment.setStatus(AppointmentStatus.WaitList);
+        Patient patient = new Patient();
+        patient.setUuid("somePatientUuid");
+        appointment.setPatient(patient);
+        appointments.add(appointment);
+        AppointmentSearchRequestModel appointmentQuery = new AppointmentSearchRequestModel();
+        appointmentQuery.setStatus("WaitList");
+
+
+        AppointmentDefaultResponse appointmentDefaultResponse = new AppointmentDefaultResponse();
+        appointmentDefaultResponse.setUuid("appointmentUuid");
+
+        List<AppointmentDefaultResponse> appointmentDefaultResponses = new ArrayList<>();
+        appointmentDefaultResponses.add(appointmentDefaultResponse);
+
+        when(appointmentsService.search(appointmentQuery)).thenReturn(appointments);
         when(appointmentMapper.constructResponse(appointments)).thenReturn(appointmentDefaultResponses);
 
         List<AppointmentDefaultResponse> appointmentResponses = appointmentController.searchAppointments(appointmentQuery);

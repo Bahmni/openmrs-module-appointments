@@ -129,6 +129,11 @@ public class AppointmentsServiceImplTest {
     @Mock
     private AdministrationService administrationService;
 
+    @Mock
+    private AdministrationService administrationService;
+
+    @Mock
+    private UserContext userContext;
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
@@ -800,9 +805,11 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldGetDatelessAppointments() {
+    public void shouldGetAppointmentsWithoutDates() {
         AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
-        appointmentsService.searchDatelessAppointments(searchQuery);
-        verify(appointmentDao, times(1)).getDatelessAppointments(searchQuery);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
+        appointmentsService.searchAppointmentsWithoutDates(searchQuery);
+        verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);
     }
 }

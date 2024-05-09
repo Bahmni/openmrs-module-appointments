@@ -144,8 +144,10 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     }
 
     @Override
-    public List<Appointment> searchDatelessAppointments(AppointmentSearchRequestModel searchQuery) {
-        return appointmentDao.getDatelessAppointments(searchQuery);
+    public List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery) {
+        String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+        Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
+        return appointmentDao.getAppointmentsWithoutDates(searchQuery, limit);
     }
 
     private void setupTeleconsultation(Appointment appointment) {

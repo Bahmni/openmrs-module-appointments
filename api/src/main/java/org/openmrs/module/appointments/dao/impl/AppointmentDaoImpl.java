@@ -9,7 +9,6 @@ import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.criterion.Disjunction;
 import org.hibernate.sql.JoinType;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
@@ -236,15 +235,15 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     @Override
-    public List<Appointment> getDatelessAppointments(AppointmentSearchRequestModel searchQuery) {
+    public List<Appointment> getAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery, Integer limit) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
         addSearchCriteria(criteria, searchQuery);
         criteria.add(Restrictions.isNull("startDateTime"));
         criteria.add(Restrictions.isNull("endDateTime"));
         criteria.addOrder(Order.asc("dateCreated"));
-        String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
-        if(StringUtils.isNotEmpty(limit))
-            criteria.setMaxResults(Integer.parseInt(limit));
+        if (limit != null) {
+            criteria.setMaxResults(limit);
+        }
         return criteria.list();
     }
 

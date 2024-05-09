@@ -58,8 +58,8 @@ public class AppointmentController extends BaseRestController {
     @ResponseBody
     public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentSearchRequestModel searchQuery) throws IOException {
         if(searchQuery.isWithoutDates()) {
-            List<Appointment> datelessAppointments = appointmentsService.searchDatelessAppointments(searchQuery);
-            return appointmentMapper.constructResponse(datelessAppointments);
+            List<Appointment> appointmentsWithoutDates = appointmentsService.searchAppointmentsWithoutDates(searchQuery);
+            return appointmentMapper.constructResponse(appointmentsWithoutDates);
         }
 
         List<Appointment> appointments =  appointmentsService.search(searchQuery);

@@ -108,6 +108,6 @@ public interface AppointmentsService {
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
-    List<Appointment> searchDatelessAppointments(AppointmentSearchRequestModel searchQuery);
+    List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery);
 }
 
