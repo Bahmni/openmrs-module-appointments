@@ -2,9 +2,11 @@ package org.openmrs.module.appointments.model;
 
 import org.apache.commons.lang.time.DateUtils;
 import org.openmrs.BaseOpenmrsData;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.annotation.Independent;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.util.DateUtil;
 
@@ -37,6 +39,8 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
     private String teleHealthVideoLink;
+    @Independent
+    private Set<Encounter> fulfillingEncounters;
 
     /**
      * This attribute is not a entity property. Just a placeholder for the clients to prepare response relevant  to notification
@@ -249,6 +253,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     @Override
     public void setDateCreated(Date dateCreated) {
         this.dateCreated = dateCreated;
+    }
+
+    public Set<Encounter> getFulfillingEncounters() {
+        return fulfillingEncounters;
+    }
+
+    public void setFulfillingEncounters(Set<Encounter> fulfillingEncounters) {
+        this.fulfillingEncounters = fulfillingEncounters;
     }
 }
 
