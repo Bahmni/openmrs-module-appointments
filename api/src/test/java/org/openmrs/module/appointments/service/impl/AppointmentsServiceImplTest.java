@@ -129,11 +129,6 @@ public class AppointmentsServiceImplTest {
     @Mock
     private AdministrationService administrationService;
 
-    @Mock
-    private AdministrationService administrationService;
-
-    @Mock
-    private UserContext userContext;
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;
 
