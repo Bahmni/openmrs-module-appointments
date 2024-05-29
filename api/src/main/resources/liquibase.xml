@@ -731,4 +731,15 @@
         <addForeignKeyConstraint constraintName="patient_appointment_fulfilling_encounter_map_patient_appointment" baseTableName="patient_appointment_fulfilling_encounter_map" baseColumnNames="patient_appointment_id" referencedTableName="patient_appointment" referencedColumnNames="patient_appointment_id"/>
         <addForeignKeyConstraint constraintName="patient_appointment_fulfilling_encounter_map_encounter" baseTableName="patient_appointment_fulfilling_encounter_map" baseColumnNames="fulfilling_encounter_id" referencedTableName="encounter" referencedColumnNames="encounter_id"/>
     </changeSet>
+    <changeSet id="add_date_appointment_scheduled_20240528" author="aojwang">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists columnName="date_appointment_scheduled" tableName="patient_appointment"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="patient_appointment">
+            <column name="date_appointment_scheduled" type="DATE">
+            </column>
+        </addColumn>
+    </changeSet>
 </databaseChangeLog>

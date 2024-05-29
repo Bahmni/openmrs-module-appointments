@@ -9,6 +9,7 @@ public class AppointmentDefaultResponse {
 	private String uuid;
 	private String appointmentNumber;
 	private Date dateCreated;
+	private Date dateAppointmentScheduled;
 	private Map patient;
 	private AppointmentServiceDefaultResponse service;
 	private Map serviceType;
@@ -193,5 +194,13 @@ public class AppointmentDefaultResponse {
 
 	public void setDateCreated(Date dateCreated) {
 		this.dateCreated = dateCreated;
+	}
+
+	public Date getDateAppointmentScheduled() {
+		return dateAppointmentScheduled;
+	}
+
+	public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
+		this.dateAppointmentScheduled = dateAppointmentScheduled;
 	}
 }

@@ -199,6 +199,7 @@ public class AppointmentMapper {
         response.setUuid(a.getUuid());
         response.setAppointmentNumber(a.getAppointmentNumber());
         response.setDateCreated(a.getDateCreated());
+        response.setDateAppointmentScheduled(a.getDateAppointmentScheduled());
         response.setPatient(createPatientMap(a.getPatient()));
         response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));

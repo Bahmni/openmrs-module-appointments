@@ -23,6 +23,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
     private Date dateCreated;
+    private Date dateAppointmentScheduled = new Date();
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -248,6 +249,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     @Override
     public Date getDateCreated() {
         return dateCreated;
+    }
+
+    public Date getDateAppointmentScheduled() {
+        return dateAppointmentScheduled;
+    }
+
+    public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
+        this.dateAppointmentScheduled = dateAppointmentScheduled;
     }
 
     @Override
