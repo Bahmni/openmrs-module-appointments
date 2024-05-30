@@ -99,6 +99,10 @@ public class AppointmentMapper {
         if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
             appointment.setStatus(AppointmentStatus.valueOf(appointmentRequest.getStatus()));
         }
+
+        if (appointmentRequest.getDateAppointmentScheduled() != null) {
+            appointment.setDateAppointmentScheduled(appointmentRequest.getDateAppointmentScheduled());
+        }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
         //appointment.setProvider(identifyAppointmentProvider(appointmentRequest.getProviderUuid()));

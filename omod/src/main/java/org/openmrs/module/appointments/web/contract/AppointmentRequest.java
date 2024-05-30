@@ -16,6 +16,7 @@ public class AppointmentRequest {
     private String serviceTypeUuid;
     private String providerUuid;
     private String locationUuid;
+    private Date dateAppointmentScheduled;
     private Date startDateTime;
     private Date endDateTime;
     private String status;
@@ -134,5 +135,13 @@ public class AppointmentRequest {
 
     public void setPriority(String priority) {
         this.priority = priority;
+    }
+
+    public Date getDateAppointmentScheduled() {
+        return dateAppointmentScheduled;
+    }
+
+    public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
+        this.dateAppointmentScheduled = dateAppointmentScheduled;
     }
 }
