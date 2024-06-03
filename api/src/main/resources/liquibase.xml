@@ -737,9 +737,16 @@
                 <columnExists columnName="date_appointment_scheduled" tableName="patient_appointment"/>
             </not>
         </preConditions>
+        <comment>add a column to record the date an appointment was issued</comment>
         <addColumn tableName="patient_appointment">
             <column name="date_appointment_scheduled" type="DATE">
             </column>
         </addColumn>
+    </changeSet>
+    <changeSet id="fill_date_appointment_scheduled_20240603" author="aojwang">
+        <comment>Default the date an appointment was issued to the appointment date_created</comment>
+        <sql>
+            update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
+        </sql>
     </changeSet>
 </databaseChangeLog>
