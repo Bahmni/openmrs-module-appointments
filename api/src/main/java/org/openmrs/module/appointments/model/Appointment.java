@@ -28,7 +28,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
      * This property is useful for documenting the visit when the patient booked the appointment or when the patient called to book the appointment
      * NOTE: This is *not* the date the appointment is scheduled to take place. We use startDateTime for this
      */
-    private Date dateAppointmentScheduled = new Date();
+    private Date dateAppointmentScheduled;
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
