@@ -23,6 +23,12 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
     private Date dateCreated;
+    /**
+     * The date when the appointment was scheduled. This can be today or in the past (for retrospective entry), but not in the future.
+     * This property is useful for documenting the visit when the patient booked the appointment or when the patient called to book the appointment
+     * NOTE: This is *not* the date the appointment is scheduled to take place. We use startDateTime for this
+     */
+    private Date dateAppointmentScheduled = new Date();
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
@@ -248,6 +254,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     @Override
     public Date getDateCreated() {
         return dateCreated;
+    }
+
+    public Date getDateAppointmentScheduled() {
+        return dateAppointmentScheduled;
+    }
+
+    public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
+        this.dateAppointmentScheduled = dateAppointmentScheduled;
     }
 
     @Override

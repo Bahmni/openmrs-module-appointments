@@ -100,6 +100,10 @@ public class AppointmentMapper {
         if (StringUtils.isNotBlank(appointmentRequest.getStatus())){
             appointment.setStatus(AppointmentStatus.valueOf(appointmentRequest.getStatus()));
         }
+
+        if (appointmentRequest.getDateAppointmentScheduled() != null) {
+            appointment.setDateAppointmentScheduled(appointmentRequest.getDateAppointmentScheduled());
+        }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
         //appointment.setProvider(identifyAppointmentProvider(appointmentRequest.getProviderUuid()));
@@ -200,6 +204,7 @@ public class AppointmentMapper {
         response.setUuid(a.getUuid());
         response.setAppointmentNumber(a.getAppointmentNumber());
         response.setDateCreated(a.getDateCreated());
+        response.setDateAppointmentScheduled(a.getDateAppointmentScheduled());
         response.setPatient(createPatientMap(a.getPatient()));
         response.setService(appointmentServiceMapper.constructDefaultResponse(a.getService()));
         response.setServiceType(createServiceTypeMap(a.getServiceType()));
