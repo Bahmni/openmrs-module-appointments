@@ -739,7 +739,7 @@
         </preConditions>
         <comment>add a column to record the date an appointment was issued</comment>
         <addColumn tableName="patient_appointment">
-            <column name="date_appointment_scheduled" type="DATE">
+            <column name="date_appointment_scheduled" type="DATETIME">
             </column>
         </addColumn>
     </changeSet>
