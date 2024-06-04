@@ -24,9 +24,9 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private String appointmentNumber;
     private Date dateCreated;
     /**
-     * The date appointment was scheduled. This can be today or in the past (for retrospective entry), but not in the future.
-     * This property is useful for documenting visit date or when a patient called to book an appointment
-     * NOTE: This is not the date the appointment is scheduled for. We use startDateTime for this
+     * The date when the appointment was scheduled. This can be today or in the past (for retrospective entry), but not in the future.
+     * This property is useful for documenting the visit when the patient booked the appointment or when the patient called to book the appointment
+     * NOTE: This is *not* the date the appointment is scheduled to take place. We use startDateTime for this
      */
     private Date dateAppointmentScheduled = new Date();
     private Patient patient;
