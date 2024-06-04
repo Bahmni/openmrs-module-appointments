@@ -20,14 +20,15 @@ import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentAudit;
-import org.openmrs.module.appointments.model.AppointmentKind;
-import org.openmrs.module.appointments.model.AppointmentProvider;
-import org.openmrs.module.appointments.model.AppointmentProviderResponse;
-import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
+import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -308,6 +309,17 @@ public class AppointmentsServiceImplTest {
         when(appointmentDao.search(appointment)).thenReturn(appointmentList);
         appointmentsService.search(appointment);
         verify(appointmentDao, times(1)).search(appointment);
+    }
+
+    @Test
+    public void shouldSearchForAnAppointmentBasedOnAppointmentSearchRequestModel() {
+        AppointmentSearchRequestModel appointmentSearchRequestModel = new AppointmentSearchRequestModel();
+        appointmentSearchRequestModel.setStatus("Scheduled");
+        List<Appointment> appointmentList = new ArrayList<>();
+        appointmentList.add(appointment);
+        when(appointmentDao.search(appointmentSearchRequestModel)).thenReturn(appointmentList);
+        appointmentsService.search(appointmentSearchRequestModel);
+        verify(appointmentDao, times(1)).search(appointmentSearchRequestModel);
     }
 
     @Test
@@ -789,9 +801,10 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldGetAppointmentsWithoutDates() {
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
-        appointmentsService.searchAppointmentsWithoutDates();
-        verify(appointmentDao, times(1)).getAppointmentsWithoutDates(20);
+        appointmentsService.searchAppointmentsWithoutDates(searchQuery);
+        verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);
     }
 }

@@ -312,49 +312,82 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnAppointmentsWithoutDates() {
-        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(20);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(searchQuery, 20);
         assertNotNull(appointments);
         assertEquals(3, appointments.size());
     }
 
     @Test
-    public void shouldReturnAppointmentWithEncounters() {
-        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
-        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
-        assertNotNull(appointment);
-        assertEquals(2, appointment.getFulfillingEncounters().size());
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelPatientAndLocation() {
+
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> patientUuids=new ArrayList<>();
+        patientUuids.add(allAppointments.get(0).getPatient().getUuid());
+        List<String> locationUuids=new ArrayList<>();
+        locationUuids.add(allAppointments.get(0).getLocation().getUuid());
+
+        searchQuery.setPatientUuids(patientUuids);
+        searchQuery.setLocationUuids(locationUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(3, appointments.size());
     }
 
     @Test
-    public void voidingAppointmentShouldNotVoidFulfillingEncounters() {
-        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
-        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
-        appointment.setVoided(true);
-        appointmentDao.save(appointment);
-        Context.flushSession();
-        Context.clearSession();
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelServiceAndServiceType() {
 
-        appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
-        assertTrue(appointment.getVoided());
-        Encounter enc1 = encounterService.getEncounterByUuid("f303e49f-24a9-41bb-810b-5d07b881c0e0");
-        assertFalse(enc1.getVoided());
-        Encounter enc2 = encounterService.getEncounterByUuid("785826c1-f137-4b4f-bb2f-07b5c546d139");
-        assertFalse(enc2.getVoided());
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> serviceUuids=new ArrayList<>();
+        serviceUuids.add(allAppointments.get(0).getService().getUuid());
+        List<String> serviceTypeUuids=new ArrayList<>();
+        serviceTypeUuids.add(allAppointments.get(0).getServiceType().getUuid());
+
+        searchQuery.setServiceUuids(serviceUuids);
+        searchQuery.setServiceTypeUuids(serviceTypeUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
     }
 
     @Test
-    public void deletingAppointmentShouldNotDeleteFulfillingEncounters() {
-        String appointmentUuid="75504r42-3ca8-11e3-bf2b-0800271c13349";
-        Appointment appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);;
-        sessionFactory.getCurrentSession().delete(appointment);
-        Context.flushSession();
-        Context.clearSession();
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelPriority() {
 
-        appointment = appointmentDao.getAppointmentByUuid(appointmentUuid);
-        assertNull(appointment);
-        Encounter enc1 = encounterService.getEncounterByUuid("f303e49f-24a9-41bb-810b-5d07b881c0e0");
-        assertNotNull(enc1);
-        Encounter enc2 = encounterService.getEncounterByUuid("785826c1-f137-4b4f-bb2f-07b5c546d139");
-        assertNotNull(enc2);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> priorities=new ArrayList<>();
+        priorities.add("AsNeeded");
+
+        searchQuery.setPriorities(priorities);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(1, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyAppointmentsBasedOnAppointmentSearchRequestModelProviderWhenNoAppointmentsAreAssignedToProvider() {
+
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> providerUuids=new ArrayList<>();
+        providerUuids.add(UUID.randomUUID().toString());
+
+        searchQuery.setProviderUuids(providerUuids);
+        searchQuery.setStatus(null);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
     }
 }

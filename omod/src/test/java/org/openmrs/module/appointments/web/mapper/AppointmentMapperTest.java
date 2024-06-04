@@ -13,10 +13,12 @@ import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
+import org.openmrs.api.AdministrationService;
 import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentPriority;
@@ -37,6 +39,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
@@ -62,9 +65,11 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 import static org.powermock.api.mockito.PowerMockito.when;
 
 @PowerMockIgnore("javax.management.*")
+@PrepareForTest({Context.class})
 @RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
 
@@ -90,6 +95,9 @@ public class AppointmentMapperTest {
     private AppointmentsService appointmentsService;
 
     @Mock
+    private AdministrationService administrationService;
+
+    @Mock
     private AppointmentResponseExtension extension;
 
     @InjectMocks
@@ -101,6 +109,11 @@ public class AppointmentMapperTest {
     private AppointmentServiceType serviceType2;
     private Provider provider;
     private Location location;
+
+    private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY = "appointments.customPersonAttributeTypes";
+
+    private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES = "attributeA,attributeB,attributeC,attributeD";
+
 
     private AppointmentServiceDefinition service2;
 
@@ -148,6 +161,10 @@ public class AppointmentMapperTest {
         location = new Location();
         location.setUuid("locationUuid");
         when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
+
+        mockStatic(Context.class);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
+        when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
     }
 
     @Test

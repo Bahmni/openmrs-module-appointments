@@ -2,14 +2,12 @@ package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.api.APIException;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
@@ -22,7 +20,6 @@ import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestControlle
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -59,16 +56,13 @@ public class AppointmentController extends BaseRestController {
     }
     @RequestMapping( method = RequestMethod.POST, value = "search")
     @ResponseBody
-    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentQuery searchQuery) throws IOException {
+    public List<AppointmentDefaultResponse> searchAppointments( @Valid @RequestBody AppointmentSearchRequestModel searchQuery) throws IOException {
         if(searchQuery.isWithoutDates()) {
-            List<Appointment> appointmentsWithoutDates = appointmentsService.searchAppointmentsWithoutDates();
+            List<Appointment> appointmentsWithoutDates = appointmentsService.searchAppointmentsWithoutDates(searchQuery);
             return appointmentMapper.constructResponse(appointmentsWithoutDates);
         }
-        Appointment appointment = appointmentMapper.mapQueryToAppointment(searchQuery);
-        if (searchQuery.getStatus() == null) {
-            appointment.setStatus(null);
-        }
-        List<Appointment> appointments =  appointmentsService.search(appointment);
+
+        List<Appointment> appointments =  appointmentsService.search(searchQuery);
         return appointmentMapper.constructResponse(appointments);
     }
 
