@@ -30,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -103,6 +104,8 @@ public class AppointmentMapper {
 
         if (appointmentRequest.getDateAppointmentScheduled() != null) {
             appointment.setDateAppointmentScheduled(appointmentRequest.getDateAppointmentScheduled());
+        } else {
+            appointment.setDateAppointmentScheduled(new Date());
         }
         appointment.setServiceType(appointmentServiceType);
         appointment.setService(appointmentServiceDefinition);
