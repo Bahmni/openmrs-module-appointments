@@ -50,7 +50,9 @@
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<servletApi.version>3.0.1</servletApi.version>
 		<webServices.version>2.29.0</webServices.version>
-		<communications.version>1.2.0-SNAPSHOT</communications.version>
+		<communications.version>1.2.0</communications.version>
+		<teleconsultation.version>2.0.0</teleconsultation.version>
+		<webClients.version>1.0.0</webClients.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 	</properties>
@@ -151,14 +153,14 @@
 			<dependency>
 				<groupId>org.bahmni.module</groupId>
 				<artifactId>teleconsultation-api</artifactId>
-				<version>2.0.0-SNAPSHOT</version>
+				<version>${teleconsultation.version}</version>
 				<type>jar</type>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.bahmni.module</groupId>
 				<artifactId>web-clients</artifactId>
-				<version>0.94.3</version>
+				<version>${webClients.version}</version>
 			</dependency>
 
 			<dependency>
