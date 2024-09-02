@@ -24,7 +24,7 @@
 
 	<conditional_resources>
 		<conditionalResource>
-			<path>/lib/fhir2-api-2.1-${project.parent.version}.jar</path>
+			<path>/lib/appointments-atom-feed-${project.parent.version}.jar</path>
 			<modules>
 				<module>
 					<moduleId>org.ict4h.openmrs.openmrs-atomfeed</moduleId>
