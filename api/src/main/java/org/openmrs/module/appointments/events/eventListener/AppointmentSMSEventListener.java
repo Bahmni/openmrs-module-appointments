@@ -13,6 +13,7 @@ import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.events.AppointmentBookingEvent;
 import org.openmrs.module.appointments.events.RecurringAppointmentEvent;
+import org.openmrs.util.PrivilegeConstants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
@@ -82,7 +83,12 @@ public class AppointmentSMSEventListener {
     }
     private boolean shouldSendEmailForBookingAppointment() {
         AdministrationService administrationService = Context.getService(AdministrationService.class);
-        return Boolean.parseBoolean(administrationService.getGlobalProperty("sms.enableAppointmentBookingSMSAlert", "false"));
+        try {
+            Context.getUserContext().addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+            return Boolean.parseBoolean(administrationService.getGlobalProperty("sms.enableAppointmentBookingSMSAlert", "false"));
+        } finally {
+            Context.getUserContext().removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES);
+        }
     }
     private String getPhoneNumber(Patient patient) {
         PersonAttribute phoneNumber = patient.getAttribute("phoneNumber");
