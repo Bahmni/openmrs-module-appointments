@@ -24,6 +24,7 @@ public class AppointmentRequest {
     private String comments;
     private List<AppointmentProviderDetail> providers = new ArrayList<>();
     private String priority;
+    private String[] fulfillingEncounters = new String[0];
 
     public String getAppointmentNumber() {
         return appointmentNumber;
@@ -144,4 +145,12 @@ public class AppointmentRequest {
     public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
         this.dateAppointmentScheduled = dateAppointmentScheduled;
     }
+
+    public String[] getFulfillingEncounters() {
+		return fulfillingEncounters;
+	}
+
+	public void setFulfillingEncounters(String[] fulfillingEncounters) {
+		this.fulfillingEncounters = fulfillingEncounters;
+	}
 }

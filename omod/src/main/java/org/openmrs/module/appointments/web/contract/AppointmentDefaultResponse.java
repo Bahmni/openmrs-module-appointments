@@ -28,6 +28,7 @@ public class AppointmentDefaultResponse {
 	private HashMap extensions;
 	private String teleconsultationLink;
 	private String priority;
+    private String[] fulfillingEncounters = new String[0];
 
 	public String getUuid() {
 		return uuid;
@@ -202,5 +203,13 @@ public class AppointmentDefaultResponse {
 
 	public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
 		this.dateAppointmentScheduled = dateAppointmentScheduled;
+	}
+
+	public String[] getFulfillingEncounters() {
+		return fulfillingEncounters;
+	}
+
+	public void setFulfillingEncounters(String[] fulfillingEncounters) {
+		this.fulfillingEncounters = fulfillingEncounters;
 	}
 }
