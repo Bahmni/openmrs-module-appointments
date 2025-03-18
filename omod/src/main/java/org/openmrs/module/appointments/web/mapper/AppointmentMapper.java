@@ -3,9 +3,11 @@ package org.openmrs.module.appointments.web.mapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Encounter;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.EncounterService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
@@ -30,11 +32,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -58,6 +62,9 @@ public class AppointmentMapper {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Autowired
+    EncounterService encounterService;
 
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
@@ -117,6 +124,15 @@ public class AppointmentMapper {
         appointment.setComments(appointmentRequest.getComments());
         if (appointmentRequest.getPriority() != null || StringUtils.isNotBlank(appointmentRequest.getPriority())) {
                 appointment.setPriority(AppointmentPriority.valueOf(appointmentRequest.getPriority()));
+        }
+
+        if (appointmentRequest.getFulfillingEncounters().length > 0){
+            Set<Encounter> fulfillingEncounters = Arrays.stream(appointmentRequest.getFulfillingEncounters())
+                .map(encounterService::getEncounterByUuid)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+
+            appointment.setFulfillingEncounters(fulfillingEncounters);
         }
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
     }
@@ -238,6 +254,9 @@ public class AppointmentMapper {
             if (!collect.isEmpty()) {
                 response.getExtensions().put("notificationResults", collect);
             }
+        }
+        if(a.getFulfillingEncounters() != null && !a.getFulfillingEncounters().isEmpty()) {
+            response.setFulfillingEncounters(a.getFulfillingEncounters().stream().map(Encounter::getUuid).toArray(String[]::new));
         }
         return response;
     }
