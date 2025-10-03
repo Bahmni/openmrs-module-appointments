@@ -8,12 +8,16 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openmrs.Concept;
+import org.openmrs.ConceptDatatype;
+import org.openmrs.ConceptName;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
 import org.openmrs.PatientIdentifierType;
 import org.openmrs.PersonName;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.ConceptService;
 import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
@@ -25,6 +29,7 @@ import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
+import org.openmrs.module.appointments.model.AppointmentReason;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
@@ -100,6 +105,9 @@ public class AppointmentMapperTest {
     @Mock
     private AppointmentResponseExtension extension;
 
+    @Mock
+    private ConceptService conceptService;
+
     @InjectMocks
     private AppointmentMapper appointmentMapper;
 
@@ -109,6 +117,8 @@ public class AppointmentMapperTest {
     private AppointmentServiceType serviceType2;
     private Provider provider;
     private Location location;
+    private Concept reasonConcept1;
+    private Concept reasonConcept2;
 
     private static final String PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY = "appointments.customPersonAttributeTypes";
 
@@ -165,6 +175,24 @@ public class AppointmentMapperTest {
         mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
+        when(Context.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+
+        // Setup test concepts for appointment reasons
+        reasonConcept1 = new Concept();
+        reasonConcept1.setUuid("concept1Uuid");
+        ConceptName conceptName1 = new ConceptName("Follow-up", java.util.Locale.ENGLISH);
+        reasonConcept1.setFullySpecifiedName(conceptName1);
+        reasonConcept1.addName(conceptName1);
+
+        reasonConcept2 = new Concept();
+        reasonConcept2.setUuid("concept2Uuid");
+        ConceptName conceptName2 = new ConceptName("Lab Results", java.util.Locale.ENGLISH);
+        reasonConcept2.setFullySpecifiedName(conceptName2);
+        reasonConcept2.addName(conceptName2);
+
+        // Mock conceptService bean (injected via @Autowired)
+        when(conceptService.getConceptByUuid("concept1Uuid")).thenReturn(reasonConcept1);
+        when(conceptService.getConceptByUuid("concept2Uuid")).thenReturn(reasonConcept2);
     }
 
     @Test
@@ -721,5 +749,181 @@ public class AppointmentMapperTest {
         assertTrue(basicIdentifiers.contains("identifier1"));
         assertTrue(basicIdentifiers.contains("identifier2"));
         assertTrue(basicIdentifiers.contains("identifier3"));
+    }
+
+    @Test
+    public void shouldMapAppointmentReasonsFromRequest() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        List<String> reasonUuids = Arrays.asList("concept1Uuid", "concept2Uuid");
+        appointmentRequest.setReasonConceptUuids(reasonUuids);
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertNotNull(appointment.getReasons());
+        assertEquals(2, appointment.getReasons().size());
+        assertTrue(appointment.getReasons().stream().anyMatch(r -> r.getConcept().getUuid().equals("concept1Uuid")));
+        assertTrue(appointment.getReasons().stream().anyMatch(r -> r.getConcept().getUuid().equals("concept2Uuid")));
+        verify(conceptService, times(1)).getConceptByUuid("concept1Uuid");
+        verify(conceptService, times(1)).getConceptByUuid("concept2Uuid");
+    }
+
+    @Test
+    public void shouldHandleNullReasonsInRequest() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setReasonConceptUuids(null);
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertNotNull(appointment);
+        verify(conceptService, never()).getConceptByUuid(anyString());
+    }
+
+    @Test
+    public void shouldHandleEmptyReasonsInRequest() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setReasonConceptUuids(new ArrayList<>());
+
+        Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        assertNotNull(appointment);
+        verify(conceptService, never()).getConceptByUuid(anyString());
+    }
+
+    @Test
+    public void shouldIncludeReasonsInResponse() throws Exception {
+        Appointment appointment = createAppointment();
+
+        // Add reasons to appointment
+        Set<AppointmentReason> reasons = new HashSet<>();
+        AppointmentReason reason1 = new AppointmentReason();
+        reason1.setConcept(reasonConcept1);
+        reason1.setVoided(false);
+        reasons.add(reason1);
+
+        AppointmentReason reason2 = new AppointmentReason();
+        reason2.setConcept(reasonConcept2);
+        reason2.setVoided(false);
+        reasons.add(reason2);
+
+        appointment.setReasons(reasons);
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+
+        AppointmentDefaultResponse response = appointmentMapper.constructResponse(appointment);
+
+        assertNotNull(response.getReasons());
+        assertEquals(2, response.getReasons().size());
+        assertTrue(response.getReasons().stream().anyMatch(r -> r.getConceptUuid().equals("concept1Uuid")));
+        assertTrue(response.getReasons().stream().anyMatch(r -> r.getConceptUuid().equals("concept2Uuid")));
+        assertTrue(response.getReasons().stream().anyMatch(r -> r.getName().equals("Follow-up")));
+        assertTrue(response.getReasons().stream().anyMatch(r -> r.getName().equals("Lab Results")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoReasonsInResponse() throws Exception {
+        Appointment appointment = createAppointment();
+        appointment.setReasons(null);
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+
+        AppointmentDefaultResponse response = appointmentMapper.constructResponse(appointment);
+
+        assertNotNull(response.getReasons());
+        assertEquals(0, response.getReasons().size());
+    }
+
+    @Test
+    public void shouldFilterOutVoidedReasonsInResponse() throws Exception {
+        Appointment appointment = createAppointment();
+
+        Set<AppointmentReason> reasons = new HashSet<>();
+        AppointmentReason reason1 = new AppointmentReason();
+        reason1.setConcept(reasonConcept1);
+        reason1.setVoided(false);
+        reasons.add(reason1);
+
+        AppointmentReason reason2 = new AppointmentReason();
+        reason2.setConcept(reasonConcept2);
+        reason2.setVoided(true); // This should be filtered out
+        reasons.add(reason2);
+
+        appointment.setReasons(reasons);
+
+        AppointmentServiceDefaultResponse serviceDefaultResponse = new AppointmentServiceDefaultResponse();
+        when(appointmentServiceMapper.constructDefaultResponse(service)).thenReturn(serviceDefaultResponse);
+
+        AppointmentDefaultResponse response = appointmentMapper.constructResponse(appointment);
+
+        assertNotNull(response.getReasons());
+        assertEquals(1, response.getReasons().size());
+        assertEquals("concept1Uuid", response.getReasons().get(0).getConceptUuid());
+        assertEquals("Follow-up", response.getReasons().get(0).getName());
+    }
+
+    @Test
+    public void shouldVoidRemovedReasonsWhenUpdatingAppointment() throws Exception {
+        String appointmentUuid = "appointmentUuid";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+
+        // Existing appointment has two reasons
+        Set<AppointmentReason> existingReasons = new HashSet<>();
+        AppointmentReason reason1 = new AppointmentReason();
+        reason1.setConcept(reasonConcept1);
+        reason1.setVoided(false);
+        existingReasons.add(reason1);
+
+        AppointmentReason reason2 = new AppointmentReason();
+        reason2.setConcept(reasonConcept2);
+        reason2.setVoided(false);
+        existingReasons.add(reason2);
+
+        existingAppointment.setReasons(existingReasons);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+
+        // Update request only includes concept1, so concept2 should be voided
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setUuid(appointmentUuid);
+        appointmentRequest.setReasonConceptUuids(Arrays.asList("concept1Uuid"));
+
+        Appointment updatedAppointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        // Should have reason1 active and reason2 voided
+        long voidedCount = updatedAppointment.getReasons().stream()
+                .filter(r -> r.getConcept().getUuid().equals("concept2Uuid") && r.getVoided())
+                .count();
+        assertEquals(1, voidedCount);
+    }
+
+    @Test
+    public void shouldNotAddDuplicateReasonsWhenUpdatingAppointment() throws Exception {
+        String appointmentUuid = "appointmentUuid";
+        Appointment existingAppointment = createAppointment();
+        existingAppointment.setUuid(appointmentUuid);
+
+        // Existing appointment already has reason1
+        Set<AppointmentReason> existingReasons = new HashSet<>();
+        AppointmentReason reason1 = new AppointmentReason();
+        reason1.setConcept(reasonConcept1);
+        reason1.setVoided(false);
+        existingReasons.add(reason1);
+
+        existingAppointment.setReasons(existingReasons);
+        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
+
+        // Update request includes concept1 again - should not duplicate
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setUuid(appointmentUuid);
+        appointmentRequest.setReasonConceptUuids(Arrays.asList("concept1Uuid"));
+
+        Appointment updatedAppointment = appointmentMapper.fromRequest(appointmentRequest);
+
+        // Should still have only 1 reason
+        long concept1Count = updatedAppointment.getReasons().stream()
+                .filter(r -> r.getConcept().getUuid().equals("concept1Uuid"))
+                .count();
+        assertEquals(1, concept1Count);
     }
 }

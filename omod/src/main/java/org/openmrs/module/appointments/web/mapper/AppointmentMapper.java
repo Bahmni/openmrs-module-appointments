@@ -3,15 +3,18 @@ package org.openmrs.module.appointments.web.mapper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
+import org.openmrs.api.ConceptService;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentKind;
+import org.openmrs.module.appointments.model.AppointmentReason;
 import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
@@ -23,6 +26,7 @@ import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
+import org.openmrs.module.appointments.web.contract.AppointmentReasonResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
@@ -37,7 +41,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class AppointmentMapper {
@@ -58,6 +61,9 @@ public class AppointmentMapper {
 
     @Autowired
     AppointmentsService appointmentsService;
+
+    @Autowired
+    ConceptService conceptService;
 
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
@@ -119,6 +125,7 @@ public class AppointmentMapper {
                 appointment.setPriority(AppointmentPriority.valueOf(appointmentRequest.getPriority()));
         }
         mapProvidersForAppointment(appointment, appointmentRequest.getProviders());
+        mapReasonsForAppointment(appointment, appointmentRequest.getReasonConceptUuids());
     }
 
     private Provider identifyAppointmentProvider(String providerUuid) {
@@ -164,6 +171,50 @@ public class AppointmentMapper {
             }
         }
 
+    }
+
+    private void mapReasonsForAppointment(Appointment appointment, List<String> reasonConceptUuids) {
+        if (reasonConceptUuids == null || reasonConceptUuids.isEmpty()) {
+            return;
+        }
+
+        if (appointment.getReasons() == null) {
+            appointment.setReasons(new HashSet<>());
+        }
+
+        Set<AppointmentReason> existingReasons = appointment.getReasons();
+        Set<AppointmentReason> newReasons = new HashSet<>();
+
+        for (String conceptUuid : reasonConceptUuids) {
+            Concept concept = conceptService.getConceptByUuid(conceptUuid);
+            if (concept == null) {
+                log.warn("Concept not found for UUID: " + conceptUuid);
+                continue;
+            }
+
+            boolean exists = existingReasons.stream()
+                    .anyMatch(r -> r.getConcept() != null && r.getConcept().getUuid().equals(conceptUuid));
+
+            if (!exists) {
+                AppointmentReason reason = new AppointmentReason();
+                reason.setConcept(concept);
+                reason.setAppointment(appointment);
+                newReasons.add(reason);
+            }
+        }
+
+        for (AppointmentReason existingReason : existingReasons) {
+            if (existingReason.getConcept() != null) {
+                boolean stillExists = reasonConceptUuids.stream()
+                        .anyMatch(uuid -> uuid.equals(existingReason.getConcept().getUuid()));
+                if (!stillExists) {
+                    existingReason.setVoided(true);
+                    existingReason.setVoidReason("Removed from appointment");
+                }
+            }
+        }
+
+        appointment.getReasons().addAll(newReasons);
     }
 
     private AppointmentProvider createNewAppointmentProvider(AppointmentProviderDetail providerDetail) {
@@ -222,6 +273,7 @@ public class AppointmentMapper {
         if (appointmentResponseExtension != null)
             response.setAdditionalInfo(appointmentResponseExtension.run(a));
         response.setProviders(mapAppointmentProviders(a.getProviders()));
+        response.setReasons(mapAppointmentReasons(a.getReasons()));
         response.setRecurring(a.isRecurring());
         response.setVoided(a.getVoided());
         HashMap extensions = new HashMap();
@@ -259,6 +311,34 @@ public class AppointmentMapper {
             }
         }
         return providerList;
+    }
+
+    private List<AppointmentReasonResponse> mapAppointmentReasons(Set<AppointmentReason> reasons) {
+        List<AppointmentReasonResponse> reasonsList = new ArrayList<>();
+        if (reasons == null || reasons.isEmpty()) {
+            return reasonsList;
+        }
+
+        for (AppointmentReason appointmentReason : reasons) {
+            if (appointmentReason.getVoided() || appointmentReason.getConcept() == null) {
+                continue;
+            }
+
+            Concept concept = appointmentReason.getConcept();
+            String conceptName = "";
+            if (concept.getName() != null) {
+                conceptName = concept.getName().getName();
+            } else if (concept.getFullySpecifiedName(Context.getLocale()) != null) {
+                conceptName = concept.getFullySpecifiedName(Context.getLocale()).getName();
+            }
+            AppointmentReasonResponse response = new AppointmentReasonResponse(
+                    concept.getUuid(),
+                    conceptName
+            );
+            reasonsList.add(response);
+        }
+
+        return reasonsList;
     }
 
     private Map createServiceTypeMap(AppointmentServiceType s) {
