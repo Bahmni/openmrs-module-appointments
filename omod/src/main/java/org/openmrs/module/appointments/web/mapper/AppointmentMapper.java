@@ -188,8 +188,10 @@ public class AppointmentMapper {
         for (String conceptUuid : reasonConceptUuids) {
             Concept concept = conceptService.getConceptByUuid(conceptUuid);
             if (concept == null) {
-                log.warn("Concept not found for UUID: " + conceptUuid);
-                continue;
+                throw new ConversionException("Bad Request. No concept found with UUID: " + conceptUuid);
+            }
+            if (concept.getRetired()) {
+                throw new ConversionException("Bad Request. Concept with UUID: " + conceptUuid + " is retired");
             }
 
             boolean exists = existingReasons.stream()

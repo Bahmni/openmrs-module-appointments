@@ -43,6 +43,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentQuery;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
+import org.openmrs.module.webservices.rest.web.response.ConversionException;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
@@ -925,5 +926,51 @@ public class AppointmentMapperTest {
                 .filter(r -> r.getConcept().getUuid().equals("concept1Uuid"))
                 .count();
         assertEquals(1, concept1Count);
+    }
+
+    @Test
+    public void shouldThrowConversionExceptionWhenConceptUuidDoesNotExist() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setReasonConceptUuids(Arrays.asList("nonExistentConceptUuid"));
+
+        // Mock conceptService to return null for non-existent concept
+        when(conceptService.getConceptByUuid("nonExistentConceptUuid")).thenReturn(null);
+
+        expectedException.expect(ConversionException.class);
+        expectedException.expectMessage("Bad Request. No concept found with UUID: nonExistentConceptUuid");
+
+        appointmentMapper.fromRequest(appointmentRequest);
+    }
+
+    @Test
+    public void shouldThrowConversionExceptionWhenConceptIsRetired() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setReasonConceptUuids(Arrays.asList("retiredConceptUuid"));
+
+        // Create a retired concept
+        Concept retiredConcept = new Concept();
+        retiredConcept.setUuid("retiredConceptUuid");
+        retiredConcept.setRetired(true);
+
+        when(conceptService.getConceptByUuid("retiredConceptUuid")).thenReturn(retiredConcept);
+
+        expectedException.expect(ConversionException.class);
+        expectedException.expectMessage("Bad Request. Concept with UUID: retiredConceptUuid is retired");
+
+        appointmentMapper.fromRequest(appointmentRequest);
+    }
+
+    @Test
+    public void shouldThrowConversionExceptionWhenOneOfMultipleConceptsDoesNotExist() throws Exception {
+        AppointmentRequest appointmentRequest = createAppointmentRequest();
+        appointmentRequest.setReasonConceptUuids(Arrays.asList("concept1Uuid", "invalidConceptUuid"));
+
+        // Mock first concept as valid, second as null
+        when(conceptService.getConceptByUuid("invalidConceptUuid")).thenReturn(null);
+
+        expectedException.expect(ConversionException.class);
+        expectedException.expectMessage("Bad Request. No concept found with UUID: invalidConceptUuid");
+
+        appointmentMapper.fromRequest(appointmentRequest);
     }
 }
