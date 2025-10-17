@@ -317,21 +317,21 @@
 
     <changeSet id="Create-privilege-manage-appointment-services-202510101200" author="Bahmni">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Manage Appointment Services'</sqlCheck>
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='app:appointments:manageServices'</sqlCheck>
         </preConditions>
         <comment>Adding privilege for Managing Appointment Services</comment>
         <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Services', 'Able to Manage Appointment Services in Appointments module', uuid());
+            INSERT INTO privilege (privilege, description, uuid) VALUES ('app:appointments:manageServices', 'Able to Manage Appointment Services in Appointments module', uuid());
         </sql>
     </changeSet>
 
     <changeSet id="Create-privilege-manage-appointment-service-availability-202510101200" author="Bahmni">
         <preConditions onFail="MARK_RAN">
-            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='Manage Appointment Service Availability'</sqlCheck>
+            <sqlCheck expectedResult="0">select count(*) from privilege where privilege='app:appointments:manageServiceAvailability'</sqlCheck>
         </preConditions>
         <comment>Adding privilege for Managing Appointment Service Availability</comment>
         <sql>
-            INSERT INTO privilege (privilege, description, uuid) VALUES ('Manage Appointment Service Availability', 'Able to Edit Appointment Service Availability in Appointments module', uuid());
+            INSERT INTO privilege (privilege, description, uuid) VALUES ('app:appointments:manageServiceAvailability', 'Able to Edit Appointment Service Availability in Appointments module', uuid());
         </sql>
     </changeSet>
 
