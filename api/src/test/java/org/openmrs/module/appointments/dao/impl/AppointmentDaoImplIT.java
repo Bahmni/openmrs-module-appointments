@@ -398,20 +398,18 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(endDate);
         
-        // Add location UUIDs (OR condition - appointments in any of these locations)
+
         List<String> locationUuids = new ArrayList<>();
-        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a1"); // Room1
-        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a2"); // Room2
+        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a2");
         appointmentSearchRequest.setLocationUuids(locationUuids);
 
         // Execute search
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        // Verify results
         assertNotNull(appointments);
         assertTrue("Expected at least 1 appointment but got " + appointments.size(), appointments.size() > 0);
         
-        // Verify all returned appointments have one of the specified locations
         for (Appointment appointment : appointments) {
             assertTrue("Appointment location " + appointment.getLocation().getUuid() + " not in expected locations " + locationUuids, 
                       locationUuids.contains(appointment.getLocation().getUuid()));
