@@ -3,9 +3,7 @@ package org.openmrs.module.appointments.dao.impl;
 import org.hibernate.SessionFactory;
 import org.junit.Before;
 import org.junit.Test;
-import org.openmrs.Encounter;
 import org.openmrs.api.EncounterService;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
@@ -41,7 +39,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointments() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointments(null);
-        assertEquals(13, allAppointmentServices.size());
+        assertEquals(15, allAppointmentServices.size());
     }
 
     @Test
@@ -54,12 +52,12 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldSaveAppointmentService() throws Exception {
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(13, allAppointments.size());
+        assertEquals(15, allAppointments.size());
         Appointment apt = new Appointment();
         apt.setPatient(allAppointments.get(0).getPatient());
         appointmentDao.save(apt);
         allAppointments = appointmentDao.getAllAppointments(null);
-        assertEquals(14, allAppointments.size());
+        assertEquals(16, allAppointments.size());
     }
 
     @Test
@@ -67,7 +65,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         List<Appointment> allAppointments = appointmentDao.getAllFutureAppointmentsForService(appointmentServiceDefinition);
         assertNotNull(allAppointments);
-        assertEquals(2, allAppointments.size());
+        assertEquals(4, allAppointments.size());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c1111", allAppointments.get(0).getUuid());
         assertEquals("75504r42-3ca8-11e3-bf2b-0800271c12222", allAppointments.get(1).getUuid());
     }
@@ -150,7 +148,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Test
     public void shouldGetAllNonVoidedAppointmentsWhenNoDateRangeIsProvided() throws Exception {
         List<Appointment> allAppointmentServices = appointmentDao.getAllAppointmentsInDateRange(null, null);
-        assertEquals(13, allAppointmentServices.size());
+        assertEquals(15, allAppointmentServices.size());
     }
 
     @Test
@@ -179,7 +177,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(6, appointments.size());
+        assertEquals(7, appointments.size());
     }
 
     @Test
@@ -190,7 +188,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(10, appointments.size());
+        assertEquals(12, appointments.size());
     }
 
     @Test
@@ -260,7 +258,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(3, appointments.size());
+        assertEquals(4, appointments.size());
     }
 
     @Test
@@ -269,13 +267,13 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
 
-        assertEquals(13, appointments.size());
+        assertEquals(15, appointments.size());
     }
 
     @Test
     public void shouldReturnAllNonVoidedFutureAppointmentsOfPatient() {
         List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
-        assertEquals(5, appointments.size());
+        assertEquals(7, appointments.size());
     }
 
     @Test
@@ -389,5 +387,58 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsForMultipleLocationsUsingAppointmentSearchRequest() throws ParseException {
+        // Create search request with multiple location UUIDs
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2108-08-15T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        Date endDate = DateUtil.convertToDate("2108-08-18T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        appointmentSearchRequest.setEndDate(endDate);
+        
+        // Add location UUIDs (OR condition - appointments in any of these locations)
+        List<String> locationUuids = new ArrayList<>();
+        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a1"); // Room1
+        locationUuids.add("c36006e5-9fbb-4f20-866b-0ece245615a2"); // Room2
+        appointmentSearchRequest.setLocationUuids(locationUuids);
+
+        // Execute search
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        // Verify results
+        assertNotNull(appointments);
+        assertTrue("Expected at least 1 appointment but got " + appointments.size(), appointments.size() > 0);
+        
+        // Verify all returned appointments have one of the specified locations
+        for (Appointment appointment : appointments) {
+            assertTrue("Appointment location " + appointment.getLocation().getUuid() + " not in expected locations " + locationUuids, 
+                      locationUuids.contains(appointment.getLocation().getUuid()));
+        }
+    }
+
+    @Test
+    public void shouldReturnAppointmentsForSingleLocationUsingAppointmentSearchRequest() throws ParseException {
+        
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        String locationUuid = allAppointments.get(0).getLocation().getUuid();
+        
+      
+        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+        Date startDate = DateUtil.convertToDate("2000-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);
+        appointmentSearchRequest.setStartDate(startDate);
+        
+        List<String> locationUuids = new ArrayList<>();
+        locationUuids.add(locationUuid);
+        appointmentSearchRequest.setLocationUuids(locationUuids);
+
+        
+        List<Appointment> appointments = appointmentDao.search(appointmentSearchRequest);
+
+        assertNotNull(appointments);
+        for (Appointment appointment : appointments) {
+            assertEquals(locationUuid, appointment.getLocation().getUuid());
+        }
     }
 }
