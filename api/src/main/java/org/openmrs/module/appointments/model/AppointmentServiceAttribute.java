@@ -1,23 +1,11 @@
 package org.openmrs.module.appointments.model;
 
-import org.openmrs.BaseOpenmrsData;
+import org.openmrs.attribute.Attribute;
+import org.openmrs.attribute.BaseAttribute;
 
-import java.io.Serializable;
-
-public class AppointmentServiceAttribute extends BaseOpenmrsData implements Serializable {
+public class AppointmentServiceAttribute extends BaseAttribute<AppointmentServiceAttributeType, AppointmentServiceDefinition> implements Attribute<AppointmentServiceAttributeType, AppointmentServiceDefinition> {
 
     private Integer appointmentServiceAttributeId;
-    private AppointmentServiceDefinition appointmentService;
-    private AppointmentServiceAttributeType attributeType;
-    private String valueReference;
-
-    public Integer getAppointmentServiceAttributeId() {
-        return appointmentServiceAttributeId;
-    }
-
-    public void setAppointmentServiceAttributeId(Integer appointmentServiceAttributeId) {
-        this.appointmentServiceAttributeId = appointmentServiceAttributeId;
-    }
 
     @Override
     public Integer getId() {
@@ -30,38 +18,18 @@ public class AppointmentServiceAttribute extends BaseOpenmrsData implements Seri
     }
 
     public AppointmentServiceDefinition getAppointmentService() {
-        return appointmentService;
+        return getOwner();
     }
 
     public void setAppointmentService(AppointmentServiceDefinition appointmentService) {
-        this.appointmentService = appointmentService;
+        setOwner(appointmentService);
     }
 
-    public AppointmentServiceAttributeType getAttributeType() {
-        return attributeType;
+    public Integer getAppointmentServiceAttributeId() {
+        return appointmentServiceAttributeId;
     }
 
-    public void setAttributeType(AppointmentServiceAttributeType attributeType) {
-        this.attributeType = attributeType;
-    }
-
-    public String getValueReference() {
-        return valueReference;
-    }
-
-    public void setValueReference(String valueReference) {
-        this.valueReference = valueReference;
-    }
-
-    public Object getValue() {
-        return valueReference;
-    }
-
-    public void setValue(Object value) {
-        if (value == null) {
-            this.valueReference = null;
-        } else {
-            this.valueReference = value.toString();
-        }
+    public void setAppointmentServiceAttributeId(Integer appointmentServiceAttributeId) {
+        this.appointmentServiceAttributeId = appointmentServiceAttributeId;
     }
 }
