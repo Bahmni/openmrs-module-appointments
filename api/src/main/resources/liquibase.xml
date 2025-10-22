@@ -769,4 +769,83 @@
             update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
         </sql>
     </changeSet>
+
+    <changeSet id="create-table-appointment-service-attribute-type-202510211630" author="Bahmni">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="appointment_service_attribute_type"/>
+            </not>
+        </preConditions>
+        <comment>Creating appointment_service_attribute_type table</comment>
+        <createTable tableName="appointment_service_attribute_type">
+            <column name="appointment_service_attribute_type_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="name" type="varchar(255)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="description" type="varchar(1024)" />
+            <column name="datatype" type="varchar(255)" />
+            <column name="datatype_config" type="text" />
+            <column name="preferred_handler" type="varchar(255)" />
+            <column name="handler_config" type="text" />
+            <column name="min_occurs" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="max_occurs" type="int"></column>
+            <column name="creator" type="int">
+                <constraints nullable="false" />
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false" />
+            </column>
+            <column name="changed_by" type="int" />
+            <column name="date_changed" type="datetime" />
+            <column name="retired" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false" />
+            </column>
+            <column name="retired_by" type="int" />
+            <column name="date_retired" type="datetime" />
+            <column name="retire_reason" type="varchar(255)" defaultValue="null" />
+            <column name="uuid" type="char(38)">
+                <constraints nullable="false" unique="true" />
+            </column>
+        </createTable>
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_creator_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="creator" referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_changed_by_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_retired_by_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="retired_by" referencedTableName="users" referencedColumnNames="user_id"/>
+    </changeSet>
+
+    <changeSet id="create-table-appointment-service-attribute-202510211645" author="Bahmni">
+        <preConditions onFail="MARK_RAN" onError="HALT">
+            <not>
+                <tableExists tableName="appointment_service_attribute"/>
+            </not>
+        </preConditions>
+        <comment>Creating appointment_service_attribute table</comment>
+        <createTable tableName="appointment_service_attribute">
+            <column name="appointment_service_attribute_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false" />
+            </column>
+            <column name="appointment_service_id" type="int"><constraints nullable="false" /></column>
+            <column name="attribute_type_id" type="int"><constraints nullable="false" /></column>
+            <column name="value_reference" type="text"><constraints nullable="false" /></column>
+            <column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
+            <column name="creator" type="int"><constraints nullable="false"/></column>
+            <column name="date_created" type="datetime"><constraints nullable="false"/></column>
+            <column name="changed_by" type="int"/>
+            <column name="date_changed" type="datetime" />
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int" />
+            <column name="date_voided" type="datetime" />
+            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
+        </createTable>
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_appointment_service_fk" baseTableName="appointment_service_attribute" baseColumnNames="appointment_service_id" referencedTableName="appointment_service" referencedColumnNames="appointment_service_id" />
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_attribute_type_id_fk" baseTableName="appointment_service_attribute" baseColumnNames="attribute_type_id" referencedTableName="appointment_service_attribute_type" referencedColumnNames="appointment_service_attribute_type_id" />
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_creator_fk" baseTableName="appointment_service_attribute" baseColumnNames="creator" referencedTableName="users" referencedColumnNames="user_id" />
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_changed_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id" />
+        <addForeignKeyConstraint constraintName="appointment_service_attribute_voided_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="voided_by" referencedTableName="users" referencedColumnNames="user_id" />
+    </changeSet>
 </databaseChangeLog>
