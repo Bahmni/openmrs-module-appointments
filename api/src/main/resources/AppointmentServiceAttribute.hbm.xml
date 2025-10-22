@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="org.openmrs.module.appointments.model">
+    <class name="AppointmentServiceAttribute" table="appointment_service_attribute" batch-size="50">
+        <id name="appointmentServiceAttributeId" type="java.lang.Integer" column="appointment_service_attribute_id">
+            <generator class="native">
+                <param name="sequence">appointment_service_attribute_id_seq</param>
+            </generator>
+        </id>
+
+        <many-to-one name="appointmentService" class="AppointmentServiceDefinition" column="appointment_service_id" not-null="true"/>
+        <many-to-one name="attributeType" class="AppointmentServiceAttributeType" column="attribute_type_id" not-null="true"/>
+
+        <property name="valueReference" type="text" not-null="true" access="field" column="value_reference" length="65535"/>
+
+        <property name="voided" type="java.lang.Boolean" column="voided" not-null="true"/>
+        <property name="voidReason" type="java.lang.String" column="void_reason" length="255"/>
+        <property name="dateVoided" type="java.util.Date" column="date_voided" length="19"/>
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by"/>
+
+        <property name="dateCreated" type="java.util.Date" column="date_created" not-null="true" length="19"/>
+        <property name="dateChanged" type="java.util.Date" column="date_changed" length="19"/>
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" not-null="true"/>
+
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by"/>
+    </class>
+</hibernate-mapping>
