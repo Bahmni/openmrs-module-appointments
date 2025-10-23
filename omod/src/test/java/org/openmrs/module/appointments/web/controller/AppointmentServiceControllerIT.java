@@ -10,6 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceAttributeResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -311,5 +312,103 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Appointment Service does not exist");
         MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));
+    }
+
+    @Test
+    public void should_returnAttributesInDefaultResponse() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/default"));
+        List<AppointmentServiceDefaultResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
+
+        assertNotNull(services);
+
+        // Find the "Consultation" service which should have attributes
+        AppointmentServiceDefaultResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Service should have attributes", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+
+        // Verify first attribute (Consultation Fee)
+        AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Consultation Fee"))
+                .findFirst().orElse(null);
+        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertEquals("Consultation Fee", feeAttr.getAttributeType());
+        assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a1", feeAttr.getAttributeTypeUuid());
+        assertEquals("500", feeAttr.getValue());
+        assertEquals("e36006e5-9fbb-4f20-866b-0ece245615a1", feeAttr.getUuid());
+
+        // Verify second attribute (Room Number)
+        AppointmentServiceAttributeResponse roomAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Room Number"))
+                .findFirst().orElse(null);
+        assertNotNull("Room Number attribute should exist", roomAttr);
+        assertEquals("Room Number", roomAttr.getAttributeType());
+        assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a2", roomAttr.getAttributeTypeUuid());
+        assertEquals("Room 101", roomAttr.getValue());
+        assertEquals("e36006e5-9fbb-4f20-866b-0ece245615a2", roomAttr.getUuid());
+    }
+
+    @Test
+    public void should_notReturnVoidedAttributes() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/default"));
+        List<AppointmentServiceDefaultResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
+
+        assertNotNull(services);
+
+        // Find the "Consultation" service
+        AppointmentServiceDefaultResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Service should have attributes", service.getAttributes());
+
+        // Verify voided attribute (uuid: e36006e5-9fbb-4f20-866b-0ece245615a3) is not in the response
+        boolean hasVoidedAttribute = service.getAttributes().stream()
+                .anyMatch(a -> a.getUuid().equals("e36006e5-9fbb-4f20-866b-0ece245615a3"));
+
+        assertEquals("Voided attribute should not be in response", false, hasVoidedAttribute);
+        assertEquals("Should only have 2 non-voided attributes", 2, service.getAttributes().size());
+    }
+
+    @Test
+    public void should_returnAttributesInFullResponse() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/full"));
+        List<AppointmentServiceFullResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(services);
+
+        // Find the "Consultation" service
+        AppointmentServiceFullResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Full response should include attributes (inherited from default)", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+    }
+
+    @Test
+    public void should_returnAttributesForSingleService() throws Exception {
+        // Get service by UUID
+        AppointmentServiceFullResponse service = deserialize(
+                handle(newGetRequest("/rest/v1/appointmentService",
+                    new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a6"))),
+                new TypeReference<AppointmentServiceFullResponse>() {});
+
+        assertNotNull(service);
+        assertEquals("Consultation", service.getName());
+        assertNotNull("Service should have attributes", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+
+        // Verify attributes are correct
+        AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Consultation Fee"))
+                .findFirst().orElse(null);
+        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertEquals("500", feeAttr.getValue());
     }
 }
