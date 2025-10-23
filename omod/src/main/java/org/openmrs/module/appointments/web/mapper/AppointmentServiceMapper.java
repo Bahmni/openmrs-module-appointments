@@ -4,6 +4,7 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
@@ -190,6 +191,15 @@ public class AppointmentServiceMapper {
         }
         asResponse.setLocation(locationMap);
 
+        Set<AppointmentServiceAttribute> attributes = as.getAttributes();
+        if(attributes != null && !attributes.isEmpty()) {
+            List<AppointmentServiceAttributeResponse> attributeResponses = attributes.stream()
+                    .filter(attr -> !attr.getVoided())
+                    .map(attr -> constructAttributeResponse(attr))
+                    .collect(Collectors.toList());
+            asResponse.setAttributes(attributeResponses);
+        }
+
         return asResponse;
     }
 
@@ -205,5 +215,23 @@ public class AppointmentServiceMapper {
 
     private String convertTimeToString(Time time) {
        return time != null ? time.toString() : new String();
+    }
+
+    private AppointmentServiceAttributeResponse constructAttributeResponse(AppointmentServiceAttribute attribute) {
+        AppointmentServiceAttributeResponse response = new AppointmentServiceAttributeResponse();
+        response.setUuid(attribute.getUuid());
+        response.setAttributeType(attribute.getAttributeType().getName());
+        response.setAttributeTypeUuid(attribute.getAttributeType().getUuid());
+
+        try {
+            Object value = attribute.getAttributeType().getDatatypeClassname() != null
+                    ? attribute.getValue()
+                    : attribute.getValueReference();
+            response.setValue(value);
+        } catch (Exception e) {
+            response.setValue(attribute.getValueReference());
+        }
+
+        return response;
     }
 }
