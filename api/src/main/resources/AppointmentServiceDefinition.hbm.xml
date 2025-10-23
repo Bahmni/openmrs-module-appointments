@@ -44,8 +44,8 @@
             <key column="appointment_service_id"/>
             <one-to-many class="org.openmrs.module.appointments.model.AppointmentServiceType"/>
         </set>
-        <set name="attributes" lazy="true" inverse="true" batch-size="100" cascade="all-delete-orphan" order-by="voided asc" access="field">
-            <key column="appointment_service_id" not-null="true"/>
+        <set name="attributes" inverse="true" cascade="all-delete-orphan" lazy="false" batch-size="100" order-by="voided asc" access="field">
+            <key column="appointment_service_id"/>
             <one-to-many class="org.openmrs.module.appointments.model.AppointmentServiceAttribute"/>
         </set>
     </class>
