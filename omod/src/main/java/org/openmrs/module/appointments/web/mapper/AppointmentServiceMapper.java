@@ -10,6 +10,8 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
+import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
+import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
@@ -30,6 +32,9 @@ public class AppointmentServiceMapper {
 
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+
+    @Autowired
+    AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService;
 
     public AppointmentServiceDefinition fromDescription(AppointmentServiceDescription appointmentServiceDescription) {
         AppointmentServiceDefinition appointmentServiceDefinition;
@@ -73,6 +78,11 @@ public class AppointmentServiceMapper {
             appointmentServiceDescription.getServiceTypes()
                     .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentServiceDefinition));
         }
+
+        if(appointmentServiceDescription.getAttributes() != null) {
+            appointmentServiceDescription.getAttributes()
+                    .forEach(attribute -> constructAppointmentServiceAttribute(attribute, appointmentServiceDefinition));
+        }
         return appointmentServiceDefinition;
     }
 
@@ -97,6 +107,43 @@ public class AppointmentServiceMapper {
         serviceType.setVoidReason(voidReason);
         serviceType.setDateVoided(new Date());
         serviceType.setVoidedBy(Context.getAuthenticatedUser());
+    }
+
+    private void constructAppointmentServiceAttribute(AppointmentServiceAttributeDescription attrDesc, AppointmentServiceDefinition appointmentServiceDefinition) {
+        AppointmentServiceAttribute attribute;
+        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
+
+        if(attrDesc.getUuid() != null)
+            attribute = getAttributeByUuid(existingAttributes, attrDesc.getUuid());
+        else
+            attribute = new AppointmentServiceAttribute();
+
+        AppointmentServiceAttributeType attributeType = appointmentServiceAttributeTypeService.getAttributeTypeByUuid(attrDesc.getAttributeTypeUuid());
+        if (attributeType == null) {
+            throw new RuntimeException("Attribute type not found: " + attrDesc.getAttributeTypeUuid());
+        }
+
+        attribute.setAttributeType(attributeType);
+        attribute.setValueReferenceInternal(attrDesc.getValue());
+        attribute.setAppointmentService(appointmentServiceDefinition);
+
+        if (attrDesc.getVoided() != null && attrDesc.getVoided()) {
+            setVoidedInfoForAttribute(attribute, attrDesc.getVoidReason());
+        }
+
+        existingAttributes.add(attribute);
+    }
+
+    private void setVoidedInfoForAttribute(AppointmentServiceAttribute attribute, String voidReason) {
+        attribute.setVoided(true);
+        attribute.setVoidReason(voidReason);
+        attribute.setDateVoided(new Date());
+        attribute.setVoidedBy(Context.getAuthenticatedUser());
+    }
+
+    private AppointmentServiceAttribute getAttributeByUuid(Set<AppointmentServiceAttribute> attributes, String attributeUuid) {
+        return attributes.stream()
+                .filter(attr -> attr.getUuid().equals(attributeUuid)).findAny().get();
     }
 
     private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityDescription avb, AppointmentServiceDefinition appointmentServiceDefinition) {

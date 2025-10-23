@@ -91,6 +91,7 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
         setVoidInfoForService(appointmentServiceDefinition, voidReason);
         setVoidInfoForWeeklyAvailability(appointmentServiceDefinition, voidReason);
         setVoidInfoForServiceTypes(appointmentServiceDefinition, voidReason);
+        setVoidInfoForAttributes(appointmentServiceDefinition, voidReason);
     }
 
     private void setVoidInfoForService(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason) {
@@ -115,6 +116,15 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
             serviceWeeklyAvailability.setDateVoided(new Date());
             serviceWeeklyAvailability.setVoidedBy(Context.getAuthenticatedUser());
             serviceWeeklyAvailability.setVoidReason(voidReason);
+        }
+    }
+
+    private void setVoidInfoForAttributes(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason) {
+        for (AppointmentServiceAttribute attribute : appointmentServiceDefinition.getAttributes()) {
+            attribute.setVoided(true);
+            attribute.setDateVoided(new Date());
+            attribute.setVoidedBy(Context.getAuthenticatedUser());
+            attribute.setVoidReason(voidReason);
         }
     }
 
