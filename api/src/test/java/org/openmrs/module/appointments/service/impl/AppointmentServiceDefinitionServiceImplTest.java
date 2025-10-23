@@ -10,6 +10,7 @@ import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.*;
+import org.openmrs.module.appointments.service.AppointmentServiceAttributeService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.powermock.api.mockito.PowerMockito;
@@ -44,6 +45,9 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Mock
     private AppointmentsService appointmentsService;
 
+    @Mock
+    private AppointmentServiceAttributeService appointmentServiceAttributeService;
+
     @InjectMocks
     AppointmentServiceDefinitionServiceImpl appointmentServiceService;
 
@@ -55,6 +59,8 @@ public class AppointmentServiceDefinitionServiceImplTest {
         mockStatic(Context.class);
         authenticatedUser = new User(8);
         PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        when(appointmentServiceAttributeService.getAttributesByService(Mockito.anyInt(), Mockito.anyBoolean()))
+                .thenReturn(Collections.emptyList());
     }
 
     @Test
