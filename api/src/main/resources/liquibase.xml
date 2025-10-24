@@ -769,4 +769,10 @@
             update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
         </sql>
     </changeSet>
+    <changeSet author="bahmni-appointments" id="add_index_on_patient_appointment_start_date_time_202411281139">
+        <comment>add index on patient_appointment start_date_time column</comment>
+        <createIndex indexName="patient_appointment_start_date_time_index" tableName="patient_appointment">
+            <column name="start_date_time"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
