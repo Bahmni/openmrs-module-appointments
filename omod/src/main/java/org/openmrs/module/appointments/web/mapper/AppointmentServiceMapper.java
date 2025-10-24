@@ -83,6 +83,9 @@ public class AppointmentServiceMapper {
             appointmentServiceDescription.getAttributes()
                     .forEach(attribute -> constructAppointmentServiceAttribute(attribute, appointmentServiceDefinition));
         }
+
+        validateAttributeCardinality(appointmentServiceDefinition);
+
         return appointmentServiceDefinition;
     }
 
@@ -111,7 +114,7 @@ public class AppointmentServiceMapper {
 
     private void constructAppointmentServiceAttribute(AppointmentServiceAttributeDescription attrDesc, AppointmentServiceDefinition appointmentServiceDefinition) {
         AppointmentServiceAttribute attribute;
-        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
+        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(false);
 
         if(attrDesc.getUuid() != null)
             attribute = getAttributeByUuid(existingAttributes, attrDesc.getUuid());
@@ -139,6 +142,34 @@ public class AppointmentServiceMapper {
         attribute.setVoidReason(voidReason);
         attribute.setDateVoided(new Date());
         attribute.setVoidedBy(Context.getAuthenticatedUser());
+    }
+
+    private void validateAttributeCardinality(AppointmentServiceDefinition appointmentServiceDefinition) {
+        List<AppointmentServiceAttributeType> allAttributeTypes = appointmentServiceAttributeTypeService.getAllAttributeTypes(false);
+
+        for (AppointmentServiceAttributeType attributeType : allAttributeTypes) {
+            Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(false);
+            long count = existingAttributes.stream()
+                    .filter(attr -> !attr.getVoided())
+                    .filter(attr -> attr.getAttributeType().getUuid().equals(attributeType.getUuid()))
+                    .count();
+
+            Integer minOccurs = attributeType.getMinOccurs();
+            if (minOccurs != null && minOccurs > 0) {
+                if (count < minOccurs) {
+                    throw new RuntimeException("Attribute '" + attributeType.getName() +
+                            "' requires at least " + minOccurs + " occurrence(s), but only " + count + " provided");
+                }
+            }
+
+            Integer maxOccurs = attributeType.getMaxOccurs();
+            if (maxOccurs != null && maxOccurs > 0) {
+                if (count > maxOccurs) {
+                    throw new RuntimeException("Attribute '" + attributeType.getName() +
+                            "' allows at most " + maxOccurs + " occurrence(s), but " + count + " provided");
+                }
+            }
+        }
     }
 
     private AppointmentServiceAttribute getAttributeByUuid(Set<AppointmentServiceAttribute> attributes, String attributeUuid) {

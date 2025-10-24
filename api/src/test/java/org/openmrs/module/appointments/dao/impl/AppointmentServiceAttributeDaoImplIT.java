@@ -117,7 +117,6 @@ public class AppointmentServiceAttributeDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSaveNewAttribute() throws Exception {
-        // Get service by ID directly from session to avoid eager loading issues
         AppointmentServiceDefinition service = getServiceById(1);
         AppointmentServiceAttributeType attributeType =
             appointmentServiceAttributeTypeDao.getAttributeTypeByUuid("e8588d22-555g-5gg1-b59g-c98c72d5c9b9");
@@ -214,7 +213,6 @@ public class AppointmentServiceAttributeDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldMaintainRelationshipsAfterSave() throws Exception {
-        // Get service by ID directly from session to avoid eager loading issues
         AppointmentServiceDefinition service = getServiceById(2);
         AppointmentServiceAttributeType attributeType =
             appointmentServiceAttributeTypeDao.getAttributeTypeByUuid("d7477c21-444f-4ff0-a48f-b87b61c4b8a8");

@@ -614,4 +614,54 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
     }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenMinOccursNotSatisfied() throws Exception {
+        String dataJson = "{\"name\":\"New Service Without Required Attribute\"," +
+                "\"durationMins\":30," +
+                "\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:00:00\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                " \"value\":\"DEPT-999\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenMaxOccursExceeded() throws Exception {
+        String dataJson = "{\"name\":\"Service With Too Many Attributes\"," +
+                "\"durationMins\":30," +
+                "\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:00:00\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                " \"value\":\"Category 1\"}," +
+                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                " \"value\":\"Category 2\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenTryingToUpdateVoidedAttribute() throws Exception {
+        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String voidedAttributeUuid = "d4567890-4444-4f20-866b-0ece245615d4";
+
+        String dataJson = "{\"name\":\"Consultation\"," +
+                "\"uuid\":\"" + existingServiceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"" + voidedAttributeUuid + "\"," +
+                " \"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                " \"value\":\"Updated Value\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
 }
