@@ -114,7 +114,7 @@ public class AppointmentServiceMapper {
 
     private void constructAppointmentServiceAttribute(AppointmentServiceAttributeDescription attrDesc, AppointmentServiceDefinition appointmentServiceDefinition) {
         AppointmentServiceAttribute attribute;
-        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(false);
+        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
 
         if(attrDesc.getUuid() != null)
             attribute = getAttributeByUuid(existingAttributes, attrDesc.getUuid());
@@ -148,7 +148,7 @@ public class AppointmentServiceMapper {
         List<AppointmentServiceAttributeType> allAttributeTypes = appointmentServiceAttributeTypeService.getAllAttributeTypes(false);
 
         for (AppointmentServiceAttributeType attributeType : allAttributeTypes) {
-            Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(false);
+            Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
             long count = existingAttributes.stream()
                     .filter(attr -> !attr.getVoided())
                     .filter(attr -> attr.getAttributeType().getUuid().equals(attributeType.getUuid()))
