@@ -274,9 +274,6 @@
                 <property name="appointmentsService">
                     <ref bean="appointmentsService"/>
                 </property>
-                <property name="appointmentServiceAttributeService">
-                    <ref bean="appointmentServiceAttributeService"/>
-                </property>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -300,12 +297,6 @@
     </bean>
 
     <bean id="appointmentServiceAttributeTypeDao" class="org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeTypeDaoImpl">
-        <property name="sessionFactory">
-            <ref bean="sessionFactory"/>
-        </property>
-    </bean>
-
-    <bean id="appointmentServiceAttributeDao" class="org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeDaoImpl">
         <property name="sessionFactory">
             <ref bean="sessionFactory"/>
         </property>
@@ -339,31 +330,4 @@
         </property>
     </bean>
 
-    <bean id="appointmentServiceAttributeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
-        <property name="transactionManager">
-            <ref bean="transactionManager"/>
-        </property>
-        <property name="target">
-            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceAttributeServiceImpl">
-                <property name="appointmentServiceAttributeDao">
-                    <ref bean="appointmentServiceAttributeDao"/>
-                </property>
-            </bean>
-        </property>
-        <property name="preInterceptors">
-            <ref bean="serviceInterceptors"/>
-        </property>
-        <property name="transactionAttributeSource">
-            <ref bean="transactionAttributeSource"/>
-        </property>
-    </bean>
-
-    <bean parent="serviceContext">
-        <property name="moduleService">
-            <list merge="true">
-                <value>org.openmrs.module.appointments.service.AppointmentServiceAttributeService</value>
-                <ref bean="appointmentServiceAttributeService"/>
-            </list>
-        </property>
-    </bean>
 </beans>

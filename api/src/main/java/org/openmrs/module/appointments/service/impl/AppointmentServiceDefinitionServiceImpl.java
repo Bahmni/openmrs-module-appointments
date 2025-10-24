@@ -3,12 +3,11 @@ package org.openmrs.module.appointments.service.impl;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
-import org.openmrs.module.appointments.service.AppointmentServiceAttributeService;
+import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,18 +20,12 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
 
     AppointmentsService appointmentsService;
 
-    AppointmentServiceAttributeService appointmentServiceAttributeService;
-
     public void setAppointmentServiceDao(AppointmentServiceDao appointmentServiceDao) {
         this.appointmentServiceDao = appointmentServiceDao;
     }
 
     public void setAppointmentsService(AppointmentsService appointmentsService) {
         this.appointmentsService = appointmentsService;
-    }
-
-    public void setAppointmentServiceAttributeService(AppointmentServiceAttributeService appointmentServiceAttributeService) {
-        this.appointmentServiceAttributeService = appointmentServiceAttributeService;
     }
 
     @Override
@@ -46,22 +39,12 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
 
     @Override
     public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
-        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDao.getAllAppointmentServices(includeVoided);
-        for (AppointmentServiceDefinition service : appointmentServiceDefinitions) {
-            List<AppointmentServiceAttribute> attributes = appointmentServiceAttributeService.getAttributesByService(service.getAppointmentServiceId(), false);
-            service.setAttributes(new HashSet<>(attributes));
-        }
-        return appointmentServiceDefinitions;
+        return appointmentServiceDao.getAllAppointmentServices(includeVoided);
     }
 
     @Override
     public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid(uuid);
-        if (appointmentServiceDefinition != null) {
-            List<AppointmentServiceAttribute> attributes = appointmentServiceAttributeService.getAttributesByService(appointmentServiceDefinition.getAppointmentServiceId(), false);
-            appointmentServiceDefinition.setAttributes(new HashSet<>(attributes));
-        }
-        return appointmentServiceDefinition;
+        return appointmentServiceDao.getAppointmentServiceByUuid(uuid);
     }
 
     @Override
