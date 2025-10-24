@@ -914,4 +914,15 @@
         <addForeignKeyConstraint constraintName="appointment_service_attribute_changed_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id" />
         <addForeignKeyConstraint constraintName="appointment_service_attribute_voided_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="voided_by" referencedTableName="users" referencedColumnNames="user_id" />
     </changeSet>
+    <changeSet id="add-index-patient-appointment-appointment-number-202510231900" author="Srijan Ram, Kousalya">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <indexExists indexName="patient_appointment_appointment_number_idx" tableName="patient_appointment"/>
+            </not>
+        </preConditions>
+        <comment>Adding index on appointment_number column to improve search performance</comment>
+        <createIndex indexName="patient_appointment_appointment_number_idx" tableName="patient_appointment">
+            <column name="appointment_number"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
