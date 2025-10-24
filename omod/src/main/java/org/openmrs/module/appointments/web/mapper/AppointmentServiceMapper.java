@@ -281,4 +281,22 @@ public class AppointmentServiceMapper {
 
         return response;
     }
+
+    public AppointmentServiceAttributeTypeResponse constructAttributeTypeResponse(AppointmentServiceAttributeType attributeType) {
+        AppointmentServiceAttributeTypeResponse response = new AppointmentServiceAttributeTypeResponse();
+        response.setUuid(attributeType.getUuid());
+        response.setName(attributeType.getName());
+        response.setDescription(attributeType.getDescription());
+        response.setDatatype(attributeType.getDatatypeClassname());
+        response.setMinOccurs(attributeType.getMinOccurs());
+        response.setMaxOccurs(attributeType.getMaxOccurs());
+        response.setRetired(attributeType.getRetired());
+        return response;
+    }
+
+    public List<AppointmentServiceAttributeTypeResponse> constructAttributeTypeListResponse(List<AppointmentServiceAttributeType> attributeTypes) {
+        return attributeTypes.stream()
+                .map(this::constructAttributeTypeResponse)
+                .collect(Collectors.toList());
+    }
 }

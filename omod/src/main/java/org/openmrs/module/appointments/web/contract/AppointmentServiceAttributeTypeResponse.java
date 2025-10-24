@@ -5,6 +5,10 @@ public class AppointmentServiceAttributeTypeResponse {
     private String name;
     private String description;
     private String format;
+    private String datatype;
+    private Integer minOccurs;
+    private Integer maxOccurs;
+    private Boolean retired;
 
     public String getUuid() {
         return uuid;
@@ -36,5 +40,37 @@ public class AppointmentServiceAttributeTypeResponse {
 
     public void setFormat(String format) {
         this.format = format;
+    }
+
+    public String getDatatype() {
+        return datatype;
+    }
+
+    public void setDatatype(String datatype) {
+        this.datatype = datatype;
+    }
+
+    public Integer getMinOccurs() {
+        return minOccurs;
+    }
+
+    public void setMinOccurs(Integer minOccurs) {
+        this.minOccurs = minOccurs;
+    }
+
+    public Integer getMaxOccurs() {
+        return maxOccurs;
+    }
+
+    public void setMaxOccurs(Integer maxOccurs) {
+        this.maxOccurs = maxOccurs;
+    }
+
+    public Boolean getRetired() {
+        return retired;
+    }
+
+    public void setRetired(Boolean retired) {
+        this.retired = retired;
     }
 }
