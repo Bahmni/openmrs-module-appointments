@@ -5,7 +5,6 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Person;
-import org.openmrs.PersonAttribute;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
@@ -24,6 +23,8 @@ import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
+import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -63,6 +64,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     private TeleconsultationAppointmentService teleconsultationAppointmentService;
 
     private PatientAppointmentNotifierService appointmentNotifierService;
+    private AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
 
 
 
@@ -120,11 +122,24 @@ public class AppointmentsServiceImpl implements AppointmentsService {
                         equals(Context.getAuthenticatedUser().getPerson()));
     }
 
+    private void checkAndAssignAppointmentNumber(Appointment appointment) {
+        if (appointment.getAppointmentNumber() == null) {
+            AppointmentNumberGenerator appointmentNumberGenerator =
+                    appointmentNumberGeneratorLocator.retrieveAppointmentNumberGenerator();
+            if (appointmentNumberGenerator == null) {
+                log.warn("Can not generate appointment number. No generator found");
+                return;
+            }
+            String generateAppointmentNumber = appointmentNumberGenerator.generateAppointmentNumber(appointment);
+            appointment.setAppointmentNumber(generateAppointmentNumber);
+        }
+    }
+
     @Transactional
     @Override
     public Appointment validateAndSave(Appointment appointment) throws APIException {
         validate(appointment, appointmentValidators);
-        appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        checkAndAssignAppointmentNumber(appointment);
         setupTeleconsultation(appointment);
         save(appointment);
         notifyUpdates(appointment);
@@ -136,7 +151,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public Appointment validateAndSave(Supplier<Appointment> mapper) {
         Appointment appointment = mapper.get();
         validate(appointment, appointmentValidators);
-        appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+        checkAndAssignAppointmentNumber(appointment);
         setupTeleconsultation(appointment);
         save(appointment);
         notifyUpdates(appointment);
@@ -344,7 +359,6 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     private List<Appointment> getNonVoidedFutureAppointments(List<Appointment> appointments) {
         return appointments.stream().filter(appointment -> {
-            appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
             return !(appointment.getVoided() || appointment.getStartDateTime().before(getStartOfDay()));
         }).collect(Collectors.toList());
     }
@@ -410,11 +424,9 @@ public class AppointmentsServiceImpl implements AppointmentsService {
             newAppointment.setCreator(null);
             newAppointment.setDateChanged(null);
             newAppointment.setChangedBy(null);
-
-            //TODO: should we copy the original appointment
-            //newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
-            appointmentServiceHelper.checkAndAssignAppointmentNumber(newAppointment);
-
+            if (retainAppointmentNumber) {
+                newAppointment.setAppointmentNumber(prevAppointment.getAppointmentNumber());
+            }
             newAppointment.setStatus(AppointmentStatus.Scheduled);
             validateAndSave(newAppointment);
 
@@ -454,4 +466,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         appointmentAudits.addAll(new HashSet<>(Collections.singleton(appointmentAudit)));
     }
 
+    public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
+        this.appointmentNumberGeneratorLocator = appointmentNumberGeneratorLocator;
+    }
 }

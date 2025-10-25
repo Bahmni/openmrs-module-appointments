@@ -37,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @Component
 public class AppointmentMapper {
@@ -79,6 +78,9 @@ public class AppointmentMapper {
         } else {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
+            if (!StringUtils.isEmpty(appointmentRequest.getAppointmentNumber())) {
+                appointment.setAppointmentNumber(appointmentRequest.getAppointmentNumber());
+            }
         }
         mapAppointmentRequestToAppointment(appointmentRequest, appointment);
         return appointment;

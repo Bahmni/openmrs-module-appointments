@@ -60,6 +60,12 @@
         </property>
     </bean>
 
+    <bean id="appointmentNumberGenerator" class="org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl"/>
+
+    <bean id="appointmentNumberGeneratorLocator" class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
+        <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+    </bean>
+
     <bean id="recurringAppointmentService"
           class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
         <property name="transactionManager">
@@ -95,6 +101,7 @@
                 <property name="appointmentDao">
                     <ref bean="appointmentDao"/>
                 </property>
+                <property name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -164,6 +171,7 @@
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
                 </property>
+                <property name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
             </bean>
         </property>
         <property name="preInterceptors">

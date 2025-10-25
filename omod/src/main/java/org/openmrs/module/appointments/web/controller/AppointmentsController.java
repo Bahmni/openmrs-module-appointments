@@ -71,8 +71,7 @@ public class AppointmentsController extends BaseRestController {
     public ResponseEntity<Object> saveAppointment(@Valid @RequestBody AppointmentRequest appointmentRequest) throws IOException {
         try {
             appointmentRequest.setUuid(null);
-            Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
-            appointmentsService.validateAndSave(appointment);
+            Appointment appointment = appointmentsService.validateAndSave(() -> appointmentMapper.fromRequest(appointmentRequest));
             return new ResponseEntity<>(appointmentMapper.constructResponse(appointment), HttpStatus.OK);
         }catch (RuntimeException e) {
             log.error("Runtime error while trying to create new appointment", e);
