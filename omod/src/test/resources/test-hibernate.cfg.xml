@@ -9,6 +9,7 @@
 		<mapping resource="Speciality.hbm.xml"/>
 		<mapping resource="ServiceWeeklyAvailability.hbm.xml"/>
 		<mapping resource="Appointment.hbm.xml"/>
+		<mapping resource="AppointmentReason.hbm.xml"/>
 		<mapping resource="AppointmentServiceType.hbm.xml"/>
 		<mapping resource="AppointmentAudit.hbm.xml"/>
 		<mapping resource="AppointmentProvider.hbm.xml"/>
