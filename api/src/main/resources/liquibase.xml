@@ -769,4 +769,70 @@
             update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
         </sql>
     </changeSet>
+    <changeSet id="create-patient_appointment_reason_table-20251002" author="Mohan">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_reason" />
+            </not>
+        </preConditions>
+        <comment>Create table to store appointment reasons linked to concepts</comment>
+        <createTable tableName="patient_appointment_reason">
+            <column name="patient_appointment_reason_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="patient_appointment_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="reason_code" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="changed_by" type="int"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="fk_patient_appointment_reason_appointment"
+                baseTableName="patient_appointment_reason"
+                baseColumnNames="patient_appointment_id"
+                referencedTableName="patient_appointment"
+                referencedColumnNames="patient_appointment_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_patient_appointment_reason_concept"
+                baseTableName="patient_appointment_reason"
+                baseColumnNames="reason_code"
+                referencedTableName="concept"
+                referencedColumnNames="concept_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_patient_appointment_reason_creator"
+                baseTableName="patient_appointment_reason"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_patient_appointment_reason_changed_by"
+                baseTableName="patient_appointment_reason"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_patient_appointment_reason_voided_by"
+                baseTableName="patient_appointment_reason"
+                baseColumnNames="voided_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+    </changeSet>
 </databaseChangeLog>
