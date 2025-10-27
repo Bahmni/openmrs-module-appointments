@@ -28,6 +28,7 @@ public class AppointmentDefaultResponse {
 	private HashMap extensions;
 	private String teleconsultationLink;
 	private String priority;
+	private List<AppointmentReasonResponse> reasons;
 
 	public String getUuid() {
 		return uuid;
@@ -202,5 +203,13 @@ public class AppointmentDefaultResponse {
 
 	public void setDateAppointmentScheduled(Date dateAppointmentScheduled) {
 		this.dateAppointmentScheduled = dateAppointmentScheduled;
+	}
+
+	public List<AppointmentReasonResponse> getReasons() {
+		return reasons;
+	}
+
+	public void setReasons(List<AppointmentReasonResponse> reasons) {
+		this.reasons = reasons;
 	}
 }

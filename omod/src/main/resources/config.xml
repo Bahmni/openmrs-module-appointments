@@ -45,6 +45,7 @@
 		AppointmentServiceType.hbm.xml
 		AppointmentProvider.hbm.xml
 		AppointmentRecurringPattern.hbm.xml
+		AppointmentReason.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
