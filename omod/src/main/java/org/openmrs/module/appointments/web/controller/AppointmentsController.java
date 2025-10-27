@@ -84,7 +84,7 @@ public class AppointmentsController extends BaseRestController {
     @ResponseBody
     public List<AppointmentDefaultResponse> search(@Valid @RequestBody AppointmentSearchRequest appointmentSearchRequest) {
         Errors appointmentSearchErrors = new BeanPropertyBindingResult(appointmentSearchRequest, "appointmentSearchRequest");
-//        appointmentSearchValidator.validate(appointmentSearchRequest, appointmentSearchErrors);
+        appointmentSearchValidator.validate(appointmentSearchRequest, appointmentSearchErrors);
         if (!appointmentSearchErrors.getAllErrors().isEmpty()) {
             throw new RuntimeException(appointmentSearchErrors.getAllErrors().get(0).getDefaultMessage());
         }
