@@ -389,7 +389,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     public void should_returnAttributesForSingleService() throws Exception {
         AppointmentServiceFullResponse service = deserialize(
                 handle(newGetRequest("/rest/v1/appointmentService",
-                    new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a6"))),
+                    new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1"))),
                 new TypeReference<AppointmentServiceFullResponse>() {});
 
         assertNotNull(service);
@@ -474,7 +474,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_updateExistingAttribute() throws Exception {
-        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
         String existingAttributeUuid = "e36006e5-9fbb-4f20-866b-0ece245615a1";
 
         String dataJson = "{\"name\":\"Consultation\"," +
@@ -507,7 +507,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_voidAttribute() throws Exception {
-        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
         String existingAttributeUuid = "e36006e5-9fbb-4f20-866b-0ece245615a2";
 
         AppointmentServiceFullResponse beforeVoid = deserialize(
@@ -651,7 +651,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test(expected = RuntimeException.class)
     public void should_throwErrorWhenTryingToUpdateVoidedAttribute() throws Exception {
-        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
         String voidedAttributeUuid = "d4567890-4444-4f20-866b-0ece245615d4";
 
         String dataJson = "{\"name\":\"Consultation\"," +
