@@ -424,15 +424,23 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertNotNull("Service should have attributes", attributes);
         assertEquals("Should have 2 attributes", 2, attributes.size());
 
-        LinkedHashMap<String, Object> attr1 = (LinkedHashMap<String, Object>) attributes.get(0);
-        assertEquals("Consultation Fee", attr1.get("attributeType"));
-        assertEquals("600", attr1.get("value"));
-        assertNotNull(attr1.get("uuid"));
+        Map<String, LinkedHashMap<String, Object>> attrMap = new HashMap<>();
+        for (Object attr : attributes) {
+            LinkedHashMap<String, Object> attrData = (LinkedHashMap<String, Object>) attr;
+            attrMap.put((String) attrData.get("attributeType"), attrData);
+        }
 
-        LinkedHashMap<String, Object> attr2 = (LinkedHashMap<String, Object>) attributes.get(1);
-        assertEquals("Room Number", attr2.get("attributeType"));
-        assertEquals("Room 202", attr2.get("value"));
-        assertNotNull(attr2.get("uuid"));
+        LinkedHashMap<String, Object> consultationFeeAttr = attrMap.get("Consultation Fee");
+        assertNotNull("Consultation Fee attribute should exist", consultationFeeAttr);
+        assertEquals("Consultation Fee", consultationFeeAttr.get("attributeType"));
+        assertEquals("600", consultationFeeAttr.get("value"));
+        assertNotNull(consultationFeeAttr.get("uuid"));
+
+        LinkedHashMap<String, Object> roomNumberAttr = attrMap.get("Room Number");
+        assertNotNull("Room Number attribute should exist", roomNumberAttr);
+        assertEquals("Room Number", roomNumberAttr.get("attributeType"));
+        assertEquals("Room 202", roomNumberAttr.get("value"));
+        assertNotNull(roomNumberAttr.get("uuid"));
     }
 
     @Test
