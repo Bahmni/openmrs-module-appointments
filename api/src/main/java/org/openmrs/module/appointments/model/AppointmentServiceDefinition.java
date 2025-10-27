@@ -2,16 +2,20 @@ package org.openmrs.module.appointments.model;
 
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
+import org.openmrs.customdatatype.Customizable;
+import org.openmrs.customdatatype.CustomValueDescriptor;
 
 import java.io.Serializable;
 import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 
-
-public class AppointmentServiceDefinition extends BaseOpenmrsData implements Serializable {
+public class AppointmentServiceDefinition extends BaseOpenmrsData implements Serializable, Customizable<AppointmentServiceAttribute> {
 
     private Integer appointmentServiceId;
     private String name;
@@ -26,6 +30,7 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData implements Ser
     private AppointmentStatus initialAppointmentStatus;
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
     private Set<AppointmentServiceType> serviceTypes;
+    private Set<AppointmentServiceAttribute> attributes;
 
     public Location getLocation() {
         return location;
@@ -172,5 +177,54 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData implements Ser
 
     public void setInitialAppointmentStatus(AppointmentStatus initialAppointmentStatus) {
         this.initialAppointmentStatus = initialAppointmentStatus;
+    }
+
+    public Set<AppointmentServiceAttribute> getAttributes(boolean includeVoided) {
+        if (this.attributes == null) {
+            this.attributes = new LinkedHashSet<>();
+        }
+        if(includeVoided)
+            return this.attributes;
+
+        Set<AppointmentServiceAttribute> nonVoided = new LinkedHashSet<>(this.attributes);
+        nonVoided.removeIf(AppointmentServiceAttribute::getVoided);
+        return nonVoided;
+    }
+
+    public Set<AppointmentServiceAttribute> getAttributes() {
+        return getAttributes(false);
+    }
+
+    public void setAttributes(Set<AppointmentServiceAttribute> attributes) {
+        if (this.attributes == null) {
+            this.attributes = new HashSet<>();
+        }
+        this.attributes.clear();
+        this.attributes.addAll(attributes);
+    }
+
+    @Override
+    public Collection<AppointmentServiceAttribute> getActiveAttributes() {
+        return getAttributes(false);
+    }
+
+    @Override
+    public List<AppointmentServiceAttribute> getActiveAttributes(CustomValueDescriptor ofType) {
+        List<AppointmentServiceAttribute> result = new ArrayList<>();
+        for (AppointmentServiceAttribute attr : getActiveAttributes()) {
+            if (attr.getAttributeType().equals(ofType)) {
+                result.add(attr);
+            }
+        }
+        return result;
+    }
+
+    @Override
+    public void addAttribute(AppointmentServiceAttribute attribute) {
+        if (this.attributes == null) {
+            this.attributes = new LinkedHashSet<>();
+        }
+        attribute.setAppointmentService(this);
+        this.attributes.add(attribute);
     }
 }

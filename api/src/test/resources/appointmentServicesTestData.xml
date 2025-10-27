@@ -26,4 +26,63 @@
     <appointment_service appointment_service_id="3" name="Ortho" description="Ortho Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" uuid="111106e5-0000-4f20-866b-0ece24560000" voided="false"/>
     <appointment_service_type appointment_service_type_id="2" appointment_service_id="3" name="serviceType1" duration_mins="30" uuid="678906e5-9fbb-4f20-866b-0ece24564578" creator="1" date_created="2108-08-10 15:57:09.0"  voided="false"/>
+
+    <appointment_service_attribute_type appointment_service_attribute_type_id="1"
+                                         name="Consultation Fee"
+                                         description="Fee for consultation"
+                                         datatype="org.openmrs.customdatatype.datatype.FreeTextDatatype"
+                                         min_occurs="0"
+                                         retired="false"
+                                         creator="1"
+                                         date_created="2024-01-01 00:00:00"
+                                         uuid="d36006e5-9fbb-4f20-866b-0ece245615a1"/>
+
+    <appointment_service_attribute_type appointment_service_attribute_type_id="2"
+                                         name="Room Number"
+                                         description="Room number for service"
+                                         datatype="org.openmrs.customdatatype.datatype.FreeTextDatatype"
+                                         min_occurs="0"
+                                         retired="false"
+                                         creator="1"
+                                         date_created="2024-01-01 00:00:00"
+                                         uuid="d36006e5-9fbb-4f20-866b-0ece245615a2"/>
+
+    <appointment_service_attribute appointment_service_attribute_id="1"
+                                   appointment_service_id="1"
+                                   attribute_type_id="1"
+                                   value_reference="500"
+                                   creator="1"
+                                   date_created="2024-01-01 00:00:00"
+                                   voided="false"
+                                   uuid="e36006e5-9fbb-4f20-866b-0ece245615a1"/>
+
+    <appointment_service_attribute appointment_service_attribute_id="2"
+                                   appointment_service_id="1"
+                                   attribute_type_id="2"
+                                   value_reference="Room 101"
+                                   creator="1"
+                                   date_created="2024-01-01 00:00:00"
+                                   voided="false"
+                                   uuid="e36006e5-9fbb-4f20-866b-0ece245615a2"/>
+
+    <appointment_service_attribute appointment_service_attribute_id="3"
+                                   appointment_service_id="1"
+                                   attribute_type_id="1"
+                                   value_reference="1000"
+                                   creator="1"
+                                   date_created="2024-01-01 00:00:00"
+                                   voided="true"
+                                   voided_by="1"
+                                   date_voided="2024-01-02 00:00:00"
+                                   void_reason="Outdated fee"
+                                   uuid="e36006e5-9fbb-4f20-866b-0ece245615a3"/>
+
+    <appointment_service_attribute appointment_service_attribute_id="4"
+                                   appointment_service_id="3"
+                                   attribute_type_id="1"
+                                   value_reference="750"
+                                   creator="1"
+                                   date_created="2024-01-01 00:00:00"
+                                   voided="false"
+                                   uuid="e36006e5-9fbb-4f20-866b-0ece245615a4"/>
 </dataset>

@@ -11,6 +11,8 @@
 		<mapping resource="ServiceWeeklyAvailability.hbm.xml"/>
 		<mapping resource="Appointment.hbm.xml"/>
 		<mapping resource="AppointmentServiceType.hbm.xml"/>
+		<mapping resource="AppointmentServiceAttributeType.hbm.xml"/>
+		<mapping resource="AppointmentServiceAttribute.hbm.xml"/>
 		<mapping resource="AppointmentAudit.hbm.xml"/>
 		<mapping resource="AppointmentProvider.hbm.xml"/>
 		<mapping resource="AppointmentRecurringPattern.hbm.xml"/>

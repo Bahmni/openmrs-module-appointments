@@ -4,11 +4,14 @@ import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
+import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
+import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
@@ -29,6 +32,9 @@ public class AppointmentServiceMapper {
 
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+
+    @Autowired
+    AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService;
 
     public AppointmentServiceDefinition fromDescription(AppointmentServiceDescription appointmentServiceDescription) {
         AppointmentServiceDefinition appointmentServiceDefinition;
@@ -72,6 +78,14 @@ public class AppointmentServiceMapper {
             appointmentServiceDescription.getServiceTypes()
                     .forEach(serviceType -> constructAppointmentServiceTypes(serviceType, appointmentServiceDefinition));
         }
+
+        if(appointmentServiceDescription.getAttributes() != null) {
+            appointmentServiceDescription.getAttributes()
+                    .forEach(attribute -> constructAppointmentServiceAttribute(attribute, appointmentServiceDefinition));
+        }
+
+        validateAttributeCardinality(appointmentServiceDefinition);
+
         return appointmentServiceDefinition;
     }
 
@@ -96,6 +110,71 @@ public class AppointmentServiceMapper {
         serviceType.setVoidReason(voidReason);
         serviceType.setDateVoided(new Date());
         serviceType.setVoidedBy(Context.getAuthenticatedUser());
+    }
+
+    private void constructAppointmentServiceAttribute(AppointmentServiceAttributeDescription attrDesc, AppointmentServiceDefinition appointmentServiceDefinition) {
+        AppointmentServiceAttribute attribute;
+        Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
+
+        if(attrDesc.getUuid() != null)
+            attribute = getAttributeByUuid(existingAttributes, attrDesc.getUuid());
+        else
+            attribute = new AppointmentServiceAttribute();
+
+        AppointmentServiceAttributeType attributeType = appointmentServiceAttributeTypeService.getAttributeTypeByUuid(attrDesc.getAttributeTypeUuid());
+        if (attributeType == null) {
+            throw new RuntimeException("Attribute type not found: " + attrDesc.getAttributeTypeUuid());
+        }
+
+        attribute.setAttributeType(attributeType);
+        attribute.setValueReferenceInternal(attrDesc.getValue());
+        attribute.setAppointmentService(appointmentServiceDefinition);
+
+        if (attrDesc.getVoided() != null && attrDesc.getVoided()) {
+            setVoidedInfoForAttribute(attribute, attrDesc.getVoidReason());
+        }
+
+        existingAttributes.add(attribute);
+    }
+
+    private void setVoidedInfoForAttribute(AppointmentServiceAttribute attribute, String voidReason) {
+        attribute.setVoided(true);
+        attribute.setVoidReason(voidReason);
+        attribute.setDateVoided(new Date());
+        attribute.setVoidedBy(Context.getAuthenticatedUser());
+    }
+
+    private void validateAttributeCardinality(AppointmentServiceDefinition appointmentServiceDefinition) {
+        List<AppointmentServiceAttributeType> allAttributeTypes = appointmentServiceAttributeTypeService.getAllAttributeTypes(false);
+
+        for (AppointmentServiceAttributeType attributeType : allAttributeTypes) {
+            Set<AppointmentServiceAttribute> existingAttributes = appointmentServiceDefinition.getAttributes(true);
+            long count = existingAttributes.stream()
+                    .filter(attr -> !attr.getVoided())
+                    .filter(attr -> attr.getAttributeType().getUuid().equals(attributeType.getUuid()))
+                    .count();
+
+            Integer minOccurs = attributeType.getMinOccurs();
+            if (minOccurs != null && minOccurs > 0) {
+                if (count < minOccurs) {
+                    throw new RuntimeException("Attribute '" + attributeType.getName() +
+                            "' requires at least " + minOccurs + " occurrence(s), but only " + count + " provided");
+                }
+            }
+
+            Integer maxOccurs = attributeType.getMaxOccurs();
+            if (maxOccurs != null && maxOccurs > 0) {
+                if (count > maxOccurs) {
+                    throw new RuntimeException("Attribute '" + attributeType.getName() +
+                            "' allows at most " + maxOccurs + " occurrence(s), but " + count + " provided");
+                }
+            }
+        }
+    }
+
+    private AppointmentServiceAttribute getAttributeByUuid(Set<AppointmentServiceAttribute> attributes, String attributeUuid) {
+        return attributes.stream()
+                .filter(attr -> attr.getUuid().equals(attributeUuid)).findAny().get();
     }
 
     private ServiceWeeklyAvailability constructServiceWeeklyAvailability(ServiceWeeklyAvailabilityDescription avb, AppointmentServiceDefinition appointmentServiceDefinition) {
@@ -190,6 +269,15 @@ public class AppointmentServiceMapper {
         }
         asResponse.setLocation(locationMap);
 
+        Set<AppointmentServiceAttribute> attributes = as.getAttributes();
+        if(attributes != null && !attributes.isEmpty()) {
+            List<AppointmentServiceAttributeResponse> attributeResponses = attributes.stream()
+                    .filter(attr -> !attr.getVoided())
+                    .map(attr -> constructAttributeResponse(attr))
+                    .collect(Collectors.toList());
+            asResponse.setAttributes(attributeResponses);
+        }
+
         return asResponse;
     }
 
@@ -205,5 +293,41 @@ public class AppointmentServiceMapper {
 
     private String convertTimeToString(Time time) {
        return time != null ? time.toString() : new String();
+    }
+
+    private AppointmentServiceAttributeResponse constructAttributeResponse(AppointmentServiceAttribute attribute) {
+        AppointmentServiceAttributeResponse response = new AppointmentServiceAttributeResponse();
+        response.setUuid(attribute.getUuid());
+        response.setAttributeType(attribute.getAttributeType().getName());
+        response.setAttributeTypeUuid(attribute.getAttributeType().getUuid());
+
+        try {
+            Object value = attribute.getAttributeType().getDatatypeClassname() != null
+                    ? attribute.getValue()
+                    : attribute.getValueReference();
+            response.setValue(value);
+        } catch (Exception e) {
+            response.setValue(attribute.getValueReference());
+        }
+
+        return response;
+    }
+
+    public AppointmentServiceAttributeTypeResponse constructAttributeTypeResponse(AppointmentServiceAttributeType attributeType) {
+        AppointmentServiceAttributeTypeResponse response = new AppointmentServiceAttributeTypeResponse();
+        response.setUuid(attributeType.getUuid());
+        response.setName(attributeType.getName());
+        response.setDescription(attributeType.getDescription());
+        response.setDatatype(attributeType.getDatatypeClassname());
+        response.setMinOccurs(attributeType.getMinOccurs());
+        response.setMaxOccurs(attributeType.getMaxOccurs());
+        response.setRetired(attributeType.getRetired());
+        return response;
+    }
+
+    public List<AppointmentServiceAttributeTypeResponse> constructAttributeTypeListResponse(List<AppointmentServiceAttributeType> attributeTypes) {
+        return attributeTypes.stream()
+                .map(this::constructAttributeTypeResponse)
+                .collect(Collectors.toList());
     }
 }

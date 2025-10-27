@@ -10,6 +10,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
+import org.openmrs.module.appointments.web.contract.AppointmentServiceAttributeResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceFullResponse;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -311,5 +312,356 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Appointment Service does not exist");
         MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));
+    }
+
+    @Test
+    public void should_returnAttributesInDefaultResponse() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/default"));
+        List<AppointmentServiceDefaultResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
+
+        assertNotNull(services);
+
+        AppointmentServiceDefaultResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Service should have attributes", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+
+        AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Consultation Fee"))
+                .findFirst().orElse(null);
+        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertEquals("Consultation Fee", feeAttr.getAttributeType());
+        assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a1", feeAttr.getAttributeTypeUuid());
+        assertEquals("500", feeAttr.getValue());
+        assertEquals("e36006e5-9fbb-4f20-866b-0ece245615a1", feeAttr.getUuid());
+
+        AppointmentServiceAttributeResponse roomAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Room Number"))
+                .findFirst().orElse(null);
+        assertNotNull("Room Number attribute should exist", roomAttr);
+        assertEquals("Room Number", roomAttr.getAttributeType());
+        assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a2", roomAttr.getAttributeTypeUuid());
+        assertEquals("Room 101", roomAttr.getValue());
+        assertEquals("e36006e5-9fbb-4f20-866b-0ece245615a2", roomAttr.getUuid());
+    }
+
+    @Test
+    public void should_notReturnVoidedAttributes() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/default"));
+        List<AppointmentServiceDefaultResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
+
+        assertNotNull(services);
+
+        AppointmentServiceDefaultResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Service should have attributes", service.getAttributes());
+
+        boolean hasVoidedAttribute = service.getAttributes().stream()
+                .anyMatch(a -> a.getUuid().equals("e36006e5-9fbb-4f20-866b-0ece245615a3"));
+
+        assertEquals("Voided attribute should not be in response", false, hasVoidedAttribute);
+        assertEquals("Should only have 2 non-voided attributes", 2, service.getAttributes().size());
+    }
+
+    @Test
+    public void should_returnAttributesInFullResponse() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/all/full"));
+        List<AppointmentServiceFullResponse> services = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(services);
+
+        AppointmentServiceFullResponse service = services.stream()
+                .filter(s -> s.getName().equals("Consultation"))
+                .findFirst().orElse(null);
+
+        assertNotNull("Consultation service should exist", service);
+        assertNotNull("Full response should include attributes (inherited from default)", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+    }
+
+    @Test
+    public void should_returnAttributesForSingleService() throws Exception {
+        AppointmentServiceFullResponse service = deserialize(
+                handle(newGetRequest("/rest/v1/appointmentService",
+                    new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a6"))),
+                new TypeReference<AppointmentServiceFullResponse>() {});
+
+        assertNotNull(service);
+        assertEquals("Consultation", service.getName());
+        assertNotNull("Service should have attributes", service.getAttributes());
+        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+
+        AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
+                .filter(a -> a.getAttributeType().equals("Consultation Fee"))
+                .findFirst().orElse(null);
+        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertEquals("500", feeAttr.getValue());
+    }
+
+    @Test
+    public void should_createServiceWithAttributes() throws Exception {
+        String dataJson = "{\"name\":\"Cardiology Service\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\", \"value\":\"600\"}," +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a2\", \"value\":\"Room 202\"}" +
+                "]}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject serviceResponse = SimpleObject.parseJson(response.getContentAsString());
+
+        assertNotNull(serviceResponse);
+        assertEquals("Cardiology Service", serviceResponse.get("name"));
+        assertNotNull(serviceResponse.get("uuid"));
+
+        ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
+        assertNotNull("Service should have attributes", attributes);
+        assertEquals("Should have 2 attributes", 2, attributes.size());
+
+        LinkedHashMap<String, Object> attr1 = (LinkedHashMap<String, Object>) attributes.get(0);
+        assertEquals("Consultation Fee", attr1.get("attributeType"));
+        assertEquals("600", attr1.get("value"));
+        assertNotNull(attr1.get("uuid"));
+
+        LinkedHashMap<String, Object> attr2 = (LinkedHashMap<String, Object>) attributes.get(1);
+        assertEquals("Room Number", attr2.get("attributeType"));
+        assertEquals("Room 202", attr2.get("value"));
+        assertNotNull(attr2.get("uuid"));
+    }
+
+    @Test
+    public void should_updateServiceWithNewAttributes() throws Exception {
+        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
+
+        AppointmentServiceFullResponse beforeUpdate = deserialize(
+                handle(newGetRequest("/rest/v1/appointmentService",
+                    new Parameter("uuid", existingServiceUuid))),
+                new TypeReference<AppointmentServiceFullResponse>() {});
+
+        int initialAttributeCount = beforeUpdate.getAttributes() != null ? beforeUpdate.getAttributes().size() : 0;
+
+        String dataJson = "{\"name\":\"Consultation\"," +
+                "\"uuid\":\"" + existingServiceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a3\", \"value\":\"Special instructions here\"}" +
+                "]}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject serviceResponse = SimpleObject.parseJson(response.getContentAsString());
+
+        assertNotNull(serviceResponse);
+        assertEquals(existingServiceUuid, serviceResponse.get("uuid"));
+
+        ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
+        assertNotNull("Service should have attributes", attributes);
+
+        boolean hasNewAttribute = false;
+        for (Object attr : attributes) {
+            LinkedHashMap<String, Object> attrMap = (LinkedHashMap<String, Object>) attr;
+            if ("Special Instructions".equals(attrMap.get("attributeType"))) {
+                hasNewAttribute = true;
+                assertEquals("Special instructions here", attrMap.get("value"));
+            }
+        }
+        assertEquals("Should have new attribute", true, hasNewAttribute);
+    }
+
+    @Test
+    public void should_updateExistingAttribute() throws Exception {
+        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String existingAttributeUuid = "e36006e5-9fbb-4f20-866b-0ece245615a1";
+
+        String dataJson = "{\"name\":\"Consultation\"," +
+                "\"uuid\":\"" + existingServiceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"" + existingAttributeUuid + "\"," +
+                " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                " \"value\":\"750\"}" +
+                "]}";
+
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        SimpleObject serviceResponse = SimpleObject.parseJson(response.getContentAsString());
+
+        assertNotNull(serviceResponse);
+        assertEquals(existingServiceUuid, serviceResponse.get("uuid"));
+
+        ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
+        assertNotNull("Service should have attributes", attributes);
+
+        boolean foundUpdated = false;
+        for (Object attr : attributes) {
+            LinkedHashMap<String, Object> attrMap = (LinkedHashMap<String, Object>) attr;
+            if (existingAttributeUuid.equals(attrMap.get("uuid"))) {
+                foundUpdated = true;
+                assertEquals("Value should be updated to 750", "750", attrMap.get("value"));
+            }
+        }
+        assertEquals("Should find and verify updated attribute", true, foundUpdated);
+    }
+
+    @Test
+    public void should_voidAttribute() throws Exception {
+        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String existingAttributeUuid = "e36006e5-9fbb-4f20-866b-0ece245615a2";
+
+        AppointmentServiceFullResponse beforeVoid = deserialize(
+                handle(newGetRequest("/rest/v1/appointmentService",
+                    new Parameter("uuid", existingServiceUuid))),
+                new TypeReference<AppointmentServiceFullResponse>() {});
+
+        int initialCount = beforeVoid.getAttributes().size();
+
+        String dataJson = "{\"name\":\"Consultation\"," +
+                "\"uuid\":\"" + existingServiceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"" + existingAttributeUuid + "\"," +
+                " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a2\"," +
+                " \"value\":\"Room 101\"," +
+                " \"voided\":true," +
+                " \"voidReason\":\"No longer needed\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+
+        AppointmentServiceFullResponse afterVoid = deserialize(
+                handle(newGetRequest("/rest/v1/appointmentService",
+                    new Parameter("uuid", existingServiceUuid))),
+                new TypeReference<AppointmentServiceFullResponse>() {});
+
+        boolean hasVoidedAttribute = afterVoid.getAttributes().stream()
+                .anyMatch(a -> a.getUuid().equals(existingAttributeUuid));
+
+        assertEquals("Voided attribute should not be in response", false, hasVoidedAttribute);
+        assertEquals("Should have one less attribute", initialCount - 1, afterVoid.getAttributes().size());
+    }
+
+    @Test
+    public void should_handleMixOfNewUpdatedAndVoidedAttributes() throws Exception {
+        String dataJson1 = "{\"name\":\"Mixed Attribute Service\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\", \"value\":\"100\"}" +
+                "]}";
+
+        MockHttpServletResponse response1 = handle(newPostRequest("/rest/v1/appointmentService", dataJson1));
+        SimpleObject serviceResponse1 = SimpleObject.parseJson(response1.getContentAsString());
+        String serviceUuid = (String) serviceResponse1.get("uuid");
+        ArrayList initialAttributes = (ArrayList) serviceResponse1.get("attributes");
+        String firstAttributeUuid = (String) ((LinkedHashMap<String, Object>) initialAttributes.get(0)).get("uuid");
+
+        String dataJson2 = "{\"name\":\"Mixed Attribute Service\"," +
+                "\"uuid\":\"" + serviceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"" + firstAttributeUuid + "\"," +
+                " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                " \"value\":\"200\"}," +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a2\", \"value\":\"New Room\"}," +
+                "{\"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a3\"," +
+                " \"value\":\"Void me\"," +
+                " \"voided\":true," +
+                " \"voidReason\":\"Test voiding\"}" +
+                "]}";
+
+        MockHttpServletResponse response2 = handle(newPostRequest("/rest/v1/appointmentService", dataJson2));
+        SimpleObject serviceResponse2 = SimpleObject.parseJson(response2.getContentAsString());
+
+        ArrayList finalAttributes = (ArrayList) serviceResponse2.get("attributes");
+        assertEquals("Should have 2 non-voided attributes", 2, finalAttributes.size());
+
+        boolean foundUpdated = false;
+        boolean foundNew = false;
+        for (Object attr : finalAttributes) {
+            LinkedHashMap<String, Object> attrMap = (LinkedHashMap<String, Object>) attr;
+            if (firstAttributeUuid.equals(attrMap.get("uuid"))) {
+                foundUpdated = true;
+                assertEquals("First attribute should be updated", "200", attrMap.get("value"));
+            }
+            if ("Room Number".equals(attrMap.get("attributeType"))) {
+                foundNew = true;
+                assertEquals("New attribute should exist", "New Room", attrMap.get("value"));
+            }
+        }
+
+        assertEquals("Should find updated attribute", true, foundUpdated);
+        assertEquals("Should find new attribute", true, foundNew);
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorForInvalidAttributeTypeUuid() throws Exception {
+        String dataJson = "{\"name\":\"Service With Invalid Attribute\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"invalid-uuid-12345\", \"value\":\"test\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorForNonExistentAttributeUuid() throws Exception {
+        String dataJson = "{\"name\":\"Test Service\"," +
+                "\"uuid\":\"c36006d4-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"non-existent-attribute-uuid\"," +
+                " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                " \"value\":\"test\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenMinOccursNotSatisfied() throws Exception {
+        String dataJson = "{\"name\":\"New Service Without Required Attribute\"," +
+                "\"durationMins\":30," +
+                "\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:00:00\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                " \"value\":\"DEPT-999\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenMaxOccursExceeded() throws Exception {
+        String dataJson = "{\"name\":\"Service With Too Many Attributes\"," +
+                "\"durationMins\":30," +
+                "\"startTime\":\"09:00:00\"," +
+                "\"endTime\":\"17:00:00\"," +
+                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"attributes\": [" +
+                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                " \"value\":\"Category 1\"}," +
+                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                " \"value\":\"Category 2\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test(expected = RuntimeException.class)
+    public void should_throwErrorWhenTryingToUpdateVoidedAttribute() throws Exception {
+        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
+        String voidedAttributeUuid = "d4567890-4444-4f20-866b-0ece245615d4";
+
+        String dataJson = "{\"name\":\"Consultation\"," +
+                "\"uuid\":\"" + existingServiceUuid + "\"," +
+                "\"attributes\": [" +
+                "{\"uuid\":\"" + voidedAttributeUuid + "\"," +
+                " \"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                " \"value\":\"Updated Value\"}" +
+                "]}";
+
+        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
     }
 }

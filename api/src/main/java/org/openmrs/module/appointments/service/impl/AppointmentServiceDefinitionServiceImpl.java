@@ -7,6 +7,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
+import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,14 +39,12 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
 
     @Override
     public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
-        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDao.getAllAppointmentServices(includeVoided);
-        return appointmentServiceDefinitions;
+        return appointmentServiceDao.getAllAppointmentServices(includeVoided);
     }
 
     @Override
     public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDao.getAppointmentServiceByUuid(uuid);
-        return appointmentServiceDefinition;
+        return appointmentServiceDao.getAppointmentServiceByUuid(uuid);
     }
 
     @Override
@@ -75,6 +74,7 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
         setVoidInfoForService(appointmentServiceDefinition, voidReason);
         setVoidInfoForWeeklyAvailability(appointmentServiceDefinition, voidReason);
         setVoidInfoForServiceTypes(appointmentServiceDefinition, voidReason);
+        setVoidInfoForAttributes(appointmentServiceDefinition, voidReason);
     }
 
     private void setVoidInfoForService(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason) {
@@ -99,6 +99,15 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
             serviceWeeklyAvailability.setDateVoided(new Date());
             serviceWeeklyAvailability.setVoidedBy(Context.getAuthenticatedUser());
             serviceWeeklyAvailability.setVoidReason(voidReason);
+        }
+    }
+
+    private void setVoidInfoForAttributes(AppointmentServiceDefinition appointmentServiceDefinition, String voidReason) {
+        for (AppointmentServiceAttribute attribute : appointmentServiceDefinition.getAttributes()) {
+            attribute.setVoided(true);
+            attribute.setDateVoided(new Date());
+            attribute.setVoidedBy(Context.getAuthenticatedUser());
+            attribute.setVoidReason(voidReason);
         }
     }
 

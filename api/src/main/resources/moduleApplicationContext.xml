@@ -295,4 +295,39 @@
             <ref bean="sessionFactory"/>
         </property>
     </bean>
+
+    <bean id="appointmentServiceAttributeTypeDao" class="org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeTypeDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="appointmentServiceAttributeTypeService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentServiceAttributeTypeServiceImpl">
+                <property name="appointmentServiceAttributeTypeDao">
+                    <ref bean="appointmentServiceAttributeTypeDao"/>
+                </property>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService</value>
+                <ref bean="appointmentServiceAttributeTypeService"/>
+            </list>
+        </property>
+    </bean>
+
 </beans>

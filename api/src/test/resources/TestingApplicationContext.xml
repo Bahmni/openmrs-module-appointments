@@ -229,5 +229,10 @@
         </property>
     </bean>
 
+    <bean id="appointmentServiceAttributeTypeDao" class="org.openmrs.module.appointments.dao.impl.AppointmentServiceAttributeTypeDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
 
 </beans>

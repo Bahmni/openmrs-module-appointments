@@ -22,6 +22,7 @@ public class AppointmentServiceDescription {
     private String initialAppointmentStatus;
     private List<ServiceWeeklyAvailabilityDescription> weeklyAvailability;
     private Set<AppointmentServiceTypeDescription> serviceTypes;
+    private Set<AppointmentServiceAttributeDescription> attributes;
 
     public Set<AppointmentServiceTypeDescription> getServiceTypes() {
         return serviceTypes;
@@ -29,6 +30,14 @@ public class AppointmentServiceDescription {
 
     public void setServiceTypes(Set<AppointmentServiceTypeDescription> serviceTypes) {
         this.serviceTypes = serviceTypes;
+    }
+
+    public Set<AppointmentServiceAttributeDescription> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(Set<AppointmentServiceAttributeDescription> attributes) {
+        this.attributes = attributes;
     }
 
 
