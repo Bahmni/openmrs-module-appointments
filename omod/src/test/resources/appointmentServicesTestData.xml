@@ -12,7 +12,7 @@
               uuid="c36006e5-9fbb-4f20-866b-0ece245615a1"/>
 
     <appointment_speciality speciality_id="1" name="Ortho" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1" creator="1" />
-    <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615a1"
+    <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006e5-9fbb-4f20-866b-0ece245615a6"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
 
     <appointment_service appointment_service_id="2" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b1"
@@ -21,11 +21,8 @@
     <appointment_service appointment_service_id="3" name="Ortho Service" description="ortho services" start_time="09:00:00" end_time="16:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece24560000"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
 
-    <appointment_service appointment_service_id="5" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006e5-9fbb-4f20-866b-0ece245615a6"
-                         speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
-
      <appointment_service appointment_service_id="4" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b4"
-                             speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="1" voided_by="1" date_voided="2024-01-01 00:00:00.0" void_reason="" />
+                             speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0" />
 
     <appointment_service_weekly_availability service_weekly_availability_id="1" service_id="1" day_of_week="MONDAY" start_time="09:00:00" end_time="17:00:00" uuid="c36006d4-9fcc-4f20-866b-0ece245615b1"
                                               max_appointments_limit="4" creator="1" voided="0"/>
@@ -37,8 +34,8 @@
     <patient_appointment patient_appointment_id="2" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c1111"/>
     <patient_appointment patient_appointment_id="3" patient_id ="1" appointment_service_id="1" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c12222"/>
     <patient_appointment patient_appointment_id="4" patient_id ="1" appointment_service_id="3" start_date_time="2008-08-15 13:00:00.0" end_date_time="2008-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2008-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13333"/>
-    <patient_appointment patient_appointment_id="12" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" status="Completed" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" voided_by="1" date_voided="2024-01-01 00:00:00.0" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c5111"/>
-    <patient_appointment patient_appointment_id="13" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" voided_by="1" date_voided="2024-01-01 00:00:00.0" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c52222"/>
+    <patient_appointment patient_appointment_id="12" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 12:00:00.0" end_date_time="2108-08-15 13:00:00.0" status="Completed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c5111"/>
+    <patient_appointment patient_appointment_id="13" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c52222"/>
     <patient_appointment patient_appointment_id="15" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Scheduled" creator="1" date_created="2108-08-10 15:57:09.0" voided="true" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0900271c13345"/>
     <patient_appointment patient_appointment_id="16" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Cancelled" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271c13355"/>
     <patient_appointment patient_appointment_id="16" patient_id ="1" appointment_service_id="4" start_date_time="2108-08-15 13:00:00.0" end_date_time="2108-08-15 14:00:00.0" status="Missed" creator="1" date_created="2108-08-10 15:57:09.0" voided="false" void_reason="" uuid="75504r42-3ca8-11e3-bf2b-0800271b13355"/>
@@ -49,15 +46,18 @@
     <appointment_service_attribute_type appointment_service_attribute_type_id="2" name="Room Number" description="Room number for the service"
                                          min_occurs="0" max_occurs="1" creator="1" date_created="2024-10-21 10:00:00.0" retired="false"
                                          uuid="d36006e5-9fbb-4f20-866b-0ece245615a2"/>
+    <appointment_service_attribute_type appointment_service_attribute_type_id="3" name="Special Instructions" description="Special instructions for the service"
+                                         min_occurs="0" max_occurs="1" creator="1" date_created="2024-10-21 10:00:00.0" retired="false"
+                                         uuid="d36006e5-9fbb-4f20-866b-0ece245615a3"/>
 
-    <appointment_service_attribute appointment_service_attribute_id="1" appointment_service_id="5" attribute_type_id="1"
+    <appointment_service_attribute appointment_service_attribute_id="1" appointment_service_id="1" attribute_type_id="1"
                                     value_reference="500" creator="1" date_created="2024-10-21 10:00:00.0" voided="false"
                                     uuid="e36006e5-9fbb-4f20-866b-0ece245615a1"/>
-    <appointment_service_attribute appointment_service_attribute_id="2" appointment_service_id="5" attribute_type_id="2"
+    <appointment_service_attribute appointment_service_attribute_id="2" appointment_service_id="1" attribute_type_id="2"
                                     value_reference="Room 101" creator="1" date_created="2024-10-21 10:00:00.0" voided="false"
                                     uuid="e36006e5-9fbb-4f20-866b-0ece245615a2"/>
-    <appointment_service_attribute appointment_service_attribute_id="3" appointment_service_id="5" attribute_type_id="2"
+    <appointment_service_attribute appointment_service_attribute_id="3" appointment_service_id="1" attribute_type_id="2"
                                     value_reference="Room 201" creator="1" date_created="2024-10-21 10:00:00.0" voided="true"
-                                    void_reason="No longer used" uuid="e36006e5-9fbb-4f20-866b-0ece245615a3"/>
+                                    voided_by="1" date_voided="2024-10-21 11:00:00.0" void_reason="No longer used" uuid="e36006e5-9fbb-4f20-866b-0ece245615a3"/>
 
 </dataset>

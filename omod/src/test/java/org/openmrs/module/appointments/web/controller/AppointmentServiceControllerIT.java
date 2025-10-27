@@ -157,7 +157,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     public void should_GetAllAppointmentServices() throws Exception {
         List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/default")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
         assertEquals(3,asResponses.size());
-        assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
         assertEquals("09:00:00", asResponses.get(0).getStartTime());
@@ -178,7 +178,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_GetServiceByUuid() throws Exception {
-        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1"))), new TypeReference<AppointmentServiceFullResponse>() {});
+        AppointmentServiceFullResponse asResponse = deserialize(handle(newGetRequest("/rest/v1/appointmentService",new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a6"))), new TypeReference<AppointmentServiceFullResponse>() {});
         assertNotNull(asResponse);
         assertEquals("Consultation", asResponse.getName());
         assertEquals("Consultation", asResponse.getDescription());
@@ -236,7 +236,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldThrowAnExceptionWhenThereAreFutureAppointmentsForAServiceAndTryingToDeleteService() throws Exception {
-        Parameter uuid = new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245615a1");
+        Parameter uuid = new Parameter("uuid", "c36006e5-9fbb-4f20-866b-0ece245615a6");
         Parameter voidReason = new Parameter("void_reason", "webservice call");
 
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentService", uuid, voidReason));
@@ -251,7 +251,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldUpdateService() throws Exception {
-        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        AppointmentServiceDefinition appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         assertNotNull(appointmentServiceDefinition);
         String uuid = appointmentServiceDefinition.getUuid();
         String dataJson = "{\"name\":\"Chemotherapy\",\"startTime\":\"09:00:00\"," +
@@ -263,7 +263,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "\"serviceTypes\": [{ \"name\": \"stage 1\", \"duration\":\"20\", \"uuid\":\"c36006d5-9fcc-4f20-866b-0ece245615b1\" }]" +
                 "}";
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
-        appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006d4-9fbb-4f20-866b-0ece245615a1");
+        appointmentServiceDefinition = appointmentServiceDefinitionService.getAppointmentServiceByUuid("c36006e5-9fbb-4f20-866b-0ece245615a6");
         assertEquals("Chemotherapy", appointmentServiceDefinition.getName());
         assertEquals(uuid, appointmentServiceDefinition.getUuid());
         assertEquals(1, appointmentServiceDefinition.getServiceTypes().size());
@@ -284,7 +284,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     public void should_GetAllAppointmentServicesWithNonVoidedServiceTypes() throws Exception {
         List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/full")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
         assertEquals(3,asResponses.size());
-        assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
+        assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a6", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
         assertEquals("09:00:00", asResponses.get(0).getStartTime());
@@ -437,7 +437,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_updateServiceWithNewAttributes() throws Exception {
-        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
+        String existingServiceUuid = "c36006e5-9fbb-4f20-866b-0ece245615a6";
 
         AppointmentServiceFullResponse beforeUpdate = deserialize(
                 handle(newGetRequest("/rest/v1/appointmentService",
@@ -605,7 +605,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test(expected = RuntimeException.class)
     public void should_throwErrorForNonExistentAttributeUuid() throws Exception {
         String dataJson = "{\"name\":\"Test Service\"," +
-                "\"uuid\":\"c36006d4-9fbb-4f20-866b-0ece245615a1\"," +
+                "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a6\"," +
                 "\"attributes\": [" +
                 "{\"uuid\":\"non-existent-attribute-uuid\"," +
                 " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
