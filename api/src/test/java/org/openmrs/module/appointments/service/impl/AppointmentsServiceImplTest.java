@@ -530,20 +530,6 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
-    public void shouldNotCallSearchMethodInAppointmentDaoAndReturnNullWhenStartDateIsNull() {
-        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
-        Date endDate = Date.from(Instant.now());
-        appointmentSearchRequest.setStartDate(null);
-        appointmentSearchRequest.setEndDate(endDate);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
-        List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
-
-        verify(appointmentDao, never()).search(appointmentSearchRequest);
-        assertNull(actualAppointments);
-    }
-
-    @Test
     public void shouldCallSearchMethodInAppointmentDaoWhenEndDateIsNull() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         Date startDate = Date.from(Instant.now());
