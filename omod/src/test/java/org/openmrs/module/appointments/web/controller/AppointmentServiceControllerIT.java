@@ -675,9 +675,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesByLocationUuid() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -697,9 +696,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesBySpecialityUuid() throws Exception {
-        String searchJson = "{\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -718,10 +716,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesByLocationAndSpeciality() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -738,11 +735,10 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesIncludingVoided() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"includeVoided\":true}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("includeVoided", "true")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -760,10 +756,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesExcludingVoidedByDefault() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -776,10 +771,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_searchAppointmentServicesWithLimit() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"limit\":2}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("limit", "2")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -788,9 +782,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_returnAllNonVoidedServicesWhenNoFiltersProvided() throws Exception {
-        String searchJson = "{}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search"));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -799,9 +791,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_returnEmptyListWhenNoMatchingLocation() throws Exception {
-        String searchJson = "{\"locationUuid\":\"non-existent-uuid-12345\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "non-existent-uuid-12345")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -810,9 +801,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_returnEmptyListWhenNoMatchingSpeciality() throws Exception {
-        String searchJson = "{\"specialityUuid\":\"non-existent-uuid-67890\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "non-existent-uuid-67890")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -821,9 +811,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_includeServicesWithoutLocationWhenSearchingBySpeciality() throws Exception {
-        String searchJson = "{\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
@@ -842,9 +831,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void should_includeServicesWithoutSpecialityWhenSearchingByLocation() throws Exception {
-        String searchJson = "{\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"}";
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentService/search", searchJson));
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
