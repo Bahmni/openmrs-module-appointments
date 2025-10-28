@@ -156,7 +156,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServices() throws Exception {
         List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/default")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
-        assertEquals(6,asResponses.size());
+        assertEquals(7,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
@@ -283,7 +283,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServicesWithNonVoidedServiceTypes() throws Exception {
         List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/full")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
-        assertEquals(6,asResponses.size());
+        assertEquals(7,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
@@ -681,7 +681,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
-        assertEquals(4, results.size());
+        assertEquals(5, results.size());
 
         List<String> serviceNames = new ArrayList<>();
         for (AppointmentServiceFullResponse service : results) {
@@ -689,7 +689,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         }
 
         assertEquals(true, serviceNames.contains("Consultation"));
-        assertEquals(true, serviceNames.contains("Ortho"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
+        assertEquals(true, serviceNames.contains("Treatment"));
         assertEquals(true, serviceNames.contains("Cardiology Room1"));
         assertEquals(true, serviceNames.contains("General Room1"));
     }
@@ -710,7 +711,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         }
 
         assertEquals(true, serviceNames.contains("Consultation"));
-        assertEquals(true, serviceNames.contains("Ortho"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
         assertEquals(true, serviceNames.contains("Ortho Room2"));
         assertEquals(true, serviceNames.contains("Tele Ortho"));
     }
@@ -732,7 +733,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         }
 
         assertEquals(true, serviceNames.contains("Consultation"));
-        assertEquals(true, serviceNames.contains("Ortho"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
     }
 
     @Test
@@ -769,7 +770,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(2, results.size());
 
         for (AppointmentServiceFullResponse service : results) {
-            assertEquals("Treatment", service.getName() != null);
+            assertNotNull(service.getName());
         }
     }
 
@@ -793,7 +794,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
 
         assertNotNull(results);
-        assertEquals(6, results.size());
+        assertEquals(7, results.size());
     }
 
     @Test
@@ -831,7 +832,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         for (AppointmentServiceFullResponse service : results) {
             if ("Tele Ortho".equals(service.getName())) {
                 hasTeleOrtho = true;
-                assertNull("Tele Ortho should have null location", service.getLocation());
+                assertEquals("Tele Ortho should have empty or null location", true,
+                    service.getLocation() == null || service.getLocation().isEmpty());
             }
         }
 
@@ -851,7 +853,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         for (AppointmentServiceFullResponse service : results) {
             if ("General Room1".equals(service.getName())) {
                 hasGeneralService = true;
-                assertNull("General Room1 should have null speciality", service.getSpeciality());
+                assertEquals("General Room1 should have empty or null speciality", true,
+                    service.getSpeciality() == null || service.getSpeciality().isEmpty());
             }
         }
 

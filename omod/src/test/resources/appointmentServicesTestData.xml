@@ -10,8 +10,11 @@
 
     <location location_id="1" name="Room1" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
               uuid="c36006e5-9fbb-4f20-866b-0ece245615a1"/>
+    <location location_id="2" name="Room2" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="c36006e5-9fbb-4f20-866b-0ece245615a2"/>
 
     <appointment_speciality speciality_id="1" name="Ortho" uuid="c36006e5-9fbb-4f20-866b-0ece245615a1" creator="1" />
+    <appointment_speciality speciality_id="2" name="Cardiology" uuid="c36006e5-9fbb-4f20-866b-0ece245615a3" creator="1"/>
     <appointment_service appointment_service_id="1" name="Consultation" description="Consultation" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615a1"
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
 
@@ -22,7 +25,27 @@
                          speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0"/>
 
      <appointment_service appointment_service_id="4" name="Treatment" description="Treatment" start_time="09:00:00" end_time="17:00:00" location_id="1" uuid="c36006d4-9fbb-4f20-866b-0ece245615b4"
-                             speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1" voided="0" />
+                             max_appointments_limit="4" duration_mins="30" creator="1" voided="0" />
+
+    <appointment_service appointment_service_id="5" name="Ortho Room2" description="Ortho in Room2"
+                        start_time="09:00:00" end_time="17:00:00" location_id="2" speciality_id="1"
+                        max_appointments_limit="4" duration_mins="30" creator="1"
+                        uuid="c36006e5-9fbb-4f20-866b-0ece245615b2" voided="0"/>
+
+    <appointment_service appointment_service_id="6" name="Cardiology Room1" description="Cardiology in Room1"
+                        start_time="09:00:00" end_time="17:00:00" location_id="1" speciality_id="2"
+                        max_appointments_limit="4" duration_mins="30" creator="1"
+                        uuid="c36006e5-9fbb-4f20-866b-0ece245615b3" voided="0"/>
+
+    <appointment_service appointment_service_id="7" name="Tele Ortho" description="Tele ortho service"
+                        start_time="09:00:00" end_time="17:00:00" speciality_id="1"
+                        max_appointments_limit="4" duration_mins="30" creator="1"
+                        uuid="c36006e5-9fbb-4f20-866b-0ece245615b4" voided="0"/>
+
+    <appointment_service appointment_service_id="8" name="General Room1" description="General service in Room1"
+                        start_time="09:00:00" end_time="17:00:00" location_id="1"
+                        max_appointments_limit="4" duration_mins="30" creator="1"
+                        uuid="c36006e5-9fbb-4f20-866b-0ece245615b5" voided="0"/>
 
     <appointment_service_weekly_availability service_weekly_availability_id="1" service_id="1" day_of_week="MONDAY" start_time="09:00:00" end_time="17:00:00" uuid="c36006d4-9fcc-4f20-866b-0ece245615b1"
                                               max_appointments_limit="4" creator="1" voided="0"/>
