@@ -121,7 +121,7 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
             query.setParameter("voided", false);
         }
 
-        if (searchRequest.getLimit() > 0) {
+        if (searchRequest.getLimit() != null && searchRequest.getLimit() > 0) {
             query.setMaxResults(searchRequest.getLimit());
         }
 

@@ -34,11 +34,11 @@ public class AppointmentServiceSearchRequest {
     }
 
 
-    public int getLimit() {
+    public Integer getLimit() {
         return limit;
     }
 
-    public void setLimit(int limit) {
+    public void setLimit(Integer limit) {
         this.limit = limit;
     }
 }
