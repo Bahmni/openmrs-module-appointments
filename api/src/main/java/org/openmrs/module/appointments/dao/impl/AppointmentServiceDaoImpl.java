@@ -7,7 +7,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentSearchParams;
+import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -75,7 +75,7 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     }
 
     @Override
-    public List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams) {
+    public List<AppointmentServiceDefinition> search(AppointmentServiceSearchParams searchParams) {
         CriteriaBuilder criteriaBuilder = sessionFactory.getCurrentSession().getCriteriaBuilder();
         CriteriaQuery<AppointmentServiceDefinition> criteriaQuery = criteriaBuilder.createQuery(AppointmentServiceDefinition.class);
         Root<AppointmentServiceDefinition> root = criteriaQuery.from(AppointmentServiceDefinition.class);

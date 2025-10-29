@@ -2,7 +2,7 @@ package org.openmrs.module.appointments.dao;
 
 
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentSearchParams;
+import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 
 import java.util.List;
@@ -19,5 +19,5 @@ public interface AppointmentServiceDao {
 
     AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid);
 
-    List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams);
+    List<AppointmentServiceDefinition> search(AppointmentServiceSearchParams searchParams);
 }

@@ -4,7 +4,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentSearchParams;
+import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
@@ -49,7 +49,7 @@ public class AppointmentServiceDefinitionServiceImpl implements AppointmentServi
     }
 
     @Override
-    public List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams) {
+    public List<AppointmentServiceDefinition> search(AppointmentServiceSearchParams searchParams) {
         return appointmentServiceDao.search(searchParams);
     }
 

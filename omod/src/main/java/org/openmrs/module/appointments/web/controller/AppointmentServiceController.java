@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentSearchParams;
+import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
@@ -65,7 +65,7 @@ public class AppointmentServiceController extends BaseRestController {
             @RequestParam(value = "specialityUuid", required = false) String specialityUuid,
             @RequestParam(value = "includeVoided", defaultValue = "false") Boolean includeVoided,
             @RequestParam(value = "limit", defaultValue = "100") Integer limit) {
-        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        AppointmentServiceSearchParams searchParams = new AppointmentServiceSearchParams();
         searchParams.setLocationUuid(locationUuid);
         searchParams.setSpecialityUuid(specialityUuid);
         searchParams.setIncludeVoided(includeVoided);
