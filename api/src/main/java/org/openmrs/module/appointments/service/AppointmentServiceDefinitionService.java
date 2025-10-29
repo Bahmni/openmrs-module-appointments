@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.service;
 
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +29,7 @@ public interface AppointmentServiceDefinitionService {
 
     @Transactional
     @Authorized({VIEW_APPOINTMENTS_SERVICE, MANAGE_APPOINTMENTS_SERVICE})
-    List<AppointmentServiceDefinition> search(AppointmentServiceSearchRequest searchRequest);
+    List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams);
 
     @Transactional
     @Authorized({MANAGE_APPOINTMENTS_SERVICE})

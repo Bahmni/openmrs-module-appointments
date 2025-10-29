@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
@@ -65,13 +65,13 @@ public class AppointmentServiceController extends BaseRestController {
             @RequestParam(value = "specialityUuid", required = false) String specialityUuid,
             @RequestParam(value = "includeVoided", defaultValue = "false") Boolean includeVoided,
             @RequestParam(value = "limit", defaultValue = "100") Integer limit) {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid(locationUuid);
-        searchRequest.setSpecialityUuid(specialityUuid);
-        searchRequest.setIncludeVoided(includeVoided);
-        searchRequest.setLimit(limit);
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid(locationUuid);
+        searchParams.setSpecialityUuid(specialityUuid);
+        searchParams.setIncludeVoided(includeVoided);
+        searchParams.setLimit(limit);
 
-        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.search(searchRequest);
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.search(searchParams);
         return appointmentServiceMapper.constructFullResponseForServiceList(appointmentServiceDefinitions);
     }
 

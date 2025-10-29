@@ -5,7 +5,7 @@ import org.junit.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -166,10 +166,10 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesByLocationUuid() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(4, results.size());
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("Consultation")));
@@ -180,10 +180,10 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesBySpecialityUuid() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(4, results.size());
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("Consultation")));
@@ -194,11 +194,11 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesByLocationAndSpecialityUuid() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(2, results.size());
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("Consultation")));
@@ -207,12 +207,12 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesIncludingVoided() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setIncludeVoided(true);
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setIncludeVoided(true);
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(3, results.size());
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("Consultation")));
@@ -222,11 +222,11 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesExcludingVoidedByDefault() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(2, results.size());
         assertTrue(results.stream().noneMatch(AppointmentServiceDefinition::getVoided));
@@ -234,20 +234,20 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentServicesWithLimit() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setLimit(2);
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setLimit(2);
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(2, results.size());
     }
 
     @Test
     public void shouldReturnAllNonVoidedServicesWhenNoFiltersProvided() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(6, results.size());
         assertTrue(results.stream().noneMatch(AppointmentServiceDefinition::getVoided));
@@ -255,30 +255,30 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnEmptyListWhenNoMatchingLocation() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("non-existent-location-uuid");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("non-existent-location-uuid");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(0, results.size());
     }
 
     @Test
     public void shouldReturnEmptyListWhenNoMatchingSpeciality() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setSpecialityUuid("non-existent-speciality-uuid");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setSpecialityUuid("non-existent-speciality-uuid");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(0, results.size());
     }
 
     @Test
     public void shouldOrderResultsByAppointmentServiceId() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertTrue(results.size() > 1);
         for (int i = 0; i < results.size() - 1; i++) {
@@ -288,12 +288,12 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldHandleNullIncludeVoidedAsExcludingVoided() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
-        searchRequest.setIncludeVoided(null);
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        searchParams.setIncludeVoided(null);
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertEquals(2, results.size());
         assertTrue(results.stream().noneMatch(AppointmentServiceDefinition::getVoided));
@@ -301,20 +301,20 @@ public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldIncludeServicesWithoutLocationWhenSearchingBySpeciality() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setSpecialityUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("Tele Ortho")));
     }
 
     @Test
     public void shouldIncludeServicesWithoutSpecialityWhenSearchingByLocation() throws Exception {
-        AppointmentServiceSearchRequest searchRequest = new AppointmentServiceSearchRequest();
-        searchRequest.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentSearchParams searchParams = new AppointmentSearchParams();
+        searchParams.setLocationUuid("c36006e5-9fbb-4f20-866b-0ece245615a1");
 
-        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchRequest);
+        List<AppointmentServiceDefinition> results = appointmentServiceDao.search(searchParams);
 
         assertTrue(results.stream().anyMatch(s -> s.getName().equals("General Room1")));
     }

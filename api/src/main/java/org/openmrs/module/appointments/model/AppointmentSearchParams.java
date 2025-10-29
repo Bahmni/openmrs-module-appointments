@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.model;
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 
 @JsonIgnoreProperties
-public class AppointmentServiceSearchRequest {
+public class AppointmentSearchParams {
     private String locationUuid;
     private String specialityUuid;
     private Boolean includeVoided = false;

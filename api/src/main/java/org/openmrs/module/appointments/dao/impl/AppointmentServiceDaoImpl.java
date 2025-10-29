@@ -8,7 +8,7 @@ import org.hibernate.criterion.Restrictions;
 import org.hibernate.query.Query;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.module.appointments.model.AppointmentServiceSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -76,11 +76,11 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     }
 
     @Override
-    public List<AppointmentServiceDefinition> search(AppointmentServiceSearchRequest searchRequest) {
+    public List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams) {
         StringBuilder hql = new StringBuilder(HQL_SEARCH_BASE);
 
-        boolean hasLocationFilter = StringUtils.isNotBlank(searchRequest.getLocationUuid());
-        boolean hasSpecialityFilter = StringUtils.isNotBlank(searchRequest.getSpecialityUuid());
+        boolean hasLocationFilter = StringUtils.isNotBlank(searchParams.getLocationUuid());
+        boolean hasSpecialityFilter = StringUtils.isNotBlank(searchParams.getSpecialityUuid());
 
         if (hasLocationFilter) {
             hql.append(HQL_LEFT_JOIN_LOCATION);
@@ -100,7 +100,7 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
             hasConditions = true;
         }
 
-        if (searchRequest.getIncludeVoided() == null || !searchRequest.getIncludeVoided()) {
+        if (searchParams.getIncludeVoided() == null || !searchParams.getIncludeVoided()) {
             hql.append(hasConditions ? " AND" : " WHERE").append(HQL_WHERE_VOIDED);
         }
 
@@ -110,19 +110,19 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
                 .createQuery(hql.toString(), AppointmentServiceDefinition.class);
 
         if (hasLocationFilter) {
-            query.setParameter("locationUuid", searchRequest.getLocationUuid());
+            query.setParameter("locationUuid", searchParams.getLocationUuid());
         }
 
         if (hasSpecialityFilter) {
-            query.setParameter("specialityUuid", searchRequest.getSpecialityUuid());
+            query.setParameter("specialityUuid", searchParams.getSpecialityUuid());
         }
 
-        if (searchRequest.getIncludeVoided() == null || !searchRequest.getIncludeVoided()) {
+        if (searchParams.getIncludeVoided() == null || !searchParams.getIncludeVoided()) {
             query.setParameter("voided", false);
         }
 
-        if (searchRequest.getLimit() != null && searchRequest.getLimit() > 0) {
-            query.setMaxResults(searchRequest.getLimit());
+        if (searchParams.getLimit() != null && searchParams.getLimit() > 0) {
+            query.setMaxResults(searchParams.getLimit());
         }
 
         return query.list();
