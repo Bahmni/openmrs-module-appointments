@@ -176,6 +176,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setLimitCriteria(appointmentSearchRequest, criteria);
         setProviderCriteria(appointmentSearchRequest, criteria);
         setStatusCriteria(appointmentSearchRequest, criteria);
+        setLocationCriteria(appointmentSearchRequest, criteria);
 
         return criteria.list();
     }
@@ -217,6 +218,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
     private void setStatusCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
         if(appointmentSearchRequest.getStatus() != null) {
             criteria.add(Restrictions.eq("status", appointmentSearchRequest.getStatus()));
+        }
+    }
+
+    private void setLocationCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (appointmentSearchRequest.getLocationUuids() != null && !appointmentSearchRequest.getLocationUuids().isEmpty()) {
+            criteria.createAlias("location", "location");
+            Disjunction disjunction = Restrictions.disjunction();
+            appointmentSearchRequest.getLocationUuids().stream()
+                    .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
+                    .forEach(disjunction::add);
+            criteria.add(disjunction);
         }
     }
 

@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.model;
 
 import java.util.Date;
+import java.util.List;
 
 public class AppointmentSearchRequest {
 
@@ -10,6 +11,7 @@ public class AppointmentSearchRequest {
     private String providerUuid;
     private int limit;
     private AppointmentStatus status;
+    private List<String> locationUuids;
 
     public Date getStartDate() {
         return startDate;
@@ -57,5 +59,13 @@ public class AppointmentSearchRequest {
 
     public void setStatus(AppointmentStatus status) {
         this.status = status;
+    }
+
+    public List<String> getLocationUuids() {
+        return locationUuids;
+    }
+
+    public void setLocationUuids(List<String> locationUuids) {
+        this.locationUuids = locationUuids;
     }
 }
