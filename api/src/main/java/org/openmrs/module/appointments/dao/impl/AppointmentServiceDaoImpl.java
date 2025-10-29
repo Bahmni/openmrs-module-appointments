@@ -5,24 +5,23 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.query.Query;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Join;
+import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Predicate;
+import javax.persistence.criteria.Root;
+import java.util.ArrayList;
 import java.util.List;
 
 public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
-
-    private static final String HQL_SEARCH_BASE = "SELECT asd FROM AppointmentServiceDefinition asd";
-    private static final String HQL_LEFT_JOIN_LOCATION = " LEFT JOIN asd.location loc";
-    private static final String HQL_LEFT_JOIN_SPECIALITY = " LEFT JOIN asd.speciality spec";
-    private static final String HQL_WHERE_LOCATION = " loc.uuid = :locationUuid";
-    private static final String HQL_WHERE_SPECIALITY = " spec.uuid = :specialityUuid";
-    private static final String HQL_WHERE_VOIDED = " asd.voided = :voided";
-    private static final String HQL_ORDER_BY = " ORDER BY asd.appointmentServiceId ASC";
 
     private SessionFactory sessionFactory;
 
@@ -77,55 +76,38 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
     @Override
     public List<AppointmentServiceDefinition> search(AppointmentSearchParams searchParams) {
-        StringBuilder hql = new StringBuilder(HQL_SEARCH_BASE);
+        CriteriaBuilder criteriaBuilder = sessionFactory.getCurrentSession().getCriteriaBuilder();
+        CriteriaQuery<AppointmentServiceDefinition> criteriaQuery = criteriaBuilder.createQuery(AppointmentServiceDefinition.class);
+        Root<AppointmentServiceDefinition> root = criteriaQuery.from(AppointmentServiceDefinition.class);
 
-        boolean hasLocationFilter = StringUtils.isNotBlank(searchParams.getLocationUuid());
-        boolean hasSpecialityFilter = StringUtils.isNotBlank(searchParams.getSpecialityUuid());
+        List<Predicate> predicates = new ArrayList<>();
 
-        if (hasLocationFilter) {
-            hql.append(HQL_LEFT_JOIN_LOCATION);
-        }
-        if (hasSpecialityFilter) {
-            hql.append(HQL_LEFT_JOIN_SPECIALITY);
-        }
-
-        boolean hasConditions = false;
-        if (hasLocationFilter) {
-            hql.append(" WHERE").append(HQL_WHERE_LOCATION);
-            hasConditions = true;
+        if (StringUtils.isNotBlank(searchParams.getLocationUuid())) {
+            Join<Object, Object> locationJoin = root.join("location", JoinType.LEFT);
+            predicates.add(criteriaBuilder.equal(locationJoin.get("uuid"), searchParams.getLocationUuid()));
         }
 
-        if (hasSpecialityFilter) {
-            hql.append(hasConditions ? " AND" : " WHERE").append(HQL_WHERE_SPECIALITY);
-            hasConditions = true;
+        if (StringUtils.isNotBlank(searchParams.getSpecialityUuid())) {
+            Join<Object, Object> specialityJoin = root.join("speciality", JoinType.LEFT);
+            predicates.add(criteriaBuilder.equal(specialityJoin.get("uuid"), searchParams.getSpecialityUuid()));
         }
 
         if (searchParams.getIncludeVoided() == null || !searchParams.getIncludeVoided()) {
-            hql.append(hasConditions ? " AND" : " WHERE").append(HQL_WHERE_VOIDED);
+            predicates.add(criteriaBuilder.equal(root.get("voided"), false));
         }
 
-        hql.append(HQL_ORDER_BY);
-
-        Query<AppointmentServiceDefinition> query = sessionFactory.getCurrentSession()
-                .createQuery(hql.toString(), AppointmentServiceDefinition.class);
-
-        if (hasLocationFilter) {
-            query.setParameter("locationUuid", searchParams.getLocationUuid());
+        if (!predicates.isEmpty()) {
+            criteriaQuery.where(criteriaBuilder.and(predicates.toArray(new Predicate[0])));
         }
 
-        if (hasSpecialityFilter) {
-            query.setParameter("specialityUuid", searchParams.getSpecialityUuid());
-        }
-
-        if (searchParams.getIncludeVoided() == null || !searchParams.getIncludeVoided()) {
-            query.setParameter("voided", false);
-        }
+        criteriaQuery.orderBy(criteriaBuilder.asc(root.get("appointmentServiceId")));
+        TypedQuery<AppointmentServiceDefinition> query = sessionFactory.getCurrentSession().createQuery(criteriaQuery);
 
         if (searchParams.getLimit() != null && searchParams.getLimit() > 0) {
             query.setMaxResults(searchParams.getLimit());
         }
 
-        return query.list();
+        return query.getResultList();
     }
 
     private void evictObjectFromSession(Session currentSession, AppointmentServiceDefinition appointmentServiceDefinition) {
