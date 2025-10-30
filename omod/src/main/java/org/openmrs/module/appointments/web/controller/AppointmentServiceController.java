@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
@@ -55,6 +56,13 @@ public class AppointmentServiceController extends BaseRestController {
         AppointmentServiceFullResponse appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition);
 
         return appointmentServiceFullResponse;
+    }
+
+    @RequestMapping(method = RequestMethod.GET, value = "search")
+    @ResponseBody
+    public List<AppointmentServiceFullResponse> search(AppointmentServiceSearchParams searchParams) {
+        List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.search(searchParams);
+        return appointmentServiceMapper.constructFullResponseForServiceList(appointmentServiceDefinitions);
     }
 
     @RequestMapping( method = RequestMethod.POST)

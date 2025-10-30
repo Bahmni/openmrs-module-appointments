@@ -156,7 +156,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServices() throws Exception {
         List<AppointmentServiceDefaultResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/default")), new TypeReference<List<AppointmentServiceDefaultResponse>>() {});
-        assertEquals(3,asResponses.size());
+        assertEquals(7,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
@@ -283,7 +283,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Test
     public void should_GetAllAppointmentServicesWithNonVoidedServiceTypes() throws Exception {
         List<AppointmentServiceFullResponse> asResponses = deserialize(handle(newGetRequest("/rest/v1/appointmentService/all/full")), new TypeReference<List<AppointmentServiceFullResponse>>() {});
-        assertEquals(3,asResponses.size());
+        assertEquals(7,asResponses.size());
         assertEquals("c36006d4-9fbb-4f20-866b-0ece245615a1", asResponses.get(0).getUuid());
         assertEquals("Consultation", asResponses.get(0).getName());
         assertEquals("Consultation", asResponses.get(0).getDescription());
@@ -671,5 +671,181 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 "]}";
 
         handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+    }
+
+    @Test
+    public void should_searchAppointmentServicesByLocationUuid() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(5, results.size());
+
+        List<String> serviceNames = new ArrayList<>();
+        for (AppointmentServiceFullResponse service : results) {
+            serviceNames.add(service.getName());
+        }
+
+        assertEquals(true, serviceNames.contains("Consultation"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
+        assertEquals(true, serviceNames.contains("Treatment"));
+        assertEquals(true, serviceNames.contains("Cardiology Room1"));
+        assertEquals(true, serviceNames.contains("General Room1"));
+    }
+
+    @Test
+    public void should_searchAppointmentServicesBySpecialityUuid() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(4, results.size());
+
+        List<String> serviceNames = new ArrayList<>();
+        for (AppointmentServiceFullResponse service : results) {
+            serviceNames.add(service.getName());
+        }
+
+        assertEquals(true, serviceNames.contains("Consultation"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
+        assertEquals(true, serviceNames.contains("Ortho Room2"));
+        assertEquals(true, serviceNames.contains("Tele Ortho"));
+    }
+
+    @Test
+    public void should_searchAppointmentServicesByLocationAndSpeciality() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(2, results.size());
+
+        List<String> serviceNames = new ArrayList<>();
+        for (AppointmentServiceFullResponse service : results) {
+            serviceNames.add(service.getName());
+        }
+
+        assertEquals(true, serviceNames.contains("Consultation"));
+        assertEquals(true, serviceNames.contains("Ortho Service"));
+    }
+
+    @Test
+    public void should_searchAppointmentServicesIncludingVoided() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("includeVoided", "true")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(3, results.size());
+
+        boolean hasVoidedService = false;
+        for (AppointmentServiceFullResponse service : results) {
+            if ("Treatment".equals(service.getName())) {
+                hasVoidedService = true;
+            }
+        }
+
+        assertEquals("Should include voided Treatment service", true, hasVoidedService);
+    }
+
+    @Test
+    public void should_searchAppointmentServicesExcludingVoidedByDefault() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(2, results.size());
+
+        for (AppointmentServiceFullResponse service : results) {
+            assertNotNull(service.getName());
+        }
+    }
+
+    @Test
+    public void should_searchAppointmentServicesWithLimit() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1"),
+                new Parameter("limit", "2")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(2, results.size());
+    }
+
+    @Test
+    public void should_returnAllNonVoidedServicesWhenNoFiltersProvided() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search"));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(7, results.size());
+    }
+
+    @Test
+    public void should_returnEmptyListWhenNoMatchingLocation() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "non-existent-uuid-12345")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    public void should_returnEmptyListWhenNoMatchingSpeciality() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "non-existent-uuid-67890")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+        assertEquals(0, results.size());
+    }
+
+    @Test
+    public void should_includeServicesWithoutLocationWhenSearchingBySpeciality() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("specialityUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+
+        boolean hasTeleOrtho = false;
+        for (AppointmentServiceFullResponse service : results) {
+            if ("Tele Ortho".equals(service.getName())) {
+                hasTeleOrtho = true;
+                assertEquals("Tele Ortho should have empty or null location", true,
+                    service.getLocation() == null || service.getLocation().isEmpty());
+            }
+        }
+
+        assertEquals("Should include Tele Ortho service without location", true, hasTeleOrtho);
+    }
+
+    @Test
+    public void should_includeServicesWithoutSpecialityWhenSearchingByLocation() throws Exception {
+        MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentService/search",
+                new Parameter("locationUuid", "c36006e5-9fbb-4f20-866b-0ece245615a1")));
+        List<AppointmentServiceFullResponse> results = deserialize(response, new TypeReference<List<AppointmentServiceFullResponse>>() {});
+
+        assertNotNull(results);
+
+        boolean hasGeneralService = false;
+        for (AppointmentServiceFullResponse service : results) {
+            if ("General Room1".equals(service.getName())) {
+                hasGeneralService = true;
+                assertEquals("General Room1 should have empty or null speciality", true,
+                    service.getSpeciality() == null || service.getSpeciality().isEmpty());
+            }
+        }
+
+        assertEquals("Should include General Room1 service without speciality", true, hasGeneralService);
     }
 }
