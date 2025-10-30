@@ -60,17 +60,7 @@ public class AppointmentServiceController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET, value = "search")
     @ResponseBody
-    public List<AppointmentServiceFullResponse> search(
-            @RequestParam(value = "locationUuid", required = false) String locationUuid,
-            @RequestParam(value = "specialityUuid", required = false) String specialityUuid,
-            @RequestParam(value = "includeVoided", defaultValue = "false") Boolean includeVoided,
-            @RequestParam(value = "limit", defaultValue = "100") Integer limit) {
-        AppointmentServiceSearchParams searchParams = new AppointmentServiceSearchParams();
-        searchParams.setLocationUuid(locationUuid);
-        searchParams.setSpecialityUuid(specialityUuid);
-        searchParams.setIncludeVoided(includeVoided);
-        searchParams.setLimit(limit);
-
+    public List<AppointmentServiceFullResponse> search(AppointmentServiceSearchParams searchParams) {
         List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.search(searchParams);
         return appointmentServiceMapper.constructFullResponseForServiceList(appointmentServiceDefinitions);
     }
