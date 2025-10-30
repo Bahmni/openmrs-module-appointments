@@ -162,5 +162,15 @@
 		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
 	</globalProperty>
 
+    <privilege>
+        <name>app:appointment:markAppointmentAsArrived</name>
+        <description>Ability to mark appointment as arrived</description>
+    </privilege>
+
+    <privilege>
+        <name>app:appointment:startVerification</name>
+        <description>Ability to start verification</description>
+    </privilege>
+
 
 </module>
