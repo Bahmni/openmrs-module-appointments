@@ -372,6 +372,7 @@ public class AppointmentMapper {
         map.put("identifier", p.getPatientIdentifier().getIdentifier());
         map.put("age", p.getAge());
         map.put("gender", p.getGender());
+        map.put("birthDate", p.getBirthdate());
         map.put("customAttributes", customAttributesMap);
         map.putAll(p.getActiveIdentifiers().stream().filter(e -> e.getIdentifierType() != null).collect(Collectors.toMap(e -> e.getIdentifierType().toString().replaceAll("[- ]", ""), e -> e.getIdentifier(), (e1, e2) -> e1 + "," + e2)));
         return map;

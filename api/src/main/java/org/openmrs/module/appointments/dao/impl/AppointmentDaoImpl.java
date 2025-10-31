@@ -176,6 +176,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setLimitCriteria(appointmentSearchRequest, criteria);
         setProviderCriteria(appointmentSearchRequest, criteria);
         setStatusCriteria(appointmentSearchRequest, criteria);
+        setAppointmentNumberCriteria(appointmentSearchRequest, criteria);
+
 
         return criteria.list();
     }
@@ -309,6 +311,12 @@ public class AppointmentDaoImpl implements AppointmentDao {
                         .forEach(disjunction::add);
                 criteria.add(disjunction);
             }
+        }
+    }
+
+    private void setAppointmentNumberCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getAppointmentNumber())) {
+            criteria.add(Restrictions.eq("appointmentNumber", appointmentSearchRequest.getAppointmentNumber()));
         }
     }
 
