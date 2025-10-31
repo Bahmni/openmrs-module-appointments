@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.helper;
 
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -77,6 +78,7 @@ public class AppointmentServiceHelperTest {
                 anyListOf(String.class));
     }
 
+    @Ignore("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
     @Test
     public void shouldAssignAppointmentNumberIfNumberIsNull() {
         Appointment appointment = new Appointment();
@@ -86,6 +88,7 @@ public class AppointmentServiceHelperTest {
         assertEquals("0000", appointment.getAppointmentNumber());
     }
 
+    @Ignore("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
     @Test
     public void shouldNotAssignAppointmentNumberIfNumberIsNotNull() {
         Appointment appointment = new Appointment();

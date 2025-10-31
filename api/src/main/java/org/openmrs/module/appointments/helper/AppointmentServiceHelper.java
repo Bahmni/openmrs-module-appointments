@@ -20,6 +20,12 @@ import java.util.Objects;
 
 public class AppointmentServiceHelper {
 
+    /**
+     * This method has been deprecated.
+     * instead use the AppointmentNumberGeneratorLocator.retrieveAppointmentNumberGenerator().generateAppointmentNumber()
+     * @param appointment for which appointment number must be set
+     */
+    @Deprecated
     public void checkAndAssignAppointmentNumber(Appointment appointment) {
         if (appointment.getAppointmentNumber() == null) {
             appointment.setAppointmentNumber(generateAppointmentNumber(appointment));

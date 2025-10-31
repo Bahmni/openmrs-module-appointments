@@ -29,6 +29,7 @@ import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
 import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentAudit;
+import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -128,6 +129,9 @@ public class AppointmentsServiceImplTest {
 
     @Mock
     private AdministrationService administrationService;
+
+    @Mock
+    private AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
 
     @InjectMocks
     private AppointmentsServiceImpl appointmentsService;

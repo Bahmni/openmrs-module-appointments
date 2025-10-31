@@ -20,11 +20,14 @@ import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
+import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.util.AppointmentBuilder;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -35,8 +38,18 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyListOf;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.nullable;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
@@ -71,6 +84,9 @@ public class AppointmentRecurringPatternServiceImplTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    @Mock
+    AppointmentNumberGenerator appointmentNumberGenerator;
+
     @Test
     public void shouldSaveRecurringAppointmentsForGivenRecurringPatternAndAppointment() throws IOException {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
@@ -83,6 +99,10 @@ public class AppointmentRecurringPatternServiceImplTest {
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
+
+        //setting up the number generator locator
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
         AppointmentRecurringPattern savedAppointmentRecurringPattern = recurringAppointmentService
                 .validateAndSave(appointmentRecurringPattern);
 
@@ -91,7 +111,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
+        verify(appointmentNumberGenerator).generateAppointmentNumber(appointment);
         assertEquals(1, appointmentRecurringPattern.getAppointments().size());
         assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
     }
@@ -105,11 +125,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         int year = startTimeCalendar.get(Calendar.YEAR);
         int month = startTimeCalendar.get(Calendar.MONTH);
         int day = startTimeCalendar.get(Calendar.DATE);
-        startTimeCalendar.set(year, month, day, 10, 00, 00);
-        endTimeCalendar.set(year, month, day, 10, 30, 00);
-        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        startTimeCalendar.set(year, month, day, 10, 0, 0);
+        endTimeCalendar.set(year, month, day, 10, 30, 0);
+        newStartTimeCalendar.set(year, month, day, 12, 0, 0);
         newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
-        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 0);
         newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
@@ -157,11 +177,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         int year = startTimeCalendar.get(Calendar.YEAR);
         int month = startTimeCalendar.get(Calendar.MONTH);
         int day = startTimeCalendar.get(Calendar.DATE);
-        startTimeCalendar.set(year, month, day, 10, 00, 00);
-        endTimeCalendar.set(year, month, day, 10, 30, 00);
-        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        startTimeCalendar.set(year, month, day, 10, 0, 0);
+        endTimeCalendar.set(year, month, day, 10, 30, 0);
+        newStartTimeCalendar.set(year, month, day, 12, 0, 0);
         newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
-        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 0);
         newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
@@ -209,11 +229,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         int year = startTimeCalendar.get(Calendar.YEAR);
         int month = startTimeCalendar.get(Calendar.MONTH);
         int day = startTimeCalendar.get(Calendar.DATE);
-        startTimeCalendar.set(year, month, day, 10, 00, 00);
-        endTimeCalendar.set(year, month, day, 10, 30, 00);
-        newStartTimeCalendar.set(year, month, day, 12, 00, 00);
+        startTimeCalendar.set(year, month, day, 10, 0, 0);
+        endTimeCalendar.set(year, month, day, 10, 30, 0);
+        newStartTimeCalendar.set(year, month, day, 12, 0, 0);
         newStartTimeCalendar.set(Calendar.MILLISECOND, 0);
-        newEndTimeCalendar.set(year, month, day, 12, 30, 00);
+        newEndTimeCalendar.set(year, month, day, 12, 30, 0);
         newEndTimeCalendar.set(Calendar.MILLISECOND, 0);
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setType(RecurringAppointmentType.DAY);
@@ -267,12 +287,14 @@ public class AppointmentRecurringPatternServiceImplTest {
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
 
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(appointmentServiceHelper).checkAndAssignAppointmentNumber(appointment);
+        verify(appointmentNumberGenerator).generateAppointmentNumber(appointment);
     }
 
     @Test
@@ -287,12 +309,14 @@ public class AppointmentRecurringPatternServiceImplTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentDao, never()).save(any(Appointment.class));
         verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
-        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
+        verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
     }
 
     @Test
@@ -305,12 +329,15 @@ public class AppointmentRecurringPatternServiceImplTest {
         newAppointment.setUuid("newApp");
         List<Appointment> updatedAppointments = Arrays.asList(voidedAppointment, newAppointment);
 
+        //setting up the number generator locator
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(new AppointmentNumberGeneratorLocatorImpl(new DefaultAppointmentNumberGeneratorImpl()));
+        String expectedAppointmentNumberPart = new SimpleDateFormat("YYMMddHHmm").format(new Date());
         Appointment appointment = recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentServiceHelper, times(2)).getAppointmentAuditEvent(any(Appointment.class), nullable(String.class));
-        verify(appointmentServiceHelper, times(2)).checkAndAssignAppointmentNumber(any(Appointment.class));
+        updatedAppointments.forEach(app -> assertTrue("Should have generated appointment number", app.getAppointmentNumber().startsWith(expectedAppointmentNumberPart)));
         assertEquals(newAppointment, appointment);
     }
 
@@ -328,12 +355,14 @@ public class AppointmentRecurringPatternServiceImplTest {
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
 
         verify(appointmentDao, never()).save(any(Appointment.class));
         verify(appointmentServiceHelper,never()).getAppointmentAsJsonString(any());
         verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(), any());
-        verify(appointmentServiceHelper, never()).checkAndAssignAppointmentNumber(any());
+        verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
     }
 
 
