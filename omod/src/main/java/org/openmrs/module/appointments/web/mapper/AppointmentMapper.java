@@ -85,6 +85,9 @@ public class AppointmentMapper {
         } else {
             appointment = new Appointment();
             appointment.setPatient(patientService.getPatientByUuid(appointmentRequest.getPatientUuid()));
+            if (!StringUtils.isEmpty(appointmentRequest.getAppointmentNumber())) {
+                appointment.setAppointmentNumber(appointmentRequest.getAppointmentNumber());
+            }
         }
         mapAppointmentRequestToAppointment(appointmentRequest, appointment);
         return appointment;

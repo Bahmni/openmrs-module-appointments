@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
@@ -124,11 +125,14 @@ public class AppointmentsControllerTest {
         appointment.setService(new AppointmentServiceDefinition());
 
         when(appointmentMapper.fromRequest(request)).thenReturn(appointment);
+        when(appointmentsService.validateAndSave(any(Supplier.class)))
+                .thenAnswer(invocation -> appointmentMapper.fromRequest(request));
+
         appointmentsController.saveAppointment(request);
 
 
         verify(appointmentMapper, times(1)).fromRequest(request);
-        verify(appointmentsService, times(1)).validateAndSave(appointment);
+        verify(appointmentsService, times(1)).validateAndSave(any(Supplier.class));
     }
 
     @Test
@@ -145,11 +149,13 @@ public class AppointmentsControllerTest {
         appointment.setService(new AppointmentServiceDefinition());
 
         when(appointmentMapper.fromRequest(request)).thenReturn(appointment);
+        when(appointmentsService.validateAndSave(any(Supplier.class)))
+                .thenAnswer(invocation -> appointmentMapper.fromRequest(request));
         appointmentsController.saveAppointment(request);
 
 
         verify(appointmentMapper, times(1)).fromRequest(request);
-        verify(appointmentsService, times(1)).validateAndSave(appointment);
+        verify(appointmentsService, times(1)).validateAndSave(any(Supplier.class));
     }
 
 

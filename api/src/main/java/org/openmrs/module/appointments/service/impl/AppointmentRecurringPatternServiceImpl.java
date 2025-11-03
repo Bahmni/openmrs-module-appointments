@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -7,6 +9,8 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
+import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
+import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -28,6 +32,7 @@ import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 @Transactional
 public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurringPatternService {
 
+    private Log log = LogFactory.getLog(this.getClass());
 
     private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
@@ -38,6 +43,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     private List<AppointmentValidator> appointmentValidators;
 
     private List<AppointmentValidator> editAppointmentValidators;
+    private AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
 
     private AppointmentDao appointmentDao;
 
@@ -83,9 +89,22 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         return appointmentRecurringPattern;
     }
 
+    private void checkAndAssignAppointmentNumber(Appointment appointment) {
+        if (appointment.getAppointmentNumber() == null) {
+            AppointmentNumberGenerator appointmentNumberGenerator =
+                    appointmentNumberGeneratorLocator.retrieveAppointmentNumberGenerator();
+            if (appointmentNumberGenerator == null) {
+                log.warn("Can not generate appointment number. No generator found");
+                return;
+            }
+            String generateAppointmentNumber = appointmentNumberGenerator.generateAppointmentNumber(appointment);
+            appointment.setAppointmentNumber(generateAppointmentNumber);
+        }
+    }
+
     private void updateAppointmentsDetails(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> appointments)  {
         appointments.forEach(appointment -> {
-            appointmentServiceHelper.checkAndAssignAppointmentNumber(appointment);
+            checkAndAssignAppointmentNumber(appointment);
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
         });
@@ -153,5 +172,9 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         } else {
             appointment.setAppointmentAudits(new HashSet<>(Collections.singletonList(appointmentAudit)));
         }
+    }
+
+    public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
+        this.appointmentNumberGeneratorLocator = appointmentNumberGeneratorLocator;
     }
 }
