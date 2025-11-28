@@ -42,7 +42,6 @@ public class DefaultMailSender implements MailSender {
     public void send(String subject, String bodyText, String[] to, String[] cc, String[] bcc) {
         try {
             MimeMessage mail = new MimeMessage(getSession());
-            if(!Objects.equals(mail.getSession().getProperty("mail.send"), "true")) return;
             mail.setFrom(new InternetAddress(this.administrationService.getGlobalProperty("mail.from", "")));
             Address[] toAddresses = new Address[1];
             toAddresses[0] = new InternetAddress(to[0]);
@@ -64,14 +63,26 @@ public class DefaultMailSender implements MailSender {
             multipart.addBodyPart(mimeBodyPart);
             mail.setContent(multipart);
 
-            Transport transport = session.getTransport();
-            log.info("Sending Mail");
-            transport.connect(session.getProperty("mail.smtp.host"), session.getProperty("mail.user"), session.getProperty("mail.password"));
-            transport.sendMessage(mail, mail.getAllRecipients());
-            log.info("Mail Sent");
-            transport.close();
-        }
-        catch (Exception e) {
+            Transport transport = null;
+            try {
+                transport = session.getTransport();
+                log.info("Sending Mail");
+                if (!transport.isConnected()) {
+                    transport.connect(
+                            administrationService.getGlobalProperty("mail.smtp_host"),
+                            Integer.parseInt(administrationService.getGlobalProperty("mail.smtp_port")),
+                            administrationService.getGlobalProperty("mail.user"),
+                            administrationService.getGlobalProperty("mail.password")
+                    );
+                }
+                transport.sendMessage(mail, mail.getAllRecipients());
+                log.info("Mail Sent");
+            } finally {
+                if (transport != null && transport.isConnected()) {
+                    transport.close();
+                }
+            }
+        } catch (Exception e) {
             throw new RuntimeException("Error occurred while sending email", e);
         }
     }
@@ -95,6 +106,28 @@ public class DefaultMailSender implements MailSender {
                     if (sessionProperties == null) {
                         log.info("Could not load mail properties from application data directory. Loading from OMRS settings.");
                         sessionProperties = mailSessionPropertiesFromOMRS();
+                    } else {
+                        administrationService.setGlobalProperty("mail.transport_protocol", sessionProperties.getProperty("mail.transport.protocol"));
+                        administrationService.setGlobalProperty("mail.smtp_host", sessionProperties.getProperty("mail.smtp.host"));
+                        administrationService.setGlobalProperty("mail.smtp_port", sessionProperties.getProperty("mail.smtp.port"));
+                        administrationService.setGlobalProperty("mail.smtp_auth", sessionProperties.getProperty("mail.smtp.auth"));
+                        administrationService.setGlobalProperty("mail.smtp.starttls.enable", sessionProperties.getProperty("mail.smtp.starttls.enable"));
+                        administrationService.setGlobalProperty("mail.smtp.ssl.enable", sessionProperties.getProperty("mail.smtp.ssl.enable"));
+                        administrationService.setGlobalProperty("mail.debug", sessionProperties.getProperty("mail.debug"));
+                        administrationService.setGlobalProperty("mail.from", sessionProperties.getProperty("mail.from"));
+                        administrationService.setGlobalProperty("mail.user", sessionProperties.getProperty("mail.user"));
+                        administrationService.setGlobalProperty("mail.password", sessionProperties.getProperty("mail.password"));
+
+                        Properties p = new Properties();
+                        String[] propertyKeys = {"mail.from", "mail.user", "mail.password", "mail.transport.protocol", "mail.smtp.host", "mail.smtp.port", "mail.smtp.auth", "mail.smtp.starttls.enable", "mail.smtp.ssl.enable", "mail.debug"};
+
+                        for (String key : propertyKeys) {
+                            String value = sessionProperties.getProperty(key);
+                            p.put(key, (value != null) ? value : "");
+                        }
+
+                        sessionProperties = p;
+                        session = Session.getInstance(sessionProperties);
                     }
                     final String user = sessionProperties.getProperty("mail.user");
                     final String password = sessionProperties.getProperty("mail.password");
@@ -104,9 +137,6 @@ public class DefaultMailSender implements MailSender {
                                 return new PasswordAuthentication(user, password);
                             }
                         });
-                    }
-                    else {
-                        session = Session.getInstance(sessionProperties);
                     }
                 }
             }
