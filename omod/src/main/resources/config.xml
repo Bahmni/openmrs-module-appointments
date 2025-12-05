@@ -163,4 +163,15 @@
 	</globalProperty>
 
 
+	<privilege>
+		<name>app:appointments:manageServiceAvailability</name>
+		<description>Able to Edit Appointment Service Availability in Appointments module</description>
+	</privilege>
+
+	<privilege>
+		<name>app:appointments:manageServices</name>
+		<description>Able to Manage Appointment Services in Appointments module</description>
+	</privilege>
+
+
 </module>
