@@ -38,6 +38,13 @@
         <constructor-arg ref="defaultTCApptMailSender"/>
     </bean>
 
+    <bean id="defaultApptSmsSender" class="org.openmrs.module.appointments.notification.impl.DefaultSmsSender">
+        <constructor-arg ref="adminService"/>
+    </bean>
+    <bean id="defaultPatientSmsNotifier" class="org.openmrs.module.appointments.notification.impl.DefaultAppointmentPatientSmsNotifier">
+        <constructor-arg ref="defaultApptSmsSender"/>
+    </bean>
+
 <!--    <ref bean="defaultAppointmentMailSender"/>-->
 
     <bean id="openmrsProperties" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
@@ -50,6 +57,7 @@
         <property name="eventNotifiers">
             <list value-type="org.openmrs.module.appointments.notification.AppointmentEventNotifier">
                 <ref bean="defaultPatientEmailNotifier"/>
+                <ref bean="defaultPatientSmsNotifier"/>
             </list>
         </property>
     </bean>
