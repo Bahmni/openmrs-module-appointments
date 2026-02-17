@@ -37,6 +37,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
@@ -338,6 +339,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentServiceHelper, times(2)).getAppointmentAsJsonString(any(Appointment.class));
         verify(appointmentServiceHelper, times(2)).getAppointmentAuditEvent(any(Appointment.class), nullable(String.class));
         updatedAppointments.forEach(app -> assertTrue("Should have generated appointment number", app.getAppointmentNumber().startsWith(expectedAppointmentNumberPart)));
+        assertEquals(voidedAppointment.getAppointmentNumber(), newAppointment.getAppointmentNumber());
         assertEquals(newAppointment, appointment);
     }
 
@@ -365,6 +367,128 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
     }
 
+
+    @Test
+    public void shouldAssignSameAppointmentNumberToAllNewRecurringAppointments() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment appointmentOne = new Appointment();
+        Appointment appointmentTwo = new Appointment();
+        Appointment appointmentThree = new Appointment();
+        List<Appointment> appointments = Arrays.asList(appointmentOne, appointmentTwo, appointmentThree);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+
+        String sharedAppointmentNumber = "TEST123";
+        String notes = "Notes";
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+
+        when(appointmentNumberGenerator.generateAppointmentNumber(any(Appointment.class)))
+                .thenReturn(sharedAppointmentNumber);
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
+        AppointmentRecurringPattern savedPattern = recurringAppointmentService
+                .validateAndSave(appointmentRecurringPattern);
+
+        assertEquals(sharedAppointmentNumber, appointmentOne.getAppointmentNumber());
+        assertEquals(sharedAppointmentNumber, appointmentTwo.getAppointmentNumber());
+        assertEquals(sharedAppointmentNumber, appointmentThree.getAppointmentNumber());
+        verify(appointmentNumberGenerator, times(1)).generateAppointmentNumber(any());
+    }
+
+    @Test
+    public void shouldReuseExistingAppointmentNumberWhenAddingAppointmentsToExistingSeries() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        String existingNumber = "EXISTING123";
+
+        Appointment existingAppointmentOne = new Appointment();
+        existingAppointmentOne.setAppointmentNumber(existingNumber);
+        Appointment existingAppointmentTwo = new Appointment();
+        existingAppointmentTwo.setAppointmentNumber(existingNumber);
+        Appointment newAppointment = new Appointment();
+        newAppointment.setAppointmentNumber(null);
+
+        List<Appointment> appointments = Arrays.asList(
+                existingAppointmentOne, existingAppointmentTwo, newAppointment);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+
+        String notes = "Notes";
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
+        AppointmentRecurringPattern savedPattern = recurringAppointmentService
+                .validateAndSave(appointmentRecurringPattern);
+
+        assertEquals(existingNumber, newAppointment.getAppointmentNumber());
+        assertEquals(existingNumber, existingAppointmentOne.getAppointmentNumber());
+        assertEquals(existingNumber, existingAppointmentTwo.getAppointmentNumber());
+        verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
+    }
+
+    @Test
+    public void shouldPreserveSingleAppointmentNumberWhenAlreadyAssigned() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        String preservedNumber = "PRESERVE123";
+
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentNumber(preservedNumber);
+
+        List<Appointment> appointments = Collections.singletonList(appointment);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+
+        String notes = "Notes";
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
+        AppointmentRecurringPattern savedPattern = recurringAppointmentService
+                .validateAndSave(appointmentRecurringPattern);
+
+        assertEquals(preservedNumber, appointment.getAppointmentNumber());
+        verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
+    }
+
+    @Test
+    public void shouldHandleNullGeneratorGracefullyForAllAppointments() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        Appointment appointmentOne = new Appointment();
+        Appointment appointmentTwo = new Appointment();
+        List<Appointment> appointments = Arrays.asList(appointmentOne, appointmentTwo);
+        appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
+
+        String notes = "Notes";
+        AppointmentAudit appointmentAudit = new AppointmentAudit();
+        doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
+        doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
+        doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
+
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(null));
+        AppointmentRecurringPattern savedPattern = recurringAppointmentService
+                .validateAndSave(appointmentRecurringPattern);
+
+        assertNull(appointmentOne.getAppointmentNumber());
+        assertNull(appointmentTwo.getAppointmentNumber());
+    }
+
+    @Test(expected = IndexOutOfBoundsException.class)
+    public void shouldThrowExceptionForEmptyAppointmentList() throws IOException {
+        AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
+        appointmentRecurringPattern.setAppointments(new HashSet<>());
+
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
+    }
 
     private Appointment getAppointment(String uuid, Patient patient, AppointmentStatus appointmentStatus,
                                        AppointmentKind appointmentKind, Date start, Date end) {
