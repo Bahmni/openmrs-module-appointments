@@ -43,6 +43,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyListOf;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -96,10 +97,18 @@ public class AppointmentRecurringPatternServiceImplTest {
         List<Appointment> appointments = Collections.singletonList(appointment);
         appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
         String notes = "Notes";
+        String generatedNumber = "TEST123";
+
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
+        // Mock applyAppointmentNumbers to set the appointment number
+        doAnswer(invocation -> {
+            List<Appointment> appts = invocation.getArgument(0);
+            appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
+            return null;
+        }).when(appointmentNumberGenerator).applyAppointmentNumbers(anyListOf(Appointment.class));
 
         //setting up the number generator locator
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
@@ -112,7 +121,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(appointmentNumberGenerator).generateAppointmentNumber(appointment);
+        verify(appointmentNumberGenerator).applyAppointmentNumbers(anyListOf(Appointment.class));
         assertEquals(1, appointmentRecurringPattern.getAppointments().size());
         assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
     }
@@ -284,9 +293,18 @@ public class AppointmentRecurringPatternServiceImplTest {
         AppointmentAudit appointmentAudit = new AppointmentAudit();
         appointmentRecurringPattern.setAppointments(new HashSet<>(appointments));
         String notes = "Notes";
+        String generatedNumber = "TEST123";
+
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
+
+        // Mock applyAppointmentNumbers to set the appointment number
+        doAnswer(invocation -> {
+            List<Appointment> appts = invocation.getArgument(0);
+            appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
+            return null;
+        }).when(appointmentNumberGenerator).applyAppointmentNumbers(anyListOf(Appointment.class));
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
                 new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
@@ -295,7 +313,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(appointmentNumberGenerator).generateAppointmentNumber(appointment);
+        verify(appointmentNumberGenerator).applyAppointmentNumbers(anyListOf(Appointment.class));
     }
 
     @Test
@@ -383,6 +401,19 @@ public class AppointmentRecurringPatternServiceImplTest {
 
         when(appointmentNumberGenerator.generateAppointmentNumber(any(Appointment.class)))
                 .thenReturn(sharedAppointmentNumber);
+
+        // Mock applyAppointmentNumbers to use the mocked generateAppointmentNumber
+        doAnswer(invocation -> {
+            List<Appointment> appts = invocation.getArgument(0);
+            String number = appointmentNumberGenerator.generateAppointmentNumber(appts.get(0));
+            appts.forEach(a -> {
+                if (a.getAppointmentNumber() == null) {
+                    a.setAppointmentNumber(number);
+                }
+            });
+            return null;
+        }).when(appointmentNumberGenerator).applyAppointmentNumbers(anyListOf(Appointment.class));
+
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
@@ -395,7 +426,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         assertEquals(sharedAppointmentNumber, appointmentOne.getAppointmentNumber());
         assertEquals(sharedAppointmentNumber, appointmentTwo.getAppointmentNumber());
         assertEquals(sharedAppointmentNumber, appointmentThree.getAppointmentNumber());
-        verify(appointmentNumberGenerator, times(1)).generateAppointmentNumber(any());
+        verify(appointmentNumberGenerator, times(1)).applyAppointmentNumbers(anyListOf(Appointment.class));
     }
 
     @Test

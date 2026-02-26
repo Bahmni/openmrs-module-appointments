@@ -90,25 +90,19 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     private void updateAppointmentsDetails(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> appointments)  {
-        // Generate or reuse appointment number for the entire recurring series
-        String sharedAppointmentNumber = getOrGenerateSharedAppointmentNumber(appointments);
+        assignAppointmentNumbers(appointments);
 
         appointments.forEach(appointment -> {
-            // Use the shared appointment number for all appointments
-            if (appointment.getAppointmentNumber() == null) {
-                appointment.setAppointmentNumber(sharedAppointmentNumber);
-            }
             setAppointmentAudit(appointment);
             appointment.setAppointmentRecurringPattern(appointmentRecurringPattern);
         });
     }
 
-    private String getOrGenerateSharedAppointmentNumber(List<Appointment> appointments) {
+    private void assignAppointmentNumbers(List<Appointment> appointments) {
         if (appointments.isEmpty()) {
-            return null;
+            return;
         }
 
-        // Check if any appointment already has a number (for adding to existing series)
         String existingAppointmentNumber = appointments.stream()
                 .map(Appointment::getAppointmentNumber)
                 .filter(number -> number != null)
@@ -116,19 +110,25 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
                 .orElse(null);
 
         if (existingAppointmentNumber != null) {
-            return existingAppointmentNumber;
+            // All must use existing number
+            appointments.forEach(appointment -> {
+                if (appointment.getAppointmentNumber() == null) {
+                    appointment.setAppointmentNumber(existingAppointmentNumber);
+                }
+            });
+            return;
         }
 
-        // Generate new number for new series
+        // Delegate to generator's batch method
         AppointmentNumberGenerator appointmentNumberGenerator =
                 appointmentNumberGeneratorLocator.retrieveAppointmentNumberGenerator();
 
         if (appointmentNumberGenerator == null) {
             log.warn("Can not generate appointment number. No generator found");
-            return null;
+            return;
         }
 
-        return appointmentNumberGenerator.generateAppointmentNumber(appointments.get(0));
+        appointmentNumberGenerator.applyAppointmentNumbers(appointments);
     }
 
     @Override
