@@ -30,6 +30,16 @@
         <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
     </bean>
 
+    <bean id="defaultRecurringAppointmentNumberingStrategy"
+          class="org.openmrs.module.appointments.service.impl.DefaultRecurringAppointmentNumberingStrategyImpl">
+        <constructor-arg name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
+    </bean>
+
+    <bean id="recurringAppointmentNumberingStrategyLocator"
+          class="org.openmrs.module.appointments.service.impl.RecurringAppointmentNumberingStrategyLocatorImpl">
+        <constructor-arg name="recurringAppointmentNumberingStrategy" ref="defaultRecurringAppointmentNumberingStrategy"/>
+    </bean>
+
     <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
     <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender">
         <constructor-arg ref="adminService"/>
@@ -206,6 +216,7 @@
                     <ref bean="appointmentDao"/>
                 </property>
                 <property name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
+                <property name="recurringAppointmentNumberingStrategyLocator" ref="recurringAppointmentNumberingStrategyLocator"/>
             </bean>
         </property>
         <property name="preInterceptors">

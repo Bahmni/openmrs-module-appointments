@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.helper.AppointmentServiceHelper;
@@ -12,6 +13,8 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
+import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategy;
+import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategyLocator;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +47,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
 
     private List<AppointmentValidator> editAppointmentValidators;
     private AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
+    private RecurringAppointmentNumberingStrategyLocator recurringAppointmentNumberingStrategyLocator;
 
     private AppointmentDao appointmentDao;
 
@@ -74,6 +78,11 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     @Override
     public AppointmentRecurringPattern validateAndSave(AppointmentRecurringPattern appointmentRecurringPattern) {
         List<Appointment> appointments = new ArrayList<>(appointmentRecurringPattern.getAppointments());
+
+        if (appointments.isEmpty()) {
+            throw new APIException("Cannot save a recurring pattern with no appointments");
+        }
+
         appointmentServiceHelper.validate(appointments.get(0), appointmentValidators);
         updateAppointmentsDetails(appointmentRecurringPattern, appointments);
         appointmentRecurringPatternDao.save(appointmentRecurringPattern);
@@ -90,7 +99,7 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
     }
 
     private void updateAppointmentsDetails(AppointmentRecurringPattern appointmentRecurringPattern, List<Appointment> appointments)  {
-        assignAppointmentNumbers(appointments);
+        assignAppointmentNumbers(appointments, appointmentRecurringPattern);
 
         appointments.forEach(appointment -> {
             setAppointmentAudit(appointment);
@@ -98,37 +107,24 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         });
     }
 
-    private void assignAppointmentNumbers(List<Appointment> appointments) {
+    private void assignAppointmentNumbers(List<Appointment> appointments,
+                                          AppointmentRecurringPattern pattern) {
         if (appointments.isEmpty()) {
             return;
         }
 
-        String existingAppointmentNumber = appointments.stream()
-                .map(Appointment::getAppointmentNumber)
-                .filter(number -> number != null)
-                .findFirst()
-                .orElse(null);
+        // Delegate all numbering logic to pluggable strategy
+        // Strategy handles both new appointments and update scenarios
+        RecurringAppointmentNumberingStrategy strategy =
+                recurringAppointmentNumberingStrategyLocator
+                        .retrieveRecurringAppointmentNumberingStrategy();
 
-        if (existingAppointmentNumber != null) {
-            // All must use existing number
-            appointments.forEach(appointment -> {
-                if (appointment.getAppointmentNumber() == null) {
-                    appointment.setAppointmentNumber(existingAppointmentNumber);
-                }
-            });
+        if (strategy == null) {
+            log.warn("Can not apply appointment numbers. No recurring appointment numbering strategy found");
             return;
         }
 
-        // Delegate to generator's batch method
-        AppointmentNumberGenerator appointmentNumberGenerator =
-                appointmentNumberGeneratorLocator.retrieveAppointmentNumberGenerator();
-
-        if (appointmentNumberGenerator == null) {
-            log.warn("Can not generate appointment number. No generator found");
-            return;
-        }
-
-        appointmentNumberGenerator.applyAppointmentNumbers(appointments);
+        strategy.applyAppointmentNumbers(appointments, pattern);
     }
 
     @Override
@@ -197,5 +193,10 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
 
     public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
         this.appointmentNumberGeneratorLocator = appointmentNumberGeneratorLocator;
+    }
+
+    public void setRecurringAppointmentNumberingStrategyLocator(
+            RecurringAppointmentNumberingStrategyLocator recurringAppointmentNumberingStrategyLocator) {
+        this.recurringAppointmentNumberingStrategyLocator = recurringAppointmentNumberingStrategyLocator;
     }
 }
