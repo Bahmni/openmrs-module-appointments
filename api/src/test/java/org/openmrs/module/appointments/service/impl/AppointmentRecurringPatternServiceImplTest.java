@@ -22,8 +22,7 @@ import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
-import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategy;
-import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategyLocator;
+import org.openmrs.module.appointments.service.RecurringAppointmentNumberGenerator;
 import org.openmrs.module.appointments.util.AppointmentBuilder;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
@@ -92,10 +91,7 @@ public class AppointmentRecurringPatternServiceImplTest {
     AppointmentNumberGenerator appointmentNumberGenerator;
 
     @Mock
-    RecurringAppointmentNumberingStrategy recurringAppointmentNumberingStrategy;
-
-    @Mock
-    RecurringAppointmentNumberingStrategyLocator recurringAppointmentNumberingStrategyLocator;
+    RecurringAppointmentNumberGenerator recurringAppointmentNumberGenerator;
 
     @Test
     public void shouldSaveRecurringAppointmentsForGivenRecurringPatternAndAppointment() throws IOException {
@@ -116,14 +112,12 @@ public class AppointmentRecurringPatternServiceImplTest {
             List<Appointment> appts = invocation.getArgument(0);
             appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
             return null;
-        }).when(recurringAppointmentNumberingStrategy).applyAppointmentNumbers(
+        }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
 
         //setting up the locators
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
         AppointmentRecurringPattern savedAppointmentRecurringPattern = recurringAppointmentService
                 .validateAndSave(appointmentRecurringPattern);
 
@@ -132,7 +126,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(recurringAppointmentNumberingStrategy).applyAppointmentNumbers(
+        verify(recurringAppointmentNumberGenerator).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
         assertEquals(1, appointmentRecurringPattern.getAppointments().size());
         assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
@@ -316,19 +310,17 @@ public class AppointmentRecurringPatternServiceImplTest {
             List<Appointment> appts = invocation.getArgument(0);
             appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
             return null;
-        }).when(recurringAppointmentNumberingStrategy).applyAppointmentNumbers(
+        }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentRecurringPatternDao, times(1)).save(appointmentRecurringPattern);
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
-        verify(recurringAppointmentNumberingStrategy).applyAppointmentNumbers(
+        verify(recurringAppointmentNumberGenerator).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
     }
 
@@ -345,9 +337,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         expectedException.expectMessage(errorMessage);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, appointment);
 
         verify(appointmentDao, never()).save(any(Appointment.class));
@@ -367,10 +357,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         List<Appointment> updatedAppointments = Arrays.asList(voidedAppointment, newAppointment);
 
         //setting up the number generator and strategy locators
-        recurringAppointmentService.setAppointmentNumberGeneratorLocator(new AppointmentNumberGeneratorLocatorImpl(new DefaultAppointmentNumberGeneratorImpl()));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(new DefaultRecurringAppointmentNumberingStrategyImpl(
-                        new AppointmentNumberGeneratorLocatorImpl(new DefaultAppointmentNumberGeneratorImpl()))));
+        recurringAppointmentService.setAppointmentNumberGeneratorLocator(
+                new AppointmentNumberGeneratorLocatorImpl(
+                        new DefaultAppointmentNumberGeneratorImpl(),
+                        new DefaultRecurringAppointmentNumberGeneratorImpl(
+                                new AppointmentNumberGeneratorLocatorImpl(new DefaultAppointmentNumberGeneratorImpl()))));
         String expectedAppointmentNumberPart = new SimpleDateFormat("YYMMddHHmm").format(new Date());
         Appointment appointment = recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
 
@@ -397,9 +388,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         expectedException.expectMessage(errorMessage);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
         recurringAppointmentService.update(appointmentRecurringPattern, updatedAppointments);
 
         verify(appointmentDao, never()).save(any(Appointment.class));
@@ -435,7 +424,7 @@ public class AppointmentRecurringPatternServiceImplTest {
                 }
             });
             return null;
-        }).when(recurringAppointmentNumberingStrategy).applyAppointmentNumbers(
+        }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
 
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
@@ -443,16 +432,13 @@ public class AppointmentRecurringPatternServiceImplTest {
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
-        AppointmentRecurringPattern savedPattern = recurringAppointmentService
-                .validateAndSave(appointmentRecurringPattern);
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
 
         assertEquals(sharedAppointmentNumber, appointmentOne.getAppointmentNumber());
         assertEquals(sharedAppointmentNumber, appointmentTwo.getAppointmentNumber());
         assertEquals(sharedAppointmentNumber, appointmentThree.getAppointmentNumber());
-        verify(recurringAppointmentNumberingStrategy, times(1)).applyAppointmentNumbers(
+        verify(recurringAppointmentNumberGenerator, times(1)).setAppointmentNumbers(
                 anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
     }
 
@@ -479,13 +465,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(
-                        new DefaultRecurringAppointmentNumberingStrategyImpl(
+                new AppointmentNumberGeneratorLocatorImpl(
+                        appointmentNumberGenerator,
+                        new DefaultRecurringAppointmentNumberGeneratorImpl(
                                 new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator))));
-        AppointmentRecurringPattern savedPattern = recurringAppointmentService
-                .validateAndSave(appointmentRecurringPattern);
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
 
         assertEquals(existingNumber, newAppointment.getAppointmentNumber());
         assertEquals(existingNumber, existingAppointmentOne.getAppointmentNumber());
@@ -511,11 +495,8 @@ public class AppointmentRecurringPatternServiceImplTest {
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
-        AppointmentRecurringPattern savedPattern = recurringAppointmentService
-                .validateAndSave(appointmentRecurringPattern);
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
+        recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
 
         assertEquals(preservedNumber, appointment.getAppointmentNumber());
         verify(appointmentNumberGenerator, never()).generateAppointmentNumber(any());
@@ -536,12 +517,11 @@ public class AppointmentRecurringPatternServiceImplTest {
         doNothing().when(appointmentRecurringPatternDao).save(appointmentRecurringPattern);
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(null));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(
-                        new DefaultRecurringAppointmentNumberingStrategyImpl(
+                new AppointmentNumberGeneratorLocatorImpl(
+                        null,
+                        new DefaultRecurringAppointmentNumberGeneratorImpl(
                                 new AppointmentNumberGeneratorLocatorImpl(null))));
-        AppointmentRecurringPattern savedPattern = recurringAppointmentService
+        recurringAppointmentService
                 .validateAndSave(appointmentRecurringPattern);
 
         assertNull(appointmentOne.getAppointmentNumber());
@@ -549,14 +529,12 @@ public class AppointmentRecurringPatternServiceImplTest {
     }
 
     @Test(expected = APIException.class)
-    public void shouldThrowExceptionForEmptyAppointmentList() throws IOException {
+    public void shouldThrowExceptionForEmptyAppointmentList() {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setAppointments(new HashSet<>());
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
-                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator));
-        recurringAppointmentService.setRecurringAppointmentNumberingStrategyLocator(
-                new RecurringAppointmentNumberingStrategyLocatorImpl(recurringAppointmentNumberingStrategy));
+                new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
 
         recurringAppointmentService.validateAndSave(appointmentRecurringPattern);
     }

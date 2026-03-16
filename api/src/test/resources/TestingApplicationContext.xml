@@ -62,8 +62,18 @@
 
     <bean id="appointmentNumberGenerator" class="org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl"/>
 
+    <bean id="defaultRecurringAppointmentNumberGenerator"
+          class="org.openmrs.module.appointments.service.impl.DefaultRecurringAppointmentNumberGeneratorImpl">
+        <constructor-arg name="appointmentNumberGeneratorLocator">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
+                <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean id="appointmentNumberGeneratorLocator" class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
         <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+        <constructor-arg name="recurringAppointmentNumberGenerator" ref="defaultRecurringAppointmentNumberGenerator"/>
     </bean>
 
     <bean id="recurringAppointmentService"

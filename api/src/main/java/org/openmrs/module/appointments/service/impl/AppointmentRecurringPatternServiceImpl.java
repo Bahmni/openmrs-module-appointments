@@ -13,8 +13,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
-import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategy;
-import org.openmrs.module.appointments.service.RecurringAppointmentNumberingStrategyLocator;
+import org.openmrs.module.appointments.service.RecurringAppointmentNumberGenerator;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +46,6 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
 
     private List<AppointmentValidator> editAppointmentValidators;
     private AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
-    private RecurringAppointmentNumberingStrategyLocator recurringAppointmentNumberingStrategyLocator;
 
     private AppointmentDao appointmentDao;
 
@@ -113,18 +111,16 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
             return;
         }
 
-        // Delegate all numbering logic to pluggable strategy
-        // Strategy handles both new appointments and update scenarios
-        RecurringAppointmentNumberingStrategy strategy =
-                recurringAppointmentNumberingStrategyLocator
-                        .retrieveRecurringAppointmentNumberingStrategy();
+        RecurringAppointmentNumberGenerator generator =
+                appointmentNumberGeneratorLocator
+                        .retrieveRecurringAppointmentNumberGenerator();
 
-        if (strategy == null) {
-            log.warn("Can not apply appointment numbers. No recurring appointment numbering strategy found");
+        if (generator == null) {
+            log.warn("Can not apply appointment numbers. No recurring appointment number generator found");
             return;
         }
 
-        strategy.applyAppointmentNumbers(appointments, pattern);
+        generator.setAppointmentNumbers(appointments, pattern);
     }
 
     @Override
@@ -195,8 +191,4 @@ public class AppointmentRecurringPatternServiceImpl implements AppointmentRecurr
         this.appointmentNumberGeneratorLocator = appointmentNumberGeneratorLocator;
     }
 
-    public void setRecurringAppointmentNumberingStrategyLocator(
-            RecurringAppointmentNumberingStrategyLocator recurringAppointmentNumberingStrategyLocator) {
-        this.recurringAppointmentNumberingStrategyLocator = recurringAppointmentNumberingStrategyLocator;
-    }
 }
