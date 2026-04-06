@@ -637,6 +637,98 @@
             <column name="description" value="URL pattern to use for published Recurring appointment events. Default is /openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}. If you change default value, please add your custom implementation for the given URL"/>
         </insert>
     </changeSet>
+
+    <!-- Migrate atomfeed properties to bahmnievents for Spring event outbox integration -->
+    <changeSet id="202403311000" author="Lingeswaran">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bahmnievents.publish.eventsForAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Migrate atomfeed.publish.eventsForAppointments to bahmnievents.publish.eventsForAppointments, preserving custom values</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, uuid, description)
+            VALUES (
+                'bahmnievents.publish.eventsForAppointments',
+                COALESCE((SELECT pv FROM (SELECT property_value AS pv FROM global_property WHERE property = 'atomfeed.publish.eventsForAppointments' LIMIT 1) AS t), 'true'),
+                UUID(),
+                'If set true, events related to appointment changes are published'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202403311001" author="Lingeswaran">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bahmnievents.event.urlPatternForAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Migrate atomfeed.event.urlPatternForAppointments to bahmnievents.event.urlPatternForAppointments, preserving custom values</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, uuid, description)
+            VALUES (
+                'bahmnievents.event.urlPatternForAppointments',
+                COALESCE((SELECT pv FROM (SELECT property_value AS pv FROM global_property WHERE property = 'atomfeed.event.urlPatternForAppointments' LIMIT 1) AS t), '/openmrs/ws/rest/v1/appointments/{uuid}'),
+                UUID(),
+                'URL pattern to use for published appointment events. Default is /openmrs/ws/rest/v1/appointments/{uuid}. If you change default value, please add your custom implementation for the given URL'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202403311002" author="Lingeswaran">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bahmnievents.event.urlPatternForRecurringAppointments';
+            </sqlCheck>
+        </preConditions>
+        <comment>Migrate atomfeed.event.urlPatternForRecurringAppointments to bahmnievents.event.urlPatternForRecurringAppointments, preserving custom values</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, uuid, description)
+            VALUES (
+                'bahmnievents.event.urlPatternForRecurringAppointments',
+                COALESCE((SELECT pv FROM (SELECT property_value AS pv FROM global_property WHERE property = 'atomfeed.event.urlPatternForRecurringAppointments' LIMIT 1) AS t), '/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}'),
+                UUID(),
+                'URL pattern to use for published Recurring appointment events. Default is /openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}. If you change default value, please add your custom implementation for the given URL'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202403311003" author="Lingeswaran">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bahmnievents.publish.eventsForAppointmentService';
+            </sqlCheck>
+        </preConditions>
+        <comment>Migrate atomfeed.publish.eventsForAppointmentService to bahmnievents.publish.eventsForAppointmentService, preserving custom values</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, uuid, description)
+            VALUES (
+                'bahmnievents.publish.eventsForAppointmentService',
+                COALESCE((SELECT pv FROM (SELECT property_value AS pv FROM global_property WHERE property = 'atomfeed.publish.eventsForAppointmentService' LIMIT 1) AS t), 'true'),
+                UUID(),
+                'If set true, events related to appointment service changes are published'
+            );
+        </sql>
+    </changeSet>
+
+    <changeSet id="202403311004" author="Lingeswaran">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM global_property where property = 'bahmnievents.event.urlPatternForAppointmentService';
+            </sqlCheck>
+        </preConditions>
+        <comment>Migrate atomfeed.event.urlPatternForAppointmentService to bahmnievents.event.urlPatternForAppointmentService, preserving custom values</comment>
+        <sql>
+            INSERT INTO global_property (property, property_value, uuid, description)
+            VALUES (
+                'bahmnievents.event.urlPatternForAppointmentService',
+                COALESCE((SELECT pv FROM (SELECT property_value AS pv FROM global_property WHERE property = 'atomfeed.event.urlPatternForAppointmentService' LIMIT 1) AS t), '/openmrs/ws/rest/v1/appointment-services/{uuid}'),
+                UUID(),
+                'URL pattern to use for published appointment service events. Default is /openmrs/ws/rest/v1/appointment-services/{uuid}. If you change default value, please add your custom implementation for the given URL'
+            );
+        </sql>
+    </changeSet>
+
     <changeSet id="default-202009011116" author="Deedee Lee">
         <preConditions onFail="MARK_RAN">
             <sqlCheck expectedResult="0">

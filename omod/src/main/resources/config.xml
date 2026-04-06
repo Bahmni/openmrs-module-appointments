@@ -15,24 +15,12 @@
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
 		<require_module>org.bahmni.module.teleconsultation</require_module>
+		<require_module>org.bahmni.module.eventoutbox</require_module>
 	</require_modules>
 
 	<aware_of_modules>
-		<aware_of_module version="${openmrsAtomfeedVersion}">org.ict4h.openmrs.openmrs-atomfeed</aware_of_module>
 		<aware_of_module version="${communications.version}">org.bahmni.module.communication</aware_of_module>
 	</aware_of_modules>
-
-	<conditional_resources>
-		<conditionalResource>
-			<path>/lib/appointments-atom-feed-${project.parent.version}.jar</path>
-			<modules>
-				<module>
-					<moduleId>org.ict4h.openmrs.openmrs-atomfeed</moduleId>
-					<version>${openmrsAtomfeedVersion}</version>
-				</module>
-			</modules>
-		</conditionalResource>
-	</conditional_resources>
 
 	<mappingFiles>
 		Speciality.hbm.xml
@@ -72,6 +60,11 @@
 	<advice>
 		<point>org.openmrs.module.appointments.service.AppointmentRecurringPatternService</point>
 		<class>org.openmrs.module.appointments.events.advice.RecurringAppointmentEventsAdvice</class>
+	</advice>
+
+	<advice>
+		<point>org.openmrs.module.appointments.service.AppointmentServiceDefinitionService</point>
+		<class>org.openmrs.module.appointments.events.advice.AppointmentServiceDefinitionEventsAdvice</class>
 	</advice>
 
 	<globalProperty>

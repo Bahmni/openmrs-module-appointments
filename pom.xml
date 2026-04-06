@@ -32,7 +32,6 @@
 
 	<modules>
 		<module>api</module>
-		<module>atom-feed</module>
 		<module>omod</module>
     </modules>
 
@@ -45,8 +44,7 @@
 		<mockitoVersion>3.5.11</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.8.12</jacocoVersion>
-		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
-		<atomfeed.version>1.10.1</atomfeed.version>
+		<eventoutbox.version>1.0.0-SNAPSHOT</eventoutbox.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<servletApi.version>3.0.1</servletApi.version>
 		<webServices.version>2.29.0</webServices.version>
