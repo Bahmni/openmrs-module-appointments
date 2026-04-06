@@ -16,7 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.mockito.Mockito.when;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@PowerMockIgnore({"javax.*", "org.apache.*", "org.slf4j.*"})
+@PowerMockIgnore({"javax.*", "org.apache.*", "org.slf4j.*", "org.openmrs.logging.*"})
 @PrepareForTest({ServiceContext.class})
 @RunWith(PowerMockRunner.class)
 public class AtomFeedAdviceActivatorComponentTest {

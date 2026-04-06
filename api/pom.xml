@@ -146,6 +146,16 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito2</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>javax.servlet</groupId>
 			<artifactId>javax.servlet-api</artifactId>
 			<version>${servletApi.version}</version>
@@ -155,7 +165,6 @@
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 			<version>${javaxMail.version}</version>
-			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.json</groupId>
