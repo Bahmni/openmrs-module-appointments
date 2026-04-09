@@ -52,7 +52,7 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 				Appointment appointment = (Appointment) returnValue;
 				AppointmentBookingEvent appointmentEvent =new AppointmentBookingEvent(eventType,appointment);
 				eventPublisher.publishEvent(appointmentEvent);
-				log.info("Successfully published event with uuid : " + appointmentEvent.payloadId);
+				log.info("Successfully published event with uuid : {}" , appointmentEvent.payloadId);
 			}
 		}
 
@@ -70,7 +70,7 @@ public class AppointmentEventsAdvice implements AfterReturningAdvice, MethodBefo
 							.replace("{uuid}", appointment.getUuid());
 					EMREvent<Appointment> emrEvent = new EMREvent<>(appointment, CATEGORY, TITLE, null, content);
 					eventPublisher.publishEMREvent(emrEvent);
-					log.info("Successfully published EMR event for appointment uuid : " + appointment.getUuid());
+					log.info("Successfully published EMR event for appointment uuid : {} " , appointment.getUuid());
 				}
 			}
 		}

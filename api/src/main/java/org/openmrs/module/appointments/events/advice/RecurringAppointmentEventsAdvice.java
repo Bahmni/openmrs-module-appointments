@@ -33,9 +33,12 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
     private final AppointmentEventPublisher eventPublisher;
     private final ThreadLocal<Map<String, Integer>> threadLocal = new ThreadLocal<>();
     private final String RECURRING_APPOINTMENT_ID_KEY = "recurringAppointmentId";
-    private final Set<String> adviceMethodNames = Sets.newHashSet("validateAndSave");
-    private final Set<String> emrMethodNames = Sets.newHashSet("validateAndSave", "update", "changeStatus");
     private static final String TITLE = "RecurringAppointments";
+    private static final String METHOD_VALIDATE_AND_SAVE = "validateAndSave";
+    private static final String METHOD_UPDATE = "update";
+    private static final String METHOD_CHANGE_STATUS = "changeStatus";
+    private final Set<String> adviceMethodNames = Sets.newHashSet(METHOD_VALIDATE_AND_SAVE);
+    private final Set<String> emrMethodNames = Sets.newHashSet(METHOD_VALIDATE_AND_SAVE, METHOD_UPDATE, METHOD_CHANGE_STATUS);
 
     public RecurringAppointmentEventsAdvice() {
         this.eventPublisher = Context.getRegisteredComponent("appointmentEventPublisher", AppointmentEventPublisher.class);
@@ -52,7 +55,7 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
                 AppointmentRecurringPattern appointmentRecurringPattern = (AppointmentRecurringPattern) returnValue;
                 RecurringAppointmentEvent recurringAppointmentEvent = new RecurringAppointmentEvent(eventType, appointmentRecurringPattern);
                 eventPublisher.publishEvent(recurringAppointmentEvent);
-                log.info("Successfully published event with uuid : " + recurringAppointmentEvent.payloadId);
+                log.info("Successfully published event with uuid : {} " , recurringAppointmentEvent.payloadId);
             }
         }
 
@@ -68,7 +71,7 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
                     String content = urlPattern.replace("{uuid}", appointment.getUuid());
                     EMREvent<Appointment> emrEvent = new EMREvent<>(appointment, CATEGORY, TITLE, null, content);
                     eventPublisher.publishEMREvent(emrEvent);
-                    log.info("Successfully published EMR event for recurring appointment uuid : " + appointment.getUuid());
+                    log.info("Successfully published EMR event for recurring appointment uuid : {}" ,appointment.getUuid());
                 }
             }
         }
@@ -76,11 +79,11 @@ public class RecurringAppointmentEventsAdvice implements AfterReturningAdvice, M
 
     private List<Appointment> extractAppointments(String methodName, Object returnValue, Object[] arguments) {
         List<Appointment> appointments = new ArrayList<>();
-        if ("validateAndSave".equals(methodName) || (("update".equals(methodName)) && returnValue instanceof AppointmentRecurringPattern)) {
+        if (METHOD_VALIDATE_AND_SAVE.equals(methodName) || ((METHOD_UPDATE.equals(methodName)) && returnValue instanceof AppointmentRecurringPattern)) {
             appointments.addAll(((AppointmentRecurringPattern) returnValue).getAppointments());
-        } else if ("update".equals(methodName) && returnValue instanceof Appointment) {
+        } else if (METHOD_UPDATE.equals(methodName) && returnValue instanceof Appointment) {
             appointments = (List<Appointment>) arguments[1];
-        } else if ("changeStatus".equals(methodName)) {
+        } else if (METHOD_CHANGE_STATUS.equals(methodName)) {
             appointments = (List<Appointment>) returnValue;
         }
         return appointments;

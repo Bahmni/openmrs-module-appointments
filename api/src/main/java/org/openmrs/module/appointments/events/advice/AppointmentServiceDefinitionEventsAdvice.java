@@ -40,7 +40,7 @@ public class AppointmentServiceDefinitionEventsAdvice implements AfterReturningA
                         .replace("{uuid}", serviceDefinition.getUuid());
                 EMREvent<AppointmentServiceDefinition> emrEvent = new EMREvent<>(serviceDefinition, SERVICE_CATEGORY, TITLE, null, content);
                 eventPublisher.publishEMREvent(emrEvent);
-                log.info("Successfully published EMR event for appointment service uuid : " + serviceDefinition.getUuid());
+                log.info("Successfully published EMR event for appointment service uuid : {}" , serviceDefinition.getUuid());
             }
         }
     }
