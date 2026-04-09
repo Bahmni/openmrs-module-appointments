@@ -5,6 +5,7 @@
 
 <hibernate-configuration>
 	<session-factory>
+		<property name="hibernate.integration.envers.enabled">true</property>
 		<mapping resource="AppointmentServiceDefinition.hbm.xml"/>
 		<mapping resource="AppointmentReason.hbm.xml"/>
 		<mapping resource="Speciality.hbm.xml"/>

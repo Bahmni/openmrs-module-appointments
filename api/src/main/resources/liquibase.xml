@@ -905,4 +905,211 @@
             <column name="appointment_number"/>
         </createIndex>
     </changeSet>
+
+    <!-- Hibernate Envers auditing tables (AM-241) -->
+
+    <changeSet id="create-envers-revision_entity-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="revision_entity"/>
+            </not>
+        </preConditions>
+        <comment>Create OpenMRS Envers revision metadata table (OpenmrsRevisionEntity maps to revision_entity)</comment>
+        <sql>
+            CREATE TABLE revision_entity (
+                id INT NOT NULL AUTO_INCREMENT,
+                timestamp BIGINT,
+                changed_by INT,
+                changed_on DATETIME,
+                PRIMARY KEY (id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-patient_appointment_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for patient_appointment (Appointment entity)</comment>
+        <sql>
+            CREATE TABLE patient_appointment_AUD (
+                patient_appointment_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                appointment_number VARCHAR(255),
+                patient_id INT,
+                appointment_service_id INT,
+                appointment_service_type_id INT,
+                location_id INT,
+                start_date_time DATETIME,
+                end_date_time DATETIME,
+                appointment_kind VARCHAR(255),
+                status VARCHAR(255),
+                priority VARCHAR(255),
+                comments VARCHAR(255),
+                date_created DATETIME,
+                date_appointment_scheduled DATETIME,
+                date_changed DATETIME,
+                uuid VARCHAR(38),
+                voided TINYINT,
+                date_voided DATETIME,
+                void_reason VARCHAR(255),
+                tele_health_video_link VARCHAR(255),
+                voided_by INT,
+                changed_by INT,
+                creator INT,
+                related_appointment_id INT,
+                PRIMARY KEY (patient_appointment_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-appointment_service_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_service_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for appointment_service (AppointmentServiceDefinition entity)</comment>
+        <sql>
+            CREATE TABLE appointment_service_AUD (
+                appointment_service_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                name VARCHAR(255),
+                description VARCHAR(255),
+                start_time TIME,
+                end_time TIME,
+                max_appointments_limit INT,
+                duration_mins INT,
+                color VARCHAR(8),
+                initial_appointment_status VARCHAR(255),
+                date_created DATETIME,
+                date_changed DATETIME,
+                uuid VARCHAR(38),
+                voided TINYINT,
+                date_voided DATETIME,
+                void_reason VARCHAR(255),
+                voided_by INT,
+                changed_by INT,
+                creator INT,
+                location_id INT,
+                speciality_id INT,
+                PRIMARY KEY (appointment_service_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-appointment_service_type_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_service_type_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for appointment_service_type (AppointmentServiceType entity)</comment>
+        <sql>
+            CREATE TABLE appointment_service_type_AUD (
+                appointment_service_type_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                appointment_service_id INT,
+                name VARCHAR(255),
+                duration_mins INT,
+                voided TINYINT,
+                date_created DATETIME,
+                date_changed DATETIME,
+                uuid VARCHAR(38),
+                date_voided DATETIME,
+                void_reason VARCHAR(255),
+                voided_by INT,
+                changed_by INT,
+                creator INT,
+                PRIMARY KEY (appointment_service_type_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-patient_appointment_provider_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_provider_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for patient_appointment_provider (AppointmentProvider entity)</comment>
+        <sql>
+            CREATE TABLE patient_appointment_provider_AUD (
+                patient_appointment_provider_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                patient_appointment_id INT,
+                provider_id INT,
+                response VARCHAR(255),
+                comments VARCHAR(1000),
+                date_created DATETIME,
+                creator INT,
+                date_changed DATETIME,
+                changed_by INT,
+                voided TINYINT,
+                date_voided DATETIME,
+                void_reason VARCHAR(255),
+                voided_by INT,
+                uuid VARCHAR(38),
+                PRIMARY KEY (patient_appointment_provider_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-patient_appointment_recurring_time_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="patient_appointment_recurring_time_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for patient_appointment_recurring_time (AppointmentRecurringPattern entity)</comment>
+        <sql>
+            CREATE TABLE patient_appointment_recurring_time_AUD (
+                patient_appointment_timings_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                recurrence_type VARCHAR(255),
+                period INT,
+                frequency INT,
+                end_date DATETIME,
+                days_of_week VARCHAR(255),
+                PRIMARY KEY (patient_appointment_timings_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
+    <changeSet id="create-envers-appointment_speciality_AUD-table-20260409" author="Binayak Das">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_speciality_AUD"/>
+            </not>
+        </preConditions>
+        <comment>Hibernate Envers audit table for appointment_speciality (Speciality entity)</comment>
+        <sql>
+            CREATE TABLE appointment_speciality_AUD (
+                speciality_id INT NOT NULL,
+                REV INT NOT NULL,
+                REVTYPE TINYINT,
+                name VARCHAR(50),
+                date_created DATETIME,
+                date_changed DATETIME,
+                uuid VARCHAR(38),
+                changed_by INT,
+                creator INT,
+                PRIMARY KEY (speciality_id, REV),
+                FOREIGN KEY (REV) REFERENCES revision_entity(id)
+            )
+        </sql>
+    </changeSet>
+
 </databaseChangeLog>

@@ -1,5 +1,8 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.customdatatype.Customizable;
@@ -15,6 +18,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentServiceDefinition extends BaseOpenmrsData implements Serializable, Customizable<AppointmentServiceAttribute> {
 
     private Integer appointmentServiceId;
@@ -28,8 +32,10 @@ public class AppointmentServiceDefinition extends BaseOpenmrsData implements Ser
     private Location location;
     private String  color;
     private AppointmentStatus initialAppointmentStatus;
+    @NotAudited
     private Set<ServiceWeeklyAvailability> weeklyAvailability;
     private Set<AppointmentServiceType> serviceTypes;
+    @NotAudited
     private Set<AppointmentServiceAttribute> attributes;
 
     public Location getLocation() {

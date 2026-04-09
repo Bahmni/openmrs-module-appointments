@@ -171,6 +171,12 @@
 			<artifactId>json</artifactId>
 			<version>20210307</version>
 		</dependency>
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-envers</artifactId>
+			<version>5.6.15.Final</version>
+			<scope>provided</scope>
+		</dependency>
 		<!-- End OpenMRS core -->
 	</dependencies>
 

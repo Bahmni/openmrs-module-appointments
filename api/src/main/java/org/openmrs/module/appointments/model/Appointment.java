@@ -1,6 +1,9 @@
 package org.openmrs.module.appointments.model;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
@@ -19,6 +22,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
@@ -42,11 +46,14 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private String comments;
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
+    @NotAudited
     private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
     private String teleHealthVideoLink;
     @Independent
+    @NotAudited
     private Set<Encounter> fulfillingEncounters;
+    @NotAudited
     private Set<AppointmentReason> reasons;
 
     /**
