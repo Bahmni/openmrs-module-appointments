@@ -36,8 +36,8 @@ public class RecurringAppointmentEventsAdviceTest {
 
     private static final String UUID_1 = "uuid-1";
     private static final String UUID_2 = "uuid-2";
-    private static final String RAISE_EVENT_GP = "bahmnievents.publish.eventsForAppointments";
-    private static final String URL_PATTERN_GP = "bahmnievents.event.urlPatternForRecurringAppointments";
+    private static final String RAISE_EVENT_GP = "eventoutbox.publish.eventsForAppointments";
+    private static final String URL_PATTERN_GP = "eventoutbox.event.urlPatternForRecurringAppointments";
     private static final String DEFAULT_URL = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
 
     @Mock

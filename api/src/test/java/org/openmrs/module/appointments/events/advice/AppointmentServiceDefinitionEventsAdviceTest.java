@@ -29,8 +29,8 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 public class AppointmentServiceDefinitionEventsAdviceTest {
 
     private static final String UUID = "service-def-uuid";
-    private static final String RAISE_EVENT_GP = "bahmnievents.publish.eventsForAppointmentService";
-    private static final String URL_PATTERN_GP = "bahmnievents.event.urlPatternForAppointmentService";
+    private static final String RAISE_EVENT_GP = "eventoutbox.publish.eventsForAppointmentService";
+    private static final String URL_PATTERN_GP = "eventoutbox.event.urlPatternForAppointmentService";
     private static final String DEFAULT_URL = "/openmrs/ws/rest/v1/appointmentService?uuid={uuid}";
 
     @Mock
