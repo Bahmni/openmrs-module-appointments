@@ -54,12 +54,14 @@ public class AppointmentEnversAuditIT extends BaseIntegrationTest {
 
     @Test
     public void shouldHaveCreatedAuditTableForAppointment() {
+        // @AuditTable("patient_appointment_revisions") is used to avoid collision
+        // with the existing patient_appointment_audit table (AppointmentAudit entity)
         BigInteger count = (BigInteger) sessionFactory.getCurrentSession()
                 .createNativeQuery(
                         "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES "
-                                + "WHERE UPPER(TABLE_NAME) = 'PATIENT_APPOINTMENT_AUD'")
+                                + "WHERE UPPER(TABLE_NAME) = 'PATIENT_APPOINTMENT_REVISIONS'")
                 .getSingleResult();
-        assertEquals("patient_appointment_AUD table should be created by Hibernate Envers for @Audited Appointment",
+        assertEquals("patient_appointment_revisions table should be created by Hibernate Envers for @Audited Appointment",
                 1L, count.longValue());
     }
 

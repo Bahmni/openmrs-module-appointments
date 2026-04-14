@@ -1,6 +1,7 @@
 package org.openmrs.module.appointments.model;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.envers.AuditTable;
 import org.hibernate.envers.Audited;
 import org.hibernate.envers.NotAudited;
 import org.hibernate.envers.RelationTargetAuditMode;
@@ -23,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+@AuditTable("patient_appointment_revisions")
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
