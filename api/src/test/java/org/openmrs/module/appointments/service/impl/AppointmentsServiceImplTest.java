@@ -797,4 +797,47 @@ public class AppointmentsServiceImplTest {
         appointmentsService.searchAppointmentsWithoutDates(searchQuery);
         verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);
     }
+
+    @Test
+    public void shouldChangeStatusForMultipleAppointments() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2");
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("uuid1");
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("uuid2");
+        List<Appointment> appointments = asList(appointment1, appointment2);
+        
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
+        
+        List<Appointment> result = appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+        
+        verify(appointmentDao, times(1)).getAppointmentsByUuids(appointmentUuids);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoAppointmentsFoundForProvidedUuids() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2");
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(Collections.emptyList());
+        
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("No valid appointments found for the provided UUIDs");
+
+        appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenAppointmentCountMismatch() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2", "uuid3");
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("uuid1");
+        List<Appointment> appointments = Collections.singletonList(appointment1);
+        
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
+        
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Appointments not found for some UUIDs");
+        
+        appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+    }
 }
