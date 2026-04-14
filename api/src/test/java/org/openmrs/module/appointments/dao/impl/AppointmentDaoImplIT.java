@@ -390,4 +390,53 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
     }
+
+    @Test
+    public void shouldGetAppointmentsByUuids() {
+        List<String> uuids = Arrays.asList(
+            "75504r42-3ca8-11e3-bf2b-0800271c1b77",
+            "75504r42-3ca8-11e3-bf2b-0800271c1111"
+        );
+        
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+        
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1b77")));
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1111")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithEmptyList() {
+        List<String> uuids = new ArrayList<>();
+        
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+        
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithNull() {
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(null);
+        
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnOnlyValidAppointmentsWhenGetAppointmentsByUuidsCalledWithMixedValidAndInvalidUuids() {
+        List<String> uuids = Arrays.asList(
+            "75504r42-3ca8-11e3-bf2b-0800271c1b77",
+            "invalid-uuid-does-not-exist",
+            "75504r42-3ca8-11e3-bf2b-0800271c1111"
+        );
+        
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+        
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1b77")));
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1111")));
+    }
 }
