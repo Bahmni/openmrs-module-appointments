@@ -38,6 +38,8 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
+    // provider is intentionally not mapped in HBM (commented out) - must not be audited
+    @NotAudited
     private Provider provider;
     private Location location;
     private Date startDateTime;
@@ -61,6 +63,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     /**
      * This attribute is not a entity property. Just a placeholder for the clients to prepare response relevant  to notification
      */
+    @NotAudited
     private List<NotificationResult> notificationResults;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
