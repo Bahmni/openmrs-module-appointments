@@ -470,14 +470,14 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Transactional
     @Override
-    public List<Appointment> changeStatusForAppointments(List<String> appointmentUuids, String toStatus) {
+    public List<Appointment> changeStatusForAppointments(List<String> appointmentUuids, AppointmentStatus toStatus) {
         log.info("Changing status for " + appointmentUuids.size() + " appointment(s) to: " + toStatus);
 
         List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(appointmentUuids);
 
         if (appointments.isEmpty()) {
             log.error("No valid appointments found for the provided UUIDs");
-            throw new APIException("No valid appointments found for the provided UUIDs");
+            throw new IllegalArgumentException("No valid appointments found for the provided UUIDs");
         }
 
         if (appointments.size() != appointmentUuids.size()) {
@@ -487,7 +487,7 @@ public class AppointmentsServiceImpl implements AppointmentsService {
         Date onDate = new Date();
 
         for (Appointment appointment : appointments) {
-            changeStatus(appointment, toStatus, onDate);
+            changeStatus(appointment, toStatus.name(), onDate);
             log.debug("Changed status to " + toStatus + " for appointment UUID: " + appointment.getUuid());
         }
 

@@ -144,12 +144,11 @@ public class AppointmentsController extends BaseRestController {
         log.info("inside cancel appointments by UUIDs");
         try {
             List<String> appointmentUuids = request.getAppointmentUuids();
-            String toStatus = request.getToStatus().name();
             
-            log.info("Updating " + appointmentUuids.size() + " appointment(s) to status: " + toStatus);
+            log.info("Updating " + appointmentUuids.size() + " appointment(s) to status: " + request.getToStatus());
 
             List<Appointment> updatedAppointments = appointmentsService.changeStatusForAppointments(
-                appointmentUuids, toStatus);
+                appointmentUuids, request.getToStatus());
             
             return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
         } catch (RuntimeException e) {
