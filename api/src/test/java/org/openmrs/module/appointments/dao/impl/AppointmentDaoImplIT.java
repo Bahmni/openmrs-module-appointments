@@ -301,6 +301,40 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldGetAppointmentsReminderWithNullHours() {
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(null);
+        assertNotNull(result);
+        assertTrue(result.size() > 0);
+        assertTrue(result.stream().noneMatch(apt -> apt.getStatus() == AppointmentStatus.Cancelled));
+    }
+
+    @Test
+    public void shouldGetAppointmentsReminderWithSpecificHours() {
+        String hours = "24";
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertNotNull(result);
+        assertTrue(result.stream().noneMatch(apt -> apt.getStatus() == AppointmentStatus.Cancelled));
+    }
+
+    @Test
+    public void shouldExcludeCancelledAppointmentsFromReminder() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        long cancelledCount = allAppointments.stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
+                .count();
+        
+        List<Appointment> reminderAppointments = appointmentDao.getAllAppointmentsReminder(null);
+        
+        assertEquals(0, reminderAppointments.stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
+                .count());
+        
+        if (cancelledCount > 0) {
+            assertTrue(reminderAppointments.size() < allAppointments.size());
+        }
+    }
+
+    @Test
     public void testSearch() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         appointmentSearchRequest.setStartDate(new Date());
