@@ -32,6 +32,7 @@
 
 	<modules>
 		<module>api</module>
+		<module>events</module>
 		<module>omod</module>
     </modules>
 

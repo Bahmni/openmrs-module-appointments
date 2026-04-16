@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.events.publisher;
 
-import org.bahmni.module.eventoutbox.EMREvent;
 import org.openmrs.module.appointments.events.AppointmentEvent;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.ApplicationEventPublisherAware;
@@ -19,7 +18,7 @@ public class AppointmentEventPublisher implements ApplicationEventPublisherAware
         this.eventPublisher.publishEvent(event);
     }
 
-    public void publishEMREvent(EMREvent<?> event) {
+    public void publish(Object event) {
         this.eventPublisher.publishEvent(event);
     }
 }
