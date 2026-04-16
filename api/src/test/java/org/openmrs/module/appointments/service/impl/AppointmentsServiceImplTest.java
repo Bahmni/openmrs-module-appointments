@@ -809,7 +809,7 @@ public class AppointmentsServiceImplTest {
         
         when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
         
-        List<Appointment> result = appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+        List<Appointment> result = appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
         
         verify(appointmentDao, times(1)).getAppointmentsByUuids(appointmentUuids);
         assertEquals(2, result.size());
@@ -820,10 +820,10 @@ public class AppointmentsServiceImplTest {
         List<String> appointmentUuids = asList("uuid1", "uuid2");
         when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(Collections.emptyList());
         
-        expectedException.expect(APIException.class);
+        expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("No valid appointments found for the provided UUIDs");
 
-        appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
     }
 
     @Test
@@ -838,6 +838,6 @@ public class AppointmentsServiceImplTest {
         expectedException.expect(IllegalArgumentException.class);
         expectedException.expectMessage("Appointments not found for some UUIDs");
         
-        appointmentsService.changeStatusForAppointments(appointmentUuids, "Cancelled");
+        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
     }
 }

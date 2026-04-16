@@ -8,11 +8,11 @@ import java.util.List;
 
 public class AppointmentStatusChangeRequest {
     
-    @NotNull(message = "appointmentUuids array is required in request body")
-    @Size(min = 1, message = "appointmentUuids array must contain at least one element")
+    @NotNull(message = "List of appointment UUIDs is required")
+    @Size(min = 1, message = "At least one appointment UUID must be specified")
     private List<String> appointmentUuids;
     
-    @NotNull(message = "toStatus is required in request body")
+    @NotNull(message = "toStatus is required")
     private AppointmentStatus toStatus;
     
     public List<String> getAppointmentUuids() {
