@@ -12,8 +12,8 @@ public class AppointmentServiceDefinitionAdvice extends AbstractBaseAdvice {
     private static final String CATEGORY = "appointmentservice";
     private static final ArrayList<String> METHOD_NAMES = new ArrayList<>(Arrays.asList("save", "voidAppointmentService"));
     private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/appointmentService?uuid={uuid}";
-    private static final String RAISE_EVENT_GLOBAL_PROPERTY = "atomfeed.publish.eventsForAppointmentService";
-    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForAppointmentService";
+    private static final String RAISE_EVENT_GLOBAL_PROPERTY = "eventoutbox.publish.eventsForAppointmentService";
+    private static final String URL_PATTERN_GLOBAL_PROPERTY = "eventoutbox.event.urlPatternForAppointmentService";
 
     @Override
     protected String getContents(Object returnValue) {

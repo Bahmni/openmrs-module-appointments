@@ -27,7 +27,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
-			<artifactId>${project.parent.artifactId}-atom-feed</artifactId>
+			<artifactId>${project.parent.artifactId}-events</artifactId>
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>

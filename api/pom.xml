@@ -94,7 +94,7 @@
 
 	<dependencies>
 		<!-- Begin OpenMRS core -->
-		<dependency>
+<dependency>
 			<groupId>org.bahmni.module</groupId>
 			<artifactId>teleconsultation-api</artifactId>
 			<version>${teleconsultation.version}</version>

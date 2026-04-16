@@ -19,7 +19,7 @@ public class RecurringAppointmentsAdvice extends AbstractBaseAdvice {
     private static final String UPDATE = "update";
     private static final String CHANGE_STATUS = "changeStatus";
     private static final List<String> METHOD_NAMES = Arrays.asList(VALIDATE_AND_SAVE, UPDATE, CHANGE_STATUS);
-    private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
+    private static final String URL_PATTERN_GLOBAL_PROPERTY = "eventoutbox.event.urlPatternForRecurringAppointments";
     private static final String DEFAULT_URL_PATTERN = "/openmrs/ws/rest/v1/recurring-appointments?uuid={uuid}";
 
     @Override
