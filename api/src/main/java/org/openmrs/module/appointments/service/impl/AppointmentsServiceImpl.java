@@ -467,4 +467,31 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public void setAppointmentNumberGeneratorLocator(AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator) {
         this.appointmentNumberGeneratorLocator = appointmentNumberGeneratorLocator;
     }
+
+    @Transactional
+    @Override
+    public List<Appointment> changeStatusForAppointments(List<String> appointmentUuids, AppointmentStatus toStatus) {
+        log.info("Changing status for " + appointmentUuids.size() + " appointment(s) to: " + toStatus);
+
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(appointmentUuids);
+
+        if (appointments.isEmpty()) {
+            log.error("No valid appointments found for the provided UUIDs");
+            throw new IllegalArgumentException("No valid appointments found for the provided UUIDs");
+        }
+
+        if (appointments.size() != appointmentUuids.size()) {
+            throw new IllegalArgumentException("Appointments not found for some UUIDs");
+        }
+
+        Date onDate = new Date();
+
+        for (Appointment appointment : appointments) {
+            changeStatus(appointment, toStatus.name(), onDate);
+            log.debug("Changed status to " + toStatus + " for appointment UUID: " + appointment.getUuid());
+        }
+
+        log.info("Successfully updated " + appointments.size() + " appointment(s)");
+        return appointments;
+    }
 }

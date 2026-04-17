@@ -45,6 +45,7 @@ import java.text.SimpleDateFormat;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.*;
+import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
 import static org.junit.Assert.assertEquals;
@@ -796,5 +797,165 @@ public class AppointmentsServiceImplTest {
         when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         appointmentsService.searchAppointmentsWithoutDates(searchQuery);
         verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);
+    }
+
+    @Test
+    public void shouldChangeStatusForMultipleAppointments() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2");
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("uuid1");
+        Appointment appointment2 = new Appointment();
+        appointment2.setUuid("uuid2");
+        List<Appointment> appointments = asList(appointment1, appointment2);
+        
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
+        
+        List<Appointment> result = appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+        
+        verify(appointmentDao, times(1)).getAppointmentsByUuids(appointmentUuids);
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenNoAppointmentsFoundForProvidedUuids() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2");
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(Collections.emptyList());
+        
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("No valid appointments found for the provided UUIDs");
+
+        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+    }
+
+    @Test
+    public void shouldThrowExceptionWhenAppointmentCountMismatch() {
+        List<String> appointmentUuids = asList("uuid1", "uuid2", "uuid3");
+        Appointment appointment1 = new Appointment();
+        appointment1.setUuid("uuid1");
+        List<Appointment> appointments = Collections.singletonList(appointment1);
+        
+        when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
+        
+        expectedException.expect(IllegalArgumentException.class);
+        expectedException.expectMessage("Appointments not found for some UUIDs");
+        
+        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+    }
+
+    @Test
+    public void shouldCallSupplierAndSaveAppointmentWhenValidateAndSaveWithSupplier() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setStartDateTime(new Date());
+        appointment.setEndDateTime(new Date());
+        appointment.setAppointmentKind(AppointmentKind.Scheduled);
+        appointment.setAppointmentAudits(new HashSet<>());
+        
+        Supplier<Appointment> mapper = () -> appointment;
+        
+        Appointment result = appointmentsService.validateAndSave(mapper);
+        
+        verify(appointmentDao, times(1)).save(appointment);
+        assertEquals(appointment, result);
+    }
+
+    @Test
+    public void shouldValidateAppointmentFromSupplierBeforeSaving() {
+        Appointment appointment = new Appointment();
+        appointment.setPatient(new Patient());
+        appointment.setService(new AppointmentServiceDefinition());
+        appointment.setAppointmentAudits(new HashSet<>());
+        
+        Supplier<Appointment> mapper = () -> appointment;
+        String errorMessage = "Appointment validation failed";
+        
+        doThrow(new APIException(errorMessage))
+            .when(appointmentServiceHelper)
+            .validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
+        
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage(errorMessage);
+        
+        appointmentsService.validateAndSave(mapper);
+        
+        verify(appointmentDao, never()).save(any(Appointment.class));
+    }
+
+    @Test
+    public void shouldGetAllAppointmentsReminderForGivenHours() {
+        String hours = "24";
+        List<Appointment> appointments = new ArrayList<>();
+        Appointment appointment = new Appointment();
+        appointment.setService(new AppointmentServiceDefinition());
+        appointments.add(appointment);
+        
+        when(appointmentDao.getAllAppointmentsReminder(hours)).thenReturn(appointments);
+        
+        List<Appointment> result = appointmentsService.getAllAppointmentsReminder(hours);
+        
+        verify(appointmentDao, times(1)).getAllAppointmentsReminder(hours);
+        assertEquals(1, result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoAppointmentsFoundForReminder() {
+        String hours = "48";
+        when(appointmentDao.getAllAppointmentsReminder(hours)).thenReturn(new ArrayList<>());
+        
+        List<Appointment> result = appointmentsService.getAllAppointmentsReminder(hours);
+        
+        verify(appointmentDao, times(1)).getAllAppointmentsReminder(hours);
+        assertEquals(0, result.size());
+    }
+
+    @Test
+    public void shouldFilterOutAppointmentsWithVoidedServiceInGetAllAppointmentsReminder() {
+        String hours = "24";
+        List<Appointment> appointments = new ArrayList<>();
+        
+        Appointment appointment1 = new Appointment();
+        AppointmentServiceDefinition voidedService = new AppointmentServiceDefinition();
+        voidedService.setVoided(true);
+        appointment1.setService(voidedService);
+        appointments.add(appointment1);
+        
+        Appointment appointment2 = new Appointment();
+        appointment2.setService(new AppointmentServiceDefinition());
+        appointments.add(appointment2);
+        
+        when(appointmentDao.getAllAppointmentsReminder(hours)).thenReturn(appointments);
+        
+        List<Appointment> result = appointmentsService.getAllAppointmentsReminder(hours);
+        
+        verify(appointmentDao, times(1)).getAllAppointmentsReminder(hours);
+        assertEquals(1, result.size());
+        assertFalse(result.get(0).getService().getVoided());
+    }
+
+    @Test
+    public void shouldFilterOutAppointmentsWithVoidedServiceTypeInGetAllAppointmentsReminder() {
+        String hours = "24";
+        List<Appointment> appointments = new ArrayList<>();
+        
+        Appointment appointment1 = new Appointment();
+        AppointmentServiceDefinition service1 = new AppointmentServiceDefinition();
+        AppointmentServiceType voidedServiceType = new AppointmentServiceType();
+        voidedServiceType.setVoided(true);
+        appointment1.setService(service1);
+        appointment1.setServiceType(voidedServiceType);
+        appointments.add(appointment1);
+        
+        Appointment appointment2 = new Appointment();
+        AppointmentServiceDefinition service2 = new AppointmentServiceDefinition();
+        appointment2.setService(service2);
+        appointments.add(appointment2);
+        
+        when(appointmentDao.getAllAppointmentsReminder(hours)).thenReturn(appointments);
+        
+        List<Appointment> result = appointmentsService.getAllAppointmentsReminder(hours);
+        
+        verify(appointmentDao, times(1)).getAllAppointmentsReminder(hours);
+        assertEquals(1, result.size());
     }
 }
