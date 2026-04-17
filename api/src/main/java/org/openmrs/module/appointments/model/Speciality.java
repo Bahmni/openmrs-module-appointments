@@ -1,8 +1,11 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.User;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Speciality extends BaseOpenmrsData {
     private Integer specialityId;
     private String name;

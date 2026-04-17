@@ -12,7 +12,13 @@ public class DefaultAppointmentStatusChangeValidator implements AppointmentStatu
 
     @Override
     public void validate(Appointment appointment, AppointmentStatus toStatus, List<String> errors) {
-        String disableDefaultValidationValue = Context.getAdministrationService().getGlobalProperty("disableDefaultAppointmentValidations");
+        Context.addProxyPrivilege("Get Global Properties");
+        String disableDefaultValidationValue;
+        try {
+            disableDefaultValidationValue = Context.getAdministrationService().getGlobalProperty("disableDefaultAppointmentValidations");
+        } finally {
+            Context.removeProxyPrivilege("Get Global Properties");
+        }
         boolean disableValidation = disableDefaultValidationValue != null ? Boolean.valueOf(disableDefaultValidationValue) : false;
         if (!disableValidation) {
             AppointmentStatus currentStatus = appointment.getStatus();

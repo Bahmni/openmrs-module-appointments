@@ -25,6 +25,12 @@
             <ref bean="mappingJarResources"/>
         </property>
         <!--  default properties must be set in the hibernate.default.properties -->
+        <property name="hibernateProperties">
+            <props>
+                <!-- Enable Hibernate Envers auditing for @Audited entities (AM-241) -->
+                <prop key="hibernate.integration.envers.enabled">true</prop>
+            </props>
+        </property>
     </bean>
 
     <bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>

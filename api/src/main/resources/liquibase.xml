@@ -905,4 +905,23 @@
             <column name="appointment_number"/>
         </createIndex>
     </changeSet>
+
+    <!-- AM-241: Guard against Envers _AUD table name collisions.
+         Envers auto-creates <table>_AUD for each @Audited entity. If a table with that name
+         already exists for a different purpose the migration will break silently.
+         patient_appointment_AUD is already handled via @AuditTable("patient_appointment_revisions")
+         on the Appointment entity. The remaining audited entities are checked here. -->
+    <changeSet id="envers-aud-collision-check-AM-241" author="Binayak490-cyber" runAlways="false">
+        <preConditions onFail="WARN" onFailMessage="[AM-241] One or more Envers _AUD table names collide with existing tables. Add @AuditTable with a custom name to the affected entity to resolve.">
+            <and>
+                <not><tableExists tableName="patient_appointment_provider_AUD"/></not>
+                <not><tableExists tableName="appointment_service_AUD"/></not>
+                <not><tableExists tableName="appointment_service_type_AUD"/></not>
+                <not><tableExists tableName="appointment_speciality_AUD"/></not>
+                <not><tableExists tableName="patient_appointment_recurring_time_AUD"/></not>
+            </and>
+        </preConditions>
+        <sql>SELECT 1</sql>
+    </changeSet>
+
 </databaseChangeLog>

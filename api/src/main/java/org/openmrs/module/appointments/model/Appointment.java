@@ -1,6 +1,10 @@
 package org.openmrs.module.appointments.model;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
@@ -19,6 +23,8 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+@AuditTable("patient_appointment_revisions")
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
@@ -32,6 +38,8 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private Patient patient;
     private AppointmentServiceDefinition service;
     private AppointmentServiceType serviceType;
+    // provider is intentionally not mapped in HBM (commented out) - must not be audited
+    @NotAudited
     private Provider provider;
     private Location location;
     private Date startDateTime;
@@ -42,16 +50,20 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
     private String comments;
     private Set<AppointmentProvider> providers;
     private AppointmentRecurringPattern appointmentRecurringPattern;
+    @NotAudited
     private Set<AppointmentAudit> appointmentAudits = new HashSet<>();
     private Appointment relatedAppointment;
     private String teleHealthVideoLink;
     @Independent
+    @NotAudited
     private Set<Encounter> fulfillingEncounters;
+    @NotAudited
     private Set<AppointmentReason> reasons;
 
     /**
      * This attribute is not a entity property. Just a placeholder for the clients to prepare response relevant  to notification
      */
+    @NotAudited
     private List<NotificationResult> notificationResults;
 
     public Set<AppointmentAudit> getAppointmentAudits() {
