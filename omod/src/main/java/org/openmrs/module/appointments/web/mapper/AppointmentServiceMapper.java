@@ -46,8 +46,8 @@ public class AppointmentServiceMapper {
         appointmentServiceDefinition.setName(appointmentServiceDescription.getName());
         appointmentServiceDefinition.setDescription(appointmentServiceDescription.getDescription());
         appointmentServiceDefinition.setDurationMins(appointmentServiceDescription.getDurationMins());
-        appointmentServiceDefinition.setStartTime(appointmentServiceDescription.getStartTime());
-        appointmentServiceDefinition.setEndTime(appointmentServiceDescription.getEndTime());
+        appointmentServiceDefinition.setStartTime(utcTimeToServerTime(appointmentServiceDescription.getStartTime()));
+        appointmentServiceDefinition.setEndTime(utcTimeToServerTime(appointmentServiceDescription.getEndTime()));
         appointmentServiceDefinition.setMaxAppointmentsLimit(appointmentServiceDescription.getMaxAppointmentsLimit());
         appointmentServiceDefinition.setColor(appointmentServiceDescription.getColor());
 
@@ -184,8 +184,8 @@ public class AppointmentServiceMapper {
         else
             availability = new ServiceWeeklyAvailability();
         availability.setDayOfWeek(avb.getDayOfWeek());
-        availability.setStartTime(avb.getStartTime());
-        availability.setEndTime(avb.getEndTime());
+        availability.setStartTime(utcTimeToServerTime(avb.getStartTime()));
+        availability.setEndTime(utcTimeToServerTime(avb.getEndTime()));
         availability.setMaxAppointmentsLimit(avb.getMaxAppointmentsLimit());
         availability.setService(appointmentServiceDefinition);
         availability.setVoided(avb.isVoided());
@@ -292,7 +292,30 @@ public class AppointmentServiceMapper {
     }
 
     private String convertTimeToString(Time time) {
-       return time != null ? time.toString() : new String();
+        if (time == null) {
+            return new String();
+        }
+
+        // Use today's date for the returned time so that hour is adjusted considering daylight saving time
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, time.getHours());
+        calendar.set(Calendar.MINUTE, time.getMinutes());
+        calendar.set(Calendar.SECOND, time.getSeconds());
+        calendar.set(Calendar.MILLISECOND, 0);
+
+       return calendar.toInstant().toString();
+    }
+
+    private Time utcTimeToServerTime(Time time) {
+        if (time == null) {
+            return null;
+        }
+        Calendar serviceEndTimeUtc = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        serviceEndTimeUtc.set(Calendar.HOUR_OF_DAY, time.getHours());
+        serviceEndTimeUtc.set(Calendar.MINUTE, time.getMinutes());
+        serviceEndTimeUtc.set(Calendar.SECOND, time.getSeconds());
+        serviceEndTimeUtc.set(Calendar.MILLISECOND, 0);
+        return new Time(serviceEndTimeUtc.getTime().getHours(), serviceEndTimeUtc.getTime().getMinutes(), serviceEndTimeUtc.getTime().getSeconds());
     }
 
     private AppointmentServiceAttributeResponse constructAttributeResponse(AppointmentServiceAttribute attribute) {
