@@ -1,0 +1,118 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>
+    <person person_id="1" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="11e04d42-3ca8-11e3-bf2b-0800271c1b75"/>
+    <person person_id="2" gender="F" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0" voided="false" void_reason="" uuid="22e04d42-3ca8-11e3-bf2b-0800271c1b76"/>
+
+    <users user_id="1" person_id="1" system_id="1-1" username="admin" retired="false"
+           password="ff6d1655327d385e11a04e1632b4f33ceb8fafd2" salt="5d32c5fd9fde391c755f1f4dfd5e1d6e3debe6"
+           secret_question="" creator="1" date_created="2008-08-15 15:46:47.0"
+           uuid="11fd3a7b-6482-487d-87eR-c07b123MxF11"/>
+
+    <location location_id="1" name="Test Location 1" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="aaa006e5-9fbb-4f20-866b-0ece245615a1"/>
+    <location location_id="2" name="Test Location 2" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="bbb006e5-9fbb-4f20-866b-0ece245615a2"/>
+
+    <provider provider_id="1" person_id="1" identifier="PROV1" retired="false" creator="1" date_created="2008-08-15 15:46:47.0"
+              uuid="ccc006e5-9fbb-4f20-866b-0ece245615a1"/>
+    <provider provider_id="2" person_id="2" identifier="PROV2" retired="false" creator="1" date_created="2008-08-15 15:46:47.0"
+              uuid="ddd006e5-9fbb-4f20-866b-0ece245615a2"/>
+
+    <appointment_speciality speciality_id="1" name="Cardiology" uuid="eee006e5-9fbb-4f20-866b-0ece245615a1" creator="1" date_created="2008-08-15 15:46:47.0"/>
+
+    <appointment_service appointment_service_id="1" name="Test Service 1" description="Test Service" start_time="09:00:00" end_time="17:00:00"
+                         location_id="1" speciality_id="1" max_appointments_limit="10" duration_mins="30" creator="1"
+                         uuid="fff006e5-9fbb-4f20-866b-0ece245615a1" voided="false" date_created="2008-08-15 15:46:47.0"/>
+
+    <appointment_service appointment_service_id="2" name="Test Service 2" description="Test Service 2" start_time="09:00:00" end_time="17:00:00"
+                         location_id="1" speciality_id="1" max_appointments_limit="10" duration_mins="30" creator="1"
+                         uuid="ggg006e5-9fbb-4f20-866b-0ece245615a2" voided="false" date_created="2008-08-15 15:46:47.0"/>
+
+    <!-- Unavailability block 1: location only (all services, all providers) -->
+    <appointment_unavailability appointment_unavailability_id="1"
+                                location_id="1"
+                                appointment_service_id="NULL"
+                                provider_id="NULL"
+                                start_date="2026-08-03"
+                                start_time="11:00:00"
+                                end_date="2026-08-04"
+                                end_time="11:00:00"
+                                uuid="uuu006e5-9fbb-4f20-866b-0ece245615a1"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="false"/>
+
+    <!-- Unavailability block 2: location + service -->
+    <appointment_unavailability appointment_unavailability_id="2"
+                                location_id="1"
+                                appointment_service_id="1"
+                                provider_id="NULL"
+                                start_date="2026-08-05"
+                                start_time="07:00:00"
+                                end_date="2026-08-05"
+                                end_time="19:00:00"
+                                uuid="vvv006e5-9fbb-4f20-866b-0ece245615a2"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="false"/>
+
+    <!-- Unavailability block 3: location + provider -->
+    <appointment_unavailability appointment_unavailability_id="3"
+                                location_id="1"
+                                appointment_service_id="NULL"
+                                provider_id="1"
+                                start_date="2026-08-06"
+                                start_time="09:00:00"
+                                end_date="2026-08-06"
+                                end_time="17:00:00"
+                                uuid="www006e5-9fbb-4f20-866b-0ece245615a3"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="false"/>
+
+    <!-- Unavailability block 4: location + service + provider -->
+    <appointment_unavailability appointment_unavailability_id="4"
+                                location_id="1"
+                                appointment_service_id="1"
+                                provider_id="1"
+                                start_date="2026-08-07"
+                                start_time="14:00:00"
+                                end_date="2026-08-07"
+                                end_time="16:00:00"
+                                uuid="xxx006e5-9fbb-4f20-866b-0ece245615a4"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="false"/>
+
+    <!-- Unavailability block 5: voided -->
+    <appointment_unavailability appointment_unavailability_id="5"
+                                location_id="1"
+                                appointment_service_id="1"
+                                provider_id="1"
+                                start_date="2026-08-08"
+                                start_time="09:00:00"
+                                end_date="2026-08-08"
+                                end_time="17:00:00"
+                                uuid="yyy006e5-9fbb-4f20-866b-0ece245615a5"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="true"
+                                voided_by="1"
+                                date_voided="2024-01-02 10:00:00.0"
+                                void_reason="Test voided"/>
+
+    <!-- Unavailability block 6: location 2, for filter testing -->
+    <appointment_unavailability appointment_unavailability_id="6"
+                                location_id="2"
+                                appointment_service_id="NULL"
+                                provider_id="NULL"
+                                start_date="2026-08-09"
+                                start_time="09:00:00"
+                                end_date="2026-08-09"
+                                end_time="17:00:00"
+                                uuid="zzz006e5-9fbb-4f20-866b-0ece245615a6"
+                                creator="1"
+                                date_created="2024-01-01 10:00:00.0"
+                                voided="false"/>
+
+</dataset>

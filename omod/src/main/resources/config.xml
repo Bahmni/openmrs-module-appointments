@@ -46,6 +46,7 @@
 		AppointmentProvider.hbm.xml
 		AppointmentRecurringPattern.hbm.xml
 		AppointmentReason.hbm.xml
+		AppointmentUnavailability.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -171,6 +172,21 @@
 	<privilege>
 		<name>app:appointments:manageServices</name>
 		<description>Able to Manage Appointment Services in Appointments module</description>
+	</privilege>
+
+	<privilege>
+		<name>Add Appointment Unavailability</name>
+		<description>Able to add Appointment Unavailability blocks</description>
+	</privilege>
+
+	<privilege>
+		<name>Get Appointment Unavailability</name>
+		<description>Able to view Appointment Unavailability blocks</description>
+	</privilege>
+
+	<privilege>
+		<name>Delete Appointment Unavailability</name>
+		<description>Able to delete Appointment Unavailability blocks</description>
 	</privilege>
 
 
