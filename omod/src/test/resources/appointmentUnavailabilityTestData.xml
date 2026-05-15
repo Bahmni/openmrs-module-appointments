@@ -31,8 +31,6 @@
     <!-- Unavailability block 1: location only (all services, all providers) -->
     <appointment_unavailability appointment_unavailability_id="1"
                                 location_id="1"
-                                appointment_service_id="NULL"
-                                provider_id="NULL"
                                 start_date="2026-08-03"
                                 start_time="11:00:00"
                                 end_date="2026-08-04"
@@ -46,7 +44,6 @@
     <appointment_unavailability appointment_unavailability_id="2"
                                 location_id="1"
                                 appointment_service_id="1"
-                                provider_id="NULL"
                                 start_date="2026-08-05"
                                 start_time="07:00:00"
                                 end_date="2026-08-05"
@@ -59,7 +56,6 @@
     <!-- Unavailability block 3: location + provider -->
     <appointment_unavailability appointment_unavailability_id="3"
                                 location_id="1"
-                                appointment_service_id="NULL"
                                 provider_id="1"
                                 start_date="2026-08-06"
                                 start_time="09:00:00"
@@ -104,8 +100,6 @@
     <!-- Unavailability block 6: location 2, for filter testing -->
     <appointment_unavailability appointment_unavailability_id="6"
                                 location_id="2"
-                                appointment_service_id="NULL"
-                                provider_id="NULL"
                                 start_date="2026-08-09"
                                 start_time="09:00:00"
                                 end_date="2026-08-09"
