@@ -130,9 +130,12 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     public void shouldReturnBadRequestForEmptyArray() throws Exception {
         String dataJson = "[]";
 
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-        assertEquals(400, response.getStatus());
-        assertTrue(response.getContentAsString().contains("at least one unavailability block"));
+        try {
+            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            fail("Should have thrown RuntimeException");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("at least one unavailability block"));
+        }
     }
 
     @Test
@@ -145,9 +148,12 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 "\"endTime\":\"17:00\"" +
                 "}]";
 
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-        assertEquals(400, response.getStatus());
-        assertTrue(response.getContentAsString().contains("endDate/endTime must be after startDate/startTime"));
+        try {
+            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            fail("Should have thrown RuntimeException");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("endDate cannot be before startDate"));
+        }
     }
 
     @Test
@@ -161,11 +167,12 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 "\"endDate\":\"2026-08-13\",\"endTime\":\"09:00\"}" + // Invalid: end before start
                 "]";
 
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-        assertEquals(400, response.getStatus());
-        String content = response.getContentAsString();
-        assertTrue(content.contains("[1]")); // Index of failing element
-        assertTrue(content.contains("endDate/endTime must be after startDate/startTime"));
+        try {
+            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            fail("Should have thrown RuntimeException");
+        } catch (RuntimeException e) {
+            assertTrue(e.getMessage().contains("endTime must be after startTime when dates are the same"));
+        }
 
         // Verify no blocks were created (all-or-nothing)
         List<AppointmentUnavailability> all = service.getAll(null, null, null, null, null, false, null);

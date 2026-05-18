@@ -142,6 +142,6 @@ public class AppointmentUnavailabilityMapper {
     }
 
     private String formatTime(Time time) {
-        return time != null ? time.toString() : null;
+        return time != null ? TIME_FORMAT.format(time) : null;
     }
 }

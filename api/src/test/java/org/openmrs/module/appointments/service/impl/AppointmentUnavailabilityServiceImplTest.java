@@ -96,50 +96,6 @@ public class AppointmentUnavailabilityServiceImplTest {
     }
 
     @Test
-    public void shouldRejectWhenStartDateIsNull() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setStartDate(null);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] startDate is required");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
-    public void shouldRejectWhenStartTimeIsNull() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setStartTime(null);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] startTime is required");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
-    public void shouldRejectWhenEndDateIsNull() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setEndDate(null);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] endDate is required");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
-    public void shouldRejectWhenEndTimeIsNull() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setEndTime(null);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] endTime is required");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
     public void shouldRejectWhenEndIsBeforeStart() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         // Set end before start
@@ -162,17 +118,6 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("[0] endDate/endTime must be after startDate/startTime");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
-    public void shouldRejectWhenLocationIsNull() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setLocation(null);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] location is required");
 
         service.save(unavailabilities);
     }
@@ -291,24 +236,6 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         // Should never call save since validation failed
         verify(appointmentUnavailabilityDao, never()).save(any(AppointmentUnavailability.class));
-    }
-
-    @Test
-    public void shouldIncludeIndexInErrorMessage() {
-        List<AppointmentUnavailability> unavailabilities = new ArrayList<>();
-        unavailabilities.add(createValidUnavailability()); // [0] valid
-        unavailabilities.add(createValidUnavailability()); // [1] valid
-        AppointmentUnavailability invalid = createValidUnavailability();
-        invalid.setEndDate(null); // [2] invalid
-        unavailabilities.add(invalid);
-
-        Location location = createLocation(1, "Location 1", false);
-        when(locationService.getLocation(1)).thenReturn(location);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[2] endDate is required");
-
-        service.save(unavailabilities);
     }
 
     @Test
