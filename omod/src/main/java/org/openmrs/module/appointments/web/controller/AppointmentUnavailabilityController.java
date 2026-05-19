@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -68,7 +69,7 @@ public class AppointmentUnavailabilityController extends BaseRestController {
         unavailabilityRequestValidator.validate(requests, errors);
         if (!errors.getAllErrors().isEmpty()) {
             log.error("Validation failed: " + errors.getAllErrors().get(0).getDefaultMessage());
-            throw new RuntimeException(errors.getAllErrors().get(0).getDefaultMessage());
+            throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
         }
 
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityMapper.fromRequest(requests);
@@ -156,7 +157,7 @@ public class AppointmentUnavailabilityController extends BaseRestController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
-    @ExceptionHandler({RuntimeException.class, ParseException.class})
+    @ExceptionHandler({RuntimeException.class, APIException.class, ParseException.class})
     public ResponseEntity<Object> handleException(Exception ex) {
         log.error("Exception in AppointmentUnavailabilityController", ex);
         Map<String, Object> errors = new HashMap<>();

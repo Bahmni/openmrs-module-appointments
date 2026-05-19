@@ -9,6 +9,7 @@ import org.mockito.*;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.User;
+import org.openmrs.api.APIException;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.api.context.Context;
@@ -82,7 +83,7 @@ public class AppointmentUnavailabilityServiceImplTest {
 
     @Test
     public void shouldRejectEmptyList() {
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("at least one unavailability block");
 
         service.save(new ArrayList<>());
@@ -90,7 +91,7 @@ public class AppointmentUnavailabilityServiceImplTest {
 
     @Test
     public void shouldRejectNullList() {
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("at least one unavailability block");
 
         service.save(null);
@@ -103,7 +104,7 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("[0] location is invalid or retired");
 
         service.save(unavailabilities);
@@ -120,7 +121,7 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
                 .thenReturn(appointmentService);
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("[0] service is invalid or voided");
 
         this.service.save(unavailabilities);
@@ -138,7 +139,7 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
                 .thenReturn(appointmentService);
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("[0] Service does not belong to the specified location");
 
         this.service.save(unavailabilities);
@@ -154,7 +155,7 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(locationService.getLocation(1)).thenReturn(location);
         when(providerService.getProvider(1)).thenReturn(provider);
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("[0] provider is invalid or retired");
 
         service.save(unavailabilities);
@@ -170,7 +171,7 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(RuntimeException.class);
+        expectedException.expect(APIException.class);
         expectedException.expectMessage("[0] Cannot create unavailability block that has already ended");
 
         service.save(unavailabilities);

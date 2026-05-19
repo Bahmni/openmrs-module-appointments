@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.controller;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.junit.Before;
 import org.junit.Test;
+import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
@@ -141,8 +142,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         try {
             handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-            fail("Should have thrown RuntimeException");
-        } catch (RuntimeException e) {
+            fail("Should have thrown APIException");
+        } catch (APIException e) {
             assertTrue(e.getMessage().contains("at least one unavailability block"));
         }
     }
@@ -161,8 +162,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         try {
             handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-            fail("Should have thrown RuntimeException");
-        } catch (RuntimeException e) {
+            fail("Should have thrown APIException");
+        } catch (APIException e) {
             assertTrue(e.getMessage().contains("endDate cannot be before startDate"));
         }
     }
@@ -182,8 +183,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         try {
             handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
-            fail("Should have thrown RuntimeException");
-        } catch (RuntimeException e) {
+            fail("Should have thrown APIException");
+        } catch (APIException e) {
             assertTrue(e.getMessage().contains("endTime must be after startTime when dates are the same"));
         }
 

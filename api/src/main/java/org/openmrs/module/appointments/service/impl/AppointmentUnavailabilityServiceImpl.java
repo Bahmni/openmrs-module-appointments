@@ -4,6 +4,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -41,7 +42,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     public List<AppointmentUnavailability> save(List<AppointmentUnavailability> appointmentUnavailabilities) {
         if (appointmentUnavailabilities == null || appointmentUnavailabilities.isEmpty()) {
             log.error("Save failed: Request must contain at least one unavailability block");
-            throw new RuntimeException("Request must contain at least one unavailability block");
+            throw new APIException("Request must contain at least one unavailability block");
         }
 
         for (int i = 0; i < appointmentUnavailabilities.size(); i++) {
@@ -64,7 +65,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         Location location = Context.getLocationService().getLocation(unavailability.getLocation().getLocationId());
         if (location == null || location.getRetired()) {
             log.error(indexPrefix + "Validation failed: location is invalid or retired");
-            throw new RuntimeException(indexPrefix + "location is invalid or retired");
+            throw new APIException(indexPrefix + "location is invalid or retired");
         }
 
         if (unavailability.getService() != null) {
@@ -72,13 +73,13 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
                     .getAppointmentServiceByUuid(unavailability.getService().getUuid());
             if (service == null || service.getVoided()) {
                 log.error(indexPrefix + "Validation failed: service is invalid or voided");
-                throw new RuntimeException(indexPrefix + "service is invalid or voided");
+                throw new APIException(indexPrefix + "service is invalid or voided");
             }
             unavailability.setService(service);
 
             if (service.getLocation() != null && !service.getLocation().equals(location)) {
                 log.error(indexPrefix + "Validation failed: Service does not belong to the specified location");
-                throw new RuntimeException(indexPrefix + "Service does not belong to the specified location");
+                throw new APIException(indexPrefix + "Service does not belong to the specified location");
             }
         }
 
@@ -86,7 +87,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
             Provider provider = Context.getProviderService().getProvider(unavailability.getProvider().getProviderId());
             if (provider == null || provider.getRetired()) {
                 log.error(indexPrefix + "Validation failed: provider is invalid or retired");
-                throw new RuntimeException(indexPrefix + "provider is invalid or retired");
+                throw new APIException(indexPrefix + "provider is invalid or retired");
             }
         }
 
@@ -94,7 +95,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         Date endDateTime = combineDateAndTime(unavailability.getEndDate(), unavailability.getEndTime());
         if (endDateTime.before(now)) {
             log.error(indexPrefix + "Validation failed: Cannot create unavailability block that has already ended");
-            throw new RuntimeException(indexPrefix + "Cannot create unavailability block that has already ended");
+            throw new APIException(indexPrefix + "Cannot create unavailability block that has already ended");
         }
     }
 

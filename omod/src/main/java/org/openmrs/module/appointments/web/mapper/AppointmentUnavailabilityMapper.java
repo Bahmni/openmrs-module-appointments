@@ -3,6 +3,7 @@ package org.openmrs.module.appointments.web.mapper;
 import org.apache.commons.lang.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Provider;
+import org.openmrs.api.APIException;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -43,7 +44,7 @@ public class AppointmentUnavailabilityMapper {
 
         Location location = locationService.getLocationByUuid(request.getLocationUuid());
         if (location == null) {
-            throw new RuntimeException("Invalid location or location not found");
+            throw new APIException("Invalid location or location not found");
         }
         unavailability.setLocation(location);
 
@@ -51,7 +52,7 @@ public class AppointmentUnavailabilityMapper {
             AppointmentServiceDefinition service = appointmentServiceDefinitionService
                     .getAppointmentServiceByUuid(request.getAppointmentServiceUuid());
             if (service == null) {
-                throw new RuntimeException("Invalid service or service not found");
+                throw new APIException("Invalid service or service not found");
             }
             unavailability.setService(service);
         }
@@ -74,7 +75,7 @@ public class AppointmentUnavailabilityMapper {
             LocalTime endTime = LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
             unavailability.setEndTime(Time.valueOf(endTime));
         } catch (Exception e) {
-            throw new RuntimeException("Invalid date or time format: " + e.getMessage(), e);
+            throw new APIException("Invalid date or time format: " + e.getMessage(), e);
         }
 
         return unavailability;
