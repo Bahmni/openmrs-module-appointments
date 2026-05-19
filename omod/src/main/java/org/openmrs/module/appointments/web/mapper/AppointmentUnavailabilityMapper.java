@@ -5,7 +5,6 @@ import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
 import org.openmrs.api.ProviderService;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
@@ -20,7 +19,6 @@ import java.time.LocalTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,24 +41,26 @@ public class AppointmentUnavailabilityMapper {
     public AppointmentUnavailability fromRequest(AppointmentUnavailabilityRequest request) {
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
 
-        // Set location (required)
         Location location = locationService.getLocationByUuid(request.getLocationUuid());
+        if (location == null) {
+            throw new RuntimeException("Invalid location or location not found");
+        }
         unavailability.setLocation(location);
 
-        // Set service (optional)
         if (StringUtils.isNotBlank(request.getAppointmentServiceUuid())) {
             AppointmentServiceDefinition service = appointmentServiceDefinitionService
                     .getAppointmentServiceByUuid(request.getAppointmentServiceUuid());
+            if (service == null) {
+                throw new RuntimeException("Invalid service or service not found");
+            }
             unavailability.setService(service);
         }
 
-        // Set provider (optional)
         if (StringUtils.isNotBlank(request.getProviderUuid())) {
             Provider provider = providerService.getProviderByUuid(request.getProviderUuid());
             unavailability.setProvider(provider);
         }
 
-        // Parse and set dates and times
         try {
             LocalDate startDate = LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
             unavailability.setStartDate(java.sql.Date.valueOf(startDate));
@@ -94,31 +94,26 @@ public class AppointmentUnavailabilityMapper {
 
         response.setUuid(unavailability.getUuid());
 
-        // Location details
         if (unavailability.getLocation() != null) {
             response.setLocationUuid(unavailability.getLocation().getUuid());
             response.setLocationName(unavailability.getLocation().getName());
         }
 
-        // Service details (optional)
         if (unavailability.getService() != null) {
             response.setAppointmentServiceUuid(unavailability.getService().getUuid());
             response.setAppointmentServiceName(unavailability.getService().getName());
         }
 
-        // Provider details (optional)
         if (unavailability.getProvider() != null) {
             response.setProviderUuid(unavailability.getProvider().getUuid());
             response.setProviderName(unavailability.getProvider().getName());
         }
 
-        // Date and time fields
         response.setStartDate(formatDate(unavailability.getStartDate()));
         response.setStartTime(formatTime(unavailability.getStartTime()));
         response.setEndDate(formatDate(unavailability.getEndDate()));
         response.setEndTime(formatTime(unavailability.getEndTime()));
 
-        // Metadata
         response.setVoided(unavailability.getVoided());
         if (unavailability.getDateCreated() != null) {
             response.setDateCreated(DATETIME_FORMATTER.format(

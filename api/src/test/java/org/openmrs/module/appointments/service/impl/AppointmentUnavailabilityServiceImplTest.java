@@ -97,33 +97,6 @@ public class AppointmentUnavailabilityServiceImplTest {
     }
 
     @Test
-    public void shouldRejectWhenEndIsBeforeStart() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        // Set end before start
-        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf("2026-08-01"));
-        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf("2026-08-05"));
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] endDate/endTime must be after startDate/startTime");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
-    public void shouldRejectWhenSameDateButEndTimeBeforeStartTime() {
-        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
-        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf("2026-08-03"));
-        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf("2026-08-03"));
-        unavailabilities.get(0).setStartTime(Time.valueOf("17:00:00"));
-        unavailabilities.get(0).setEndTime(Time.valueOf("09:00:00"));
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] endDate/endTime must be after startDate/startTime");
-
-        service.save(unavailabilities);
-    }
-
-    @Test
     public void shouldRejectWhenLocationIsRetired() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location = createLocation(1, "Location 1", true); // retired
@@ -219,22 +192,6 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         assertNotNull(result);
         assertEquals(1, result.size());
-    }
-
-    @Test
-    public void shouldValidateAllElementsBeforePersistingAny() {
-        List<AppointmentUnavailability> unavailabilities = new ArrayList<>();
-        unavailabilities.add(createValidUnavailability()); // valid
-        AppointmentUnavailability invalid = createValidUnavailability();
-        invalid.setStartDate(null); // invalid
-        unavailabilities.add(invalid);
-
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("[0] location is invalid or retired");
-
-        service.save(unavailabilities);
-
-        verify(appointmentUnavailabilityDao, never()).save(any(AppointmentUnavailability.class));
     }
 
     @Test

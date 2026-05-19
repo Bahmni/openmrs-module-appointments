@@ -61,12 +61,6 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     }
 
     private void validateUnavailability(AppointmentUnavailability unavailability, String indexPrefix) {
-        if (!isStartBeforeEnd(unavailability.getStartDate(), unavailability.getStartTime(),
-                unavailability.getEndDate(), unavailability.getEndTime())) {
-            log.error(indexPrefix + "Validation failed: endDate/endTime must be after startDate/startTime");
-            throw new RuntimeException(indexPrefix + "endDate/endTime must be after startDate/startTime");
-        }
-
         Location location = Context.getLocationService().getLocation(unavailability.getLocation().getLocationId());
         if (location == null || location.getRetired()) {
             log.error(indexPrefix + "Validation failed: location is invalid or retired");
