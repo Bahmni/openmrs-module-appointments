@@ -10,6 +10,8 @@ import org.openmrs.module.webservices.rest.SimpleObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -24,6 +26,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     private AppointmentUnavailabilityService service;
 
     private ObjectMapper objectMapper = new ObjectMapper();
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+    private String futureDate(int plusDays) {
+        return LocalDate.now().plusDays(plusDays).format(DATE_FORMATTER);
+    }
 
     @Before
     public void setUp() throws Exception {
@@ -32,11 +39,12 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldCreateSingleUnavailabilityBlock() throws Exception {
+        String date = futureDate(30);
         String dataJson = "[{" +
                 "\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-10\"," +
+                "\"startDate\":\"" + date + "\"," +
                 "\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-10\"," +
+                "\"endDate\":\"" + date + "\"," +
                 "\"endTime\":\"17:00\"" +
                 "}]";
 
@@ -53,9 +61,9 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         assertNotNull(block.get("uuid"));
         assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", block.get("locationUuid"));
         assertEquals("Test Location 1", block.get("locationName"));
-        assertEquals("2026-08-10", block.get("startDate"));
+        assertEquals(date, block.get("startDate"));
         assertEquals("09:00", block.get("startTime"));
-        assertEquals("2026-08-10", block.get("endDate"));
+        assertEquals(date, block.get("endDate"));
         assertEquals("17:00", block.get("endTime"));
         assertNull(block.get("appointmentServiceUuid"));
         assertNull(block.get("providerUuid"));
@@ -63,27 +71,28 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldCreateBatchOfFourBlocks() throws Exception {
+        String date = futureDate(32);
         String dataJson = "[" +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"appointmentServiceUuid\":\"fff006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"providerUuid\":\"ccc006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-12\",\"startTime\":\"07:00\"," +
-                "\"endDate\":\"2026-08-12\",\"endTime\":\"19:00\"}," +
+                "\"startDate\":\"" + date + "\",\"startTime\":\"07:00\"," +
+                "\"endDate\":\"" + date + "\",\"endTime\":\"19:00\"}," +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"appointmentServiceUuid\":\"fff006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"providerUuid\":\"ddd006e5-9fbb-4f20-866b-0ece245615a2\"," +
-                "\"startDate\":\"2026-08-12\",\"startTime\":\"07:00\"," +
-                "\"endDate\":\"2026-08-12\",\"endTime\":\"19:00\"}," +
+                "\"startDate\":\"" + date + "\",\"startTime\":\"07:00\"," +
+                "\"endDate\":\"" + date + "\",\"endTime\":\"19:00\"}," +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"appointmentServiceUuid\":\"ggg006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"providerUuid\":\"ccc006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-12\",\"startTime\":\"07:00\"," +
-                "\"endDate\":\"2026-08-12\",\"endTime\":\"19:00\"}," +
+                "\"startDate\":\"" + date + "\",\"startTime\":\"07:00\"," +
+                "\"endDate\":\"" + date + "\",\"endTime\":\"19:00\"}," +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"appointmentServiceUuid\":\"ggg006e5-9fbb-4f20-866b-0ece245615a2\"," +
                 "\"providerUuid\":\"ddd006e5-9fbb-4f20-866b-0ece245615a2\"," +
-                "\"startDate\":\"2026-08-12\",\"startTime\":\"07:00\"," +
-                "\"endDate\":\"2026-08-12\",\"endTime\":\"19:00\"}" +
+                "\"startDate\":\"" + date + "\",\"startTime\":\"07:00\"," +
+                "\"endDate\":\"" + date + "\",\"endTime\":\"19:00\"}" +
                 "]";
 
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
@@ -103,13 +112,14 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldCreateBlockWithServiceAndProviderAsNull() throws Exception {
+        String date = futureDate(31);
         String dataJson = "[{" +
                 "\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"appointmentServiceUuid\":null," +
                 "\"providerUuid\":null," +
-                "\"startDate\":\"2026-08-11\"," +
+                "\"startDate\":\"" + date + "\"," +
                 "\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-11\"," +
+                "\"endDate\":\"" + date + "\"," +
                 "\"endTime\":\"17:00\"" +
                 "}]";
 
@@ -139,11 +149,13 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnBadRequestWhenEndDateBeforeStartDate() throws Exception {
+        String startDate = futureDate(35);
+        String endDate = futureDate(30);  // Earlier than startDate
         String dataJson = "[{" +
                 "\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-10\"," +
+                "\"startDate\":\"" + startDate + "\"," +
                 "\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-05\"," +
+                "\"endDate\":\"" + endDate + "\"," +
                 "\"endTime\":\"17:00\"" +
                 "}]";
 
@@ -157,13 +169,15 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnBadRequestForBatchWithOneInvalidElement() throws Exception {
+        String date1 = futureDate(32);
+        String date2 = futureDate(33);
         String dataJson = "[" +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-12\",\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-12\",\"endTime\":\"17:00\"}," +
+                "\"startDate\":\"" + date1 + "\",\"startTime\":\"09:00\"," +
+                "\"endDate\":\"" + date1 + "\",\"endTime\":\"17:00\"}," +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-13\",\"startTime\":\"17:00\"," +
-                "\"endDate\":\"2026-08-13\",\"endTime\":\"09:00\"}" + // Invalid: end before start
+                "\"startDate\":\"" + date2 + "\",\"startTime\":\"17:00\"," +
+                "\"endDate\":\"" + date2 + "\",\"endTime\":\"09:00\"}" + // Invalid: end before start
                 "]";
 
         try {
@@ -220,8 +234,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     public void shouldFilterByDateRange() throws Exception {
         MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentUnavailability",
                 new Parameter("locationUuid", "aaa006e5-9fbb-4f20-866b-0ece245615a1"),
-                new Parameter("startDate", "2026-08-05"),
-                new Parameter("endDate", "2026-08-07")));
+                new Parameter("startDate", "2099-08-05"),
+                new Parameter("endDate", "2099-08-07")));
         assertEquals(200, response.getStatus());
 
         String content = response.getContentAsString();
@@ -314,13 +328,15 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldDeleteOneBlockFromBatch() throws Exception {
+        String date1 = futureDate(45);
+        String date2 = futureDate(46);
         String dataJson = "[" +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-15\",\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-15\",\"endTime\":\"17:00\"}," +
+                "\"startDate\":\"" + date1 + "\",\"startTime\":\"09:00\"," +
+                "\"endDate\":\"" + date1 + "\",\"endTime\":\"17:00\"}," +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"startDate\":\"2026-08-16\",\"startTime\":\"09:00\"," +
-                "\"endDate\":\"2026-08-16\",\"endTime\":\"17:00\"}" +
+                "\"startDate\":\"" + date2 + "\",\"startTime\":\"09:00\"," +
+                "\"endDate\":\"" + date2 + "\",\"endTime\":\"17:00\"}" +
                 "]";
 
         MockHttpServletResponse createResponse = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));

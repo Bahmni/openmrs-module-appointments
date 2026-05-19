@@ -26,7 +26,8 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -56,7 +57,7 @@ public class AppointmentUnavailabilityController extends BaseRestController {
     @Autowired
     private AppointmentUnavailabilityRequestValidator unavailabilityRequestValidator;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
@@ -109,12 +110,12 @@ public class AppointmentUnavailabilityController extends BaseRestController {
 
         Date startDate = null;
         if (StringUtils.isNotBlank(startDateStr)) {
-            startDate = DATE_FORMAT.parse(startDateStr);
+            startDate = java.sql.Date.valueOf(LocalDate.parse(startDateStr, DATE_FORMATTER));
         }
 
         Date endDate = null;
         if (StringUtils.isNotBlank(endDateStr)) {
-            endDate = DATE_FORMAT.parse(endDateStr);
+            endDate = java.sql.Date.valueOf(LocalDate.parse(endDateStr, DATE_FORMATTER));
         }
 
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityService.getAll(

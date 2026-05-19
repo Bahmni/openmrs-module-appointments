@@ -15,8 +15,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.sql.Time;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -34,9 +36,9 @@ public class AppointmentUnavailabilityMapper {
     @Autowired
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
-    private static final SimpleDateFormat DATETIME_FORMAT = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    private static final DateTimeFormatter DATETIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     public AppointmentUnavailability fromRequest(AppointmentUnavailabilityRequest request) {
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
@@ -60,18 +62,18 @@ public class AppointmentUnavailabilityMapper {
 
         // Parse and set dates and times
         try {
-            Date startDate = DATE_FORMAT.parse(request.getStartDate());
-            unavailability.setStartDate(new java.sql.Date(startDate.getTime()));
+            LocalDate startDate = LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
+            unavailability.setStartDate(java.sql.Date.valueOf(startDate));
 
-            Date startTime = TIME_FORMAT.parse(request.getStartTime());
-            unavailability.setStartTime(new Time(startTime.getTime()));
+            LocalTime startTime = LocalTime.parse(request.getStartTime(), TIME_FORMATTER);
+            unavailability.setStartTime(Time.valueOf(startTime));
 
-            Date endDate = DATE_FORMAT.parse(request.getEndDate());
-            unavailability.setEndDate(new java.sql.Date(endDate.getTime()));
+            LocalDate endDate = LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
+            unavailability.setEndDate(java.sql.Date.valueOf(endDate));
 
-            Date endTime = TIME_FORMAT.parse(request.getEndTime());
-            unavailability.setEndTime(new Time(endTime.getTime()));
-        } catch (ParseException e) {
+            LocalTime endTime = LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
+            unavailability.setEndTime(Time.valueOf(endTime));
+        } catch (Exception e) {
             throw new RuntimeException("Invalid date or time format: " + e.getMessage(), e);
         }
 
@@ -119,7 +121,8 @@ public class AppointmentUnavailabilityMapper {
         // Metadata
         response.setVoided(unavailability.getVoided());
         if (unavailability.getDateCreated() != null) {
-            response.setDateCreated(DATETIME_FORMAT.format(unavailability.getDateCreated()));
+            response.setDateCreated(DATETIME_FORMATTER.format(
+                    unavailability.getDateCreated().toInstant().atZone(ZoneOffset.UTC)));
         }
         if (unavailability.getCreator() != null) {
             response.setCreatorName(unavailability.getCreator().getUsername());
@@ -138,10 +141,10 @@ public class AppointmentUnavailabilityMapper {
     }
 
     private String formatDate(java.sql.Date date) {
-        return date != null ? DATE_FORMAT.format(date) : null;
+        return date != null ? date.toLocalDate().format(DATE_FORMATTER) : null;
     }
 
     private String formatTime(Time time) {
-        return time != null ? TIME_FORMAT.format(time) : null;
+        return time != null ? time.toLocalTime().format(TIME_FORMATTER) : null;
     }
 }

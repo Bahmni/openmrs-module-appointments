@@ -6,21 +6,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 
 @Component
 public class AppointmentUnavailabilityRequestValidator implements Validator {
 
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
-    private static final SimpleDateFormat TIME_FORMAT = new SimpleDateFormat("HH:mm");
-
-    static {
-        DATE_FORMAT.setLenient(false);
-        TIME_FORMAT.setLenient(false);
-    }
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @Override
     public boolean supports(Class<?> aClass) {
@@ -84,52 +80,52 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
 
     private void validateDateTimeFormats(AppointmentUnavailabilityRequest request, Errors errors) {
         try {
-            DATE_FORMAT.parse(request.getStartDate());
-        } catch (ParseException e) {
+            LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
             errors.reject("invalid", "startDate must be in yyyy-MM-dd format");
             return;
         }
 
         try {
-            DATE_FORMAT.parse(request.getEndDate());
-        } catch (ParseException e) {
+            LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
+        } catch (DateTimeParseException e) {
             errors.reject("invalid", "endDate must be in yyyy-MM-dd format");
             return;
         }
 
         try {
-            TIME_FORMAT.parse(request.getStartTime());
-        } catch (ParseException e) {
+            LocalTime.parse(request.getStartTime(), TIME_FORMATTER);
+        } catch (DateTimeParseException e) {
             errors.reject("invalid", "startTime must be in HH:mm format");
             return;
         }
 
         try {
-            TIME_FORMAT.parse(request.getEndTime());
-        } catch (ParseException e) {
+            LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
+        } catch (DateTimeParseException e) {
             errors.reject("invalid", "endTime must be in HH:mm format");
         }
     }
 
     private void validateBusinessLogic(AppointmentUnavailabilityRequest request, Errors errors) {
         try {
-            Date startDate = DATE_FORMAT.parse(request.getStartDate());
-            Date endDate = DATE_FORMAT.parse(request.getEndDate());
+            LocalDate startDate = LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
+            LocalDate endDate = LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
 
-            if (endDate.before(startDate)) {
+            if (endDate.isBefore(startDate)) {
                 errors.reject("invalid", "endDate cannot be before startDate");
                 return;
             }
 
             if (startDate.equals(endDate)) {
-                Date startTime = TIME_FORMAT.parse(request.getStartTime());
-                Date endTime = TIME_FORMAT.parse(request.getEndTime());
+                LocalTime startTime = LocalTime.parse(request.getStartTime(), TIME_FORMATTER);
+                LocalTime endTime = LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
 
-                if (!endTime.after(startTime)) {
+                if (!endTime.isAfter(startTime)) {
                     errors.reject("invalid", "endTime must be after startTime when dates are the same");
                 }
             }
-        } catch (ParseException e) {
+        } catch (DateTimeParseException e) {
             errors.reject("invalid", "Invalid date or time format");
         }
     }

@@ -22,6 +22,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
+import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.Assert.*;
@@ -206,9 +207,9 @@ public class AppointmentUnavailabilityServiceImplTest {
     public void shouldAcceptWhenStartInPastButEndInFuture() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location = createLocation(1, "Location 1", false);
-        // Start in past, end in future - should be allowed
-        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf("2020-01-01"));
-        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf("2030-12-31"));
+        LocalDate today = LocalDate.now();
+        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf(today.minusDays(1)));
+        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf(today.plusYears(1)));
 
         when(locationService.getLocation(1)).thenReturn(location);
         when(appointmentUnavailabilityDao.save(any(AppointmentUnavailability.class)))
@@ -229,12 +230,10 @@ public class AppointmentUnavailabilityServiceImplTest {
         unavailabilities.add(invalid);
 
         expectedException.expect(RuntimeException.class);
-//        expectedException.expectMessage("[1] startDate is required");
         expectedException.expectMessage("[0] location is invalid or retired");
 
         service.save(unavailabilities);
 
-        // Should never call save since validation failed
         verify(appointmentUnavailabilityDao, never()).save(any(AppointmentUnavailability.class));
     }
 
@@ -266,8 +265,6 @@ public class AppointmentUnavailabilityServiceImplTest {
         verify(appointmentUnavailabilityDao, times(1)).save(unavailability);
     }
 
-    // Helper methods
-
     private List<AppointmentUnavailability> createValidUnavailabilityList() {
         List<AppointmentUnavailability> list = new ArrayList<>();
         list.add(createValidUnavailability());
@@ -278,9 +275,10 @@ public class AppointmentUnavailabilityServiceImplTest {
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
         Location location = createLocation(1, "Location 1", false);
         unavailability.setLocation(location);
-        unavailability.setStartDate(java.sql.Date.valueOf("2026-08-03"));
+        LocalDate futureDate = LocalDate.now().plusDays(30);
+        unavailability.setStartDate(java.sql.Date.valueOf(futureDate));
         unavailability.setStartTime(Time.valueOf("09:00:00"));
-        unavailability.setEndDate(java.sql.Date.valueOf("2026-08-03"));
+        unavailability.setEndDate(java.sql.Date.valueOf(futureDate));
         unavailability.setEndTime(Time.valueOf("17:00:00"));
         return unavailability;
     }
