@@ -98,17 +98,6 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         }
     }
 
-    private boolean isStartBeforeEnd(java.sql.Date startDate, Time startTime,
-                                      java.sql.Date endDate, Time endTime) {
-        if (endDate.after(startDate)) {
-            return true;
-        }
-        if (endDate.equals(startDate) && endTime.after(startTime)) {
-            return true;
-        }
-        return false;
-    }
-
     private Date combineDateAndTime(java.sql.Date date, Time time) {
         LocalDate localDate = date.toLocalDate();
         LocalTime localTime = time.toLocalTime();

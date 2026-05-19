@@ -140,7 +140,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         String dataJson = "[]";
 
         try {
-            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
             fail("Should have thrown RuntimeException");
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("at least one unavailability block"));
@@ -160,7 +160,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 "}]";
 
         try {
-            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
             fail("Should have thrown RuntimeException");
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("endDate cannot be before startDate"));
@@ -181,7 +181,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 "]";
 
         try {
-            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
             fail("Should have thrown RuntimeException");
         } catch (RuntimeException e) {
             assertTrue(e.getMessage().contains("endTime must be after startTime when dates are the same"));

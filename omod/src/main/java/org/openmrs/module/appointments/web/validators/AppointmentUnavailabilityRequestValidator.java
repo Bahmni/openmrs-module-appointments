@@ -17,6 +17,7 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
 
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
+    private static final String ERROR_CODE_INVALID = "invalid";
 
     @Override
     public boolean supports(Class<?> aClass) {
@@ -28,7 +29,7 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
         List<AppointmentUnavailabilityRequest> requests = (List<AppointmentUnavailabilityRequest>) o;
 
         if (requests == null || requests.isEmpty()) {
-            errors.reject("invalid", "Request must contain at least one unavailability block");
+            errors.reject(ERROR_CODE_INVALID, "Request must contain at least one unavailability block");
             return;
         }
 
@@ -54,27 +55,27 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
 
     private void validateRequiredFields(AppointmentUnavailabilityRequest request, Errors errors) {
         if (StringUtils.isBlank(request.getLocationUuid())) {
-            errors.reject("invalid", "locationUuid is required");
+            errors.reject(ERROR_CODE_INVALID, "locationUuid is required");
             return;
         }
 
         if (StringUtils.isBlank(request.getStartDate())) {
-            errors.reject("invalid", "startDate is required");
+            errors.reject(ERROR_CODE_INVALID, "startDate is required");
             return;
         }
 
         if (StringUtils.isBlank(request.getStartTime())) {
-            errors.reject("invalid", "startTime is required");
+            errors.reject(ERROR_CODE_INVALID, "startTime is required");
             return;
         }
 
         if (StringUtils.isBlank(request.getEndDate())) {
-            errors.reject("invalid", "endDate is required");
+            errors.reject(ERROR_CODE_INVALID, "endDate is required");
             return;
         }
 
         if (StringUtils.isBlank(request.getEndTime())) {
-            errors.reject("invalid", "endTime is required");
+            errors.reject(ERROR_CODE_INVALID, "endTime is required");
         }
     }
 
@@ -82,28 +83,28 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
         try {
             LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
         } catch (DateTimeParseException e) {
-            errors.reject("invalid", "startDate must be in yyyy-MM-dd format");
+            errors.reject(ERROR_CODE_INVALID, "startDate must be in yyyy-MM-dd format");
             return;
         }
 
         try {
             LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
         } catch (DateTimeParseException e) {
-            errors.reject("invalid", "endDate must be in yyyy-MM-dd format");
+            errors.reject(ERROR_CODE_INVALID, "endDate must be in yyyy-MM-dd format");
             return;
         }
 
         try {
             LocalTime.parse(request.getStartTime(), TIME_FORMATTER);
         } catch (DateTimeParseException e) {
-            errors.reject("invalid", "startTime must be in HH:mm format");
+            errors.reject(ERROR_CODE_INVALID, "startTime must be in HH:mm format");
             return;
         }
 
         try {
             LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
         } catch (DateTimeParseException e) {
-            errors.reject("invalid", "endTime must be in HH:mm format");
+            errors.reject(ERROR_CODE_INVALID, "endTime must be in HH:mm format");
         }
     }
 
@@ -113,7 +114,7 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
             LocalDate endDate = LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
 
             if (endDate.isBefore(startDate)) {
-                errors.reject("invalid", "endDate cannot be before startDate");
+                errors.reject(ERROR_CODE_INVALID, "endDate cannot be before startDate");
                 return;
             }
 
@@ -122,11 +123,11 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
                 LocalTime endTime = LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
 
                 if (!endTime.isAfter(startTime)) {
-                    errors.reject("invalid", "endTime must be after startTime when dates are the same");
+                    errors.reject(ERROR_CODE_INVALID, "endTime must be after startTime when dates are the same");
                 }
             }
         } catch (DateTimeParseException e) {
-            errors.reject("invalid", "Invalid date or time format");
+            errors.reject(ERROR_CODE_INVALID, "Invalid date or time format");
         }
     }
 }

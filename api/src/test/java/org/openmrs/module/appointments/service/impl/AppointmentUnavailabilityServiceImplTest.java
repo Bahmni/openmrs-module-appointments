@@ -113,12 +113,12 @@ public class AppointmentUnavailabilityServiceImplTest {
     public void shouldRejectWhenServiceIsVoided() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location = createLocation(1, "Location 1", false);
-        AppointmentServiceDefinition service = createService(1, "Service 1", location, true); // voided
-        unavailabilities.get(0).setService(service);
+        AppointmentServiceDefinition appointmentService = createService(1, "Service 1", location, true); // voided
+        unavailabilities.get(0).setService(appointmentService);
 
         when(locationService.getLocation(1)).thenReturn(location);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
-                .thenReturn(service);
+                .thenReturn(appointmentService);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("[0] service is invalid or voided");
@@ -131,12 +131,12 @@ public class AppointmentUnavailabilityServiceImplTest {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location1 = createLocation(1, "Location 1", false);
         Location location2 = createLocation(2, "Location 2", false);
-        AppointmentServiceDefinition service = createService(1, "Service 1", location2, false);
-        unavailabilities.get(0).setService(service);
+        AppointmentServiceDefinition appointmentService = createService(1, "Service 1", location2, false);
+        unavailabilities.get(0).setService(appointmentService);
 
         when(locationService.getLocation(1)).thenReturn(location1);
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
-                .thenReturn(service);
+                .thenReturn(appointmentService);
 
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("[0] Service does not belong to the specified location");
@@ -249,13 +249,13 @@ public class AppointmentUnavailabilityServiceImplTest {
     }
 
     private AppointmentServiceDefinition createService(Integer id, String name, Location location, boolean voided) {
-        AppointmentServiceDefinition service = new AppointmentServiceDefinition();
-        service.setAppointmentServiceId(id);
-        service.setName(name);
-        service.setLocation(location);
-        service.setVoided(voided);
-        service.setUuid("service-uuid");
-        return service;
+        AppointmentServiceDefinition appointmentService = new AppointmentServiceDefinition();
+        appointmentService.setAppointmentServiceId(id);
+        appointmentService.setName(name);
+        appointmentService.setLocation(location);
+        appointmentService.setVoided(voided);
+        appointmentService.setUuid("service-uuid");
+        return appointmentService;
     }
 
     private Provider createProvider(Integer id, String name, boolean retired) {
