@@ -30,8 +30,8 @@ public class RecurringPatternMapperTest {
         AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
 
         assertEquals(appointmentRecurringPattern.getType(), RecurringAppointmentType.DAY);
-        assertEquals(appointmentRecurringPattern.getPeriod(), new Integer(1));
-        assertEquals(appointmentRecurringPattern.getFrequency(), new Integer(2));
+        assertEquals(appointmentRecurringPattern.getPeriod(), Integer.valueOf(1));
+        assertEquals(appointmentRecurringPattern.getFrequency(), Integer.valueOf(2));
     }
 
     @Test
@@ -46,7 +46,7 @@ public class RecurringPatternMapperTest {
         AppointmentRecurringPattern appointmentRecurringPattern = recurringPatternMapper.fromRequest(recurringPattern);
 
         assertEquals(appointmentRecurringPattern.getType(), RecurringAppointmentType.WEEK);
-        assertEquals(appointmentRecurringPattern.getPeriod(), new Integer(1));
+        assertEquals(appointmentRecurringPattern.getPeriod(), Integer.valueOf(1));
         assertEquals(appointmentRecurringPattern.getEndDate(), endDate);
         assertEquals(appointmentRecurringPattern.getDaysOfWeek(), "MON,TUE");
     }
@@ -62,7 +62,7 @@ public class RecurringPatternMapperTest {
 
         assertEquals("DAY", recurringPattern.getType());
         assertEquals(1, recurringPattern.getPeriod());
-        assertEquals(new Integer(2), recurringPattern.getFrequency());
+        assertEquals(Integer.valueOf(2), recurringPattern.getFrequency());
     }
 
     @Test

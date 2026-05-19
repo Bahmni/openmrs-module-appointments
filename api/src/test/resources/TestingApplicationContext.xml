@@ -19,6 +19,15 @@
         <property name="mappingJarLocations">
             <ref bean="mappingJarResources"/>
         </property>
+        <!-- Required from OpenMRS 2.8.0 / Hibernate 5: the test SessionFactory
+             replaces the platform's, so JPA-annotated entities (e.g. Patient,
+             Person) must be discovered by package scan; mappingJarLocations
+             alone covers only hbm.xml mappings. -->
+        <property name="packagesToScan">
+            <list>
+                <value>org.openmrs</value>
+            </list>
+        </property>
         <!--  default properties must be set in the hibernate.default.properties -->
     </bean>
 

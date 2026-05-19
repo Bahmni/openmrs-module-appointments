@@ -1,13 +1,14 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
 import org.openmrs.PersonAttribute;
@@ -19,18 +20,14 @@ import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
 import org.openmrs.module.appointments.model.Appointment;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mockStatic;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
 
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
@@ -46,11 +43,20 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    private MockedStatic<Context> contextMockedStatic;
+    private AutoCloseable mocks;
+
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        mocks = MockitoAnnotations.openMocks(this);
+        contextMockedStatic = mockStatic(Context.class);
         tcAppointmentEventNotifier = new DefaultTCAppointmentPatientEmailNotifier(mailSender);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (contextMockedStatic != null) contextMockedStatic.close();
+        if (mocks != null) mocks.close();
     }
 
     @Ignore

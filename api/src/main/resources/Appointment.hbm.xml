@@ -56,7 +56,12 @@
             <one-to-many class="AppointmentAudit"/>
         </set>
 
-        <join table="patient_appointment_occurrence" inverse="true">
+        <!-- optional="true" makes Hibernate emit a LEFT OUTER JOIN here, so
+             non-recurring Appointments (which have no row in
+             patient_appointment_occurrence) are still returned by HQL "from
+             Appointment" queries. Without it, the default INNER JOIN silently
+             filters them out. Do not remove. -->
+        <join table="patient_appointment_occurrence" optional="true" inverse="true">
             <key column="patient_appointment_id"/>
             <many-to-one name="appointmentRecurringPattern" column="patient_appointment_timings_id"/>
         </join>

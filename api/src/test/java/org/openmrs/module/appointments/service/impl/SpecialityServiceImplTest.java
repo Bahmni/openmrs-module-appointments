@@ -11,7 +11,7 @@ import org.openmrs.User;
 import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class SpecialityServiceImplTest {
     @Mock
     private SpecialityDao specialityDao;
@@ -65,7 +65,7 @@ public class SpecialityServiceImplTest {
         List<Speciality> response = specialityService.getAllSpecialities();
         verify(specialityDao, times(1)).getAllSpecialities();
         assertEquals(specialities, response);
-        assertEquals(new Integer(1), specialities.get(0).getId());
+        assertEquals(Integer.valueOf(1), specialities.get(0).getId());
         assertEquals(creator, specialities.get(0).getCreator());
     }
     

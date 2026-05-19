@@ -1,13 +1,14 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
 import org.openmrs.Patient;
@@ -36,8 +37,6 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
@@ -59,8 +58,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -72,11 +71,8 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
+import static org.mockito.Mockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
 
     @Rule
@@ -138,10 +134,23 @@ public class AppointmentsServiceImplTest {
 
     private String exceptionCode = "error.privilegesRequired";
 
+    private MockedStatic<Context> contextMockedStatic;
+    private AutoCloseable mocks;
+
+    @After
+    public void tearDown() throws Exception {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+        if (mocks != null) {
+            mocks.close();
+        }
+    }
+
     @Before
     public void init() throws NoSuchFieldException, IllegalAccessException {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        mocks = MockitoAnnotations.openMocks(this);
+        contextMockedStatic = mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
         appointmentConflicts.add(appointmentServiceUnavailabilityConflict);
@@ -318,7 +327,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionIfValidationFailsOnAppointmentSave() {
         String errorMessage = "Appointment cannot be created without Patient";
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
-                .validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
+                .validate(any(Appointment.class), anyList());
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
         appointmentsService.validateAndSave(new Appointment());
@@ -333,7 +342,7 @@ public class AppointmentsServiceImplTest {
         verify(appointmentServiceHelper, times(1))
                 .validateStatusChangeAndGetErrors(any(Appointment.class),
                         any(AppointmentStatus.class),
-                        anyListOf(AppointmentStatusChangeValidator.class));
+                        anyList());
     }
 
     @Test
@@ -342,7 +351,7 @@ public class AppointmentsServiceImplTest {
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
                 .validateStatusChangeAndGetErrors(any(Appointment.class),
                         any(AppointmentStatus.class),
-                        anyListOf(AppointmentStatusChangeValidator.class));
+                        anyList());
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Completed);
         expectedException.expect(APIException.class);
@@ -562,8 +571,7 @@ public class AppointmentsServiceImplTest {
             appointmentsService.changeStatus(appointment, "Scheduled", null);
         } finally {
             verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
-            verifyStatic();
-            Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
+            contextMockedStatic.verify(() -> Context.hasPrivilege(RESET_APPOINTMENT_STATUS));
         }
     }
 
@@ -589,7 +597,7 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
         appointment.setService(null);
         String errorMessage = "Appointment cannot be updated without Service";
-        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyList());
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 

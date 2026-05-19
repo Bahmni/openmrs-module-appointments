@@ -1,10 +1,11 @@
 package org.openmrs.module.appointments.web.mapper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.User;
@@ -17,9 +18,6 @@ import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
@@ -27,11 +25,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
 public class AppointmentServiceDefinitionMapperTest {
     @Mock
     private LocationService locationService;
@@ -50,12 +46,21 @@ public class AppointmentServiceDefinitionMapperTest {
     private Speciality speciality;
     private User authenticatedUser;
 
+    private MockedStatic<Context> contextMockedStatic;
+    private AutoCloseable mocks;
+
     @Before
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        mocks = MockitoAnnotations.openMocks(this);
+        contextMockedStatic = mockStatic(Context.class);
         authenticatedUser = new User(8);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        if (contextMockedStatic != null) contextMockedStatic.close();
+        if (mocks != null) mocks.close();
     }
 
     @Test

@@ -1,33 +1,39 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.openmrs.GlobalProperty;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class TeleconsultationAppointmentServiceTest {
     @Mock
     private AdministrationService administrationService;
 
+    private MockedStatic<Context> contextMockedStatic;
+
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(Context.class);
+        contextMockedStatic = mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.serverUrlPattern")).thenReturn("https://test.server/{0}");
+    }
+
+    @After
+    public void tearDown() {
+        if (contextMockedStatic != null) contextMockedStatic.close();
     }
 
     @Test

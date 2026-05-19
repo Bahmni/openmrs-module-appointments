@@ -15,7 +15,7 @@ import static org.junit.Assert.assertNotNull;
 
 @RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
-public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContextSensitiveTest {
+public class AppointmentServiceDefinitionServiceTest extends org.openmrs.module.appointments.BaseIntegrationTest {
     private String adminUser;
     private String manageUser;
     private String readOnlyUser;

@@ -9,16 +9,16 @@ import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.model.Appointment;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.Collections;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class PatientAppointmentNotifierServiceTest {
 
     private PatientAppointmentNotifierService notifierService;

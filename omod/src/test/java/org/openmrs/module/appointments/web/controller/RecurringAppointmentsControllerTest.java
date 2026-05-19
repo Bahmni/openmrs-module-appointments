@@ -34,8 +34,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -43,7 +43,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 public class RecurringAppointmentsControllerTest {
 
@@ -140,7 +140,7 @@ public class RecurringAppointmentsControllerTest {
         verify(recurringAppointmentsService, never()).generateRecurringAppointments(recurringAppointmentRequest);
         verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "save error");
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "save error [save error]");
     }
 
     @Test
@@ -213,7 +213,7 @@ public class RecurringAppointmentsControllerTest {
         verify(appointmentRecurringPatternService, never()).validateAndSave(any());
         verify(recurringAppointmentMapper, never()).constructResponse(Collections.emptyList());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.BAD_REQUEST);
-        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error");
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error [some error]");
     }
 
     private void updateErrorsObject() {
@@ -274,7 +274,7 @@ public class RecurringAppointmentsControllerTest {
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
         Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Time Zone is missing");
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Time Zone is missing [Time Zone is missing]");
     }
 
     @Test
@@ -287,7 +287,7 @@ public class RecurringAppointmentsControllerTest {
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
         Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
         assertEquals(HttpStatus.BAD_REQUEST, responseEntity.getStatusCode());
-        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Appointment does not exist");
+        assertEquals(((Map)((Map)responseEntity.getBody()).get("error")).get("message"), "Appointment does not exist [Appointment does not exist]");
     }
 
     @Test
@@ -299,7 +299,7 @@ public class RecurringAppointmentsControllerTest {
         verify(appointmentMapper, never()).constructConflictResponse(Collections.emptyMap());
         verify(recurringAppointmentsService, never()).generateRecurringAppointments(any());
         assertEquals(responseEntity.getStatusCode(), HttpStatus.INTERNAL_SERVER_ERROR);
-        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error");
+        assertEquals(((Map) ((Map) responseEntity.getBody()).get("error")).get("message"), "some error [some error]");
     }
 
     @Test

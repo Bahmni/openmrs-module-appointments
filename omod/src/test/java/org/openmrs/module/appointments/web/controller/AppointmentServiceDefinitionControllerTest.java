@@ -20,11 +20,11 @@ import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 
 public class AppointmentServiceDefinitionControllerTest {
@@ -63,7 +63,7 @@ public class AppointmentServiceDefinitionControllerTest {
         verify(appointmentServiceMapper, times(1)).constructResponse(mappedServicePayload);
         assertNotNull(savedAppointmentService);
         assertEquals(response, savedAppointmentService.getBody());
-        assertEquals("200", savedAppointmentService.getStatusCode().toString());
+        assertEquals(200, savedAppointmentService.getStatusCode().value());
     }
 
     @Test
@@ -87,7 +87,7 @@ public class AppointmentServiceDefinitionControllerTest {
         ResponseEntity<Object> appointmentService = appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
 
         assertNotNull(appointmentService);
-        assertEquals("400", appointmentService.getStatusCode().toString());
+        assertEquals(400, appointmentService.getStatusCode().value());
         assertEquals("The service 'Cardio' is already present", ((RuntimeException)appointmentService.getBody()).getMessage());
     }
 
@@ -195,7 +195,7 @@ public class AppointmentServiceDefinitionControllerTest {
         String endDateString = "2108-08-15T18:30:00.0Z";
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
-        when(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, startDate, endDate)).thenReturn(new Integer(45));
+        when(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, startDate, endDate)).thenReturn(Integer.valueOf(45));
         Integer response = appointmentServiceController.calculateLoadForService(appointmentServiceUuid, startDateString, endDateString);
         verify(appointmentServiceDefinitionService, times(1)).calculateCurrentLoad(appointmentServiceDefinition, startDate, endDate);
         assertNotNull(response);

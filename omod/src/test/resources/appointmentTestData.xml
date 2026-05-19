@@ -81,10 +81,12 @@
     <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module"/>
     <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module"/>
     <privilege privilege="Get Providers" description="Able to view Providers"/>
+    <privilege privilege="Get Global Properties" description="Able to view global properties"/>
     <role role="Provider Response Update" description="To Test Provider response update" uuid="3480cb6d-c551-46c8-8d3a-96dc33d109fb"/>
     <role_privilege role="Provider Response Update" privilege="View Appointments"/>
     <role_privilege role="Provider Response Update" privilege="Manage Own Appointments"/>
     <role_privilege role="Provider Response Update" privilege="Get Providers"/>
+    <role_privilege role="Provider Response Update" privilege="Get Global Properties"/>
 
     <user_role user_id="11" role="Provider Response Update"/>
     <provider provider_id="2222" person_id="11" name="provider-response-user" creator="1" date_created="2005-01-01 00:00:00.0" retired="false" uuid="2bdc3f7d-jh76-401a-84e9-5494dda83e8e" />
