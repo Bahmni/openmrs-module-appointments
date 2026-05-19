@@ -47,10 +47,6 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
         if (!errors.hasErrors()) {
             validateDateTimeFormats(request, errors);
         }
-
-        if (!errors.hasErrors()) {
-            validateBusinessLogic(request, errors);
-        }
     }
 
     private void validateRequiredFields(AppointmentUnavailabilityRequest request, Errors errors) {
@@ -105,29 +101,6 @@ public class AppointmentUnavailabilityRequestValidator implements Validator {
             LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
         } catch (DateTimeParseException e) {
             errors.reject(ERROR_CODE_INVALID, "endTime must be in HH:mm format");
-        }
-    }
-
-    private void validateBusinessLogic(AppointmentUnavailabilityRequest request, Errors errors) {
-        try {
-            LocalDate startDate = LocalDate.parse(request.getStartDate(), DATE_FORMATTER);
-            LocalDate endDate = LocalDate.parse(request.getEndDate(), DATE_FORMATTER);
-
-            if (endDate.isBefore(startDate)) {
-                errors.reject(ERROR_CODE_INVALID, "endDate cannot be before startDate");
-                return;
-            }
-
-            if (startDate.equals(endDate)) {
-                LocalTime startTime = LocalTime.parse(request.getStartTime(), TIME_FORMATTER);
-                LocalTime endTime = LocalTime.parse(request.getEndTime(), TIME_FORMATTER);
-
-                if (!endTime.isAfter(startTime)) {
-                    errors.reject(ERROR_CODE_INVALID, "endTime must be after startTime when dates are the same");
-                }
-            }
-        } catch (DateTimeParseException e) {
-            errors.reject(ERROR_CODE_INVALID, "Invalid date or time format");
         }
     }
 }

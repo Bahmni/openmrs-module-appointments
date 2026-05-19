@@ -110,20 +110,6 @@ public class AppointmentUnavailabilityRequestValidatorTest {
     }
 
     @Test
-    public void shouldAddErrorWhenEndDateIsBeforeStartDate() {
-        AppointmentUnavailabilityRequest request = createValidRequest();
-        request.setStartDate("2026-08-10");
-        request.setEndDate("2026-08-09");
-        List<AppointmentUnavailabilityRequest> requests = Collections.singletonList(request);
-
-        Errors errors = new BeanPropertyBindingResult(requests, "requests");
-        validator.validate(requests, errors);
-
-        assertTrue(errors.hasErrors());
-        assertEquals("endDate cannot be before startDate", errors.getAllErrors().get(0).getDefaultMessage());
-    }
-
-    @Test
     public void shouldAddErrorWhenRequestListIsEmpty() {
         List<AppointmentUnavailabilityRequest> requests = Collections.emptyList();
 

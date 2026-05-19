@@ -91,6 +91,12 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
             }
         }
 
+        if (!isStartBeforeEnd(unavailability.getStartDate(), unavailability.getStartTime(),
+                unavailability.getEndDate(), unavailability.getEndTime())) {
+            log.error(indexPrefix + "Validation failed: End date/time must be after start date/time");
+            throw new APIException(indexPrefix + "End date/time must be after start date/time");
+        }
+
         Date now = new Date();
         Date endDateTime = combineDateAndTime(unavailability.getEndDate(), unavailability.getEndTime());
         if (endDateTime.before(now)) {
@@ -104,6 +110,11 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         LocalTime localTime = time.toLocalTime();
         LocalDateTime combined = LocalDateTime.of(localDate, localTime);
         return Date.from(combined.atZone(ZoneId.systemDefault()).toInstant());
+    }
+
+    private boolean isStartBeforeEnd(java.sql.Date startDate, Time startTime,
+                                      java.sql.Date endDate, Time endTime) {
+        return endDate.after(startDate) || (endDate.equals(startDate) && endTime.after(startTime));
     }
 
     @Override

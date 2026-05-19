@@ -26,6 +26,8 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.util.*;
 
+import static java.util.Collections.emptyList;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
@@ -162,6 +164,41 @@ public class AppointmentUnavailabilityServiceImplTest {
     }
 
     @Test
+    public void shouldRejectWhenEndDateBeforeStartDate() {
+        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
+        Location location = createLocation(1, "Location 1", false);
+        LocalDate startDate = LocalDate.now().plusDays(35);
+        LocalDate endDate = LocalDate.now().plusDays(30);
+        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf(startDate));
+        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf(endDate));
+
+        when(locationService.getLocation(1)).thenReturn(location);
+
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("[0] End date/time must be after start date/time");
+
+        service.save(unavailabilities);
+    }
+
+    @Test
+    public void shouldRejectWhenEndTimeBeforeStartTimeOnSameDate() {
+        List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
+        Location location = createLocation(1, "Location 1", false);
+        LocalDate futureDate = LocalDate.now().plusDays(30);
+        unavailabilities.get(0).setStartDate(java.sql.Date.valueOf(futureDate));
+        unavailabilities.get(0).setEndDate(java.sql.Date.valueOf(futureDate));
+        unavailabilities.get(0).setStartTime(Time.valueOf("17:00:00"));
+        unavailabilities.get(0).setEndTime(Time.valueOf("09:00:00"));
+
+        when(locationService.getLocation(1)).thenReturn(location);
+
+        expectedException.expect(APIException.class);
+        expectedException.expectMessage("[0] End date/time must be after start date/time");
+
+        service.save(unavailabilities);
+    }
+
+    @Test
     public void shouldRejectWhenEndTimeIsInPast() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location = createLocation(1, "Location 1", false);
@@ -205,6 +242,8 @@ public class AppointmentUnavailabilityServiceImplTest {
     @Test
     public void shouldDelegateGetAllToDao() {
         Location location = createLocation(1, "Location 1", false);
+        when(appointmentUnavailabilityDao.getAll(location, null, null, null, null, false, null))
+                .thenReturn(emptyList());
         service.getAll(location, null, null, null, null, false, null);
         verify(appointmentUnavailabilityDao, times(1)).getAll(location, null, null, null, null, false, null);
     }

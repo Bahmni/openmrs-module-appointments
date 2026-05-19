@@ -164,7 +164,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
             handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
             fail("Should have thrown APIException");
         } catch (APIException e) {
-            assertTrue(e.getMessage().contains("endDate cannot be before startDate"));
+            assertTrue(e.getMessage().contains("End date/time must be after start date/time"));
         }
     }
 
@@ -185,7 +185,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
             handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
             fail("Should have thrown APIException");
         } catch (APIException e) {
-            assertTrue(e.getMessage().contains("endTime must be after startTime when dates are the same"));
+            assertTrue(e.getMessage().contains("End date/time must be after start date/time"));
         }
 
         List<AppointmentUnavailability> all = service.getAll(null, null, null, null, null, false, null);
