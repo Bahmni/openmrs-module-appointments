@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.api.context.Context;
@@ -11,13 +13,18 @@ import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
 @Transactional
 public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavailabilityService {
+
+    private Log log = LogFactory.getLog(this.getClass());
 
     private AppointmentUnavailabilityDao appointmentUnavailabilityDao;
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -32,12 +39,11 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
 
     @Override
     public List<AppointmentUnavailability> save(List<AppointmentUnavailability> appointmentUnavailabilities) {
-        // Batch-level validation
         if (appointmentUnavailabilities == null || appointmentUnavailabilities.isEmpty()) {
+            log.error("Save failed: Request must contain at least one unavailability block");
             throw new RuntimeException("Request must contain at least one unavailability block");
         }
 
-        // Validate all elements before persisting any
         for (int i = 0; i < appointmentUnavailabilities.size(); i++) {
             AppointmentUnavailability unavailability = appointmentUnavailabilities.get(i);
             String indexPrefix = "[" + i + "] ";
@@ -45,23 +51,25 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
             validateUnavailability(unavailability, indexPrefix);
         }
 
-        // All validations passed, persist all
         List<AppointmentUnavailability> savedUnavailabilities = new ArrayList<>();
         for (AppointmentUnavailability unavailability : appointmentUnavailabilities) {
             savedUnavailabilities.add(appointmentUnavailabilityDao.save(unavailability));
         }
 
+        log.info("Successfully saved " + savedUnavailabilities.size() + " appointment unavailability block(s)");
         return savedUnavailabilities;
     }
 
     private void validateUnavailability(AppointmentUnavailability unavailability, String indexPrefix) {
         if (!isStartBeforeEnd(unavailability.getStartDate(), unavailability.getStartTime(),
                 unavailability.getEndDate(), unavailability.getEndTime())) {
+            log.error(indexPrefix + "Validation failed: endDate/endTime must be after startDate/startTime");
             throw new RuntimeException(indexPrefix + "endDate/endTime must be after startDate/startTime");
         }
 
         Location location = Context.getLocationService().getLocation(unavailability.getLocation().getLocationId());
         if (location == null || location.getRetired()) {
+            log.error(indexPrefix + "Validation failed: location is invalid or retired");
             throw new RuntimeException(indexPrefix + "location is invalid or retired");
         }
 
@@ -69,11 +77,13 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
             AppointmentServiceDefinition service = appointmentServiceDefinitionService
                     .getAppointmentServiceByUuid(unavailability.getService().getUuid());
             if (service == null || service.getVoided()) {
+                log.error(indexPrefix + "Validation failed: service is invalid or voided");
                 throw new RuntimeException(indexPrefix + "service is invalid or voided");
             }
             unavailability.setService(service);
 
             if (service.getLocation() != null && !service.getLocation().equals(location)) {
+                log.error(indexPrefix + "Validation failed: Service does not belong to the specified location");
                 throw new RuntimeException(indexPrefix + "Service does not belong to the specified location");
             }
         }
@@ -81,6 +91,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         if (unavailability.getProvider() != null) {
             Provider provider = Context.getProviderService().getProvider(unavailability.getProvider().getProviderId());
             if (provider == null || provider.getRetired()) {
+                log.error(indexPrefix + "Validation failed: provider is invalid or retired");
                 throw new RuntimeException(indexPrefix + "provider is invalid or retired");
             }
         }
@@ -88,6 +99,7 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         Date now = new Date();
         Date endDateTime = combineDateAndTime(unavailability.getEndDate(), unavailability.getEndTime());
         if (endDateTime.before(now)) {
+            log.error(indexPrefix + "Validation failed: Cannot create unavailability block that has already ended");
             throw new RuntimeException(indexPrefix + "Cannot create unavailability block that has already ended");
         }
     }
@@ -104,30 +116,29 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     }
 
     private Date combineDateAndTime(java.sql.Date date, Time time) {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(date);
-
-        Calendar timeCal = Calendar.getInstance();
-        timeCal.setTime(time);
-
-        cal.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY));
-        cal.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
-        cal.set(Calendar.SECOND, timeCal.get(Calendar.SECOND));
-        cal.set(Calendar.MILLISECOND, 0);
-
-        return cal.getTime();
+        LocalDate localDate = date.toLocalDate();
+        LocalTime localTime = time.toLocalTime();
+        LocalDateTime combined = LocalDateTime.of(localDate, localTime);
+        return Date.from(combined.atZone(ZoneId.systemDefault()).toInstant());
     }
 
     @Override
     public AppointmentUnavailability getByUuid(String uuid) {
-        return appointmentUnavailabilityDao.getByUuid(uuid);
+        AppointmentUnavailability unavailability = appointmentUnavailabilityDao.getByUuid(uuid);
+        if (unavailability == null) {
+            log.info("No appointment unavailability found with uuid: " + uuid);
+        }
+        return unavailability;
     }
 
     @Override
     public List<AppointmentUnavailability> getAll(Location location, AppointmentServiceDefinition service,
                                                    Provider provider, Date startDate, Date endDate,
                                                    boolean includeVoided, Integer limit) {
-        return appointmentUnavailabilityDao.getAll(location, service, provider, startDate, endDate, includeVoided, limit);
+        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityDao.getAll(
+                location, service, provider, startDate, endDate, includeVoided, limit);
+        log.info("Retrieved " + unavailabilities.size() + " appointment unavailability block(s)");
+        return unavailabilities;
     }
 
     @Override
@@ -137,5 +148,6 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
         appointmentUnavailability.setVoidedBy(Context.getAuthenticatedUser());
         appointmentUnavailability.setDateVoided(new Date());
         appointmentUnavailabilityDao.save(appointmentUnavailability);
+        log.info("Successfully voided appointment unavailability: " + appointmentUnavailability.getUuid());
     }
 }

@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
@@ -34,6 +36,8 @@ import java.util.HashMap;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentUnavailability")
 public class AppointmentUnavailabilityController extends BaseRestController {
 
+    private Log log = LogFactory.getLog(this.getClass());
+
     @Autowired
     private AppointmentUnavailabilityService appointmentUnavailabilityService;
 
@@ -62,12 +66,15 @@ public class AppointmentUnavailabilityController extends BaseRestController {
         Errors errors = new BeanPropertyBindingResult(requests, "appointmentUnavailabilityRequests");
         unavailabilityRequestValidator.validate(requests, errors);
         if (!errors.getAllErrors().isEmpty()) {
+            log.error("Validation failed: " + errors.getAllErrors().get(0).getDefaultMessage());
             throw new RuntimeException(errors.getAllErrors().get(0).getDefaultMessage());
         }
 
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityMapper.fromRequest(requests);
         List<AppointmentUnavailability> savedUnavailabilities = appointmentUnavailabilityService.save(unavailabilities);
         List<AppointmentUnavailabilityResponse> responses = appointmentUnavailabilityMapper.constructResponse(savedUnavailabilities);
+
+        log.info("Successfully created " + savedUnavailabilities.size() + " appointment unavailability block(s)");
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
@@ -81,6 +88,9 @@ public class AppointmentUnavailabilityController extends BaseRestController {
             @RequestParam(value = "endDate", required = false) String endDateStr,
             @RequestParam(value = "includeVoided", required = false, defaultValue = "false") boolean includeVoided,
             @RequestParam(value = "limit", required = false) Integer limit) throws ParseException {
+
+        log.info("Fetching appointment unavailabilities with filters - location: " + locationUuid +
+                ", service: " + serviceUuid + ", provider: " + providerUuid);
 
         Location location = null;
         if (StringUtils.isNotBlank(locationUuid)) {
@@ -110,6 +120,8 @@ public class AppointmentUnavailabilityController extends BaseRestController {
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityService.getAll(
                 location, service, provider, startDate, endDate, includeVoided, limit);
         List<AppointmentUnavailabilityResponse> responses = appointmentUnavailabilityMapper.constructResponse(unavailabilities);
+
+        log.info("Retrieved " + unavailabilities.size() + " appointment unavailability block(s)");
         return new ResponseEntity<>(responses, HttpStatus.OK);
     }
 
@@ -118,6 +130,7 @@ public class AppointmentUnavailabilityController extends BaseRestController {
     public ResponseEntity<Object> getAppointmentUnavailabilityByUuid(@PathVariable("uuid") String uuid) {
         AppointmentUnavailability unavailability = appointmentUnavailabilityService.getByUuid(uuid);
         if (unavailability == null) {
+            log.error("Could not identify appointment unavailability with uuid: " + uuid);
             return new ResponseEntity<>("Appointment Unavailability not found", HttpStatus.NOT_FOUND);
         }
         AppointmentUnavailabilityResponse response = appointmentUnavailabilityMapper.constructResponse(unavailability);
@@ -131,20 +144,20 @@ public class AppointmentUnavailabilityController extends BaseRestController {
             @RequestParam(value = "voidReason", required = false) String voidReason) {
         AppointmentUnavailability unavailability = appointmentUnavailabilityService.getByUuid(uuid);
         if (unavailability == null) {
+            log.error("Could not identify appointment unavailability with uuid: " + uuid);
             return new ResponseEntity<>("Appointment Unavailability not found", HttpStatus.NOT_FOUND);
         }
-        if (unavailability.getVoided()) {
-            AppointmentUnavailabilityResponse response = appointmentUnavailabilityMapper.constructResponse(unavailability);
-            return new ResponseEntity<>(response, HttpStatus.OK);
+        if (!unavailability.getVoided()) {
+            appointmentUnavailabilityService.voidAppointmentUnavailability(unavailability, voidReason);
         }
-        appointmentUnavailabilityService.voidAppointmentUnavailability(unavailability, voidReason);
-        AppointmentUnavailability voidedUnavailability = appointmentUnavailabilityService.getByUuid(uuid);
-        AppointmentUnavailabilityResponse response = appointmentUnavailabilityMapper.constructResponse(voidedUnavailability);
-        return new ResponseEntity<>(response, HttpStatus.OK);
+
+        log.info("Successfully voided appointment unavailability: " + uuid);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 
     @ExceptionHandler({RuntimeException.class, ParseException.class})
     public ResponseEntity<Object> handleException(Exception ex) {
+        log.error("Exception in AppointmentUnavailabilityController", ex);
         Map<String, Object> errors = new HashMap<>();
         errors.put("message", ex.getMessage());
         return new ResponseEntity<>(errors, HttpStatus.BAD_REQUEST);

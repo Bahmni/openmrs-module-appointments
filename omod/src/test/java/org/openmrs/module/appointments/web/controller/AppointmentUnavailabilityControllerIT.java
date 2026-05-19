@@ -95,7 +95,6 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         assertNotNull(result);
         assertEquals(4, result.size());
 
-        // Verify first block has service and provider
         SimpleObject block = SimpleObject.parseJson(objectMapper.writeValueAsString(result.get(0)));
         assertEquals("fff006e5-9fbb-4f20-866b-0ece245615a1", block.get("appointmentServiceUuid"));
         assertEquals("Test Service 1", block.get("appointmentServiceName"));
@@ -174,9 +173,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
             assertTrue(e.getMessage().contains("endTime must be after startTime when dates are the same"));
         }
 
-        // Verify no blocks were created (all-or-nothing)
         List<AppointmentUnavailability> all = service.getAll(null, null, null, null, null, false, null);
-        // Should still have the original 5 non-voided blocks from test data
         assertEquals(5, all.size());
     }
 
@@ -216,7 +213,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         ArrayList result = objectMapper.readValue(content, ArrayList.class);
 
         assertNotNull(result);
-        assertEquals(2, result.size()); // 2 blocks with service 1
+        assertEquals(2, result.size());
     }
 
     @Test
@@ -231,7 +228,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         ArrayList result = objectMapper.readValue(content, ArrayList.class);
 
         assertNotNull(result);
-        assertEquals(3, result.size()); // Blocks 2, 3, 4 overlap with this range
+        assertEquals(3, result.size());
     }
 
     @Test
@@ -245,7 +242,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         ArrayList result = objectMapper.readValue(content, ArrayList.class);
 
         assertNotNull(result);
-        assertEquals(5, result.size()); // 5 blocks including voided
+        assertEquals(5, result.size());
     }
 
     @Test
@@ -286,19 +283,13 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     public void shouldVoidUnavailabilityBlock() throws Exception {
         String uuid = "vvv006e5-9fbb-4f20-866b-0ece245615a2";
 
-        // Verify not voided initially
         AppointmentUnavailability before = service.getByUuid(uuid);
         assertFalse(before.getVoided());
 
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + uuid,
                 new Parameter("voidReason", "Test void reason")));
-        assertEquals(200, response.getStatus());
+        assertEquals(204, response.getStatus());
 
-        SimpleObject result = SimpleObject.parseJson(response.getContentAsString());
-        assertEquals(uuid, result.get("uuid"));
-        assertEquals(true, result.get("voided"));
-
-        // Verify voided in database
         AppointmentUnavailability after = service.getByUuid(uuid);
         assertTrue(after.getVoided());
         assertEquals("Test void reason", after.getVoidReason());
@@ -310,10 +301,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + uuid,
                 new Parameter("voidReason", "Another reason")));
-        assertEquals(200, response.getStatus());
-
-        SimpleObject result = SimpleObject.parseJson(response.getContentAsString());
-        assertEquals(true, result.get("voided"));
+        assertEquals(204, response.getStatus());
     }
 
     @Test
@@ -326,7 +314,6 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldDeleteOneBlockFromBatch() throws Exception {
-        // First create a batch of 2 blocks
         String dataJson = "[" +
                 "{\"locationUuid\":\"aaa006e5-9fbb-4f20-866b-0ece245615a1\"," +
                 "\"startDate\":\"2026-08-15\",\"startTime\":\"09:00\"," +
@@ -343,20 +330,16 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         ArrayList created = objectMapper.readValue(content, ArrayList.class);
         assertEquals(2, created.size());
 
-        // Get UUID of first block
         SimpleObject block1 = SimpleObject.parseJson(objectMapper.writeValueAsString(created.get(0)));
         String uuid1 = (String) block1.get("uuid");
 
-        // Delete first block
         MockHttpServletResponse deleteResponse = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + uuid1,
                 new Parameter("voidReason", "Test delete")));
-        assertEquals(200, deleteResponse.getStatus());
+        assertEquals(204, deleteResponse.getStatus());
 
-        // Verify first block is voided
         AppointmentUnavailability voided = service.getByUuid(uuid1);
         assertTrue(voided.getVoided());
 
-        // Verify second block still exists and is not voided
         SimpleObject block2 = SimpleObject.parseJson(objectMapper.writeValueAsString(created.get(1)));
         String uuid2 = (String) block2.get("uuid");
         AppointmentUnavailability notVoided = service.getByUuid(uuid2);
