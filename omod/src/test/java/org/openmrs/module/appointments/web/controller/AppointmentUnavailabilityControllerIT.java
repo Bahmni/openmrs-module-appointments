@@ -5,6 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.webservices.rest.SimpleObject;
@@ -188,7 +189,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
             assertTrue(e.getMessage().contains("End date/time must be after start date/time"));
         }
 
-        List<AppointmentUnavailability> all = service.getAll(null, null, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        List<AppointmentUnavailability> all = service.getAll(searchParams);
         assertEquals(5, all.size());
     }
 

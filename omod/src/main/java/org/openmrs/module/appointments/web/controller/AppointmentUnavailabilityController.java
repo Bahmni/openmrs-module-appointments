@@ -3,14 +3,9 @@ package org.openmrs.module.appointments.web.controller;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.openmrs.Location;
-import org.openmrs.Provider;
 import org.openmrs.api.APIException;
-import org.openmrs.api.LocationService;
-import org.openmrs.api.ProviderService;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;
@@ -45,15 +40,6 @@ public class AppointmentUnavailabilityController extends BaseRestController {
 
     @Autowired
     private AppointmentUnavailabilityMapper appointmentUnavailabilityMapper;
-
-    @Autowired
-    private LocationService locationService;
-
-    @Autowired
-    private ProviderService providerService;
-
-    @Autowired
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     @Autowired
     private AppointmentUnavailabilityRequestValidator unavailabilityRequestValidator;
@@ -94,21 +80,6 @@ public class AppointmentUnavailabilityController extends BaseRestController {
         log.info("Fetching appointment unavailabilities with filters - location: " + locationUuid +
                 ", service: " + serviceUuid + ", provider: " + providerUuid);
 
-        Location location = null;
-        if (StringUtils.isNotBlank(locationUuid)) {
-            location = locationService.getLocationByUuid(locationUuid);
-        }
-
-        AppointmentServiceDefinition service = null;
-        if (StringUtils.isNotBlank(serviceUuid)) {
-            service = appointmentServiceDefinitionService.getAppointmentServiceByUuid(serviceUuid);
-        }
-
-        Provider provider = null;
-        if (StringUtils.isNotBlank(providerUuid)) {
-            provider = providerService.getProviderByUuid(providerUuid);
-        }
-
         Date startDate = null;
         if (StringUtils.isNotBlank(startDateStr)) {
             startDate = java.sql.Date.valueOf(LocalDate.parse(startDateStr, DATE_FORMATTER));
@@ -119,8 +90,16 @@ public class AppointmentUnavailabilityController extends BaseRestController {
             endDate = java.sql.Date.valueOf(LocalDate.parse(endDateStr, DATE_FORMATTER));
         }
 
-        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityService.getAll(
-                location, service, provider, startDate, endDate, includeVoided, limit);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(locationUuid);
+        searchParams.setServiceUuid(serviceUuid);
+        searchParams.setProviderUuid(providerUuid);
+        searchParams.setStartDate(startDate);
+        searchParams.setEndDate(endDate);
+        searchParams.setIncludeVoided(includeVoided);
+        searchParams.setLimit(limit);
+
+        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityService.getAll(searchParams);
         List<AppointmentUnavailabilityResponse> responses = appointmentUnavailabilityMapper.constructResponse(unavailabilities);
 
         log.info("Retrieved " + unavailabilities.size() + " appointment unavailability block(s)");

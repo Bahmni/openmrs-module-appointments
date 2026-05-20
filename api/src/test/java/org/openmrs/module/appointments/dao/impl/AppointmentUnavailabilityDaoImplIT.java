@@ -3,14 +3,11 @@ package org.openmrs.module.appointments.dao.impl;
 import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.Location;
-import org.openmrs.Provider;
 import org.openmrs.api.LocationService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Time;
@@ -28,13 +25,11 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
     @Autowired
     private LocationService locationService;
 
-    @Autowired
-    private ProviderService providerService;
-
-    @Autowired
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
-
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy-MM-dd");
+
+    private static final String LOCATION_UUID = "aaa006e5-9fbb-4f20-866b-0ece245615a1";
+    private static final String SERVICE_UUID = "fff006e5-9fbb-4f20-866b-0ece245615a1";
+    private static final String PROVIDER_UUID = "ccc006e5-9fbb-4f20-866b-0ece245615a1";
 
     @Before
     public void setUp() throws Exception {
@@ -43,7 +38,7 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSaveAppointmentUnavailability() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
+        Location location = locationService.getLocationByUuid(LOCATION_UUID);
 
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
         unavailability.setLocation(location);
@@ -78,10 +73,8 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
         AppointmentUnavailability unavailability = appointmentUnavailabilityDao.getByUuid(uuid);
         assertNotNull(unavailability);
 
-        // Modify the object
         unavailability.setEndTime(Time.valueOf("23:00:00"));
 
-        // Fetch again - should get fresh copy from database
         AppointmentUnavailability unavailability2 = appointmentUnavailabilityDao.getByUuid(uuid);
         assertNotNull(unavailability2);
         assertEquals("11:00:00", unavailability2.getEndTime().toString());
@@ -89,10 +82,10 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllForLocation() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, null, null, false, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
         assertEquals(4, results.size()); // 4 non-voided blocks for location 1
@@ -100,62 +93,64 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetAllIncludingVoided() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setIncludeVoided(true);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, null, null, true, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
-        assertEquals(5, results.size()); // 5 blocks including voided for location 1
+        assertEquals(5, results.size()); 
     }
 
     @Test
     public void shouldFilterByService() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
-        AppointmentServiceDefinition service = appointmentServiceDefinitionService
-                .getAppointmentServiceByUuid("fff006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setServiceUuid(SERVICE_UUID);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, service, null, null, null, false, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
-        assertEquals(2, results.size()); // 2 blocks with service 1
+        assertEquals(2, results.size());
     }
 
     @Test
     public void shouldFilterByProvider() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
-        Provider provider = providerService.getProviderByUuid("ccc006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setProviderUuid(PROVIDER_UUID);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, provider, null, null, false, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
-        assertEquals(2, results.size()); // 2 blocks with provider 1
+        assertEquals(2, results.size());
     }
 
     @Test
     public void shouldFilterByServiceAndProvider() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
-        AppointmentServiceDefinition service = appointmentServiceDefinitionService
-                .getAppointmentServiceByUuid("fff006e5-9fbb-4f20-866b-0ece245615a1");
-        Provider provider = providerService.getProviderByUuid("ccc006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setServiceUuid(SERVICE_UUID);
+        searchParams.setProviderUuid(PROVIDER_UUID);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, service, provider, null, null, false, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
-        assertEquals(1, results.size()); // 1 block with both service 1 and provider 1
+        assertEquals(1, results.size());
     }
 
     @Test
     public void shouldFilterByDateRange() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
         Date startDate = DATE_FORMAT.parse("2026-08-05");
         Date endDate = DATE_FORMAT.parse("2026-08-07");
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, startDate, endDate, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setStartDate(startDate);
+        searchParams.setEndDate(endDate);
+
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
         assertEquals(3, results.size()); // Blocks 2, 3, 4 overlap with this range
@@ -163,10 +158,11 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldRespectLimit() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setLimit(2);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, null, null, false, 2);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
         assertEquals(2, results.size()); // Limited to 2 results
@@ -174,15 +170,14 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldOrderByStartDateAndStartTime() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, null, null, false, null);
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
         assertTrue(results.size() > 1);
 
-        // Verify ordering
         for (int i = 0; i < results.size() - 1; i++) {
             AppointmentUnavailability current = results.get(i);
             AppointmentUnavailability next = results.get(i + 1);
@@ -190,7 +185,6 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
             // Current startDate should be <= next startDate
             assertTrue(current.getStartDate().compareTo(next.getStartDate()) <= 0);
 
-            // If same date, current startTime should be <= next startTime
             if (current.getStartDate().equals(next.getStartDate())) {
                 assertTrue(current.getStartTime().compareTo(next.getStartTime()) <= 0);
             }
@@ -199,14 +193,38 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnEmptyListWhenNoMatches() throws Exception {
-        Location location = locationService.getLocationByUuid("aaa006e5-9fbb-4f20-866b-0ece245615a1");
         Date startDate = DATE_FORMAT.parse("2026-09-01");
         Date endDate = DATE_FORMAT.parse("2026-09-30");
 
-        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(
-                location, null, null, startDate, endDate, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(LOCATION_UUID);
+        searchParams.setStartDate(startDate);
+        searchParams.setEndDate(endDate);
+
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
         assertEquals(0, results.size());
+    }
+
+    @Test
+    public void shouldReturnAllWhenLocationUuidIsNull() throws Exception {
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
+
+        assertNotNull(results);
+        assertTrue(results.size() >= 4); // Should return all non-voided blocks
+    }
+
+    @Test
+    public void shouldIgnoreInvalidLocationUuid() throws Exception {
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid("non-existent-uuid");
+
+        List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
+
+        assertNotNull(results);
+        assertTrue(results.size() >= 4);
     }
 }

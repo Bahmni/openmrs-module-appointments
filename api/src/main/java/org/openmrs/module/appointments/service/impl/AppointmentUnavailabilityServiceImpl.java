@@ -9,6 +9,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,14 +28,12 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
 
     private Log log = LogFactory.getLog(this.getClass());
 
-    private AppointmentUnavailabilityDao appointmentUnavailabilityDao;
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+    private final AppointmentUnavailabilityDao appointmentUnavailabilityDao;
+    private final AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    public void setAppointmentUnavailabilityDao(AppointmentUnavailabilityDao appointmentUnavailabilityDao) {
+    public AppointmentUnavailabilityServiceImpl(AppointmentUnavailabilityDao appointmentUnavailabilityDao,
+                                                 AppointmentServiceDefinitionService appointmentServiceDefinitionService) {
         this.appointmentUnavailabilityDao = appointmentUnavailabilityDao;
-    }
-
-    public void setAppointmentServiceDefinitionService(AppointmentServiceDefinitionService appointmentServiceDefinitionService) {
         this.appointmentServiceDefinitionService = appointmentServiceDefinitionService;
     }
 
@@ -127,11 +126,8 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     }
 
     @Override
-    public List<AppointmentUnavailability> getAll(Location location, AppointmentServiceDefinition service,
-                                                   Provider provider, Date startDate, Date endDate,
-                                                   boolean includeVoided, Integer limit) {
-        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityDao.getAll(
-                location, service, provider, startDate, endDate, includeVoided, limit);
+    public List<AppointmentUnavailability> getAll(AppointmentUnavailabilitySearchParams searchParams) {
+        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityDao.getAll(searchParams);
         log.info("Retrieved " + unavailabilities.size() + " appointment unavailability block(s)");
         return unavailabilities;
     }

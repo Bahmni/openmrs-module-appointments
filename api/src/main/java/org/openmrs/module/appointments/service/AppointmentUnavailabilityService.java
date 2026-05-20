@@ -1,13 +1,10 @@
 package org.openmrs.module.appointments.service;
 
-import org.openmrs.Location;
-import org.openmrs.Provider;
 import org.openmrs.annotation.Authorized;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Date;
 import java.util.List;
 
 import static org.openmrs.module.appointments.constants.PrivilegeConstants.ADD_APPOINTMENT_UNAVAILABILITY;
@@ -26,9 +23,7 @@ public interface AppointmentUnavailabilityService {
 
     @Transactional
     @Authorized({GET_APPOINTMENT_UNAVAILABILITY})
-    List<AppointmentUnavailability> getAll(Location location, AppointmentServiceDefinition service,
-                                           Provider provider, Date startDate, Date endDate,
-                                           boolean includeVoided, Integer limit);
+    List<AppointmentUnavailability> getAll(AppointmentUnavailabilitySearchParams searchParams);
 
     @Transactional
     @Authorized({DELETE_APPOINTMENT_UNAVAILABILITY})

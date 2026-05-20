@@ -16,6 +16,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
+import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
@@ -52,7 +53,6 @@ public class AppointmentUnavailabilityServiceImplTest {
     @Mock
     private ProviderService providerService;
 
-    @InjectMocks
     private AppointmentUnavailabilityServiceImpl service;
 
     private User authenticatedUser;
@@ -60,6 +60,7 @@ public class AppointmentUnavailabilityServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
+        service = new AppointmentUnavailabilityServiceImpl(appointmentUnavailabilityDao, appointmentServiceDefinitionService);
         mockStatic(Context.class);
         authenticatedUser = new User(1);
         PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
@@ -202,7 +203,6 @@ public class AppointmentUnavailabilityServiceImplTest {
     public void shouldRejectWhenEndTimeIsInPast() {
         List<AppointmentUnavailability> unavailabilities = createValidUnavailabilityList();
         Location location = createLocation(1, "Location 1", false);
-        // Set a date in the past
         unavailabilities.get(0).setStartDate(java.sql.Date.valueOf("2020-01-01"));
         unavailabilities.get(0).setEndDate(java.sql.Date.valueOf("2020-01-02"));
 
@@ -241,11 +241,14 @@ public class AppointmentUnavailabilityServiceImplTest {
 
     @Test
     public void shouldDelegateGetAllToDao() {
-        Location location = createLocation(1, "Location 1", false);
-        when(appointmentUnavailabilityDao.getAll(location, null, null, null, null, false, null))
-                .thenReturn(emptyList());
-        service.getAll(location, null, null, null, null, false, null);
-        verify(appointmentUnavailabilityDao, times(1)).getAll(location, null, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid("location-uuid-1");
+
+        when(appointmentUnavailabilityDao.getAll(searchParams)).thenReturn(emptyList());
+
+        service.getAll(searchParams);
+
+        verify(appointmentUnavailabilityDao, times(1)).getAll(searchParams);
     }
 
     @Test
