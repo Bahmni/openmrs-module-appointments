@@ -1,4 +1,4 @@
-package org.openmrs.module.appointments.model;
+package org.openmrs.module.appointments.search.param;
 
 import java.util.Date;
 
@@ -11,9 +11,6 @@ public class AppointmentUnavailabilitySearchParams {
     private Date endDate;
     private boolean includeVoided = false;
     private Integer limit;
-
-    public AppointmentUnavailabilitySearchParams() {
-    }
 
     public String getLocationUuid() {
         return locationUuid;

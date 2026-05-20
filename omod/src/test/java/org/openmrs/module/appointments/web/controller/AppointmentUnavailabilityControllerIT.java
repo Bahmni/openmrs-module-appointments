@@ -5,7 +5,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
+import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.webservices.rest.SimpleObject;

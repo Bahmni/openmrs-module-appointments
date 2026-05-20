@@ -7,7 +7,7 @@ import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
+import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Time;

@@ -2,7 +2,7 @@ package org.openmrs.module.appointments.service;
 
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
+import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;

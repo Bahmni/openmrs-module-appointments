@@ -11,7 +11,7 @@ import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
+import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;

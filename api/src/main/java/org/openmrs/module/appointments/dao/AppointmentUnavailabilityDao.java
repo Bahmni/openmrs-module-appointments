@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.dao;
 
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
-import org.openmrs.module.appointments.model.AppointmentUnavailabilitySearchParams;
+import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 
 import java.util.List;
 
