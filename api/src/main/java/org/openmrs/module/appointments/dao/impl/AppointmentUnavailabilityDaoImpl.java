@@ -16,6 +16,7 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -67,12 +68,12 @@ public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabili
         }
 
         if (StringUtils.isNotBlank(searchParams.getStartDate())) {
-            Date startDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getStartDate()));
+            Date startDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getStartDate(), DateTimeFormatter.ISO_LOCAL_DATE));
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), startDate));
         }
 
         if (StringUtils.isNotBlank(searchParams.getEndDate())) {
-            Date endDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getEndDate()));
+            Date endDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getEndDate(), DateTimeFormatter.ISO_LOCAL_DATE));
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), endDate));
         }
 
