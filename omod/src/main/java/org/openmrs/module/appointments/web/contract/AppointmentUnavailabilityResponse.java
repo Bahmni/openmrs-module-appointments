@@ -3,12 +3,9 @@ package org.openmrs.module.appointments.web.contract;
 public class AppointmentUnavailabilityResponse {
 
     private String uuid;
-    private String locationUuid;
-    private String locationName;
-    private String appointmentServiceUuid;
-    private String appointmentServiceName;
-    private String providerUuid;
-    private String providerName;
+    private AppointmentUnavailabilityLocationResponse location;
+    private AppointmentUnavailabilityServiceResponse service;
+    private AppointmentUnavailabilityProviderResponse provider;
     private String startDate;
     private String startTime;
     private String endDate;
@@ -25,52 +22,28 @@ public class AppointmentUnavailabilityResponse {
         this.uuid = uuid;
     }
 
-    public String getLocationUuid() {
-        return locationUuid;
+    public AppointmentUnavailabilityLocationResponse getLocation() {
+        return location;
     }
 
-    public void setLocationUuid(String locationUuid) {
-        this.locationUuid = locationUuid;
+    public void setLocation(AppointmentUnavailabilityLocationResponse location) {
+        this.location = location;
     }
 
-    public String getLocationName() {
-        return locationName;
+    public AppointmentUnavailabilityServiceResponse getService() {
+        return service;
     }
 
-    public void setLocationName(String locationName) {
-        this.locationName = locationName;
+    public void setService(AppointmentUnavailabilityServiceResponse service) {
+        this.service = service;
     }
 
-    public String getAppointmentServiceUuid() {
-        return appointmentServiceUuid;
+    public AppointmentUnavailabilityProviderResponse getProvider() {
+        return provider;
     }
 
-    public void setAppointmentServiceUuid(String appointmentServiceUuid) {
-        this.appointmentServiceUuid = appointmentServiceUuid;
-    }
-
-    public String getAppointmentServiceName() {
-        return appointmentServiceName;
-    }
-
-    public void setAppointmentServiceName(String appointmentServiceName) {
-        this.appointmentServiceName = appointmentServiceName;
-    }
-
-    public String getProviderUuid() {
-        return providerUuid;
-    }
-
-    public void setProviderUuid(String providerUuid) {
-        this.providerUuid = providerUuid;
-    }
-
-    public String getProviderName() {
-        return providerName;
-    }
-
-    public void setProviderName(String providerName) {
-        this.providerName = providerName;
+    public void setProvider(AppointmentUnavailabilityProviderResponse provider) {
+        this.provider = provider;
     }
 
     public String getStartDate() {

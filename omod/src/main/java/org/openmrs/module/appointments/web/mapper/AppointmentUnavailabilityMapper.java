@@ -9,8 +9,11 @@ import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
+import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityLocationResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityProviderResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;
+import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityServiceResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -96,18 +99,21 @@ public class AppointmentUnavailabilityMapper {
         response.setUuid(unavailability.getUuid());
 
         if (unavailability.getLocation() != null) {
-            response.setLocationUuid(unavailability.getLocation().getUuid());
-            response.setLocationName(unavailability.getLocation().getName());
+            response.setLocation(new AppointmentUnavailabilityLocationResponse(
+                    unavailability.getLocation().getUuid(),
+                    unavailability.getLocation().getName()));
         }
 
         if (unavailability.getService() != null) {
-            response.setAppointmentServiceUuid(unavailability.getService().getUuid());
-            response.setAppointmentServiceName(unavailability.getService().getName());
+            response.setService(new AppointmentUnavailabilityServiceResponse(
+                    unavailability.getService().getUuid(),
+                    unavailability.getService().getName()));
         }
 
         if (unavailability.getProvider() != null) {
-            response.setProviderUuid(unavailability.getProvider().getUuid());
-            response.setProviderName(unavailability.getProvider().getName());
+            response.setProvider(new AppointmentUnavailabilityProviderResponse(
+                    unavailability.getProvider().getUuid(),
+                    unavailability.getProvider().getName()));
         }
 
         response.setStartDate(formatDate(unavailability.getStartDate()));

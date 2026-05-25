@@ -60,14 +60,15 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         AppointmentUnavailabilityResponse createdBlock = createdUnavailabilityBlocks[0];
         assertNotNull(createdBlock.getUuid());
-        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", createdBlock.getLocationUuid());
-        assertEquals("Test Location 1", createdBlock.getLocationName());
+        assertNotNull(createdBlock.getLocation());
+        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", createdBlock.getLocation().getUuid());
+        assertEquals("Test Location 1", createdBlock.getLocation().getName());
         assertEquals(date, createdBlock.getStartDate());
         assertEquals("09:00", createdBlock.getStartTime());
         assertEquals(date, createdBlock.getEndDate());
         assertEquals("17:00", createdBlock.getEndTime());
-        assertNull(createdBlock.getAppointmentServiceUuid());
-        assertNull(createdBlock.getProviderUuid());
+        assertNull(createdBlock.getService());
+        assertNull(createdBlock.getProvider());
     }
 
     @Test
@@ -106,9 +107,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         assertEquals(4, createdUnavailabilityBlocks.length);
 
         AppointmentUnavailabilityResponse firstCreatedBlock = createdUnavailabilityBlocks[0];
-        assertEquals("fff006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getAppointmentServiceUuid());
-        assertEquals("Test Service 1", firstCreatedBlock.getAppointmentServiceName());
-        assertEquals("ccc006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getProviderUuid());
+        assertNotNull(firstCreatedBlock.getService());
+        assertEquals("fff006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getService().getUuid());
+        assertEquals("Test Service 1", firstCreatedBlock.getService().getName());
+        assertNotNull(firstCreatedBlock.getProvider());
+        assertEquals("ccc006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getProvider().getUuid());
     }
 
     @Test
@@ -132,8 +135,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
         assertEquals(1, createdUnavailabilityBlocks.length);
         AppointmentUnavailabilityResponse createdBlock = createdUnavailabilityBlocks[0];
-        assertNull(createdBlock.getAppointmentServiceUuid());
-        assertNull(createdBlock.getProviderUuid());
+        assertNull(createdBlock.getService());
+        assertNull(createdBlock.getProvider());
     }
 
     @Test
@@ -286,8 +289,9 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         
         assertNotNull(fetchedBlock);
         assertEquals(uuid, fetchedBlock.getUuid());
-        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", fetchedBlock.getLocationUuid());
-        assertEquals("Test Location 1", fetchedBlock.getLocationName());
+        assertNotNull(fetchedBlock.getLocation());
+        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", fetchedBlock.getLocation().getUuid());
+        assertEquals("Test Location 1", fetchedBlock.getLocation().getName());
     }
 
     @Test

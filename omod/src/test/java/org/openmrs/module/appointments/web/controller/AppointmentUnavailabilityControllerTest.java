@@ -6,12 +6,10 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.openmrs.Location;
-import org.openmrs.Provider;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
+import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityLocationResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;
 import org.openmrs.module.appointments.web.mapper.AppointmentUnavailabilityMapper;
@@ -52,25 +50,9 @@ public class AppointmentUnavailabilityControllerTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
-    private Location testLocation;
-    private Provider testProvider;
-    private AppointmentServiceDefinition testService;
-
     @Before
     public void setUp() {
         initMocks(this);
-
-        testLocation = new Location();
-        testLocation.setUuid("location-uuid");
-        testLocation.setName("Test Location");
-
-        testProvider = new Provider();
-        testProvider.setUuid("provider-uuid");
-        testProvider.setName("Test Provider");
-
-        testService = new AppointmentServiceDefinition();
-        testService.setUuid("service-uuid");
-        testService.setName("Test Service");
     }
 
 
@@ -485,7 +467,6 @@ public class AppointmentUnavailabilityControllerTest {
     private AppointmentUnavailability createUnavailability(String uuid) {
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
         unavailability.setUuid(uuid);
-        unavailability.setLocation(testLocation);
         unavailability.setVoided(false);
         return unavailability;
     }
@@ -497,8 +478,7 @@ public class AppointmentUnavailabilityControllerTest {
     private AppointmentUnavailabilityResponse createResponse(String uuid) {
         AppointmentUnavailabilityResponse response = new AppointmentUnavailabilityResponse();
         response.setUuid(uuid);
-        response.setLocationUuid("location-uuid");
-        response.setLocationName("Test Location");
+        response.setLocation(new AppointmentUnavailabilityLocationResponse("location-uuid", "Test Location"));
         response.setStartDate("2026-08-10");
         response.setStartTime("09:00");
         response.setEndDate("2026-08-10");

@@ -282,18 +282,19 @@ public class AppointmentUnavailabilityMapperTest {
         unavailability.setCreator(creator);
         unavailability.setDateCreated(new java.util.Date());
 
-        // Execute
         AppointmentUnavailabilityResponse response = mapper.constructResponse(unavailability);
 
-        // Verify
         assertNotNull(response);
         assertEquals("test-uuid", response.getUuid());
-        assertEquals("location-uuid", response.getLocationUuid());
-        assertEquals("Test Location", response.getLocationName());
-        assertEquals("service-uuid", response.getAppointmentServiceUuid());
-        assertEquals("Test Service", response.getAppointmentServiceName());
-        assertEquals("provider-uuid", response.getProviderUuid());
-        assertEquals("Test Provider", response.getProviderName());
+        assertNotNull(response.getLocation());
+        assertEquals("location-uuid", response.getLocation().getUuid());
+        assertEquals("Test Location", response.getLocation().getName());
+        assertNotNull(response.getService());
+        assertEquals("service-uuid", response.getService().getUuid());
+        assertEquals("Test Service", response.getService().getName());
+        assertNotNull(response.getProvider());
+        assertEquals("provider-uuid", response.getProvider().getUuid());
+        assertEquals("Test Provider", response.getProvider().getName());
         assertEquals("2026-08-10", response.getStartDate());
         assertEquals("09:00", response.getStartTime());
         assertEquals("2026-08-10", response.getEndDate());
@@ -305,54 +306,41 @@ public class AppointmentUnavailabilityMapperTest {
 
     @Test
     public void shouldConstructResponseWithNullLocation() {
-        // Setup
         AppointmentUnavailability unavailability = createUnavailability();
         unavailability.setLocation(null);
 
-        // Execute
         AppointmentUnavailabilityResponse response = mapper.constructResponse(unavailability);
 
-        // Verify
         assertNotNull(response);
-        assertNull(response.getLocationUuid());
-        assertNull(response.getLocationName());
+        assertNull(response.getLocation());
     }
 
     @Test
     public void shouldConstructResponseWithNullService() {
-        // Setup
         AppointmentUnavailability unavailability = createUnavailability();
         unavailability.setLocation(testLocation);
         unavailability.setService(null);
 
-        // Execute
         AppointmentUnavailabilityResponse response = mapper.constructResponse(unavailability);
 
-        // Verify
         assertNotNull(response);
-        assertNull(response.getAppointmentServiceUuid());
-        assertNull(response.getAppointmentServiceName());
+        assertNull(response.getService());
     }
 
     @Test
     public void shouldConstructResponseWithNullProvider() {
-        // Setup
         AppointmentUnavailability unavailability = createUnavailability();
         unavailability.setLocation(testLocation);
         unavailability.setProvider(null);
 
-        // Execute
         AppointmentUnavailabilityResponse response = mapper.constructResponse(unavailability);
 
-        // Verify
         assertNotNull(response);
-        assertNull(response.getProviderUuid());
-        assertNull(response.getProviderName());
+        assertNull(response.getProvider());
     }
 
     @Test
     public void shouldConstructResponseWithNullDates() {
-        // Setup
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
         unavailability.setUuid("test-uuid");
         unavailability.setLocation(testLocation);
@@ -362,10 +350,8 @@ public class AppointmentUnavailabilityMapperTest {
         unavailability.setEndTime(null);
         unavailability.setVoided(false);
 
-        // Execute
         AppointmentUnavailabilityResponse response = mapper.constructResponse(unavailability);
 
-        // Verify
         assertNotNull(response);
         assertNull(response.getStartDate());
         assertNull(response.getStartTime());
