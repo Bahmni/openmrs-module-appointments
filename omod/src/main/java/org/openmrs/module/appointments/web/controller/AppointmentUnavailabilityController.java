@@ -1,6 +1,5 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.APIException;
@@ -22,12 +21,9 @@ import org.springframework.validation.Errors;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.HashMap;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentUnavailability")
@@ -44,21 +40,19 @@ public class AppointmentUnavailabilityController extends BaseRestController {
     @Autowired
     private AppointmentUnavailabilityRequestValidator unavailabilityRequestValidator;
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-
     @RequestMapping(method = RequestMethod.POST)
     @ResponseBody
     public ResponseEntity<Object> createAppointmentUnavailability(
-            @RequestBody List<AppointmentUnavailabilityRequest> requests) {
+            @RequestBody List<AppointmentUnavailabilityRequest> appointmentUnavailabilityRequests) {
 
-        Errors errors = new BeanPropertyBindingResult(requests, "appointmentUnavailabilityRequests");
-        unavailabilityRequestValidator.validate(requests, errors);
+        Errors errors = new BeanPropertyBindingResult(appointmentUnavailabilityRequests, "appointmentUnavailabilityRequests");
+        unavailabilityRequestValidator.validate(appointmentUnavailabilityRequests, errors);
         if (!errors.getAllErrors().isEmpty()) {
             log.error("Validation failed: " + errors.getAllErrors().get(0).getDefaultMessage());
             throw new APIException(errors.getAllErrors().get(0).getDefaultMessage());
         }
 
-        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityMapper.fromRequest(requests);
+        List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityMapper.fromRequest(appointmentUnavailabilityRequests);
         List<AppointmentUnavailability> savedUnavailabilities = appointmentUnavailabilityService.save(unavailabilities);
         List<AppointmentUnavailabilityResponse> responses = appointmentUnavailabilityMapper.constructResponse(savedUnavailabilities);
 
@@ -69,35 +63,7 @@ public class AppointmentUnavailabilityController extends BaseRestController {
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
     public ResponseEntity<Object> getAllAppointmentUnavailabilities(
-            @RequestParam(value = "locationUuid", required = false) String locationUuid,
-            @RequestParam(value = "serviceUuid", required = false) String serviceUuid,
-            @RequestParam(value = "providerUuid", required = false) String providerUuid,
-            @RequestParam(value = "startDate", required = false) String startDateStr,
-            @RequestParam(value = "endDate", required = false) String endDateStr,
-            @RequestParam(value = "includeVoided", required = false, defaultValue = "false") boolean includeVoided,
-            @RequestParam(value = "limit", required = false) Integer limit) throws ParseException {
-
-        log.info("Fetching appointment unavailabilities with filters - location: " + locationUuid +
-                ", service: " + serviceUuid + ", provider: " + providerUuid);
-
-        Date startDate = null;
-        if (StringUtils.isNotBlank(startDateStr)) {
-            startDate = java.sql.Date.valueOf(LocalDate.parse(startDateStr, DATE_FORMATTER));
-        }
-
-        Date endDate = null;
-        if (StringUtils.isNotBlank(endDateStr)) {
-            endDate = java.sql.Date.valueOf(LocalDate.parse(endDateStr, DATE_FORMATTER));
-        }
-
-        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
-        searchParams.setLocationUuid(locationUuid);
-        searchParams.setServiceUuid(serviceUuid);
-        searchParams.setProviderUuid(providerUuid);
-        searchParams.setStartDate(startDate);
-        searchParams.setEndDate(endDate);
-        searchParams.setIncludeVoided(includeVoided);
-        searchParams.setLimit(limit);
+            AppointmentUnavailabilitySearchParams searchParams) {
 
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityService.getAll(searchParams);
         List<AppointmentUnavailabilityResponse> responses = appointmentUnavailabilityMapper.constructResponse(unavailabilities);

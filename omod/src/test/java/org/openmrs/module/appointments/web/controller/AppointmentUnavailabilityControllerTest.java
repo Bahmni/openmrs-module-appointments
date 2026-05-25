@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.Location;
@@ -77,7 +76,6 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldCreateAppointmentUnavailabilitySuccessfully() {
-        // Setup
         List<AppointmentUnavailabilityRequest> requests = createValidRequests();
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
@@ -87,10 +85,8 @@ public class AppointmentUnavailabilityControllerTest {
         when(appointmentUnavailabilityService.save(unavailabilities)).thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
         ResponseEntity<Object> response = controller.createAppointmentUnavailability(requests);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responses, response.getBody());
         verify(unavailabilityRequestValidator, times(1)).validate(eq(requests), any(Errors.class));
@@ -101,7 +97,6 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldThrowExceptionWhenValidationFails() {
-        // Setup
         List<AppointmentUnavailabilityRequest> requests = createValidRequests();
 
         doAnswer(invocation -> {
@@ -110,7 +105,6 @@ public class AppointmentUnavailabilityControllerTest {
             return null;
         }).when(unavailabilityRequestValidator).validate(anyList(), any(Errors.class));
 
-        // Execute & Verify
         expectedException.expect(RuntimeException.class);
         expectedException.expectMessage("Validation failed: locationUuid is required");
         controller.createAppointmentUnavailability(requests);
@@ -145,8 +139,7 @@ public class AppointmentUnavailabilityControllerTest {
 
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithNoFilters() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithNoFilters() {
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
 
@@ -154,28 +147,16 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(responses, response.getBody());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertNull(capturedParams.getLocationUuid());
-        assertNull(capturedParams.getServiceUuid());
-        assertNull(capturedParams.getProviderUuid());
-        assertFalse(capturedParams.isIncludeVoided());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithLocationFilter() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithLocationFilter() {
         String locationUuid = "location-uuid";
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
@@ -184,24 +165,16 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                locationUuid, null, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(locationUuid);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertEquals(locationUuid, capturedParams.getLocationUuid());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithServiceFilter() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithServiceFilter() {
         String serviceUuid = "service-uuid";
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
@@ -210,24 +183,16 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, serviceUuid, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setServiceUuid(serviceUuid);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertEquals(serviceUuid, capturedParams.getServiceUuid());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithProviderFilter() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithProviderFilter() {
         String providerUuid = "provider-uuid";
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
@@ -236,26 +201,18 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, providerUuid, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setProviderUuid(providerUuid);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertEquals(providerUuid, capturedParams.getProviderUuid());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithDateFilters() throws ParseException {
-        // Setup
-        String startDateStr = "2026-08-01";
-        String endDateStr = "2026-08-31";
+    public void shouldGetAllAppointmentUnavailabilitiesWithDateFilters() {
+        String startDate = "2026-08-01";
+        String endDate = "2026-08-31";
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
 
@@ -263,25 +220,17 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, null, startDateStr, endDateStr, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setStartDate(startDate);
+        searchParams.setEndDate(endDate);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertNotNull(capturedParams.getStartDate());
-        assertNotNull(capturedParams.getEndDate());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithIncludeVoided() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithIncludeVoided() {
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
 
@@ -289,24 +238,16 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, null, null, null, true, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setIncludeVoided(true);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertTrue(capturedParams.isIncludeVoided());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithLimit() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithLimit() {
         Integer limit = 10;
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
@@ -315,29 +256,21 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, null, null, null, false, limit);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLimit(limit);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertEquals(limit, capturedParams.getLimit());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithAllFilters() throws ParseException {
-        // Setup
+    public void shouldGetAllAppointmentUnavailabilitiesWithAllFilters() {
         String locationUuid = "location-uuid";
         String serviceUuid = "service-uuid";
         String providerUuid = "provider-uuid";
-        String startDateStr = "2026-08-01";
-        String endDateStr = "2026-08-31";
+        String startDate = "2026-08-01";
+        String endDate = "2026-08-31";
         boolean includeVoided = true;
         Integer limit = 5;
 
@@ -348,29 +281,22 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                locationUuid, serviceUuid, providerUuid, startDateStr, endDateStr, includeVoided, limit);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid(locationUuid);
+        searchParams.setServiceUuid(serviceUuid);
+        searchParams.setProviderUuid(providerUuid);
+        searchParams.setStartDate(startDate);
+        searchParams.setEndDate(endDate);
+        searchParams.setIncludeVoided(includeVoided);
+        searchParams.setLimit(limit);
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        assertEquals(locationUuid, capturedParams.getLocationUuid());
-        assertEquals(serviceUuid, capturedParams.getServiceUuid());
-        assertEquals(providerUuid, capturedParams.getProviderUuid());
-        assertNotNull(capturedParams.getStartDate());
-        assertNotNull(capturedParams.getEndDate());
-        assertTrue(capturedParams.isIncludeVoided());
-        assertEquals(limit, capturedParams.getLimit());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldGetAllAppointmentUnavailabilitiesWithEmptyStringFilters() throws ParseException {
+    public void shouldGetAllAppointmentUnavailabilitiesWithEmptyStringFilters() {
         List<AppointmentUnavailability> unavailabilities = createUnavailabilityList();
         List<AppointmentUnavailabilityResponse> responses = createResponseList();
 
@@ -378,27 +304,18 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(unavailabilities);
         when(appointmentUnavailabilityMapper.constructResponse(unavailabilities)).thenReturn(responses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                "", "", "", "", "", false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid("");
+        searchParams.setServiceUuid("");
+        searchParams.setProviderUuid("");
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        
-        ArgumentCaptor<AppointmentUnavailabilitySearchParams> paramsCaptor = 
-                ArgumentCaptor.forClass(AppointmentUnavailabilitySearchParams.class);
-        verify(appointmentUnavailabilityService, times(1)).getAll(paramsCaptor.capture());
-        
-        AppointmentUnavailabilitySearchParams capturedParams = paramsCaptor.getValue();
-        // Empty strings are passed as-is, DAO handles blank checks
-        assertEquals("", capturedParams.getLocationUuid());
-        assertEquals("", capturedParams.getServiceUuid());
-        assertEquals("", capturedParams.getProviderUuid());
+        verify(appointmentUnavailabilityService, times(1)).getAll(searchParams);
     }
 
     @Test
-    public void shouldReturnEmptyListWhenNoUnavailabilitiesFound() throws ParseException {
-        // Setup
+    public void shouldReturnEmptyListWhenNoUnavailabilitiesFound() {
         List<AppointmentUnavailability> emptyList = new ArrayList<>();
         List<AppointmentUnavailabilityResponse> emptyResponses = new ArrayList<>();
 
@@ -406,11 +323,9 @@ public class AppointmentUnavailabilityControllerTest {
                 .thenReturn(emptyList);
         when(appointmentUnavailabilityMapper.constructResponse(emptyList)).thenReturn(emptyResponses);
 
-        // Execute
-        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(
-                null, null, null, null, null, false, null);
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        ResponseEntity<Object> response = controller.getAllAppointmentUnavailabilities(searchParams);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
         List<AppointmentUnavailabilityResponse> result = (List<AppointmentUnavailabilityResponse>) response.getBody();
         assertTrue(result.isEmpty());
@@ -419,7 +334,6 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldGetAppointmentUnavailabilityByUuid() {
-        // Setup
         String uuid = "test-uuid";
         AppointmentUnavailability unavailability = createUnavailability(uuid);
         AppointmentUnavailabilityResponse expectedResponse = createResponse(uuid);
@@ -427,10 +341,8 @@ public class AppointmentUnavailabilityControllerTest {
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(unavailability);
         when(appointmentUnavailabilityMapper.constructResponse(unavailability)).thenReturn(expectedResponse);
 
-        // Execute
         ResponseEntity<Object> response = controller.getAppointmentUnavailabilityByUuid(uuid);
 
-        // Verify
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(expectedResponse, response.getBody());
         verify(appointmentUnavailabilityService, times(1)).getByUuid(uuid);
@@ -439,25 +351,19 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldReturnNotFoundWhenUnavailabilityNotFoundByUuid() {
-        // Setup
         String uuid = "non-existent-uuid";
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(null);
 
-        // Execute
         ResponseEntity<Object> response = controller.getAppointmentUnavailabilityByUuid(uuid);
 
-        // Verify
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Appointment Unavailability not found", response.getBody());
         verify(appointmentUnavailabilityService, times(1)).getByUuid(uuid);
         verify(appointmentUnavailabilityMapper, never()).constructResponse(any(AppointmentUnavailability.class));
     }
 
-    // ========================= VOID TESTS =========================
-
     @Test
     public void shouldVoidAppointmentUnavailabilitySuccessfully() {
-        // Setup
         String uuid = "test-uuid";
         String voidReason = "Test void reason";
         AppointmentUnavailability unavailability = createUnavailability(uuid);
@@ -465,10 +371,8 @@ public class AppointmentUnavailabilityControllerTest {
 
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(unavailability);
 
-        // Execute
         ResponseEntity<Object> response = controller.voidAppointmentUnavailability(uuid, voidReason);
 
-        // Verify
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(appointmentUnavailabilityService, times(1)).getByUuid(uuid);
         verify(appointmentUnavailabilityService, times(1)).voidAppointmentUnavailability(unavailability, voidReason);
@@ -476,31 +380,25 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldVoidAppointmentUnavailabilityWithNullReason() {
-        // Setup
         String uuid = "test-uuid";
         AppointmentUnavailability unavailability = createUnavailability(uuid);
         unavailability.setVoided(false);
 
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(unavailability);
 
-        // Execute
         ResponseEntity<Object> response = controller.voidAppointmentUnavailability(uuid, null);
 
-        // Verify
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(appointmentUnavailabilityService, times(1)).voidAppointmentUnavailability(unavailability, null);
     }
 
     @Test
     public void shouldReturnNotFoundWhenVoidingNonExistentUnavailability() {
-        // Setup
         String uuid = "non-existent-uuid";
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(null);
 
-        // Execute
         ResponseEntity<Object> response = controller.voidAppointmentUnavailability(uuid, "reason");
 
-        // Verify
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Appointment Unavailability not found", response.getBody());
         verify(appointmentUnavailabilityService, times(1)).getByUuid(uuid);
@@ -509,7 +407,6 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldNotVoidAlreadyVoidedUnavailability() {
-        // Setup
         String uuid = "test-uuid";
         String voidReason = "Another reason";
         AppointmentUnavailability unavailability = createUnavailability(uuid);
@@ -517,10 +414,8 @@ public class AppointmentUnavailabilityControllerTest {
 
         when(appointmentUnavailabilityService.getByUuid(uuid)).thenReturn(unavailability);
 
-        // Execute
         ResponseEntity<Object> response = controller.voidAppointmentUnavailability(uuid, voidReason);
 
-        // Verify
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
         verify(appointmentUnavailabilityService, times(1)).getByUuid(uuid);
         verify(appointmentUnavailabilityService, never()).voidAppointmentUnavailability(any(), anyString());
@@ -529,13 +424,10 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldHandleRuntimeException() {
-        // Setup
         RuntimeException exception = new RuntimeException("Test runtime exception");
 
-        // Execute
         ResponseEntity<Object> response = controller.handleException(exception);
 
-        // Verify
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> errors = (Map<String, Object>) response.getBody();
         assertEquals("Test runtime exception", errors.get("message"));
@@ -543,13 +435,10 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldHandleParseException() {
-        // Setup
         ParseException exception = new ParseException("Invalid date format", 0);
 
-        // Execute
         ResponseEntity<Object> response = controller.handleException(exception);
 
-        // Verify
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> errors = (Map<String, Object>) response.getBody();
         assertEquals("Invalid date format", errors.get("message"));
@@ -557,18 +446,14 @@ public class AppointmentUnavailabilityControllerTest {
 
     @Test
     public void shouldHandleExceptionWithNullMessage() {
-        // Setup
         RuntimeException exception = new RuntimeException((String) null);
 
-        // Execute
         ResponseEntity<Object> response = controller.handleException(exception);
 
-        // Verify
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         Map<String, Object> errors = (Map<String, Object>) response.getBody();
         assertNull(errors.get("message"));
     }
-
 
 
     private List<AppointmentUnavailabilityRequest> createValidRequests() {

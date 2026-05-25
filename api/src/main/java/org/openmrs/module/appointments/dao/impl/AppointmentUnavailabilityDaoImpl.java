@@ -21,7 +21,10 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabilityDao {
@@ -94,12 +97,14 @@ public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabili
             }
         }
 
-        if (searchParams.getStartDate() != null) {
-            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), searchParams.getStartDate()));
+        if (StringUtils.isNotBlank(searchParams.getStartDate())) {
+            Date startDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), startDate));
         }
 
-        if (searchParams.getEndDate() != null) {
-            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), searchParams.getEndDate()));
+        if (StringUtils.isNotBlank(searchParams.getEndDate())) {
+            Date endDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getEndDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), endDate));
         }
 
         if (!searchParams.isIncludeVoided()) {

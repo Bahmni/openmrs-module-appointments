@@ -142,13 +142,10 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldFilterByDateRange() throws Exception {
-        Date startDate = DATE_FORMAT.parse("2026-08-05");
-        Date endDate = DATE_FORMAT.parse("2026-08-07");
-
         AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
         searchParams.setLocationUuid(LOCATION_UUID);
-        searchParams.setStartDate(startDate);
-        searchParams.setEndDate(endDate);
+        searchParams.setStartDate("2026-08-05");
+        searchParams.setEndDate("2026-08-07");
 
         List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
@@ -193,13 +190,10 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnEmptyListWhenNoMatches() throws Exception {
-        Date startDate = DATE_FORMAT.parse("2026-09-01");
-        Date endDate = DATE_FORMAT.parse("2026-09-30");
-
         AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
         searchParams.setLocationUuid(LOCATION_UUID);
-        searchParams.setStartDate(startDate);
-        searchParams.setEndDate(endDate);
+        searchParams.setStartDate("2026-09-01");
+        searchParams.setEndDate("2026-09-30");
 
         List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
