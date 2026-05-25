@@ -205,15 +205,6 @@
         <property name="sessionFactory">
             <ref bean="sessionFactory"/>
         </property>
-        <property name="locationService">
-            <ref bean="locationService"/>
-        </property>
-        <property name="providerService">
-            <ref bean="providerService"/>
-        </property>
-        <property name="appointmentServiceDefinitionService">
-            <ref bean="appointmentServiceService"/>
-        </property>
     </bean>
 
     <bean id="appointmentUnavailabilityService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">

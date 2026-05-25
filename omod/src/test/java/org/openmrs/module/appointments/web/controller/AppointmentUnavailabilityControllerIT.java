@@ -8,13 +8,12 @@ import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
-import org.openmrs.module.webservices.rest.SimpleObject;
+import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -53,22 +52,22 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] createdUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(1, result.size());
+        assertNotNull(createdUnavailabilityBlocks);
+        assertEquals(1, createdUnavailabilityBlocks.length);
 
-        SimpleObject block = SimpleObject.parseJson(objectMapper.writeValueAsString(result.get(0)));
-        assertNotNull(block.get("uuid"));
-        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", block.get("locationUuid"));
-        assertEquals("Test Location 1", block.get("locationName"));
-        assertEquals(date, block.get("startDate"));
-        assertEquals("09:00", block.get("startTime"));
-        assertEquals(date, block.get("endDate"));
-        assertEquals("17:00", block.get("endTime"));
-        assertNull(block.get("appointmentServiceUuid"));
-        assertNull(block.get("providerUuid"));
+        AppointmentUnavailabilityResponse createdBlock = createdUnavailabilityBlocks[0];
+        assertNotNull(createdBlock.getUuid());
+        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", createdBlock.getLocationUuid());
+        assertEquals("Test Location 1", createdBlock.getLocationName());
+        assertEquals(date, createdBlock.getStartDate());
+        assertEquals("09:00", createdBlock.getStartTime());
+        assertEquals(date, createdBlock.getEndDate());
+        assertEquals("17:00", createdBlock.getEndTime());
+        assertNull(createdBlock.getAppointmentServiceUuid());
+        assertNull(createdBlock.getProviderUuid());
     }
 
     @Test
@@ -100,16 +99,16 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] createdUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(4, result.size());
+        assertNotNull(createdUnavailabilityBlocks);
+        assertEquals(4, createdUnavailabilityBlocks.length);
 
-        SimpleObject block = SimpleObject.parseJson(objectMapper.writeValueAsString(result.get(0)));
-        assertEquals("fff006e5-9fbb-4f20-866b-0ece245615a1", block.get("appointmentServiceUuid"));
-        assertEquals("Test Service 1", block.get("appointmentServiceName"));
-        assertEquals("ccc006e5-9fbb-4f20-866b-0ece245615a1", block.get("providerUuid"));
+        AppointmentUnavailabilityResponse firstCreatedBlock = createdUnavailabilityBlocks[0];
+        assertEquals("fff006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getAppointmentServiceUuid());
+        assertEquals("Test Service 1", firstCreatedBlock.getAppointmentServiceName());
+        assertEquals("ccc006e5-9fbb-4f20-866b-0ece245615a1", firstCreatedBlock.getProviderUuid());
     }
 
     @Test
@@ -128,13 +127,13 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] createdUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertEquals(1, result.size());
-        SimpleObject block = SimpleObject.parseJson(objectMapper.writeValueAsString(result.get(0)));
-        assertNull(block.get("appointmentServiceUuid"));
-        assertNull(block.get("providerUuid"));
+        assertEquals(1, createdUnavailabilityBlocks.length);
+        AppointmentUnavailabilityResponse createdBlock = createdUnavailabilityBlocks[0];
+        assertNull(createdBlock.getAppointmentServiceUuid());
+        assertNull(createdBlock.getProviderUuid());
     }
 
     @Test
@@ -190,8 +189,8 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         }
 
         AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
-        List<AppointmentUnavailability> all = service.getAll(searchParams);
-        assertEquals(5, all.size());
+        List<AppointmentUnavailability> allBlocks = service.getAll(searchParams);
+        assertEquals(5, allBlocks.size());
     }
 
     @Test
@@ -199,11 +198,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentUnavailability"));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertTrue(result.size() > 0);
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertTrue(fetchedUnavailabilityBlocks.length > 0);
     }
 
     @Test
@@ -212,11 +211,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 new Parameter("locationUuid", "aaa006e5-9fbb-4f20-866b-0ece245615a1")));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(4, result.size()); // 4 non-voided blocks for location 1
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertEquals(4, fetchedUnavailabilityBlocks.length); // 4 non-voided blocks for location 1
     }
 
     @Test
@@ -226,11 +225,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 new Parameter("serviceUuid", "fff006e5-9fbb-4f20-866b-0ece245615a1")));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertEquals(2, fetchedUnavailabilityBlocks.length);
     }
 
     @Test
@@ -241,11 +240,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 new Parameter("endDate", "2099-08-07")));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(3, result.size());
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertEquals(3, fetchedUnavailabilityBlocks.length);
     }
 
     @Test
@@ -255,11 +254,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 new Parameter("includeVoided", "true")));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(5, result.size());
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertEquals(5, fetchedUnavailabilityBlocks.length);
     }
 
     @Test
@@ -269,11 +268,11 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
                 new Parameter("limit", "2")));
         assertEquals(200, response.getStatus());
 
-        String content = response.getContentAsString();
-        ArrayList result = objectMapper.readValue(content, ArrayList.class);
+        AppointmentUnavailabilityResponse[] fetchedUnavailabilityBlocks = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse[].class);
 
-        assertNotNull(result);
-        assertEquals(2, result.size());
+        assertNotNull(fetchedUnavailabilityBlocks);
+        assertEquals(2, fetchedUnavailabilityBlocks.length);
     }
 
     @Test
@@ -282,11 +281,13 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newGetRequest("/rest/v1/appointmentUnavailability/" + uuid));
         assertEquals(200, response.getStatus());
 
-        SimpleObject result = SimpleObject.parseJson(response.getContentAsString());
-        assertNotNull(result);
-        assertEquals(uuid, result.get("uuid"));
-        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", result.get("locationUuid"));
-        assertEquals("Test Location 1", result.get("locationName"));
+        AppointmentUnavailabilityResponse fetchedBlock = 
+                objectMapper.readValue(response.getContentAsString(), AppointmentUnavailabilityResponse.class);
+        
+        assertNotNull(fetchedBlock);
+        assertEquals(uuid, fetchedBlock.getUuid());
+        assertEquals("aaa006e5-9fbb-4f20-866b-0ece245615a1", fetchedBlock.getLocationUuid());
+        assertEquals("Test Location 1", fetchedBlock.getLocationName());
     }
 
     @Test
@@ -300,16 +301,16 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     public void shouldVoidUnavailabilityBlock() throws Exception {
         String uuid = "vvv006e5-9fbb-4f20-866b-0ece245615a2";
 
-        AppointmentUnavailability before = service.getByUuid(uuid);
-        assertFalse(before.getVoided());
+        AppointmentUnavailability beforeVoid = service.getByUuid(uuid);
+        assertFalse(beforeVoid.getVoided());
 
         MockHttpServletResponse response = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + uuid,
                 new Parameter("voidReason", "Test void reason")));
         assertEquals(204, response.getStatus());
 
-        AppointmentUnavailability after = service.getByUuid(uuid);
-        assertTrue(after.getVoided());
-        assertEquals("Test void reason", after.getVoidReason());
+        AppointmentUnavailability afterVoid = service.getByUuid(uuid);
+        assertTrue(afterVoid.getVoided());
+        assertEquals("Test void reason", afterVoid.getVoidReason());
     }
 
     @Test
@@ -345,23 +346,23 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse createResponse = handle(newPostRequest("/rest/v1/appointmentUnavailability", dataJson));
         assertEquals(200, createResponse.getStatus());
 
-        String content = createResponse.getContentAsString();
-        ArrayList created = objectMapper.readValue(content, ArrayList.class);
-        assertEquals(2, created.size());
+        AppointmentUnavailabilityResponse[] createdUnavailabilityBlocks = 
+                objectMapper.readValue(createResponse.getContentAsString(), AppointmentUnavailabilityResponse[].class);
+        assertEquals(2, createdUnavailabilityBlocks.length);
 
-        SimpleObject block1 = SimpleObject.parseJson(objectMapper.writeValueAsString(created.get(0)));
-        String uuid1 = (String) block1.get("uuid");
+        AppointmentUnavailabilityResponse firstCreatedBlock = createdUnavailabilityBlocks[0];
+        String firstBlockUuid = firstCreatedBlock.getUuid();
 
-        MockHttpServletResponse deleteResponse = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + uuid1,
+        MockHttpServletResponse deleteResponse = handle(newDeleteRequest("/rest/v1/appointmentUnavailability/" + firstBlockUuid,
                 new Parameter("voidReason", "Test delete")));
         assertEquals(204, deleteResponse.getStatus());
 
-        AppointmentUnavailability voided = service.getByUuid(uuid1);
-        assertTrue(voided.getVoided());
+        AppointmentUnavailability voidedBlock = service.getByUuid(firstBlockUuid);
+        assertTrue(voidedBlock.getVoided());
 
-        SimpleObject block2 = SimpleObject.parseJson(objectMapper.writeValueAsString(created.get(1)));
-        String uuid2 = (String) block2.get("uuid");
-        AppointmentUnavailability notVoided = service.getByUuid(uuid2);
-        assertFalse(notVoided.getVoided());
+        AppointmentUnavailabilityResponse secondCreatedBlock = createdUnavailabilityBlocks[1];
+        String secondBlockUuid = secondCreatedBlock.getUuid();
+        AppointmentUnavailability notVoidedBlock = service.getByUuid(secondBlockUuid);
+        assertFalse(notVoidedBlock.getVoided());
     }
 }

@@ -5,15 +5,9 @@ import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
-import org.openmrs.Location;
-import org.openmrs.Provider;
-import org.openmrs.api.LocationService;
-import org.openmrs.api.ProviderService;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
-import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
-import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.TypedQuery;
@@ -22,7 +16,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -30,24 +23,9 @@ import java.util.List;
 public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabilityDao {
 
     private SessionFactory sessionFactory;
-    private LocationService locationService;
-    private ProviderService providerService;
-    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
     public void setSessionFactory(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
-    }
-
-    public void setLocationService(LocationService locationService) {
-        this.locationService = locationService;
-    }
-
-    public void setProviderService(ProviderService providerService) {
-        this.providerService = providerService;
-    }
-
-    public void setAppointmentServiceDefinitionService(AppointmentServiceDefinitionService appointmentServiceDefinitionService) {
-        this.appointmentServiceDefinitionService = appointmentServiceDefinitionService;
     }
 
     @Transactional
@@ -77,33 +55,24 @@ public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabili
         List<Predicate> predicates = new ArrayList<>();
 
         if (StringUtils.isNotBlank(searchParams.getLocationUuid())) {
-            Location location = locationService.getLocationByUuid(searchParams.getLocationUuid());
-            if (location != null) {
-                predicates.add(criteriaBuilder.equal(root.get("location"), location));
-            }
+            predicates.add(criteriaBuilder.equal(root.get("location").get("uuid"), searchParams.getLocationUuid()));
         }
 
         if (StringUtils.isNotBlank(searchParams.getServiceUuid())) {
-            AppointmentServiceDefinition service = appointmentServiceDefinitionService.getAppointmentServiceByUuid(searchParams.getServiceUuid());
-            if (service != null) {
-                predicates.add(criteriaBuilder.equal(root.get("service"), service));
-            }
+            predicates.add(criteriaBuilder.equal(root.get("service").get("uuid"), searchParams.getServiceUuid()));
         }
 
         if (StringUtils.isNotBlank(searchParams.getProviderUuid())) {
-            Provider provider = providerService.getProviderByUuid(searchParams.getProviderUuid());
-            if (provider != null) {
-                predicates.add(criteriaBuilder.equal(root.get("provider"), provider));
-            }
+            predicates.add(criteriaBuilder.equal(root.get("provider").get("uuid"), searchParams.getProviderUuid()));
         }
 
         if (StringUtils.isNotBlank(searchParams.getStartDate())) {
-            Date startDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getStartDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            Date startDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getStartDate()));
             predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("endDate"), startDate));
         }
 
         if (StringUtils.isNotBlank(searchParams.getEndDate())) {
-            Date endDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getEndDate(), DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+            Date endDate = java.sql.Date.valueOf(LocalDate.parse(searchParams.getEndDate()));
             predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("startDate"), endDate));
         }
 

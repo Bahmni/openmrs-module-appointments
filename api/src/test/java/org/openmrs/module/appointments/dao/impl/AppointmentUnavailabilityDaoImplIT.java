@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.sql.Time;
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -179,7 +178,6 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
             AppointmentUnavailability current = results.get(i);
             AppointmentUnavailability next = results.get(i + 1);
 
-            // Current startDate should be <= next startDate
             assertTrue(current.getStartDate().compareTo(next.getStartDate()) <= 0);
 
             if (current.getStartDate().equals(next.getStartDate())) {
@@ -212,13 +210,13 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
-    public void shouldIgnoreInvalidLocationUuid() throws Exception {
+    public void shouldReturnEmptyResultsForInvalidLocationUuid() throws Exception {
         AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
         searchParams.setLocationUuid("non-existent-uuid");
 
         List<AppointmentUnavailability> results = appointmentUnavailabilityDao.getAll(searchParams);
 
         assertNotNull(results);
-        assertTrue(results.size() >= 4);
+        assertEquals(0, results.size());
     }
 }
