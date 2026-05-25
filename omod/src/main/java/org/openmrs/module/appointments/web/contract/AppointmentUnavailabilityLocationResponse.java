@@ -4,6 +4,9 @@ public class AppointmentUnavailabilityLocationResponse {
     private String uuid;
     private String name;
 
+    public AppointmentUnavailabilityLocationResponse() {
+    }
+
     public AppointmentUnavailabilityLocationResponse(String uuid, String name) {
         this.uuid = uuid;
         this.name = name;
