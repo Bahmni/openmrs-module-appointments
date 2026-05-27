@@ -905,4 +905,96 @@
             <column name="appointment_number"/>
         </createIndex>
     </changeSet>
+    <changeSet id="create-appointment-unavailability-table-20260514" author="Bahmni">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="appointment_unavailability" />
+            </not>
+        </preConditions>
+        <comment>Create table to store appointment unavailability blocks</comment>
+        <createTable tableName="appointment_unavailability">
+            <column name="appointment_unavailability_id" type="int" autoIncrement="true">
+                <constraints primaryKey="true" nullable="false"/>
+            </column>
+            <column name="location_id" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="appointment_service_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="provider_id" type="int">
+                <constraints nullable="true"/>
+            </column>
+            <column name="start_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="start_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_date" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="end_time" type="time">
+                <constraints nullable="false"/>
+            </column>
+            <column name="uuid" type="varchar(38)">
+                <constraints nullable="false" unique="true"/>
+            </column>
+            <column name="date_created" type="datetime">
+                <constraints nullable="false"/>
+            </column>
+            <column name="creator" type="int">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_changed" type="datetime"/>
+            <column name="changed_by" type="int"/>
+            <column name="voided" type="boolean" defaultValueBoolean="false">
+                <constraints nullable="false"/>
+            </column>
+            <column name="voided_by" type="int"/>
+            <column name="date_voided" type="datetime"/>
+            <column name="void_reason" type="varchar(255)"/>
+        </createTable>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_location"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="location_id"
+                referencedTableName="location"
+                referencedColumnNames="location_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_service"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="appointment_service_id"
+                referencedTableName="appointment_service"
+                referencedColumnNames="appointment_service_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_provider"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="provider_id"
+                referencedTableName="provider"
+                referencedColumnNames="provider_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_creator"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="creator"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_changed_by"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="changed_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+        <addForeignKeyConstraint
+                constraintName="fk_appointment_unavailability_voided_by"
+                baseTableName="appointment_unavailability"
+                baseColumnNames="voided_by"
+                referencedTableName="users"
+                referencedColumnNames="user_id"/>
+        <createIndex indexName="idx_appointment_unavailability_location_dates" tableName="appointment_unavailability">
+            <column name="location_id"/>
+            <column name="start_date"/>
+            <column name="end_date"/>
+        </createIndex>
+    </changeSet>
 </databaseChangeLog>
