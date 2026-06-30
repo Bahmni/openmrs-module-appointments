@@ -1,8 +1,11 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.attribute.AttributeType;
 import org.openmrs.attribute.BaseAttributeType;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentServiceAttributeType extends BaseAttributeType<AppointmentServiceDefinition> implements AttributeType<AppointmentServiceDefinition> {
 
     private Integer appointmentServiceAttributeTypeId;

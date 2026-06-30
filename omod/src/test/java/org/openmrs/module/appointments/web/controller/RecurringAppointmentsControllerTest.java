@@ -4,7 +4,6 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -29,10 +28,8 @@ import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsSer
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.MockedStatic;
+import org.junit.After;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -51,10 +48,8 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 public class RecurringAppointmentsControllerTest {
 
     @InjectMocks
@@ -95,12 +90,21 @@ public class RecurringAppointmentsControllerTest {
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
+    private MockedStatic<Context> mockedContext;
+
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        PowerMockito.mockStatic(Context.class);
-        Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
-        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        mockedContext = mockStatic(Context.class);
+        mockedContext.when(() -> Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

@@ -3,41 +3,37 @@ package org.openmrs.module.appointments.advice;
 import org.ict4h.atomfeed.server.repository.jdbc.AllEventRecordsQueueJdbcImpl;
 import org.ict4h.atomfeed.server.service.Event;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
+import org.ict4h.atomfeed.transaction.AFTransactionWork;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.net.URI;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.verifyNew;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class, AppointmentServiceDefinitionAdvice.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AppointmentServiceDefinitionAdviceTest {
 
     private static final String UUID = "5631b434-78aa-102b-91a0-001e378eb17e";
@@ -48,51 +44,77 @@ public class AppointmentServiceDefinitionAdviceTest {
     @Mock
     private AppointmentServiceDefinition appointmentServiceDefinition;
 
-    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
-
     @Mock
     private PlatformTransactionManager platformTransactionManager;
 
     @Mock
-    private AllEventRecordsQueueJdbcImpl allEventRecordsQueue;
-
-    @Mock
-    private EventServiceImpl eventService;
-
-    @Mock
     private AdministrationService administrationService;
-    @Mock
-    private Event event;
+
+    private MockedStatic<Context> mockedContext;
+    private MockedConstruction<AtomFeedSpringTransactionManager> mockedTransactionManager;
+    private MockedConstruction<AllEventRecordsQueueJdbcImpl> mockedEventRecordsQueue;
+    private MockedConstruction<EventServiceImpl> mockedEventService;
+    private MockedConstruction<Event> mockedEvent;
+
+    // Captured constructor arguments for every Event built during the test (replaces PowerMock verifyNew).
+    private final List<List<Object>> eventConstructorArgs = new ArrayList<>();
+
     private AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice;
 
     @Before
-    public void setUp() throws Exception {
-        mockStatic(Context.class);
-
-        atomFeedSpringTransactionManager = spy(new AtomFeedSpringTransactionManager(platformTransactionManager));
-
-        when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(Collections.singletonList(platformTransactionManager));
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+    public void setUp() {
+        mockedContext = mockStatic(Context.class);
+        mockedContext.when(() -> Context.getRegisteredComponents(PlatformTransactionManager.class))
+                .thenReturn(Collections.singletonList(platformTransactionManager));
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY)).thenReturn("true");
         when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)).thenReturn(DEFAULT_URL_PATTERN);
 
-        whenNew(AtomFeedSpringTransactionManager.class).withAnyArguments().thenReturn(atomFeedSpringTransactionManager);
-        whenNew(AllEventRecordsQueueJdbcImpl.class).withArguments(this.atomFeedSpringTransactionManager).thenReturn(allEventRecordsQueue);
-        whenNew(EventServiceImpl.class).withArguments(allEventRecordsQueue).thenReturn(eventService);
-        whenNew(Event.class).withAnyArguments().thenReturn(event);
+        // Mockito intercepts the objects the advice constructs internally (replaces PowerMock whenNew).
+        mockedTransactionManager = mockConstruction(AtomFeedSpringTransactionManager.class,
+                (mock, ctx) -> doAnswer(invocation -> {
+                    ((AFTransactionWork<?>) invocation.getArgument(0)).execute();
+                    return null;
+                }).when(mock).executeWithTransaction(any()));
+        mockedEventRecordsQueue = mockConstruction(AllEventRecordsQueueJdbcImpl.class);
+        mockedEventService = mockConstruction(EventServiceImpl.class,
+                (mock, ctx) -> doNothing().when(mock).notify(any()));
+        mockedEvent = mockConstruction(Event.class,
+                (mock, ctx) -> eventConstructorArgs.add(new ArrayList<>(ctx.arguments())));
+
         when(appointmentServiceDefinition.getUuid()).thenReturn(UUID);
-        doNothing().when(eventService).notify(any());
 
         appointmentServiceDefinitionAdvice = new AppointmentServiceDefinitionAdvice();
+    }
+
+    @After
+    public void tearDown() {
+        mockedEvent.close();
+        mockedEventService.close();
+        mockedEventRecordsQueue.close();
+        mockedTransactionManager.close();
+        mockedContext.close();
+    }
+
+    private AtomFeedSpringTransactionManager transactionManager() {
+        return mockedTransactionManager.constructed().get(0);
+    }
+
+    private EventServiceImpl eventService() {
+        return mockedEventService.constructed().get(0);
     }
 
     @Test
     public void shouldRaiseAppointmentServiceChangeEventToEventRecordsTable() throws Throwable {
         appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("save"), null, null);
 
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
+        verify(transactionManager(), times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(eventService(), times(1)).notify(any(Event.class));
+        assertEquals(1, mockedEvent.constructed().size());
+        List<Object> args = eventConstructorArgs.get(0);
+        assertEquals("Appointment Service", args.get(1));
+        assertEquals(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID), args.get(4));
+        assertEquals("appointmentservice", args.get(5));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -101,9 +123,13 @@ public class AppointmentServiceDefinitionAdviceTest {
     public void shouldRaiseAppointmentServiceVoidChangeEventToEventRecordsTable() throws Throwable {
         appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("voidAppointmentService"), null, null);
 
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID)), eq("appointmentservice"));
+        verify(transactionManager(), times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(eventService(), times(1)).notify(any(Event.class));
+        assertEquals(1, mockedEvent.constructed().size());
+        List<Object> args = eventConstructorArgs.get(0);
+        assertEquals("Appointment Service", args.get(1));
+        assertEquals(String.format("/openmrs/ws/rest/v1/appointmentService?uuid=%s", UUID), args.get(4));
+        assertEquals("appointmentservice", args.get(5));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -116,9 +142,9 @@ public class AppointmentServiceDefinitionAdviceTest {
 
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
-        verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
+        verify(transactionManager(), times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(eventService(), times(0)).notify(any(Event.class));
+        assertEquals(0, mockedEvent.constructed().size());
     }
 
     @Test
@@ -126,10 +152,10 @@ public class AppointmentServiceDefinitionAdviceTest {
         appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("dummy"), null, null);
 
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
-        verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(transactionManager(), times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
-        verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
+        verify(eventService(), times(0)).notify(any(Event.class));
+        assertEquals(0, mockedEvent.constructed().size());
     }
 
     @Test
@@ -138,10 +164,13 @@ public class AppointmentServiceDefinitionAdviceTest {
 
         appointmentServiceDefinitionAdvice.afterReturning(appointmentServiceDefinition, this.getClass().getMethod("save"), null, null);
 
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(transactionManager(), times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
-        verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("Appointment Service"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/%s", UUID)), eq("appointmentservice"));
+        verify(eventService(), times(1)).notify(any(Event.class));
+        assertEquals(1, mockedEvent.constructed().size());
+        List<Object> args = eventConstructorArgs.get(0);
+        assertEquals(String.format("/openmrs/ws/rest/v1/appointmentServiceDefinition/test/%s", UUID), args.get(4));
+        assertEquals("appointmentservice", args.get(5));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }

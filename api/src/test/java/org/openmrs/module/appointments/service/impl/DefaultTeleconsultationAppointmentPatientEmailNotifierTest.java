@@ -1,12 +1,13 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
 import org.openmrs.PersonAttribute;
@@ -18,22 +19,17 @@ import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.UUID;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
-@PowerMockIgnore( {"javax.*", "org.apache.*", "org.slf4j.*"} )
 public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
+
+    private MockedStatic<Context> mockedContext;
 
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
@@ -54,14 +50,21 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        mockedContext = mockStatic(Context.class);
         tcAppointmentEventNotifier = new DefaultTCAppointmentPatientEmailNotifier(mailSender);
-        PowerMockito.when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT)).thenReturn("Email subject");
         when(administrationService.getGlobalProperty(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE)).thenReturn("Email body");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT)).thenReturn("Email subject");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE)).thenReturn("Email body");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_BCC_EMAILS)).thenReturn("someemail1@gmail.com,someemail2@gmail.com");
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

@@ -1,5 +1,8 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 
 import java.util.Date;
@@ -7,6 +10,7 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentRecurringPattern {
 
     private Integer id;
@@ -65,6 +69,7 @@ public class AppointmentRecurringPattern {
         this.daysOfWeek = daysOfWeek;
     }
 
+    @NotAudited
     public Set<Appointment> getAppointments() {
         return appointments;
     }
