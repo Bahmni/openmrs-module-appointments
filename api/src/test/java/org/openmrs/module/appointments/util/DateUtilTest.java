@@ -1,20 +1,29 @@
 package org.openmrs.module.appointments.util;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.util.DateUtil.convertToLocalDateFromUTC;
 import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.Date;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import org.junit.Test;
+import org.openmrs.Location;
+import org.openmrs.LocationAttribute;
+import org.openmrs.LocationAttributeType;
 
 public class DateUtilTest {
     @Test
@@ -162,6 +171,61 @@ public class DateUtilTest {
         String result = DateUtil.convertUTCToGivenFormat(dateTime, format, timeZone);
 
         assertNull(result);
+    }
+
+    @Test
+    public void shouldConvertDateToMilliSecondsForGivenTimezone() {
+        // 11:00 AM UTC = 19:00 (7PM) in Asia/Manila (UTC+8) = 68400000 ms since midnight
+        long utcMs = 11 * 3600 * 1000L;
+        long result = getEpochTime(utcMs, ZoneId.of("Asia/Manila"));
+        assertEquals(68400000L, result);
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenLocationIsNull() {
+        Optional<ZoneId> zone = DateUtil.getLocationZone(null);
+        assertFalse(zone.isPresent());
+    }
+
+    @Test
+    public void shouldReturnZoneIdWhenLocationHasValidTimezoneAttribute() {
+        LocationAttributeType attrType = mock(LocationAttributeType.class);
+        when(attrType.getName()).thenReturn("timeZone");
+        LocationAttribute attr = mock(LocationAttribute.class);
+        when(attr.getAttributeType()).thenReturn(attrType);
+        when(attr.getValue()).thenReturn("Asia/Manila");
+        Location location = mock(Location.class);
+        when(location.getActiveAttributes()).thenReturn(Collections.singletonList(attr));
+
+        Optional<ZoneId> zone = DateUtil.getLocationZone(location);
+
+        assertTrue(zone.isPresent());
+        assertEquals(ZoneId.of("Asia/Manila"), zone.get());
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenLocationHasNoTimezoneAttribute() {
+        Location location = mock(Location.class);
+        when(location.getActiveAttributes()).thenReturn(Collections.emptyList());
+
+        Optional<ZoneId> zone = DateUtil.getLocationZone(location);
+
+        assertFalse(zone.isPresent());
+    }
+
+    @Test
+    public void shouldReturnEmptyWhenTimezoneAttributeValueIsInvalid() {
+        LocationAttributeType attrType = mock(LocationAttributeType.class);
+        when(attrType.getName()).thenReturn("timeZone");
+        LocationAttribute attr = mock(LocationAttribute.class);
+        when(attr.getAttributeType()).thenReturn(attrType);
+        when(attr.getValue()).thenReturn("InvalidZone");
+        Location location = mock(Location.class);
+        when(location.getActiveAttributes()).thenReturn(Collections.singletonList(attr));
+
+        Optional<ZoneId> zone = DateUtil.getLocationZone(location);
+
+        assertFalse(zone.isPresent());
     }
 
 }

@@ -7,6 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.User;
@@ -67,7 +68,8 @@ public class AppointmentUnavailabilityServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        service = new AppointmentUnavailabilityServiceImpl(appointmentUnavailabilityDao, appointmentServiceDefinitionService);
+        service = new AppointmentUnavailabilityServiceImpl(appointmentUnavailabilityDao);
+        ReflectionTestUtils.setField(service, "appointmentServiceDefinitionService", appointmentServiceDefinitionService);
         mockStatic(Context.class);
         authenticatedUser = new User(1);
         PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);

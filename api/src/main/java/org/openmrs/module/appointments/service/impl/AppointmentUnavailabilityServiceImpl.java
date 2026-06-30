@@ -12,6 +12,8 @@ import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Time;
@@ -29,12 +31,13 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     private Log log = LogFactory.getLog(this.getClass());
 
     private final AppointmentUnavailabilityDao appointmentUnavailabilityDao;
-    private final AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    public AppointmentUnavailabilityServiceImpl(AppointmentUnavailabilityDao appointmentUnavailabilityDao,
-                                                 AppointmentServiceDefinitionService appointmentServiceDefinitionService) {
+    @Autowired
+    @Lazy
+    private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
+
+    public AppointmentUnavailabilityServiceImpl(AppointmentUnavailabilityDao appointmentUnavailabilityDao) {
         this.appointmentUnavailabilityDao = appointmentUnavailabilityDao;
-        this.appointmentServiceDefinitionService = appointmentServiceDefinitionService;
     }
 
     @Override
