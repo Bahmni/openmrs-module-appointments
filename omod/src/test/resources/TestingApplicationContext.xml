@@ -68,6 +68,8 @@
 		<property name="appointmentDao" ref="appointmentDao"/>
 	</bean>
 
+	<bean id="appointmentUnavailabilityConflict" class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
+
 	<bean id="appointmentNumberGenerator" class="org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl"/>
 
 	<bean id="defaultRecurringAppointmentNumberGenerator"
@@ -214,7 +216,6 @@
         <property name="target">
             <bean class="org.openmrs.module.appointments.service.impl.AppointmentUnavailabilityServiceImpl">
                 <constructor-arg ref="appointmentUnavailabilityDao"/>
-                <constructor-arg ref="appointmentServiceService"/>
             </bean>
         </property>
         <property name="preInterceptors">

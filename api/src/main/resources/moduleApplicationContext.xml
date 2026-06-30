@@ -96,6 +96,10 @@
         <property name="appointmentDao" ref="appointmentDao"/>
     </bean>
 
+    <bean id="appointmentUnavailabilityConflict" class="org.openmrs.module.appointments.conflicts.impl.AppointmentUnavailabilityConflict">
+        <property name="appointmentUnavailabilityService" ref="appointmentUnavailabilityService"/>
+    </bean>
+
     <bean id="teleconsultationAppointmentServiceImpl" class="org.openmrs.module.appointments.service.impl.TeleconsultationAppointmentService">
         <property name="patientService">
             <ref bean="patientService"/>
@@ -165,6 +169,7 @@
                     <list>
                         <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
                         <ref bean="patientDoubleBookingConflict"/>
+                        <ref bean="appointmentUnavailabilityConflict"/>
                     </list>
                 </property>
                 <property name="teleconsultationAppointmentService">
@@ -361,7 +366,6 @@
         <property name="target">
             <bean class="org.openmrs.module.appointments.service.impl.AppointmentUnavailabilityServiceImpl">
                 <constructor-arg ref="appointmentUnavailabilityDao"/>
-                <constructor-arg ref="appointmentServiceService"/>
             </bean>
         </property>
         <property name="preInterceptors">

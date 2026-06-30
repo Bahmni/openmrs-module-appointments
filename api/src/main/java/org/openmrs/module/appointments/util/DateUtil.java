@@ -1,15 +1,22 @@
 package org.openmrs.module.appointments.util;
 
 import org.apache.commons.lang3.StringUtils;
+import org.openmrs.Location;
 
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DateTimeException;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DateUtil {
+
+    private static final String TIMEZONE_ATTRIBUTE = "timeZone";
 
     public enum DateFormatType {
         UTC("yyyy-MM-dd'T'HH:mm:ss.SSS");
@@ -74,6 +81,26 @@ public class DateUtil {
         int seconds = calendar.get(Calendar.SECOND);
         long milliSeconds = ((hours * 3600 + minutes * 60 + seconds) * 1000);
         return milliSeconds;
+    }
+
+    public static long getEpochTime(long date, ZoneId zone) {
+        java.time.ZonedDateTime zdt = new Date(date).toInstant().atZone(zone);
+        return (zdt.getHour() * 3600L + zdt.getMinute() * 60L + zdt.getSecond()) * 1000L;
+    }
+
+    public static Optional<ZoneId> getLocationZone(Location location) {
+        if (location == null) return Optional.empty();
+        return location.getActiveAttributes().stream()
+                .filter(attr -> TIMEZONE_ATTRIBUTE.equalsIgnoreCase(attr.getAttributeType().getName()))
+                .map(attr -> {
+                    try {
+                        return ZoneId.of(String.valueOf(attr.getValue()));
+                    } catch (DateTimeException e) {
+                        return null;
+                    }
+                })
+                .filter(Objects::nonNull)
+                .findFirst();
     }
 
     public static Date getEndOfDay() {
