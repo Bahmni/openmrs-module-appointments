@@ -163,7 +163,9 @@
                 </property>
                 <property name="appointmentConflicts">
                     <list>
-                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
+                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict">
+                            <property name="appointmentUnavailabilityDao" ref="appointmentUnavailabilityDao"/>
+                        </bean>
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
                 </property>
