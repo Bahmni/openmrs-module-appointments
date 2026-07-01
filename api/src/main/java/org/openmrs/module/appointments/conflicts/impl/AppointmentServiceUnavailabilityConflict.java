@@ -17,6 +17,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
+import java.util.Optional;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Objects;
@@ -48,7 +49,10 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
 
     private ZoneId getTimezoneForAppointment(Appointment appointment) {
         if (appointment.getLocation() != null) {
-            return LocationUtil.getLocationZone(appointment.getLocation()).orElse(ZoneId.systemDefault());
+            Optional<ZoneId> locationZone = LocationUtil.getLocationZone(appointment.getLocation());
+            if (locationZone.isPresent()) {
+                return locationZone.get();
+            }
         }
         AppointmentServiceDefinition service = appointment.getService();
         if (service != null) {
