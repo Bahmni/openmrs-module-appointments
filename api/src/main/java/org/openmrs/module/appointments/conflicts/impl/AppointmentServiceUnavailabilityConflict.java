@@ -14,8 +14,6 @@ import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.util.LocationUtil;
 
 import java.sql.Time;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.Optional;
 import java.time.ZonedDateTime;
@@ -117,19 +115,17 @@ public class AppointmentServiceUnavailabilityConflict implements AppointmentConf
     }
 
     private boolean isDateTimeOverlap(ZonedDateTime apptStart, ZonedDateTime apptEnd, AppointmentUnavailability unavailability) {
-        LocalDate apptDate = apptStart.toLocalDate();
-        LocalTime apptStartTime = apptStart.toLocalTime();
-        LocalTime apptEndTime = apptEnd.toLocalTime();
+        ZoneId zone = apptStart.getZone();
+        ZonedDateTime unavailStart = ZonedDateTime.of(
+                unavailability.getStartDate().toLocalDate(),
+                unavailability.getStartTime().toLocalTime(),
+                zone);
+        ZonedDateTime unavailEnd = ZonedDateTime.of(
+                unavailability.getEndDate().toLocalDate(),
+                unavailability.getEndTime().toLocalTime(),
+                zone);
 
-        LocalDate unavailStartDate = unavailability.getStartDate().toLocalDate();
-        LocalDate unavailEndDate = unavailability.getEndDate().toLocalDate();
-        LocalTime unavailStartTime = unavailability.getStartTime().toLocalTime();
-        LocalTime unavailEndTime = unavailability.getEndTime().toLocalTime();
-
-        boolean dateInRange = !apptDate.isBefore(unavailStartDate) && !apptDate.isAfter(unavailEndDate);
-        boolean timeOverlaps = apptStartTime.isBefore(unavailEndTime) && apptEndTime.isAfter(unavailStartTime);
-
-        return dateInRange && timeOverlaps;
+        return apptStart.isBefore(unavailEnd) && apptEnd.isAfter(unavailStart);
     }
 
     private boolean hasMatchingProvider(Appointment appointment, Provider provider) {

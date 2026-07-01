@@ -414,4 +414,21 @@ public class AppointmentServiceUnavailabilityConflictTest {
         assertEquals(1, conflicts.size());
         assertEquals(appointment, conflicts.get(0));
     }
+
+    @Test
+    public void shouldReturnConflictWhenAppointmentFallsWithinOvernightUnavailability() {
+        AppointmentUnavailability unavailability = buildUnavailability("2026-06-28", "18:00:00", "2026-06-29", "09:00:00");
+        when(appointmentUnavailabilityDao.getAll(any(AppointmentUnavailabilitySearchParams.class)))
+                .thenReturn(Collections.singletonList(unavailability));
+
+        Appointment appointment = new Appointment();
+        appointment.setStartDateTime(getDate(2026, 5, 29, 8, 0, 0));
+        appointment.setEndDateTime(getDate(2026, 5, 29, 8, 30, 0));
+
+        List<Appointment> conflicts = appointmentServiceUnavailabilityConflict.getConflicts(Collections.singletonList(appointment));
+
+        assertNotNull(conflicts);
+        assertEquals(1, conflicts.size());
+        assertEquals(appointment, conflicts.get(0));
+    }
 }
