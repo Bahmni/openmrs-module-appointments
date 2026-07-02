@@ -1,5 +1,7 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Location;
 import org.openmrs.Provider;
@@ -8,6 +10,7 @@ import java.io.Serializable;
 import java.sql.Date;
 import java.sql.Time;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentUnavailability extends BaseOpenmrsData implements Serializable {
 
     private Integer appointmentUnavailabilityId;

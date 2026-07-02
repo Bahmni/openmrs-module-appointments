@@ -1,6 +1,10 @@
 package org.openmrs.module.appointments.model;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.hibernate.envers.AuditTable;
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.NotAudited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Encounter;
 import org.openmrs.Location;
@@ -19,6 +23,10 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+// Custom audit-table name to avoid collision with the module's existing "patient_appointment_audit"
+// table (the AppointmentAudit status-change log). Envers default would be patient_appointment + suffix.
+@AuditTable("patient_appointment_revisions")
 public class Appointment extends BaseOpenmrsData implements Serializable {
     private Integer appointmentId;
     private String appointmentNumber;
@@ -54,6 +62,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
      */
     private List<NotificationResult> notificationResults;
 
+    @NotAudited
     public Set<AppointmentAudit> getAppointmentAudits() {
         return appointmentAudits;
     }
@@ -70,6 +79,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.appointmentRecurringPattern = appointmentRecurringPattern;
     }
 
+    @NotAudited
     public Set<AppointmentProvider> getProviders() {
         return providers;
     }
@@ -270,6 +280,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.dateCreated = dateCreated;
     }
 
+    @NotAudited
     public Set<Encounter> getFulfillingEncounters() {
         return fulfillingEncounters;
     }
@@ -278,6 +289,7 @@ public class Appointment extends BaseOpenmrsData implements Serializable {
         this.fulfillingEncounters = fulfillingEncounters;
     }
 
+    @NotAudited
     public Set<AppointmentReason> getReasons() {
         return reasons;
     }

@@ -37,18 +37,19 @@
     </modules>
 
 	<properties>
-		<openmrs.platform.version>2.4.2</openmrs.platform.version>
+		<openmrs.platform.version>2.8.3</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.13</junitVersion>
-		<powerMockVersion>2.0.7</powerMockVersion>
 		<hamcrestVersion>2.2</hamcrestVersion>
 		<mockitoVersion>3.5.11</mockitoVersion>
-		<argLine>-Xmx1024m</argLine>
+		<!-- Pin the JVM timezone for tests: several date-computation tests assume India time (IST,
+		     UTC+5:30, no DST) and fail on build machines in DST timezones. -->
+		<argLine>-Xmx1024m -Duser.timezone=Asia/Kolkata</argLine>
 		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
-		<servletApi.version>3.0.1</servletApi.version>
+		<servletApi.version>4.0.1</servletApi.version>
 		<webServices.version>2.29.0</webServices.version>
 		<communications.version>1.2.0</communications.version>
 		<teleconsultation.version>2.0.0</teleconsultation.version>
@@ -157,15 +158,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito2</artifactId>
-				<version>${powerMockVersion}</version>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockitoVersion}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -331,7 +326,7 @@
 									<goal>verify</goal>
 								</goals>
 								<configuration>
-									<argLine>-Xmx512m</argLine>
+									<argLine>-Xmx512m -Duser.timezone=Asia/Kolkata</argLine>
 									<includes>
 										<include>**/*IT.java</include>
 									</includes>

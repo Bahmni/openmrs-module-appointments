@@ -1,10 +1,13 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Concept;
 
 import java.io.Serializable;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentReason extends BaseOpenmrsData implements Serializable {
 
     private Integer appointmentReasonId;

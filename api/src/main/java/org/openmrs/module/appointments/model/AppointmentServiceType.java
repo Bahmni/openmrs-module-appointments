@@ -1,9 +1,12 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 
 import java.io.Serializable;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class AppointmentServiceType extends BaseOpenmrsData implements Serializable, Comparable<AppointmentServiceType> {
 
     private Integer id;

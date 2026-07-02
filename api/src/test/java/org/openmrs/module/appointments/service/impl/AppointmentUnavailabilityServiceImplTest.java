@@ -1,11 +1,12 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
 import org.openmrs.Provider;
@@ -19,10 +20,6 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.LocalDate;
@@ -38,12 +35,11 @@ import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
 public class AppointmentUnavailabilityServiceImplTest {
+
+    private MockedStatic<Context> mockedContext;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -68,11 +64,18 @@ public class AppointmentUnavailabilityServiceImplTest {
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         service = new AppointmentUnavailabilityServiceImpl(appointmentUnavailabilityDao, appointmentServiceDefinitionService);
-        mockStatic(Context.class);
+        mockedContext = mockStatic(Context.class);
         authenticatedUser = new User(1);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
-        PowerMockito.when(Context.getLocationService()).thenReturn(locationService);
-        PowerMockito.when(Context.getProviderService()).thenReturn(providerService);
+        mockedContext.when(Context::getAuthenticatedUser).thenReturn(authenticatedUser);
+        mockedContext.when(Context::getLocationService).thenReturn(locationService);
+        mockedContext.when(Context::getProviderService).thenReturn(providerService);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

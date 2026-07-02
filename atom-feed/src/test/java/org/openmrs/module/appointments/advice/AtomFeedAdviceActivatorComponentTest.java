@@ -1,24 +1,21 @@
 package org.openmrs.module.appointments.advice;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.Mockito;
+import org.mockito.MockedStatic;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
-import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore({"javax.*", "org.apache.*", "org.slf4j.*"})
-@PrepareForTest({ServiceContext.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AtomFeedAdviceActivatorComponentTest {
 
     @Mock
@@ -35,11 +32,20 @@ public class AtomFeedAdviceActivatorComponentTest {
 
     AtomFeedAdviceActivatorComponent component;
 
+    private MockedStatic<ServiceContext> mockedServiceContext;
+
     @Before
     public void setUp() throws Exception {
-        mockStatic(ServiceContext.class);
-        when(ServiceContext.getInstance()).thenReturn(serviceContext);
+        mockedServiceContext = mockStatic(ServiceContext.class);
+        mockedServiceContext.when(ServiceContext::getInstance).thenReturn(serviceContext);
         component = new AtomFeedAdviceActivatorComponent(appointmentServiceDefinitionAdvice, appointmentAdvice, recurringAppointmentsAdvice);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedServiceContext != null) {
+            mockedServiceContext.close();
+        }
     }
 
     @Test

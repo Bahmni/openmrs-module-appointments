@@ -1,12 +1,13 @@
 package org.openmrs.module.appointments.web.mapper;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Concept;
 import org.openmrs.ConceptDatatype;
@@ -44,9 +45,6 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -71,12 +69,9 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
 
     @Rule
@@ -128,6 +123,8 @@ public class AppointmentMapperTest {
 
     private AppointmentServiceDefinition service2;
 
+    private MockedStatic<Context> mockedContext;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
@@ -173,10 +170,10 @@ public class AppointmentMapperTest {
         location.setUuid("locationUuid");
         when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
 
-        mockStatic(Context.class);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext = mockStatic(Context.class);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
-        when(Context.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+        mockedContext.when(Context::getLocale).thenReturn(java.util.Locale.ENGLISH);
 
         // Setup test concepts for appointment reasons
         reasonConcept1 = new Concept();
@@ -194,6 +191,13 @@ public class AppointmentMapperTest {
         // Mock conceptService bean (injected via @Autowired)
         when(conceptService.getConceptByUuid("concept1Uuid")).thenReturn(reasonConcept1);
         when(conceptService.getConceptByUuid("concept2Uuid")).thenReturn(reasonConcept2);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

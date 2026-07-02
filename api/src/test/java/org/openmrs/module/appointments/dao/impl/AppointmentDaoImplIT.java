@@ -160,10 +160,17 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         // private Boolean isTeleconsultationEnabled = Boolean.FALSE;
         // fix that in the search function (not test)
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        // getAllAppointments applies no explicit ordering, so the first row is not deterministic across
+        // Hibernate versions. Pick a reference appointment that actually has a location and a service so
+        // the example-based search below is properly constrained.
+        Appointment reference = allAppointments.stream()
+                .filter(a -> a.getLocation() != null && a.getService() != null)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("expected a test appointment with location and service"));
         Appointment appointment = new Appointment();
-        appointment.setPatient(allAppointments.get(0).getPatient());
-        appointment.setLocation(allAppointments.get(0).getLocation());
-        appointment.setService(allAppointments.get(0).getService());
+        appointment.setPatient(reference.getPatient());
+        appointment.setLocation(reference.getLocation());
+        appointment.setService(reference.getService());
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
         assertEquals(3, searchedAppointmentList.size());
@@ -274,7 +281,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnAllNonVoidedFutureAppointmentsOfPatient() {
-        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
+        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(500);
         assertEquals(5, appointments.size());
     }
 
