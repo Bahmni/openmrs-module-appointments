@@ -1,20 +1,17 @@
 package org.openmrs.module.appointments.validator.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,10 +19,8 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Context.class})
 public class DefaultAppointmentValidatorTest {
 
     @Mock
@@ -34,12 +29,21 @@ public class DefaultAppointmentValidatorTest {
     @InjectMocks
     private DefaultAppointmentValidator defaultAppointmentValidator;
 
+    private MockedStatic<Context> mockedContext;
+
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        PowerMockito.mockStatic(Context.class);
+        mockedContext = mockStatic(Context.class);
 
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(() -> Context.getAdministrationService()).thenReturn(administrationService);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

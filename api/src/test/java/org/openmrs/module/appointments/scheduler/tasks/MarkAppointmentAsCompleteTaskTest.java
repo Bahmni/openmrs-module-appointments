@@ -1,20 +1,19 @@
 package org.openmrs.module.appointments.scheduler.tasks;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -24,11 +23,10 @@ import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class MarkAppointmentAsCompleteTaskTest {
 
     @Mock
@@ -40,12 +38,21 @@ public class MarkAppointmentAsCompleteTaskTest {
     private MarkAppointmentAsCompleteTask markAppointmentAsCompleteTask;
     private GlobalProperty globalProperty;
 
+    private MockedStatic<Context> mockedContext;
+
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(Context.class);
-        when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
-        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        mockedContext = mockStatic(Context.class);
+        mockedContext.when(() -> Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
+        mockedContext.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
         markAppointmentAsCompleteTask = new MarkAppointmentAsCompleteTask();
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test

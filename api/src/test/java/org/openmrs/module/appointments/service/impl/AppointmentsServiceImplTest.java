@@ -1,10 +1,10 @@
 package org.openmrs.module.appointments.service.impl;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.openmrs.*;
 import org.openmrs.api.APIAuthenticationException;
@@ -33,9 +33,6 @@ import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
@@ -65,12 +62,11 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
+
+    private MockedStatic<Context> mockedContext;
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -142,7 +138,7 @@ public class AppointmentsServiceImplTest {
     @Before
     public void init() throws NoSuchFieldException, IllegalAccessException {
         MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        mockedContext = mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
         appointmentConflicts.add(appointmentServiceUnavailabilityConflict);
@@ -150,6 +146,13 @@ public class AppointmentsServiceImplTest {
         setValuesForMemberFields(appointmentsService, "appointmentValidators", appointmentValidators);
         setValuesForMemberFields(appointmentsService, "statusChangeValidators", statusChangeValidators);
         setValuesForMemberFields(appointmentsService, "appointmentConflicts", appointmentConflicts);
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     public static void setValuesForMemberFields(Object classInstance, String fieldName, Object valueForMemberField)
@@ -502,11 +505,11 @@ public class AppointmentsServiceImplTest {
 
     private void setupForOwnPrivilegeAccess(String exceptionCode) {
         String exceptionMessage = "Exception message";
-        when(Context.hasPrivilege("manageOwnAppointments")).thenReturn(true);
+        mockedContext.when(() -> Context.hasPrivilege("manageOwnAppointments")).thenReturn(true);
         when(messageSourceService.getMessage(exceptionCode, null, null)).thenReturn(exceptionMessage);
-        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        mockedContext.when(Context::getMessageSourceService).thenReturn(messageSourceService);
         when(user.getPerson()).thenReturn(new Person());
-        when(Context.getAuthenticatedUser()).thenReturn(user);
+        mockedContext.when(Context::getAuthenticatedUser).thenReturn(user);
         when(provider.getPerson()).thenReturn(new Person());
         AppointmentProvider appointmentProvider = new AppointmentProvider();
         appointmentProvider.setProvider(provider);
@@ -524,7 +527,7 @@ public class AppointmentsServiceImplTest {
         appointmentSearchRequest.setStartDate(startDate);
         appointmentSearchRequest.setEndDate(endDate);
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
 
@@ -543,7 +546,7 @@ public class AppointmentsServiceImplTest {
 
         ArrayList<Appointment> expectedAppointments = new ArrayList<>();
         when(appointmentDao.search(appointmentSearchRequest)).thenReturn(expectedAppointments);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         List<Appointment> actualAppointments = appointmentsService.search(appointmentSearchRequest);
 
@@ -556,8 +559,8 @@ public class AppointmentsServiceImplTest {
         String exceptionMessage = "exception message";
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Missed);
-        when(Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(false);
-        when(Context.getMessageSourceService()).thenReturn(messageSourceService);
+        mockedContext.when(() -> Context.hasPrivilege(RESET_APPOINTMENT_STATUS)).thenReturn(false);
+        mockedContext.when(Context::getMessageSourceService).thenReturn(messageSourceService);
         when(messageSourceService.getMessage(any(), any(), any())).thenReturn(exceptionMessage);
 
         try {
@@ -672,7 +675,7 @@ public class AppointmentsServiceImplTest {
     public void shouldUpdateProviderResponseForGivenAppointment() {
         Person person = new Person();
         when(user.getPerson()).thenReturn(person);
-        when(Context.getAuthenticatedUser()).thenReturn(user);
+        mockedContext.when(Context::getAuthenticatedUser).thenReturn(user);
 
         Provider provider = new Provider();
         provider.setPerson(person);
@@ -701,11 +704,11 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldUpdateAppointmentStatusInCaseOfRequestedAppointment() {
-        when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
+        mockedContext.when(() -> Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
 
         Person person = new Person();
         when(user.getPerson()).thenReturn(person);
-        when(Context.getAuthenticatedUser()).thenReturn(user);
+        mockedContext.when(Context::getAuthenticatedUser).thenReturn(user);
 
         Provider provider = new Provider();
         provider.setPerson(person);
@@ -766,9 +769,9 @@ public class AppointmentsServiceImplTest {
         expectedException.expect(APIAuthenticationException.class);
         expectedException.expectMessage("Cannot change Provider Response for other providers");
 
-        when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
+        mockedContext.when(() -> Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
         when(user.getPerson()).thenReturn(new Person());
-        when(Context.getAuthenticatedUser()).thenReturn(user);
+        mockedContext.when(Context::getAuthenticatedUser).thenReturn(user);
 
         Provider provider = new Provider();
         provider.setPerson(new Person());
@@ -793,7 +796,7 @@ public class AppointmentsServiceImplTest {
     @Test
     public void shouldGetAppointmentsWithoutDates() {
         AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty("webservices.rest.maxResultsDefault")).thenReturn("20");
         appointmentsService.searchAppointmentsWithoutDates(searchQuery);
         verify(appointmentDao, times(1)).getAppointmentsWithoutDates(searchQuery, 20);

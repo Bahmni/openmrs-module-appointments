@@ -76,17 +76,21 @@ public class AppointmentDaoImpl implements AppointmentDao {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
                 Example.create(appointment).excludeProperty("uuid"));
 
-        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
-                Example.create(appointment.getPatient()));
+        // Match associations by identity rather than by Example.create() over all of the loaded
+        // entity's properties: query-by-example on a fully-loaded Patient/Location/Service is fragile
+        // (Hibernate 5.6 over-constrains it, returning no rows). We only want appointments that belong
+        // to the given patient/location/service.
+        if (appointment.getPatient() != null)
+            criteria.add(Restrictions.eq("patient", appointment.getPatient()));
 
-        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
-                Example.create(appointment.getLocation()));
+        if (appointment.getLocation() != null)
+            criteria.add(Restrictions.eq("location", appointment.getLocation()));
 
-        if (appointment.getService() != null) criteria.createCriteria("service").add(
-                Example.create(appointment.getService()));
+        if (appointment.getService() != null)
+            criteria.add(Restrictions.eq("service", appointment.getService()));
 
-        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
-                Example.create(appointment.getProvider()));
+        if (appointment.getProvider() != null)
+            criteria.add(Restrictions.eq("provider", appointment.getProvider()));
 
         return criteria.list();
     }

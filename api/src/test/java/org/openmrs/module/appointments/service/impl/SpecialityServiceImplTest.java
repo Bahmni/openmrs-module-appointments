@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -11,8 +10,6 @@ import org.openmrs.User;
 import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.MessageFormat;
 import java.util.Collections;
@@ -23,8 +20,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
 public class SpecialityServiceImplTest {
     @Mock
     private SpecialityDao specialityDao;

@@ -1,11 +1,14 @@
 package org.openmrs.module.appointments.model;
 
+import org.hibernate.envers.Audited;
+import org.hibernate.envers.RelationTargetAuditMode;
 import org.openmrs.BaseOpenmrsData;
 
 import java.io.Serializable;
 import java.sql.Time;
 import java.time.DayOfWeek;
 
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class ServiceWeeklyAvailability extends BaseOpenmrsData implements Serializable{
 
 	private Integer serviceWeeklyAvailabilityId;

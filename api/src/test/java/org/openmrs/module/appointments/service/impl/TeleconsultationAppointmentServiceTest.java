@@ -1,11 +1,12 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
 import org.openmrs.PatientIdentifier;
@@ -15,10 +16,6 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -27,12 +24,12 @@ import java.util.Set;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mockStatic;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
 public class TeleconsultationAppointmentServiceTest {
+
+    private MockedStatic<Context> mockedContext;
     public static final String PATIENT_IDENTIFIER = "GAN230901";
     @Mock
     private AdministrationService administrationService;
@@ -68,12 +65,19 @@ public class TeleconsultationAppointmentServiceTest {
         identifier.setIdentifierType(patientIdentifierType);
         patient.setIdentifiers(new HashSet<>(Arrays.asList(identifier)));
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
-        PowerMockito.mockStatic(Context.class);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        when(Context.getService(TeleconsultationService.class)).thenReturn(teleconsultationService);
+        mockedContext = mockStatic(Context.class);
+        mockedContext.when(Context::getAdministrationService).thenReturn(administrationService);
+        mockedContext.when(() -> Context.getService(TeleconsultationService.class)).thenReturn(teleconsultationService);
         when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.serverUrlPattern")).thenReturn("https://test.server/{0}");
         when(administrationService.getGlobalProperty("bahmni.adhoc.teleConsultation.id")).thenReturn("Patient Identifier");
         when(teleconsultationService.generateTeleconsultationLink(PATIENT_IDENTIFIER)).thenReturn("https://test.server/GAN230901");
+    }
+
+    @After
+    public void tearDown() {
+        if (mockedContext != null) {
+            mockedContext.close();
+        }
     }
 
     @Test
