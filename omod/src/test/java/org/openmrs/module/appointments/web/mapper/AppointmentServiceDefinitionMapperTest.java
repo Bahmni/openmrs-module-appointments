@@ -213,7 +213,7 @@ public class AppointmentServiceDefinitionMapperTest {
         appointmentServiceFullResponse = appointmentServiceMapper.constructResponse(appointmentServiceDefinition);
         assertEquals(appointmentServiceDefinition.getName(), appointmentServiceFullResponse.getName());
         assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServiceFullResponse.getDurationMins());
-        assertEquals(appointmentServiceDefinition.getStartTime().toString(), appointmentServiceFullResponse.getStartTime());
+        assertEquals(utcTimeToString(appointmentServiceDefinition.getStartTime()), appointmentServiceFullResponse.getStartTime());
         assertEquals(new String(), appointmentServiceFullResponse.getEndTime());
         assertEquals(appointmentServiceDefinition.getMaxAppointmentsLimit(), appointmentServiceFullResponse.getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServiceFullResponse.getLocation().get("name"));
@@ -247,7 +247,7 @@ public class AppointmentServiceDefinitionMapperTest {
         List<AppointmentServiceDefaultResponse> appointmentServicesResponse = appointmentServiceMapper.constructDefaultResponseForServiceList(appointmentServiceDefinitions);
         assertEquals(cardiologyService.getName(), appointmentServicesResponse.get(0).getName());
         assertEquals(cardiologyService.getDurationMins(), appointmentServicesResponse.get(0).getDurationMins());
-        assertEquals(cardiologyService.getStartTime().toString(), appointmentServicesResponse.get(0).getStartTime());
+        assertEquals(utcTimeToString(cardiologyService.getStartTime()), appointmentServicesResponse.get(0).getStartTime());
         assertEquals(new String(), appointmentServicesResponse.get(0).getEndTime());
         assertEquals(cardiologyService.getMaxAppointmentsLimit(),
                 appointmentServicesResponse.get(0).getMaxAppointmentsLimit());
@@ -255,8 +255,8 @@ public class AppointmentServiceDefinitionMapperTest {
         assertEquals(speciality.getName(), appointmentServicesResponse.get(0).getSpeciality().get("name"));
         assertEquals(chemoTherapyService.getName(), appointmentServicesResponse.get(1).getName());
         assertEquals(chemoTherapyService.getDurationMins(), appointmentServicesResponse.get(1).getDurationMins());
-        assertEquals(chemoTherapyService.getStartTime().toString(), appointmentServicesResponse.get(1).getStartTime());
-        assertEquals(chemoTherapyService.getEndTime().toString(), appointmentServicesResponse.get(1).getEndTime());
+        assertEquals(utcTimeToString(chemoTherapyService.getStartTime()), appointmentServicesResponse.get(1).getStartTime());
+        assertEquals(utcTimeToString(chemoTherapyService.getEndTime()), appointmentServicesResponse.get(1).getEndTime());
         assertEquals(chemoTherapyService.getMaxAppointmentsLimit(),
                 appointmentServicesResponse.get(1).getMaxAppointmentsLimit());
         assertEquals(location.getName(), appointmentServicesResponse.get(1).getLocation().get("name"));
@@ -443,7 +443,7 @@ public class AppointmentServiceDefinitionMapperTest {
         AppointmentServiceDefaultResponse appointmentServiceDefaultResponse = appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition);
         assertEquals(appointmentServiceDefinition.getName(), appointmentServiceDefaultResponse.getName());
         assertEquals(appointmentServiceDefinition.getDurationMins(), appointmentServiceDefaultResponse.getDurationMins());
-        assertEquals(appointmentServiceDefinition.getStartTime().toString(), appointmentServiceDefaultResponse.getStartTime());
+        assertEquals(utcTimeToString(appointmentServiceDefinition.getStartTime()), appointmentServiceDefaultResponse.getStartTime());
         assertEquals(appointmentServiceDefinition.getUuid(), appointmentServiceDefaultResponse.getUuid());
     }
 
@@ -524,4 +524,16 @@ public class AppointmentServiceDefinitionMapperTest {
         return availabilityPayload;
     }
 
+    private String utcTimeToString(Time time) {
+        Calendar timeCalendar = Calendar.getInstance();
+        timeCalendar.setTime(time);
+
+        Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"));
+        calendar.set(Calendar.HOUR_OF_DAY, timeCalendar.get(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.MINUTE, timeCalendar.get(Calendar.MINUTE));
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+
+        return calendar.toInstant().toString();
+    }
 }
