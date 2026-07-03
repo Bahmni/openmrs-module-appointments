@@ -7,8 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Location;
-import org.openmrs.LocationAttribute;
-import org.openmrs.LocationAttributeType;
 import org.openmrs.Provider;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
@@ -21,7 +19,6 @@ import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySea
 import java.sql.Date;
 import java.sql.Time;
 import java.time.DayOfWeek;
-import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -51,17 +48,6 @@ public class AppointmentServiceUnavailabilityConflictTest {
                 .thenReturn(Collections.emptyList());
     }
 
-    private Location createLocationWithSystemTimezone() {
-        LocationAttributeType timezoneAttrType = mock(LocationAttributeType.class);
-        when(timezoneAttrType.getName()).thenReturn("timeZone");
-        LocationAttribute timezoneAttr = mock(LocationAttribute.class);
-        when(timezoneAttr.getAttributeType()).thenReturn(timezoneAttrType);
-        when(timezoneAttr.getValue()).thenReturn(ZoneId.systemDefault().getId());
-        Location location = mock(Location.class);
-        when(location.getActiveAttributes()).thenReturn(Collections.singletonList(timezoneAttr));
-        return location;
-    }
-
     private AppointmentUnavailability buildUnavailability(String startDate, String startTime, String endDate, String endTime) {
         AppointmentUnavailability unavailability = new AppointmentUnavailability();
         unavailability.setStartDate(Date.valueOf(startDate));
@@ -83,7 +69,6 @@ public class AppointmentServiceUnavailabilityConflictTest {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         Appointment appointment = new Appointment();
         appointment.setService(appointmentServiceDefinition);
-        appointment.setLocation(createLocationWithSystemTimezone());
         appointment.setStartDateTime(getDate(2019, 8, 24, 11, 0, 0));
         appointment.setEndDateTime(getDate(2019, 8, 24, 12, 0, 0));
         appointment.setAppointmentId(1);
@@ -103,7 +88,6 @@ public class AppointmentServiceUnavailabilityConflictTest {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         Appointment appointment = new Appointment();
         appointment.setService(appointmentServiceDefinition);
-        appointment.setLocation(createLocationWithSystemTimezone());
         //Tuesday Appointment
         appointment.setStartDateTime(getDate(2019, 8, 24, 11, 30, 0));
         appointment.setEndDateTime(getDate(2019, 8, 24, 12, 0, 0));
@@ -128,23 +112,19 @@ public class AppointmentServiceUnavailabilityConflictTest {
     @Test
     public void shouldReturnServiceUnavailableTimeSlotConflict() {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        Location location = createLocationWithSystemTimezone();
         //All Appointments are on Tuesday
         Appointment appointmentOne = new Appointment();
         appointmentOne.setService(appointmentServiceDefinition);
-        appointmentOne.setLocation(location);
         appointmentOne.setStartDateTime(getDate(2019, 8, 23, 6, 30, 0));
         appointmentOne.setEndDateTime(getDate(2019, 8, 23, 7, 0, 0));
         appointmentOne.setAppointmentId(2);
         Appointment appointmentTwo = new Appointment();
         appointmentTwo.setService(appointmentServiceDefinition);
-        appointmentTwo.setLocation(location);
         appointmentTwo.setStartDateTime(getDate(2019, 8, 23, 17, 30, 0));
         appointmentTwo.setEndDateTime(getDate(2019, 8, 23, 17, 0, 0));
         appointmentTwo.setAppointmentId(3);
         Appointment appointmentThree = new Appointment();
         appointmentThree.setService(appointmentServiceDefinition);
-        appointmentThree.setLocation(location);
         appointmentThree.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
         appointmentThree.setEndDateTime(getDate(2019, 8, 23, 17, 1, 0));
         appointmentThree.setAppointmentId(4);
@@ -172,23 +152,19 @@ public class AppointmentServiceUnavailabilityConflictTest {
     @Test
     public void shouldNotReturnServiceUnavailableConflictsForMoreSlotsInSingleDay() {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        Location location = createLocationWithSystemTimezone();
         // All Appointments are on Monday
         Appointment appointmentOne = new Appointment();
         appointmentOne.setService(appointmentServiceDefinition);
-        appointmentOne.setLocation(location);
         appointmentOne.setStartDateTime(getDate(2019, 8, 23, 6, 30, 0));
         appointmentOne.setEndDateTime(getDate(2019, 8, 23, 7, 0, 0));
         appointmentOne.setAppointmentId(2);
         Appointment appointmentTwo = new Appointment();
         appointmentTwo.setService(appointmentServiceDefinition);
-        appointmentTwo.setLocation(location);
         appointmentTwo.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
         appointmentTwo.setEndDateTime(getDate(2019, 8, 23, 17, 30, 0));
         appointmentTwo.setAppointmentId(3);
         Appointment appointmentThree = new Appointment();
         appointmentThree.setService(appointmentServiceDefinition);
-        appointmentThree.setLocation(location);
         appointmentThree.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
         appointmentThree.setEndDateTime(getDate(2019, 8, 23, 17, 0, 0));
         appointmentThree.setAppointmentId(4);
@@ -213,22 +189,18 @@ public class AppointmentServiceUnavailabilityConflictTest {
     @Test
     public void shouldNotReturnServiceUnavailableConflictsForServicesWithNoAvailabilityInformation() {
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        Location location = createLocationWithSystemTimezone();
         Appointment appointmentOne = new Appointment();
         appointmentOne.setService(appointmentServiceDefinition);
-        appointmentOne.setLocation(location);
         appointmentOne.setStartDateTime(getDate(2019, 8, 23, 6, 30, 0));
         appointmentOne.setEndDateTime(getDate(2019, 8, 23, 7, 0, 0));
         appointmentOne.setAppointmentId(2);
         Appointment appointmentTwo = new Appointment();
         appointmentTwo.setService(appointmentServiceDefinition);
-        appointmentTwo.setLocation(location);
         appointmentTwo.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
         appointmentTwo.setEndDateTime(getDate(2019, 8, 23, 17, 30, 0));
         appointmentTwo.setAppointmentId(3);
         Appointment appointmentThree = new Appointment();
         appointmentThree.setService(appointmentServiceDefinition);
-        appointmentThree.setLocation(location);
         appointmentThree.setStartDateTime(getDate(2019, 8, 23, 16, 30, 0));
         appointmentThree.setEndDateTime(getDate(2019, 8, 23, 17, 0, 0));
         appointmentThree.setAppointmentId(4);
@@ -249,7 +221,6 @@ public class AppointmentServiceUnavailabilityConflictTest {
         appointment.setStartDateTime(getDate(2019, 8, 23, 11, 30, 0));
         appointment.setEndDateTime(getDate(2019, 8, 23, 11, 0, 0));
         appointment.setService(appointmentServiceDefinition);
-        appointment.setLocation(createLocationWithSystemTimezone());
         appointment.setAppointmentId(1);
         ServiceWeeklyAvailability day1 = new ServiceWeeklyAvailability();
         day1.setStartTime(Time.valueOf("08:30:00"));
@@ -274,7 +245,6 @@ public class AppointmentServiceUnavailabilityConflictTest {
         appointment.setStartDateTime(getDate(2019, 8, 23, 11, 0, 0));
         appointment.setEndDateTime(getDate(2019, 8, 23, 11, 30, 0));
         appointment.setService(appointmentServiceDefinition);
-        appointment.setLocation(createLocationWithSystemTimezone());
         appointment.setAppointmentId(1);
         appointmentServiceDefinition.setStartTime(Time.valueOf("11:30:00"));
         appointmentServiceDefinition.setEndTime(Time.valueOf("17:00:00"));
