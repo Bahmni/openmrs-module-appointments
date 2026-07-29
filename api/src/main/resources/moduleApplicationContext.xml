@@ -383,4 +383,29 @@
         </property>
     </bean>
 
+    <bean id="appointmentCriteriaBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder"/>
+
+    <bean id="appointmentResponseBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentResponseBuilder"/>
+
+    <bean id="appointmentSearchDao" class="org.openmrs.module.appointments.dao.impl.AppointmentSearchDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+        <constructor-arg ref="appointmentCriteriaBuilder"/>
+    </bean>
+
+    <bean id="criteriaValidator" class="org.bahmni.search.validation.CriteriaValidator"/>
+
+    <bean id="appointmentSearchService" class="org.openmrs.module.appointments.service.impl.AppointmentSearchServiceImpl">
+        <constructor-arg ref="appointmentSearchDao"/>
+        <constructor-arg ref="criteriaValidator"/>
+        <constructor-arg ref="appointmentResponseBuilder"/>
+    </bean>
+
+    <bean id="appointmentSearchServiceRegistry" class="org.bahmni.search.service.SearchServiceRegistry">
+        <constructor-arg>
+            <list>
+                <ref bean="appointmentSearchService"/>
+            </list>
+        </constructor-arg>
+    </bean>
+
 </beans>
