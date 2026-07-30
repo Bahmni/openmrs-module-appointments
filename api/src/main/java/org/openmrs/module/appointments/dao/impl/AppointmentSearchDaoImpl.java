@@ -5,6 +5,7 @@ import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder;
 
 import javax.persistence.criteria.CriteriaBuilder;
@@ -37,12 +38,12 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         CriteriaQuery<Appointment> query = cb.createQuery(Appointment.class);
         Root<Appointment> root = query.from(Appointment.class);
 
-        root.fetch("patient", JoinType.INNER);
-        root.fetch("service", JoinType.LEFT);
-        root.fetch("location", JoinType.LEFT);
+        root.fetch(AppointmentSearchConstants.PATIENT, JoinType.INNER);
+        root.fetch(AppointmentSearchConstants.SERVICE, JoinType.LEFT);
+        root.fetch(AppointmentSearchConstants.LOCATION, JoinType.LEFT);
 
         List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.isFalse(root.get("voided")));
+        predicates.add(cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
 
         Map<String, Join<?, ?>> joinCache = new HashMap<>();
         criteriaBuilder.apply(cb, root, searchCriteria, predicates, joinCache);
