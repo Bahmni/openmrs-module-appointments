@@ -9,8 +9,10 @@ import org.openmrs.PersonName;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentReason;
+import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
+
 
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
@@ -75,8 +77,22 @@ public class AppointmentResponseBuilder {
         map.put(AppointmentSearchConstants.UUID, service.getUuid());
         map.put(AppointmentSearchConstants.NAME, service.getName());
         map.put(AppointmentSearchConstants.DESCRIPTION, service.getDescription());
+        map.put(AppointmentSearchConstants.DESTINATION_COUNTRY, resolveDestinationCountry(service));
         return map;
     }
+
+    private String resolveDestinationCountry(AppointmentServiceDefinition service) {
+        if (service.getActiveAttributes() == null) return null;
+        for (AppointmentServiceAttribute attribute : service.getActiveAttributes()) {
+            if (attribute.getAttributeType() != null
+                    && AppointmentSearchConstants.DESTINATION_COUNTRY_ATTRIBUTE_TYPE_NAME
+                            .equals(attribute.getAttributeType().getName())) {
+                return attribute.getValueReference();
+            }
+        }
+        return null;
+    }
+
 
     private Map<String, Object> buildLocationMap(Location location) {
         if (location == null) return null;

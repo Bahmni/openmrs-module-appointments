@@ -7,17 +7,15 @@ import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder;
+import org.openmrs.module.appointments.search.builder.QueryContext;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
 
@@ -38,6 +36,7 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         CriteriaQuery<Appointment> query = cb.createQuery(Appointment.class);
         Root<Appointment> root = query.from(Appointment.class);
 
+        // Fetch joins to solve N+1 for response building
         root.fetch(AppointmentSearchConstants.PATIENT, JoinType.INNER);
         root.fetch(AppointmentSearchConstants.SERVICE, JoinType.LEFT);
         root.fetch(AppointmentSearchConstants.LOCATION, JoinType.LEFT);
@@ -45,8 +44,8 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
 
-        Map<String, Join<?, ?>> joinCache = new HashMap<>();
-        criteriaBuilder.apply(cb, root, searchCriteria, predicates, joinCache);
+        QueryContext context = new QueryContext(cb, root, predicates);
+        criteriaBuilder.apply(context, searchCriteria);
 
         query.select(root).distinct(true)
                 .where(predicates.toArray(new Predicate[0]));

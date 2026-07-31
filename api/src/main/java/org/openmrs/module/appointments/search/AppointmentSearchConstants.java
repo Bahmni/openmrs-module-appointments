@@ -31,4 +31,12 @@ public final class AppointmentSearchConstants {
     public static final String IDENTIFIER = "identifier";
     public static final String PREFERRED = "preferred";
     public static final String TYPE = "type";
+
+    public static final String ATTRIBUTES = "attributes";
+    public static final String ATTRIBUTE_TYPE = "attributeType";
+    public static final String VALUE_REFERENCE = "valueReference";
+
+    public static final String DESTINATION_COUNTRY_ATTRIBUTE_TYPE_NAME = "Servicing Country";
+    public static final String DESTINATION_COUNTRY = "destinationCountry";
 }
+

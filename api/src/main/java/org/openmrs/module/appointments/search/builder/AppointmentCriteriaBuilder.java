@@ -1,85 +1,167 @@
 package org.openmrs.module.appointments.search.builder;
 
-import org.bahmni.search.builder.AbstractCriteriaBuilder;
-import org.bahmni.search.builder.FieldConfig;
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
+import org.bahmni.search.model.ConditionOperator;
+import org.bahmni.search.model.FieldComparator;
 import org.bahmni.search.model.FieldType;
 import org.bahmni.search.model.SearchCondition;
-import org.openmrs.module.appointments.model.Appointment;
-import org.openmrs.module.appointments.search.AppointmentSearchFields;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
+import org.openmrs.module.appointments.search.AppointmentSearchFields;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import java.time.OffsetDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
-public class AppointmentCriteriaBuilder extends AbstractCriteriaBuilder<Appointment> {
+public class AppointmentCriteriaBuilder {
 
-    private final Map<String, FieldConfig> fieldRegistry;
+    private static final DateTimeFormatter ISO_DATETIME_FORMAT =
+            DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+
+    private final AppointmentJoinResolver joinResolver = new AppointmentJoinResolver();
+    private final Map<String, SearchFieldPredicate> fieldRegistry;
 
     public AppointmentCriteriaBuilder() {
         this.fieldRegistry = Collections.unmodifiableMap(buildFieldRegistry());
     }
 
-    public void apply(CriteriaBuilder cb, Root<Appointment> root,
-                      SearchCondition criteria, List<Predicate> predicates,
-                      Map<String, Join<?, ?>> joinCache) {
-        Predicate predicate = buildCriterion(cb, root, criteria, joinCache);
+    public void apply(QueryContext queryContext, SearchCondition criteria) {
+        Predicate predicate = buildCriterion(queryContext, criteria);
         if (predicate != null) {
-            predicates.add(predicate);
+            queryContext.predicates.add(predicate);
         }
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected Predicate buildLeafCriterion(CriteriaBuilder cb, Root<Appointment> root,
-                                            SearchCondition leaf, Map<String, ?> joinCache) {
-        String fieldName = leaf.getField();
+    private Map<String, SearchFieldPredicate> buildFieldRegistry() {
+        Map<String, SearchFieldPredicate> registry = new HashMap<>();
 
-        FieldConfig config = fieldRegistry.get(fieldName);
-        if (config == null) {
+        registry.put(AppointmentSearchFields.APPOINTMENT_DATE,
+                createFieldPredicate(queryContext -> queryContext.appointmentRoot,
+                        AppointmentSearchConstants.START_DATE_TIME, FieldType.DATE));
+
+        registry.put(AppointmentSearchFields.APPOINTMENT_NUMBER,
+                createFieldPredicate(queryContext -> queryContext.appointmentRoot,
+                        AppointmentSearchConstants.APPOINTMENT_NUMBER, FieldType.STRING));
+
+        registry.put(AppointmentSearchFields.LOCATION,
+                createFieldPredicate(joinResolver::joinLocation,
+                        AppointmentSearchConstants.UUID, FieldType.STRING));
+
+        registry.put(AppointmentSearchFields.SERVICE_TYPE,
+                createFieldPredicate(joinResolver::joinService,
+                        AppointmentSearchConstants.UUID, FieldType.STRING));
+
+        registry.put(AppointmentSearchFields.SERVICE_ATTRIBUTE_KIND,
+                createFieldPredicate(joinResolver::joinServiceAttributeType,
+                        AppointmentSearchConstants.NAME, FieldType.STRING));
+        registry.put(AppointmentSearchFields.SERVICE_ATTRIBUTE_VALUE,
+                createFieldPredicate(joinResolver::joinServiceAttributes,
+                        AppointmentSearchConstants.VALUE_REFERENCE, FieldType.STRING));
+
+        return registry;
+    }
+
+    private SearchFieldPredicate createFieldPredicate(Function<QueryContext, From<?, ?>> joinFunction,
+                                                     String propertyName, FieldType fieldType) {
+        return (queryContext, fieldName, comparator, value, operator) -> {
+            validateComparator(fieldName, comparator, fieldType);
+            Path<?> fieldPath = joinFunction.apply(queryContext).get(propertyName);
+            return buildPredicate(queryContext.criteriaBuilder, fieldPath, comparator, value);
+        };
+    }
+
+    private Predicate buildCriterion(QueryContext queryContext, SearchCondition criteria) {
+        if (criteria == null) {
+            return null;
+        }
+        if (criteria.isLeaf()) {
+            return buildLeafCriterion(queryContext, criteria);
+        }
+        return combineChildPredicates(queryContext, criteria);
+    }
+
+    private Predicate buildLeafCriterion(QueryContext queryContext, SearchCondition leafCriteria) {
+        String fieldName = leafCriteria.getField();
+        FieldComparator comparator = leafCriteria.getComparator();
+
+        SearchFieldPredicate fieldPredicate = fieldRegistry.get(fieldName);
+        if (fieldPredicate == null) {
             throw new InvalidSearchCriteriaException(
                     "Unknown search field: '" + fieldName + "'",
                     SearchResponseErrorStatus.BAD_REQUEST);
         }
 
-        validateComparator(fieldName, leaf.getComparator(), config.getFieldType());
-
-        From<?, ?> from = resolveFrom(root, config.getJoinPath(), (Map<String, Join<?, ?>>) joinCache);
-        Path<?> fieldPath = from.get(config.getPropertyName());
-        return buildPredicate(cb, fieldPath, leaf.getComparator(), leaf.getValue());
+        return fieldPredicate.build(queryContext, fieldName, comparator,
+                leafCriteria.getValue(), leafCriteria.getOperator());
     }
 
-    private Map<String, FieldConfig> buildFieldRegistry() {
-        Map<String, FieldConfig> registry = new HashMap<>();
-
-        registry.put(AppointmentSearchFields.APPOINTMENT_DATE,
-                new FieldConfig(null, AppointmentSearchConstants.START_DATE_TIME, FieldType.DATE));
-        registry.put(AppointmentSearchFields.LOCATION,
-                new FieldConfig(AppointmentSearchConstants.LOCATION, AppointmentSearchConstants.UUID, FieldType.STRING));
-        registry.put(AppointmentSearchFields.SERVICE_TYPE,
-                new FieldConfig(AppointmentSearchConstants.SERVICE, AppointmentSearchConstants.UUID, FieldType.STRING));
-        registry.put(AppointmentSearchFields.APPOINTMENT_NUMBER,
-                new FieldConfig(null, AppointmentSearchConstants.APPOINTMENT_NUMBER, FieldType.STRING));
-
-        return registry;
-    }
-
-    private From<?, ?> resolveFrom(Root<Appointment> root, String joinPath,
-                                    Map<String, Join<?, ?>> joinCache) {
-        if (joinPath == null) {
-            return root;
+    private Predicate combineChildPredicates(QueryContext queryContext, SearchCondition parentCriteria) {
+        List<Predicate> childPredicates = new ArrayList<>();
+        if (parentCriteria.getConditions() != null) {
+            for (SearchCondition childCriteria : parentCriteria.getConditions()) {
+                Predicate resolvedPredicate = buildCriterion(queryContext, childCriteria);
+                if (resolvedPredicate != null) {
+                    childPredicates.add(resolvedPredicate);
+                }
+            }
         }
-        return joinCache.computeIfAbsent(joinPath, k ->
-                root.join(joinPath, JoinType.INNER));
+
+        if (childPredicates.isEmpty()) {
+            return null;
+        }
+        if (childPredicates.size() == 1) {
+            return childPredicates.get(0);
+        }
+
+        Predicate[] predicateArray = childPredicates.toArray(new Predicate[0]);
+        return parentCriteria.getOperator() == ConditionOperator.OR
+                ? queryContext.criteriaBuilder.or(predicateArray)
+                : queryContext.criteriaBuilder.and(predicateArray);
+    }
+
+    @SuppressWarnings("unchecked")
+    private Predicate buildPredicate(CriteriaBuilder criteriaBuilder, Path<?> fieldPath,
+                                     FieldComparator comparator, String value) {
+        switch (comparator) {
+            case EQ: return criteriaBuilder.equal(fieldPath, value);
+            case GT: return criteriaBuilder.greaterThan((Path<Date>) fieldPath, parseDate(value));
+            case LT: return criteriaBuilder.lessThan((Path<Date>) fieldPath, parseDate(value));
+            default:
+                throw new InvalidSearchCriteriaException(
+                        "Unsupported comparator: " + comparator,
+                        SearchResponseErrorStatus.BAD_REQUEST);
+        }
+    }
+
+    private void validateComparator(String fieldName, FieldComparator comparator, FieldType fieldType) {
+        if (!fieldType.supports(comparator)) {
+            throw new InvalidSearchCriteriaException(
+                    "Comparator '" + comparator.name().toLowerCase()
+                            + "' is not supported for field '" + fieldName
+                            + "'. Supported: " + fieldType.getSupportedComparators().toString().toLowerCase(),
+                    SearchResponseErrorStatus.BAD_REQUEST);
+        }
+    }
+
+    private Date parseDate(String dateValue) {
+        try {
+            return Date.from(OffsetDateTime.parse(dateValue, ISO_DATETIME_FORMAT).toInstant());
+        } catch (DateTimeParseException exception) {
+            throw new InvalidSearchCriteriaException(
+                    "Invalid date format: '" + dateValue
+                            + "'. Expected yyyy-MM-dd'T'HH:mm:ss.SSSZ (e.g. 2024-01-01T10:30:00.000+0530)",
+                    SearchResponseErrorStatus.BAD_REQUEST);
+        }
     }
 }
