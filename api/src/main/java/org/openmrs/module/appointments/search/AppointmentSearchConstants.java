@@ -27,4 +27,8 @@ public final class AppointmentSearchConstants {
     public static final String REASONS = "reasons";
     public static final String CONCEPT_UUID = "conceptUuid";
 
+    public static final String IDENTIFIERS = "identifiers";
+    public static final String IDENTIFIER = "identifier";
+    public static final String PREFERRED = "preferred";
+    public static final String TYPE = "type";
 }

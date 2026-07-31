@@ -392,20 +392,26 @@
         <constructor-arg ref="appointmentCriteriaBuilder"/>
     </bean>
 
-    <bean id="criteriaValidator" class="org.bahmni.search.validation.CriteriaValidator"/>
+    <bean id="criteriaValidator" class="org.openmrs.module.appointments.search.validation.CriteriaValidator"/>
 
-    <bean id="appointmentSearchService" class="org.openmrs.module.appointments.service.impl.AppointmentSearchServiceImpl">
-        <constructor-arg ref="appointmentSearchDao"/>
-        <constructor-arg ref="criteriaValidator"/>
-        <constructor-arg ref="appointmentResponseBuilder"/>
-    </bean>
-
-    <bean id="appointmentSearchServiceRegistry" class="org.bahmni.search.service.SearchServiceRegistry">
-        <constructor-arg>
-            <list>
-                <ref bean="appointmentSearchService"/>
-            </list>
-        </constructor-arg>
+    <bean id="appointmentSearchService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentSearchServiceImpl">
+                <constructor-arg ref="appointmentSearchDao"/>
+                <constructor-arg ref="criteriaValidator"/>
+                <constructor-arg ref="appointmentResponseBuilder"/>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
     </bean>
 
 </beans>
+
