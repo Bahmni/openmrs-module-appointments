@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.service;
 
-import org.bahmni.search.model.ContextSearchResponse;
-import org.bahmni.search.model.SearchRequest;
+import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
+import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
 import org.openmrs.annotation.Authorized;
 import org.openmrs.module.appointments.constants.PrivilegeConstants;
 
@@ -12,5 +12,6 @@ public interface AppointmentSearchService {
             PrivilegeConstants.MANAGE_APPOINTMENTS,
             PrivilegeConstants.MANAGE_OWN_APPOINTMENTS
     }, requireAll = true)
-    ContextSearchResponse search(SearchRequest request);
+    AppointmentSearchResponse search(AppointmentSearchRequest request);
 }
+

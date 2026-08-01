@@ -1,11 +1,14 @@
 package org.openmrs.module.appointments.search.builder;
 
+import org.bahmni.search.builder.QueryContext;
+import org.bahmni.search.builder.SearchFieldPredicate;
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
 import org.bahmni.search.model.ConditionOperator;
 import org.bahmni.search.model.FieldComparator;
 import org.bahmni.search.model.FieldType;
 import org.bahmni.search.model.SearchCondition;
+import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.AppointmentSearchFields;
 
@@ -36,7 +39,7 @@ public class AppointmentCriteriaBuilder {
         this.fieldRegistry = Collections.unmodifiableMap(buildFieldRegistry());
     }
 
-    public void apply(QueryContext queryContext, SearchCondition criteria) {
+    public void apply(QueryContext<Appointment> queryContext, SearchCondition criteria) {
         Predicate predicate = buildCriterion(queryContext, criteria);
         if (predicate != null) {
             queryContext.predicates.add(predicate);
@@ -47,11 +50,11 @@ public class AppointmentCriteriaBuilder {
         Map<String, SearchFieldPredicate> registry = new HashMap<>();
 
         registry.put(AppointmentSearchFields.APPOINTMENT_DATE,
-                createFieldPredicate(queryContext -> queryContext.appointmentRoot,
+                createFieldPredicate(queryContext -> queryContext.root,
                         AppointmentSearchConstants.START_DATE_TIME, FieldType.DATE));
 
         registry.put(AppointmentSearchFields.APPOINTMENT_NUMBER,
-                createFieldPredicate(queryContext -> queryContext.appointmentRoot,
+                createFieldPredicate(queryContext -> queryContext.root,
                         AppointmentSearchConstants.APPOINTMENT_NUMBER, FieldType.STRING));
 
         registry.put(AppointmentSearchFields.LOCATION,
@@ -72,16 +75,17 @@ public class AppointmentCriteriaBuilder {
         return registry;
     }
 
-    private SearchFieldPredicate createFieldPredicate(Function<QueryContext, From<?, ?>> joinFunction,
+    private SearchFieldPredicate createFieldPredicate(Function<QueryContext<Appointment>, From<?, ?>> joinFunction,
                                                      String propertyName, FieldType fieldType) {
         return (queryContext, fieldName, comparator, value, operator) -> {
             validateComparator(fieldName, comparator, fieldType);
-            Path<?> fieldPath = joinFunction.apply(queryContext).get(propertyName);
+            @SuppressWarnings("unchecked")
+            Path<?> fieldPath = joinFunction.apply((QueryContext<Appointment>) queryContext).get(propertyName);
             return buildPredicate(queryContext.criteriaBuilder, fieldPath, comparator, value);
         };
     }
 
-    private Predicate buildCriterion(QueryContext queryContext, SearchCondition criteria) {
+    private Predicate buildCriterion(QueryContext<Appointment> queryContext, SearchCondition criteria) {
         if (criteria == null) {
             return null;
         }
@@ -91,7 +95,7 @@ public class AppointmentCriteriaBuilder {
         return combineChildPredicates(queryContext, criteria);
     }
 
-    private Predicate buildLeafCriterion(QueryContext queryContext, SearchCondition leafCriteria) {
+    private Predicate buildLeafCriterion(QueryContext<Appointment> queryContext, SearchCondition leafCriteria) {
         String fieldName = leafCriteria.getField();
         FieldComparator comparator = leafCriteria.getComparator();
 
@@ -106,7 +110,7 @@ public class AppointmentCriteriaBuilder {
                 leafCriteria.getValue(), leafCriteria.getOperator());
     }
 
-    private Predicate combineChildPredicates(QueryContext queryContext, SearchCondition parentCriteria) {
+    private Predicate combineChildPredicates(QueryContext<Appointment> queryContext, SearchCondition parentCriteria) {
         List<Predicate> childPredicates = new ArrayList<>();
         if (parentCriteria.getConditions() != null) {
             for (SearchCondition childCriteria : parentCriteria.getConditions()) {

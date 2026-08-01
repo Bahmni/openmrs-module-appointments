@@ -1,8 +1,8 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.bahmni.search.model.ContextSearchResponse;
-import org.bahmni.search.model.DefaultSearchResponse;
-import org.bahmni.search.model.SearchRequest;
+import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
+import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
+
 import org.openmrs.module.appointments.search.validation.CriteriaValidator;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -35,14 +35,14 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
     }
 
     @Override
-    public ContextSearchResponse search(SearchRequest request) {
+    public AppointmentSearchResponse search(AppointmentSearchRequest request) {
         log.debug("Searching appointments for entity '{}'", request.getEntity());
         validator.validateRequest(request);
 
         List<Appointment> appointments = appointmentSearchDao.search(request.getCriteria());
         if (appointments.isEmpty()) {
             log.debug("No appointments found for the given criteria");
-            return new DefaultSearchResponse(ENTITY, new ArrayList<>());
+            return AppointmentSearchResponse.success(ENTITY, new ArrayList<>());
         }
 
         List<Map<String, Object>> results = new ArrayList<>();
@@ -51,6 +51,6 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
         }
 
         log.debug("Returning {} appointment results", results.size());
-        return new DefaultSearchResponse(ENTITY, results);
+        return AppointmentSearchResponse.success(ENTITY, results);
     }
 }

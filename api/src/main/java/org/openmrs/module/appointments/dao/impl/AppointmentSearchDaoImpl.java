@@ -6,11 +6,12 @@ import org.hibernate.SessionFactory;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
+import org.bahmni.search.builder.QueryContext;
 import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder;
-import org.openmrs.module.appointments.search.builder.QueryContext;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -37,14 +38,17 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         Root<Appointment> root = query.from(Appointment.class);
 
         // Fetch joins to solve N+1 for response building
-        root.fetch(AppointmentSearchConstants.PATIENT, JoinType.INNER);
-        root.fetch(AppointmentSearchConstants.SERVICE, JoinType.LEFT);
+        Fetch<Appointment, ?> patientFetch = root.fetch(AppointmentSearchConstants.PATIENT, JoinType.INNER);
+        Fetch<Appointment, ?> serviceFetch = root.fetch(AppointmentSearchConstants.SERVICE, JoinType.LEFT);
         root.fetch(AppointmentSearchConstants.LOCATION, JoinType.LEFT);
+        root.fetch(AppointmentSearchConstants.REASONS, JoinType.LEFT);
+        serviceFetch.fetch(AppointmentSearchConstants.ATTRIBUTES, JoinType.LEFT);
+        patientFetch.fetch(AppointmentSearchConstants.IDENTIFIERS, JoinType.LEFT);
 
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
 
-        QueryContext context = new QueryContext(cb, root, predicates);
+        QueryContext<Appointment> context = new QueryContext<>(cb, root, predicates);
         criteriaBuilder.apply(context, searchCriteria);
 
         query.select(root).distinct(true)

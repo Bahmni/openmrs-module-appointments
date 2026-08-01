@@ -10,6 +10,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentReason;
 import org.openmrs.module.appointments.model.AppointmentServiceAttribute;
+import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 
@@ -17,6 +18,7 @@ import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,20 +79,33 @@ public class AppointmentResponseBuilder {
         map.put(AppointmentSearchConstants.UUID, service.getUuid());
         map.put(AppointmentSearchConstants.NAME, service.getName());
         map.put(AppointmentSearchConstants.DESCRIPTION, service.getDescription());
-        map.put(AppointmentSearchConstants.DESTINATION_COUNTRY, resolveDestinationCountry(service));
+        Map<String, Object> destinationCountryAttribute = buildDestinationCountryAttribute(service);
+        if (destinationCountryAttribute != null) {
+            map.put(AppointmentSearchConstants.ATTRIBUTES, Collections.singletonList(destinationCountryAttribute));
+        }
         return map;
     }
 
-    private String resolveDestinationCountry(AppointmentServiceDefinition service) {
+    private Map<String, Object> buildDestinationCountryAttribute(AppointmentServiceDefinition service) {
         if (service.getActiveAttributes() == null) return null;
         for (AppointmentServiceAttribute attribute : service.getActiveAttributes()) {
             if (attribute.getAttributeType() != null
                     && AppointmentSearchConstants.DESTINATION_COUNTRY_ATTRIBUTE_TYPE_NAME
                             .equals(attribute.getAttributeType().getName())) {
-                return attribute.getValueReference();
+                Map<String, Object> attributeMap = new LinkedHashMap<>();
+                attributeMap.put(AppointmentSearchConstants.TYPE, buildAttributeTypeMap(attribute.getAttributeType()));
+                attributeMap.put(AppointmentSearchConstants.VALUE, attribute.getValueReference());
+                return attributeMap;
             }
         }
         return null;
+    }
+
+    private Map<String, Object> buildAttributeTypeMap(AppointmentServiceAttributeType attributeType) {
+        Map<String, Object> map = new LinkedHashMap<>();
+        map.put(AppointmentSearchConstants.UUID, attributeType.getUuid());
+        map.put(AppointmentSearchConstants.NAME, attributeType.getName());
+        return map;
     }
 
 

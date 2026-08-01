@@ -35,6 +35,7 @@ public final class AppointmentSearchConstants {
     public static final String ATTRIBUTES = "attributes";
     public static final String ATTRIBUTE_TYPE = "attributeType";
     public static final String VALUE_REFERENCE = "valueReference";
+    public static final String VALUE = "value";
 
     public static final String DESTINATION_COUNTRY_ATTRIBUTE_TYPE_NAME = "Servicing Country";
     public static final String DESTINATION_COUNTRY = "destinationCountry";
