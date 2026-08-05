@@ -24,23 +24,18 @@ public class AppointmentJoinResolver {
                 key -> JoinResolvers.findExistingFetchOrJoin(queryContext.root, AppointmentSearchConstants.SERVICE, JoinType.INNER));
     }
 
-    /**
-     * Join: patient_appointment -> appointment_service -> appointment_service_attribute
-     * Filters out voided attributes.
-     */
     From<?, ?> joinServiceAttributes(QueryContext<Appointment> queryContext) {
+        From<?, ?> serviceJoin = joinService(queryContext);
         return queryContext.joinCache.computeIfAbsent(JOIN_KEY_SERVICE_ATTRIBUTES, key -> {
-            Join<?, ?> attributesJoin = joinService(queryContext).join(AppointmentSearchConstants.ATTRIBUTES, JoinType.INNER);
+            Join<?, ?> attributesJoin = serviceJoin.join(AppointmentSearchConstants.ATTRIBUTES, JoinType.INNER);
             queryContext.predicates.add(queryContext.criteriaBuilder.isFalse(attributesJoin.get(AppointmentSearchConstants.VOIDED)));
             return attributesJoin;
         });
     }
 
-    /**
-     * Join: appointment_service_attribute -> appointment_service_attribute_type
-     */
     From<?, ?> joinServiceAttributeType(QueryContext<Appointment> queryContext) {
+        From<?, ?> attributesJoin = joinServiceAttributes(queryContext);
         return queryContext.joinCache.computeIfAbsent(JOIN_KEY_SERVICE_ATTRIBUTE_TYPE,
-                key -> joinServiceAttributes(queryContext).join(AppointmentSearchConstants.ATTRIBUTE_TYPE, JoinType.INNER));
+                key -> attributesJoin.join(AppointmentSearchConstants.ATTRIBUTE_TYPE, JoinType.INNER));
     }
 }

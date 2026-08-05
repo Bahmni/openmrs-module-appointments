@@ -1,13 +1,11 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
-
 import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
 import org.openmrs.module.appointments.search.validation.CriteriaValidator;
 import org.openmrs.module.appointments.service.AppointmentSearchService;
 
 import org.openmrs.module.webservices.rest.web.RestConstants;
-import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +18,7 @@ import org.springframework.web.context.request.WebRequest;
 
 @Controller
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointmentSearch")
-public class AppointmentSearchController extends BaseRestController {
+public class AppointmentSearchController {
 
     private static final String SUPPORTED_ENTITY = "appointment";
 
@@ -46,8 +44,8 @@ public class AppointmentSearchController extends BaseRestController {
         String entity = request.getEntity();
         criteriaValidator.validateEntity(entity, SUPPORTED_ENTITY);
         webRequest.setAttribute(CURRENT_ENTITY_ATTRIBUTE, entity, WebRequest.SCOPE_REQUEST);
+        criteriaValidator.validateRequest(request);
         AppointmentSearchResponse response = appointmentSearchService.search(request);
         return ResponseEntity.ok(response);
     }
 }
-

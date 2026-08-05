@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -46,10 +47,30 @@ public class AppointmentSearchExceptionHandler {
         return errorResponse(currentEntity(webRequest), HttpStatus.FORBIDDEN.value(), message);
     }
 
+    @ExceptionHandler(HttpRequestMethodNotSupportedException.class)
+    @ResponseBody
+    public ResponseEntity<AppointmentSearchResponse> handleMethodNotSupported(
+            HttpRequestMethodNotSupportedException e, WebRequest webRequest) {
+        String message = e.getMessage() != null ? e.getMessage() : "Request method not supported";
+        return errorResponse(currentEntity(webRequest), HttpStatus.METHOD_NOT_ALLOWED.value(), message);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     @ResponseBody
     public ResponseEntity<AppointmentSearchResponse> handleUnexpectedError(
             RuntimeException e, WebRequest webRequest) {
+        SearchException searchException =
+                new SearchException("Unexpected error during appointment search", e);
+        log.error(searchException.getMessage(), searchException);
+        int statusCode = searchException.getStatus().getCode();
+        return errorResponse(currentEntity(webRequest), statusCode,
+                "An unexpected error occurred while processing the search request");
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseBody
+    public ResponseEntity<AppointmentSearchResponse> handleUnexpectedCheckedError(
+            Exception e, WebRequest webRequest) {
         SearchException searchException =
                 new SearchException("Unexpected error during appointment search", e);
         log.error(searchException.getMessage(), searchException);

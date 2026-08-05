@@ -10,7 +10,6 @@ public interface AppointmentSearchService {
     @Authorized(value = {
             PrivilegeConstants.VIEW_APPOINTMENTS,
             PrivilegeConstants.MANAGE_APPOINTMENTS,
-            PrivilegeConstants.MANAGE_OWN_APPOINTMENTS
     }, requireAll = true)
     AppointmentSearchResponse search(AppointmentSearchRequest request);
 }

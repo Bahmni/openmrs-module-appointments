@@ -74,20 +74,20 @@ public class AppointmentResponseBuilder {
 
 
     private Map<String, Object> buildServiceMap(AppointmentServiceDefinition service) {
-        if (service == null) return null;
+        if (service == null) return Collections.emptyMap();
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(AppointmentSearchConstants.UUID, service.getUuid());
         map.put(AppointmentSearchConstants.NAME, service.getName());
         map.put(AppointmentSearchConstants.DESCRIPTION, service.getDescription());
         Map<String, Object> destinationCountryAttribute = buildDestinationCountryAttribute(service);
-        if (destinationCountryAttribute != null) {
+        if (!destinationCountryAttribute.isEmpty()) {
             map.put(AppointmentSearchConstants.ATTRIBUTES, Collections.singletonList(destinationCountryAttribute));
         }
         return map;
     }
 
     private Map<String, Object> buildDestinationCountryAttribute(AppointmentServiceDefinition service) {
-        if (service.getActiveAttributes() == null) return null;
+        if (service.getActiveAttributes() == null) return Collections.emptyMap();
         for (AppointmentServiceAttribute attribute : service.getActiveAttributes()) {
             if (attribute.getAttributeType() != null
                     && AppointmentSearchConstants.DESTINATION_COUNTRY_ATTRIBUTE_TYPE_NAME
@@ -98,7 +98,7 @@ public class AppointmentResponseBuilder {
                 return attributeMap;
             }
         }
-        return null;
+        return Collections.emptyMap();
     }
 
     private Map<String, Object> buildAttributeTypeMap(AppointmentServiceAttributeType attributeType) {
@@ -110,7 +110,7 @@ public class AppointmentResponseBuilder {
 
 
     private Map<String, Object> buildLocationMap(Location location) {
-        if (location == null) return null;
+        if (location == null) return Collections.emptyMap();
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(AppointmentSearchConstants.UUID, location.getUuid());
         map.put(AppointmentSearchConstants.NAME, location.getName());
@@ -118,7 +118,7 @@ public class AppointmentResponseBuilder {
     }
 
     private Map<String, Object> buildPatientMap(Patient patient) {
-        if (patient == null) return null;
+        if (patient == null) return Collections.emptyMap();
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(AppointmentSearchConstants.UUID, patient.getUuid());
         map.put(AppointmentSearchConstants.GENDER, patient.getGender());
@@ -146,7 +146,7 @@ public class AppointmentResponseBuilder {
     }
 
     private Map<String, Object> buildIdentifierTypeMap(PatientIdentifierType identifierType) {
-        if (identifierType == null) return null;
+        if (identifierType == null) return Collections.emptyMap();
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(AppointmentSearchConstants.UUID, identifierType.getUuid());
         map.put(AppointmentSearchConstants.NAME, identifierType.getName());
@@ -154,7 +154,7 @@ public class AppointmentResponseBuilder {
     }
 
     private Map<String, Object> buildNameMap(PersonName name) {
-        if (name == null) return null;
+        if (name == null) return Collections.emptyMap();
         Map<String, Object> map = new LinkedHashMap<>();
         map.put(AppointmentSearchConstants.GIVEN_NAME, name.getGivenName());
         map.put(AppointmentSearchConstants.MIDDLE_NAME, name.getMiddleName());

@@ -1,6 +1,8 @@
 package org.openmrs.module.appointments.search;
 
 public final class AppointmentSearchConstants {
+    private AppointmentSearchConstants() {
+    }
 
     public static final String ENTITY_APPOINTMENT = "appointment";
 
