@@ -383,4 +383,35 @@
         </property>
     </bean>
 
+    <bean id="appointmentCriteriaBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder"/>
+
+    <bean id="appointmentResponseBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentResponseBuilder"/>
+
+    <bean id="appointmentSearchDao" class="org.openmrs.module.appointments.dao.impl.AppointmentSearchDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+        <constructor-arg ref="appointmentCriteriaBuilder"/>
+    </bean>
+
+    <bean id="criteriaValidator" class="org.openmrs.module.appointments.search.validation.CriteriaValidator"/>
+
+    <bean id="appointmentSearchService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentSearchServiceImpl">
+                <constructor-arg ref="appointmentSearchDao"/>
+                <constructor-arg ref="criteriaValidator"/>
+                <constructor-arg ref="appointmentResponseBuilder"/>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
 </beans>
+
