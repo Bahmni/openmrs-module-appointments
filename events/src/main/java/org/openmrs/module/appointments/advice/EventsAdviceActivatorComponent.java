@@ -14,10 +14,10 @@ import org.openmrs.module.appointments.service.AppointmentsService;
  * Registers AOP advice when the context starts up.
  * This is done instead of declaring advice in config.xml in order to allow it to be conditionally loaded
  */
-@OpenmrsProfile(modules = { "openmrs-atomfeed:*" })
-public class AtomFeedAdviceActivatorComponent implements AppointmentsActivatorComponent {
+@OpenmrsProfile(modules = { "eventoutbox:*" })
+public class EventsAdviceActivatorComponent implements AppointmentsActivatorComponent {
 
-    private static final Log log = LogFactory.getLog(AtomFeedAdviceActivatorComponent.class);
+    private static final Log log = LogFactory.getLog(EventsAdviceActivatorComponent.class);
 
     private final AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice;
 
@@ -25,13 +25,13 @@ public class AtomFeedAdviceActivatorComponent implements AppointmentsActivatorCo
 
     private final RecurringAppointmentsAdvice recurringAppointmentsAdvice;
 
-    public AtomFeedAdviceActivatorComponent() {
+    public EventsAdviceActivatorComponent() {
         this(new AppointmentServiceDefinitionAdvice(), new AppointmentAdvice(), new RecurringAppointmentsAdvice());
     }
 
-    public AtomFeedAdviceActivatorComponent(AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice,
-                                            AppointmentAdvice appointmentAdvice,
-                                            RecurringAppointmentsAdvice recurringAppointmentsAdvice) {
+    public EventsAdviceActivatorComponent(AppointmentServiceDefinitionAdvice appointmentServiceDefinitionAdvice,
+                                          AppointmentAdvice appointmentAdvice,
+                                          RecurringAppointmentsAdvice recurringAppointmentsAdvice) {
         this.appointmentServiceDefinitionAdvice = appointmentServiceDefinitionAdvice;
         this.appointmentAdvice = appointmentAdvice;
         this.recurringAppointmentsAdvice = recurringAppointmentsAdvice;

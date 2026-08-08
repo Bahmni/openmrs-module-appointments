@@ -9,10 +9,10 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>appointments-atom-feed</artifactId>
+    <artifactId>appointments-events</artifactId>
     <packaging>jar</packaging>
-    <name>appointments AtomFeed</name>
-    <description>AtomFeed connectors for Bahmni Appointment Scheduling</description>
+    <name>appointments Events</name>
+    <description>EventOutbox connectors for Bahmni Appointment Scheduling</description>
 
     <build>
         <resources>
@@ -76,7 +76,6 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <!-- Lowered as PowerMockito is not covered -->
                                             <minimum>0.35</minimum>
                                         </limit>
                                         <limit>
@@ -96,15 +95,9 @@
 
     <dependencies>
         <dependency>
-            <groupId>org.ict4h.openmrs</groupId>
-            <artifactId>openmrs-atomfeed-common</artifactId>
-            <version>${openmrsAtomfeedVersion}</version>
-            <scope>provided</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.ict4h</groupId>
-            <artifactId>atomfeed-server</artifactId>
-            <version>${atomfeed.version}</version>
+            <groupId>org.bahmni.module</groupId>
+            <artifactId>eventoutbox-api</artifactId>
+            <version>${eventoutbox.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>

@@ -19,7 +19,7 @@ import static org.powermock.api.mockito.PowerMockito.mockStatic;
 @PowerMockIgnore({"javax.*", "org.apache.*", "org.slf4j.*"})
 @PrepareForTest({ServiceContext.class})
 @RunWith(PowerMockRunner.class)
-public class AtomFeedAdviceActivatorComponentTest {
+public class EventsAdviceActivatorComponentTest {
 
     @Mock
     ServiceContext serviceContext;
@@ -33,13 +33,13 @@ public class AtomFeedAdviceActivatorComponentTest {
     @Mock
     RecurringAppointmentsAdvice recurringAppointmentsAdvice;
 
-    AtomFeedAdviceActivatorComponent component;
+    EventsAdviceActivatorComponent component;
 
     @Before
     public void setUp() throws Exception {
         mockStatic(ServiceContext.class);
         when(ServiceContext.getInstance()).thenReturn(serviceContext);
-        component = new AtomFeedAdviceActivatorComponent(appointmentServiceDefinitionAdvice, appointmentAdvice, recurringAppointmentsAdvice);
+        component = new EventsAdviceActivatorComponent(appointmentServiceDefinitionAdvice, appointmentAdvice, recurringAppointmentsAdvice);
     }
 
     @Test
