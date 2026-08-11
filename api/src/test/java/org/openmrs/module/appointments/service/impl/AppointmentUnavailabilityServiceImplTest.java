@@ -259,6 +259,35 @@ public class AppointmentUnavailabilityServiceImplTest {
     }
 
     @Test
+    public void shouldReturnEmptyListWhenDaoReturnsNullForGetAll() {
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid("location-uuid-1");
+
+        when(appointmentUnavailabilityDao.getAll(searchParams)).thenReturn(null);
+
+        List<AppointmentUnavailability> result = service.getAll(searchParams);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+        verify(appointmentUnavailabilityDao, times(1)).getAll(searchParams);
+    }
+
+    @Test
+    public void shouldReturnUnavailabilitiesWhenDaoReturnsNonEmptyListForGetAll() {
+        AppointmentUnavailabilitySearchParams searchParams = new AppointmentUnavailabilitySearchParams();
+        searchParams.setLocationUuid("location-uuid-1");
+        List<AppointmentUnavailability> daoResult = createValidUnavailabilityList();
+
+        when(appointmentUnavailabilityDao.getAll(searchParams)).thenReturn(daoResult);
+
+        List<AppointmentUnavailability> result = service.getAll(searchParams);
+
+        assertNotNull(result);
+        assertEquals(1, result.size());
+    }
+
+
+    @Test
     public void shouldVoidAppointmentUnavailability() {
         AppointmentUnavailability unavailability = createValidUnavailability();
         unavailability.setVoided(false);

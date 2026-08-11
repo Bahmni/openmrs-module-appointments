@@ -18,7 +18,8 @@ public class CriteriaValidator {
     private static final String LEAF_CONDITION_FIELD_PREFIX = "Leaf condition for field '";
 
     private static final Set<FieldComparator> SUPPORTED_COMPARATORS =
-            EnumSet.of(FieldComparator.EQ, FieldComparator.GT, FieldComparator.LT);
+            EnumSet.of(FieldComparator.EQ, FieldComparator.GT, FieldComparator.LT,
+                    FieldComparator.GE, FieldComparator.LE);
 
     private static final Set<ConditionOperator> SUPPORTED_OPERATORS =
             EnumSet.of(ConditionOperator.AND, ConditionOperator.OR);
@@ -63,11 +64,11 @@ public class CriteriaValidator {
         List<String> errors = new ArrayList<>();
         if (leaf.getComparator() == null) {
             errors.add(LEAF_CONDITION_FIELD_PREFIX + leaf.getField()
-                    + "' is missing 'comparator'. Supported: eq, gt, lt");
+                    + "' is missing 'comparator'. Supported: eq, gt, lt, ge, le");
         } else if (!SUPPORTED_COMPARATORS.contains(leaf.getComparator())) {
             errors.add(LEAF_CONDITION_FIELD_PREFIX + leaf.getField()
                     + "' has unsupported 'comparator': '" + leaf.getComparator()
-                    + "'. Supported: eq, gt, lt");
+                    + "'. Supported: eq, gt, lt, ge, le");
         }
         if (leaf.getValue() == null || leaf.getValue().isEmpty()) {
             errors.add(LEAF_CONDITION_FIELD_PREFIX + leaf.getField() + "' is missing 'value'");

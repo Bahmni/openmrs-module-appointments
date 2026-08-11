@@ -141,6 +141,8 @@ public class AppointmentCriteriaBuilder {
             case EQ: return criteriaBuilder.equal(fieldPath, value);
             case GT: return criteriaBuilder.greaterThan((Path<Date>) fieldPath, parseDate(value));
             case LT: return criteriaBuilder.lessThan((Path<Date>) fieldPath, parseDate(value));
+            case GE: return criteriaBuilder.greaterThanOrEqualTo((Path<Date>) fieldPath, parseDate(value));
+            case LE: return criteriaBuilder.lessThanOrEqualTo((Path<Date>) fieldPath, parseDate(value));
             default:
                 throw new InvalidSearchCriteriaException(
                         "Unsupported comparator: " + comparator,

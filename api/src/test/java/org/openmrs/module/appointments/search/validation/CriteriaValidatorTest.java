@@ -2,7 +2,6 @@
  * This Source Code Form is subject to the terms of the Mozilla Public License,
  * v. 2.0. If a copy of the MPL was not distributed with this file, You can
  * obtain one at https://www.bahmni.org/license/mplv2hd.
- *
  * Copyright (C) 2026 OpenMRS Inc.
  */
 
@@ -18,6 +17,8 @@ import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -27,6 +28,7 @@ import static org.junit.Assert.fail;
 public class CriteriaValidatorTest {
 
     private CriteriaValidator criteriaValidator;
+    private static final List<String> SUPPORTED_COMPARATORS_UNDER_TEST = Arrays.asList("eq", "gt", "lt", "ge", "le");
 
     @Before
     public void setUp() {
@@ -52,10 +54,24 @@ public class CriteriaValidatorTest {
         return condition;
     }
 
-    // ---------- validateRequest: criteria null ----------
+    @Test
+    public void shouldNotThrowForValidLeafConditionForEachSupportedComparator() {
+        for (String comparator : SUPPORTED_COMPARATORS_UNDER_TEST) {
+            AppointmentSearchRequest request = new AppointmentSearchRequest();
+            request.setCriteria(leaf("startDateTime", comparator, "2024-01-01T00:00:00Z"));
+
+            try {
+                criteriaValidator.validateRequest(request);
+            } catch (InvalidSearchCriteriaException e) {
+                fail("Did not expect an exception for supported comparator '" + comparator
+                        + "' but got: " + e.getMessages());
+            }
+        }
+    }
 
     @Test
     public void shouldThrowWhenCriteriaIsNull() {
+
         AppointmentSearchRequest request = new AppointmentSearchRequest();
         request.setCriteria(null);
 
@@ -68,8 +84,6 @@ public class CriteriaValidatorTest {
         }
     }
 
-    // ---------- validateRequest: valid leaf ----------
-
     @Test
     public void shouldNotThrowForValidLeafCondition() {
         AppointmentSearchRequest request = new AppointmentSearchRequest();
@@ -78,24 +92,6 @@ public class CriteriaValidatorTest {
         criteriaValidator.validateRequest(request);
         // no exception expected
     }
-
-    @Test
-    public void shouldNotThrowForValidLeafConditionWithGtComparator() {
-        AppointmentSearchRequest request = new AppointmentSearchRequest();
-        request.setCriteria(leaf("startDateTime", "gt", "2024-01-01T00:00:00Z"));
-
-        criteriaValidator.validateRequest(request);
-    }
-
-    @Test
-    public void shouldNotThrowForValidLeafConditionWithLtComparator() {
-        AppointmentSearchRequest request = new AppointmentSearchRequest();
-        request.setCriteria(leaf("startDateTime", "lt", "2024-01-01T00:00:00Z"));
-
-        criteriaValidator.validateRequest(request);
-    }
-
-    // ---------- validateRequest: leaf missing comparator ----------
 
     @Test
     public void shouldThrowWhenLeafIsMissingComparator() {
@@ -107,11 +103,10 @@ public class CriteriaValidatorTest {
             fail("Expected InvalidSearchCriteriaException");
         } catch (InvalidSearchCriteriaException e) {
             assertThat(e.getMessages(), hasItem(
-                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt"));
+                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt, ge, le"));
         }
     }
 
-    // ---------- validateRequest: leaf missing value ----------
 
     @Test
     public void shouldThrowWhenLeafIsMissingValue() {
@@ -139,7 +134,6 @@ public class CriteriaValidatorTest {
         }
     }
 
-    // ---------- validateRequest: leaf missing both comparator and value ----------
 
     @Test
     public void shouldReportAllErrorsWhenLeafIsMissingComparatorAndValue() {
@@ -152,12 +146,10 @@ public class CriteriaValidatorTest {
         } catch (InvalidSearchCriteriaException e) {
             assertEquals(2, e.getMessages().size());
             assertThat(e.getMessages(), hasItem(
-                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt"));
+                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt, ge, le"));
             assertThat(e.getMessages(), hasItem("Leaf condition for field 'status' is missing 'value'"));
         }
     }
-
-    // ---------- validateRequest: unsupported comparator ----------
 
     @Test
     public void shouldThrowForUnsupportedComparatorViaSetComparatorString() {
@@ -168,8 +160,6 @@ public class CriteriaValidatorTest {
             assertEquals(SearchResponseErrorStatus.BAD_REQUEST, e.getStatus());
         }
     }
-
-    // ---------- validateRequest: group missing operator ----------
 
     @Test
     public void shouldThrowWhenGroupIsMissingOperator() {
@@ -184,8 +174,6 @@ public class CriteriaValidatorTest {
         }
     }
 
-    // ---------- validateRequest: group with empty conditions ----------
-
     @Test
     public void shouldThrowWhenGroupHasEmptyConditionsList() {
         SearchCondition emptyGroup = new SearchCondition();
@@ -193,8 +181,6 @@ public class CriteriaValidatorTest {
         emptyGroup.setConditions(Collections.emptyList());
 
         AppointmentSearchRequest request = new AppointmentSearchRequest();
-        // Note: isGroup() returns false when conditions is empty (per SearchCondition impl),
-        // so this actually falls into "neither leaf nor group" branch.
         request.setCriteria(emptyGroup);
 
         try {
@@ -205,8 +191,6 @@ public class CriteriaValidatorTest {
                     "Each condition must be either a leaf {field, comparator, value} or a group {operator, conditions}"));
         }
     }
-
-    // ---------- validateRequest: group with valid AND operator and valid children ----------
 
     @Test
     public void shouldNotThrowForValidGroupWithAndOperator() {
@@ -228,8 +212,6 @@ public class CriteriaValidatorTest {
         criteriaValidator.validateRequest(request);
     }
 
-    // ---------- validateRequest: nested groups combine child errors ----------
-
     @Test
     public void shouldAggregateErrorsFromNestedGroupsAndLeaves() {
         SearchCondition invalidLeaf1 = leaf("status", null, null);
@@ -245,13 +227,11 @@ public class CriteriaValidatorTest {
             fail("Expected InvalidSearchCriteriaException");
         } catch (InvalidSearchCriteriaException e) {
             assertThat(e.getMessages(), hasItem(
-                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt"));
+                    "Leaf condition for field 'status' is missing 'comparator'. Supported: eq, gt, lt, ge, le"));
             assertThat(e.getMessages(), hasItem("Leaf condition for field 'status' is missing 'value'"));
             assertThat(e.getMessages(), hasItem("Leaf condition for field 'location' is missing 'value'"));
         }
     }
-
-    // ---------- validateEntity ----------
 
     @Test
     public void shouldThrowWhenEntityIsNull() {

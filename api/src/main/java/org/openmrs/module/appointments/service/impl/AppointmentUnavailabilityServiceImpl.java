@@ -26,7 +26,7 @@ import java.util.List;
 @Transactional
 public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavailabilityService {
 
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     private final AppointmentUnavailabilityDao appointmentUnavailabilityDao;
     private final AppointmentServiceDefinitionService appointmentServiceDefinitionService;
@@ -128,6 +128,9 @@ public class AppointmentUnavailabilityServiceImpl implements AppointmentUnavaila
     @Override
     public List<AppointmentUnavailability> getAll(AppointmentUnavailabilitySearchParams searchParams) {
         List<AppointmentUnavailability> unavailabilities = appointmentUnavailabilityDao.getAll(searchParams);
+        if (unavailabilities == null) {
+            unavailabilities = new ArrayList<>();
+        }
         log.info("Retrieved " + unavailabilities.size() + " appointment unavailability block(s)");
         return unavailabilities;
     }
