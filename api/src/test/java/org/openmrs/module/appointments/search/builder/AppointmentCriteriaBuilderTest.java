@@ -94,6 +94,12 @@ public class AppointmentCriteriaBuilderTest {
     private Predicate dateLtPredicate;
 
     @Mock
+    private Predicate dateGePredicate;
+
+    @Mock
+    private Predicate dateLePredicate;
+
+    @Mock
     private Predicate appointmentNumberPredicate;
 
     @Mock
@@ -226,6 +232,26 @@ public class AppointmentCriteriaBuilderTest {
         appointmentCriteriaBuilder.apply(queryContext, condition);
 
         assertThat(predicates, hasItem(dateLtPredicate));
+    }
+
+    @Test
+    public void shouldBuildGreaterThanOrEqualPredicateForAppointmentDate() {
+        when(criteriaBuilder.greaterThanOrEqualTo(eq(startDateTimePath), any(Date.class))).thenReturn(dateGePredicate);
+        SearchCondition condition = leaf(AppointmentSearchFields.APPOINTMENT_DATE, "ge", VALID_DATE);
+
+        appointmentCriteriaBuilder.apply(queryContext, condition);
+
+        assertThat(predicates, hasItem(dateGePredicate));
+    }
+
+    @Test
+    public void shouldBuildLessThanOrEqualPredicateForAppointmentDate() {
+        when(criteriaBuilder.lessThanOrEqualTo(eq(startDateTimePath), any(Date.class))).thenReturn(dateLePredicate);
+        SearchCondition condition = leaf(AppointmentSearchFields.APPOINTMENT_DATE, "le", VALID_DATE);
+
+        appointmentCriteriaBuilder.apply(queryContext, condition);
+
+        assertThat(predicates, hasItem(dateLePredicate));
     }
 
     @Test
