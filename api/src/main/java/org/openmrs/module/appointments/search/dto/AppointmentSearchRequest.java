@@ -9,12 +9,14 @@
 package org.openmrs.module.appointments.search.dto;
 
 import org.bahmni.search.model.SearchCondition;
+import org.bahmni.search.model.SearchRequestMeta;
 
 
 public class AppointmentSearchRequest {
 
     private String entity;
     private SearchCondition criteria;
+    private SearchRequestMeta meta;
 
     public String getEntity() {
         return entity;
@@ -30,5 +32,13 @@ public class AppointmentSearchRequest {
 
     public void setCriteria(SearchCondition criteria) {
         this.criteria = criteria;
+    }
+
+    public SearchRequestMeta getMeta() {
+        return meta;
+    }
+
+    public void setMeta(SearchRequestMeta meta) {
+        this.meta = meta;
     }
 }

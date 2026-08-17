@@ -18,6 +18,7 @@ import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.JoinType;
+import javax.persistence.criteria.Order;
 import javax.persistence.criteria.Path;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
@@ -29,6 +30,7 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doReturn;
@@ -79,7 +81,13 @@ public class AppointmentSearchDaoImplTest {
     private Path<Boolean> voidedPath;
 
     @Mock
+    private Path<Integer> appointmentIdPath;
+
+    @Mock
     private Predicate voidedPredicate;
+
+    @Mock
+    private Order order;
 
     @Mock
     private Query<Appointment> hibernateQuery;
@@ -103,21 +111,26 @@ public class AppointmentSearchDaoImplTest {
         doReturn(patientIdentifiersFetch).when(patientFetch).fetch(eq(AppointmentSearchConstants.IDENTIFIERS), any(JoinType.class));
 
         doReturn(voidedPath).when(root).get(AppointmentSearchConstants.VOIDED);
+        doReturn(appointmentIdPath).when(root).get("appointmentId");
         when(criteriaBuilder.isFalse(voidedPath)).thenReturn(voidedPredicate);
+        when(criteriaBuilder.desc(appointmentIdPath)).thenReturn(order);
+        when(criteriaBuilder.asc(appointmentIdPath)).thenReturn(order);
 
         when(criteriaQuery.select(root)).thenReturn(criteriaQuery);
         when(criteriaQuery.distinct(true)).thenReturn(criteriaQuery);
-        when(criteriaQuery.where(any(Predicate[].class))).thenReturn(criteriaQuery);
+        doReturn(criteriaQuery).when(criteriaQuery).where(any(Predicate[].class));
+        doReturn(criteriaQuery).when(criteriaQuery).orderBy(any(Order.class));
 
         when(session.createQuery(criteriaQuery)).thenReturn(hibernateQuery);
         when(hibernateQuery.setHint(anyString(), any())).thenReturn(hibernateQuery);
+        when(hibernateQuery.setMaxResults(anyInt())).thenReturn(hibernateQuery);
     }
 
     @Test
     public void shouldFetchPatientServiceAndLocationToAvoidNPlusOne() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition());
+        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
 
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.PATIENT), eq(JoinType.INNER));
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.SERVICE), eq(JoinType.LEFT));
@@ -128,7 +141,7 @@ public class AppointmentSearchDaoImplTest {
     public void shouldFetchReasonsServiceAttributesAndPatientIdentifiersToAvoidNPlusOne() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition());
+        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
 
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.REASONS), eq(JoinType.LEFT));
         verify(serviceFetch, times(1)).fetch(eq(AppointmentSearchConstants.ATTRIBUTES), eq(JoinType.LEFT));
@@ -140,7 +153,7 @@ public class AppointmentSearchDaoImplTest {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
         SearchCondition condition = searchCondition();
 
-        appointmentSearchDao.search(condition);
+        appointmentSearchDao.search(condition, null, "desc", "next", 101);
 
         verify(appointmentCriteriaBuilder, times(1)).apply(any(QueryContext.class), eq(condition));
     }
@@ -149,7 +162,7 @@ public class AppointmentSearchDaoImplTest {
     public void shouldApplyDistinctAndPassDistinctThroughFalseHintToAvoidDuplicateRows() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition());
+        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
 
         verify(criteriaQuery, times(1)).distinct(true);
         verify(hibernateQuery, times(1)).setHint("hibernate.query.passDistinctThrough", false);
@@ -161,7 +174,7 @@ public class AppointmentSearchDaoImplTest {
         List<Appointment> expected = Arrays.asList(appointment);
         when(hibernateQuery.getResultList()).thenReturn(expected);
 
-        List<Appointment> actual = appointmentSearchDao.search(searchCondition());
+        List<Appointment> actual = appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
 
         assertThat(actual, is(expected));
     }

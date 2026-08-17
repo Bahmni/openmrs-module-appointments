@@ -19,28 +19,31 @@ import java.util.Map;
 public class AppointmentSearchResponse {
 
     private final String context;
-    private final SearchResponseMeta metaData;
+    private final SearchResponseMeta meta;
     private final List<Map<String, Object>> results;
-    private final List<Map<String, String>> links;
     private final SearchError error;
 
 
     private AppointmentSearchResponse(String context, List<Map<String, Object>> results,
-                                       List<Map<String, String>> links, SearchError error) {
+                                       SearchResponseMeta meta, SearchError error) {
         this.context = context;
-        this.metaData = new SearchResponseMeta();
+        this.meta = meta;
         this.results = results;
-        this.links = links;
         this.error = error;
     }
 
     public static AppointmentSearchResponse success(String context, List<Map<String, Object>> results) {
-        return new AppointmentSearchResponse(context, results, Collections.emptyList(), null);
+        return new AppointmentSearchResponse(context, results, new SearchResponseMeta(), null);
+    }
+
+    public static AppointmentSearchResponse success(String context, List<Map<String, Object>> results,
+                                                     SearchResponseMeta meta) {
+        return new AppointmentSearchResponse(context, results, meta, null);
     }
 
     public static AppointmentSearchResponse error(String context, int status, List<String> messages) {
-        return new AppointmentSearchResponse(context, Collections.emptyList(), Collections.emptyList(),
-                new SearchError(status, messages));
+        return new AppointmentSearchResponse(context, Collections.emptyList(),
+                new SearchResponseMeta(), new SearchError(status, messages));
     }
 
     public static AppointmentSearchResponse error(String context, int status, String message) {
@@ -51,16 +54,12 @@ public class AppointmentSearchResponse {
         return context;
     }
 
-    public SearchResponseMeta getMetaData() {
-        return metaData;
+    public SearchResponseMeta getMeta() {
+        return meta;
     }
 
     public List<Map<String, Object>> getResults() {
         return results;
-    }
-
-    public List<Map<String, String>> getLinks() {
-        return links;
     }
 
     public SearchError getError() {

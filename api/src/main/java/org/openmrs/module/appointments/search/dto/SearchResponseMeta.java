@@ -8,17 +8,37 @@
 
 package org.openmrs.module.appointments.search.dto;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import org.bahmni.search.model.PaginationResponse;
 
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SearchResponseMeta {
 
-    private final Date timestamp;
+    private final long timestamp;
+    private final Long totalCount;
+    private final PaginationResponse pagination;
 
     public SearchResponseMeta() {
-        this.timestamp = new Date();
+        this.timestamp = System.currentTimeMillis();
+        this.totalCount = null;
+        this.pagination = new PaginationResponse(null, null);
     }
 
-    public Date getTimestamp() {
+    public SearchResponseMeta(PaginationResponse pagination, Long totalCount) {
+        this.timestamp = System.currentTimeMillis();
+        this.pagination = pagination;
+        this.totalCount = totalCount;
+    }
+
+    public long getTimestamp() {
         return timestamp;
+    }
+
+    public Long getTotalCount() {
+        return totalCount;
+    }
+
+    public PaginationResponse getPagination() {
+        return pagination;
     }
 }

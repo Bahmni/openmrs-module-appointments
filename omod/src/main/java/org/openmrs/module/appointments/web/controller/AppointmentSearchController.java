@@ -35,8 +35,6 @@ public class AppointmentSearchController {
     }
 
     @PostMapping(
-            consumes = MediaType.APPLICATION_JSON_VALUE,
-            produces = MediaType.APPLICATION_JSON_VALUE
     )
     @ResponseBody
     public ResponseEntity<AppointmentSearchResponse> search(@RequestBody AppointmentSearchRequest request,
