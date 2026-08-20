@@ -9,6 +9,7 @@
 package org.openmrs.module.appointments.search.dto;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import org.bahmni.search.model.SearchResponseMeta;
 
 import java.util.Collections;
 import java.util.List;

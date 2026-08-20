@@ -17,6 +17,7 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
@@ -33,8 +34,43 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
     }
 
     @Override
-    public List<Appointment> search(SearchCondition searchCriteria, Long cursorId,
-                                     String sortOrder, String direction, int limit) {
+    public List<Integer> findMatchingIds(SearchCondition searchCriteria, Long cursorId,
+                                          String sortOrder, String direction, int limit) {
+        Session session = sessionFactory.getCurrentSession();
+        CriteriaBuilder cb = session.getCriteriaBuilder();
+
+        CriteriaQuery<Integer> query = cb.createQuery(Integer.class);
+        Root<Appointment> root = query.from(Appointment.class);
+
+        List<Predicate> predicates = buildPredicates(cb, root, searchCriteria);
+
+        boolean queryDescending = PaginationHelper.shouldSortQueryDescending(sortOrder, direction);
+
+        if (cursorId != null) {
+            if (queryDescending) {
+                predicates.add(cb.lessThan(root.get(FIELD_APPOINTMENT_ID), cursorId));
+            } else {
+                predicates.add(cb.greaterThan(root.get(FIELD_APPOINTMENT_ID), cursorId));
+            }
+        }
+
+        query.select(root.get(FIELD_APPOINTMENT_ID)).distinct(true);
+        query.where(predicates.toArray(new Predicate[0]));
+        query.orderBy(queryDescending
+                ? cb.desc(root.get(FIELD_APPOINTMENT_ID))
+                : cb.asc(root.get(FIELD_APPOINTMENT_ID)));
+
+        return session.createQuery(query)
+                .setMaxResults(limit)
+                .getResultList();
+    }
+
+    @Override
+    public List<Appointment> findByIds(List<Integer> appointmentIds) {
+        if (appointmentIds == null || appointmentIds.isEmpty()) {
+            return new ArrayList<>();
+        }
+
         Session session = sessionFactory.getCurrentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
 
@@ -43,32 +79,14 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
 
         addFetchJoins(root);
 
-        List<Predicate> predicates = new ArrayList<>();
-        predicates.add(cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
-
-        QueryContext<Appointment> context = new QueryContext<>(cb, root, predicates);
-        criteriaBuilder.apply(context, searchCriteria);
-
-        boolean queryDescending = PaginationHelper.resolveQueryDescending(sortOrder, direction);
-
-        if (cursorId != null) {
-            if (queryDescending) {
-                predicates.add(cb.lessThan(root.get(FIELD_APPOINTMENT_ID), cursorId.intValue()));
-            } else {
-                predicates.add(cb.greaterThan(root.get(FIELD_APPOINTMENT_ID), cursorId.intValue()));
-            }
-        }
-
         query.select(root).distinct(true);
-        query.where(predicates.toArray(new Predicate[0]));
-        query.orderBy(queryDescending
-                ? cb.desc(root.get(FIELD_APPOINTMENT_ID))
-                : cb.asc(root.get(FIELD_APPOINTMENT_ID)));
+        query.where(root.get(FIELD_APPOINTMENT_ID).in(appointmentIds));
 
-        return session.createQuery(query)
+        List<Appointment> appointments = session.createQuery(query)
                 .setHint(PaginationHelper.HINT_PASS_DISTINCT_THROUGH, false)
-                .setMaxResults(limit)
                 .getResultList();
+
+        return reorderByIds(appointments, appointmentIds);
     }
 
     @Override
@@ -79,16 +97,28 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         CriteriaQuery<Long> query = cb.createQuery(Long.class);
         Root<Appointment> root = query.from(Appointment.class);
 
+        List<Predicate> predicates = buildPredicates(cb, root, searchCriteria);
+
+        query.select(cb.countDistinct(root))
+                .where(predicates.toArray(new Predicate[0]));
+
+        return session.createQuery(query).getSingleResult();
+    }
+
+    private List<Predicate> buildPredicates(CriteriaBuilder cb, Root<Appointment> root, SearchCondition searchCriteria) {
         List<Predicate> predicates = new ArrayList<>();
         predicates.add(cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
 
         QueryContext<Appointment> context = new QueryContext<>(cb, root, predicates);
         criteriaBuilder.apply(context, searchCriteria);
 
-        query.select(cb.countDistinct(root))
-                .where(predicates.toArray(new Predicate[0]));
+        return predicates;
+    }
 
-        return session.createQuery(query).getSingleResult();
+    private List<Appointment> reorderByIds(List<Appointment> appointments, List<Integer> orderedIds) {
+        List<Appointment> reordered = new ArrayList<>(appointments);
+        reordered.sort(Comparator.comparingInt(appointment -> orderedIds.indexOf(appointment.getAppointmentId())));
+        return reordered;
     }
 
     private void addFetchJoins(Root<Appointment> root) {

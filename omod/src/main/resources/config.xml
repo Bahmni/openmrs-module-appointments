@@ -163,6 +163,19 @@
 		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
 	</globalProperty>
 
+	<globalProperty>
+		<property>bahmni.appointmentSearch.pagination.defaultLimit</property>
+		<defaultValue>100</defaultValue>
+		<description>The default number of appointment search results returned per page when the client does not specify a batch size in the search request.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>bahmni.appointmentSearch.pagination.maxLimit</property>
+		<defaultValue>500</defaultValue>
+		<description>The maximum number of appointment search results that can be returned per page, regardless of the batch size requested by the client. Requested limits greater than this value are clamped to this maximum.</description>
+	</globalProperty>
+
+
 
 	<privilege>
 		<name>app:appointments:manageServiceAvailability</name>

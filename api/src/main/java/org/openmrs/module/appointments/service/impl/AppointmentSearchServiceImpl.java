@@ -2,7 +2,6 @@ package org.openmrs.module.appointments.service.impl;
 
 import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
 import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
-import org.openmrs.module.appointments.search.dto.SearchResponseMeta;
 
 import org.openmrs.module.appointments.search.validation.CriteriaValidator;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
@@ -10,10 +9,12 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.builder.AppointmentResponseBuilder;
 import org.openmrs.module.appointments.service.AppointmentSearchService;
-import org.bahmni.search.model.PaginationRequest;
-import org.bahmni.search.model.PaginationResponse;
 import org.bahmni.search.model.SearchRequestMeta;
+import org.bahmni.search.model.SearchResponseMeta;
+import org.bahmni.search.pagination.PageResult;
 import org.bahmni.search.pagination.PaginationHelper;
+import org.bahmni.search.pagination.ResolvedPagination;
+import org.openmrs.api.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,6 +27,12 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
     private static final Logger log = LoggerFactory.getLogger(AppointmentSearchServiceImpl.class);
 
     private static final String ENTITY = AppointmentSearchConstants.ENTITY_APPOINTMENT;
+
+    private static final String GP_PAGINATION_DEFAULT_LIMIT = "bahmni.appointmentSearch.pagination.defaultLimit";
+    private static final String GP_PAGINATION_MAX_LIMIT = "bahmni.appointmentSearch.pagination.maxLimit";
+    private static final int FALLBACK_DEFAULT_LIMIT = 100;
+    private static final int FALLBACK_MAX_LIMIT = 500;
+
 
     private final AppointmentSearchDao appointmentSearchDao;
     private final CriteriaValidator validator;
@@ -45,37 +52,36 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
         validator.validateRequest(request);
 
         SearchRequestMeta meta = request.getMeta();
-        PaginationRequest pagination = PaginationHelper.resolvePagination(meta);
-        int effectiveLimit = PaginationHelper.resolveEffectiveLimit(pagination.getLimit());
-        String sortOrder = PaginationHelper.resolveSortOrder(pagination.getSortOrder());
-        String direction = pagination.getDirection();
-        Long cursorId = PaginationHelper.decodeCursor(pagination.getCursor());
-        boolean isPrev = PaginationHelper.isPrevDirection(direction);
+        int defaultLimit = PaginationHelper.resolveGlobalProperty(
+                Context.getAdministrationService().getGlobalProperty(GP_PAGINATION_DEFAULT_LIMIT), FALLBACK_DEFAULT_LIMIT, GP_PAGINATION_DEFAULT_LIMIT);
+        int maxLimit = PaginationHelper.resolveGlobalProperty(
+                Context.getAdministrationService().getGlobalProperty(GP_PAGINATION_MAX_LIMIT), FALLBACK_MAX_LIMIT, GP_PAGINATION_MAX_LIMIT);
 
-        int fetchSize = effectiveLimit + 1;
-        List<Appointment> rawAppointments = appointmentSearchDao.search(
-                request.getCriteria(), cursorId, sortOrder, direction, fetchSize);
+        ResolvedPagination resolved = PaginationHelper.resolvePaginationContext(meta, ENTITY, defaultLimit, maxLimit);
 
-        boolean hasMore = PaginationHelper.hasMore(rawAppointments.size(), effectiveLimit);
-        List<Appointment> appointments = PaginationHelper.trimAndOrient(rawAppointments, effectiveLimit, isPrev);
+        List<Integer> matchingIds = appointmentSearchDao.findMatchingIds(
+                request.getCriteria(), resolved.getCursorId(), resolved.getSortOrder(),
+                resolved.getDirection(), resolved.getFetchSize());
+
+        List<Appointment> rawAppointments = appointmentSearchDao.findByIds(matchingIds);
+
+        PageResult<Appointment> pageResult = PaginationHelper.paginate(
+                ENTITY, rawAppointments, appointment -> appointment.getAppointmentId().longValue(), resolved);
 
         List<Map<String, Object>> results = new ArrayList<>();
-        for (Appointment appointment : appointments) {
+
+        for (Appointment appointment : pageResult.getItems()) {
             results.add(responseBuilder.mapAppointment(appointment));
         }
-
-        PaginationResponse paginationResponse = appointments.isEmpty()
-                ? PaginationHelper.emptyPaginationResponse()
-                : PaginationHelper.buildPaginationResponse(
-                        appointments.get(0).getAppointmentId(),
-                        appointments.get(appointments.size() - 1).getAppointmentId(),
-                        hasMore, cursorId, isPrev);
 
         Long totalCount = PaginationHelper.resolveTotalCount(meta,
                 () -> appointmentSearchDao.count(request.getCriteria()));
 
-        SearchResponseMeta responseMeta = new SearchResponseMeta(paginationResponse, totalCount);
+        SearchResponseMeta responseMeta = new SearchResponseMeta(pageResult.getPaginationResponse(), totalCount);
         log.debug("Returning {} appointment results", results.size());
         return AppointmentSearchResponse.success(ENTITY, results, responseMeta);
     }
+
 }
+
+

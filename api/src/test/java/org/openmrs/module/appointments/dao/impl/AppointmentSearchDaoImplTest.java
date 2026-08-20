@@ -16,6 +16,7 @@ import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Expression;
 import javax.persistence.criteria.Fetch;
 import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Order;
@@ -52,6 +53,9 @@ public class AppointmentSearchDaoImplTest {
 
     @Mock
     private CriteriaQuery<Appointment> criteriaQuery;
+
+    @Mock
+    private CriteriaQuery<Integer> idCriteriaQuery;
 
     @Mock
     private Root<Appointment> root;
@@ -92,6 +96,12 @@ public class AppointmentSearchDaoImplTest {
     @Mock
     private Query<Appointment> hibernateQuery;
 
+    @Mock
+    private Query<Integer> idHibernateQuery;
+
+    @Mock
+    private Predicate inPredicate;
+
     private AppointmentSearchDaoImpl appointmentSearchDao;
 
     @Before
@@ -101,7 +111,9 @@ public class AppointmentSearchDaoImplTest {
         when(sessionFactory.getCurrentSession()).thenReturn(session);
         when(session.getCriteriaBuilder()).thenReturn(criteriaBuilder);
         when(criteriaBuilder.createQuery(Appointment.class)).thenReturn(criteriaQuery);
+        when(criteriaBuilder.createQuery(Integer.class)).thenReturn(idCriteriaQuery);
         when(criteriaQuery.from(Appointment.class)).thenReturn(root);
+        when(idCriteriaQuery.from(Appointment.class)).thenReturn(root);
 
         doReturn(patientFetch).when(root).fetch(eq(AppointmentSearchConstants.PATIENT), any(JoinType.class));
         doReturn(serviceFetch).when(root).fetch(eq(AppointmentSearchConstants.SERVICE), any(JoinType.class));
@@ -119,18 +131,27 @@ public class AppointmentSearchDaoImplTest {
         when(criteriaQuery.select(root)).thenReturn(criteriaQuery);
         when(criteriaQuery.distinct(true)).thenReturn(criteriaQuery);
         doReturn(criteriaQuery).when(criteriaQuery).where(any(Predicate[].class));
-        doReturn(criteriaQuery).when(criteriaQuery).orderBy(any(Order.class));
+
+        doReturn(idCriteriaQuery).when(idCriteriaQuery).select(any(Expression.class));
+        when(idCriteriaQuery.distinct(true)).thenReturn(idCriteriaQuery);
+        doReturn(idCriteriaQuery).when(idCriteriaQuery).where(any(Predicate[].class));
+        doReturn(idCriteriaQuery).when(idCriteriaQuery).orderBy(any(Order.class));
+
+        doReturn(inPredicate).when(appointmentIdPath).in(any(List.class));
 
         when(session.createQuery(criteriaQuery)).thenReturn(hibernateQuery);
         when(hibernateQuery.setHint(anyString(), any())).thenReturn(hibernateQuery);
         when(hibernateQuery.setMaxResults(anyInt())).thenReturn(hibernateQuery);
+
+        when(session.createQuery(idCriteriaQuery)).thenReturn(idHibernateQuery);
+        when(idHibernateQuery.setMaxResults(anyInt())).thenReturn(idHibernateQuery);
     }
 
     @Test
-    public void shouldFetchPatientServiceAndLocationToAvoidNPlusOne() {
+    public void shouldFetchPatientServiceAndLocationToAvoidNPlusOneWhenFindingByIds() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
+        appointmentSearchDao.findByIds(Arrays.asList(1));
 
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.PATIENT), eq(JoinType.INNER));
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.SERVICE), eq(JoinType.LEFT));
@@ -138,10 +159,10 @@ public class AppointmentSearchDaoImplTest {
     }
 
     @Test
-    public void shouldFetchReasonsServiceAttributesAndPatientIdentifiersToAvoidNPlusOne() {
+    public void shouldFetchReasonsServiceAttributesAndPatientIdentifiersToAvoidNPlusOneWhenFindingByIds() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
+        appointmentSearchDao.findByIds(Arrays.asList(1));
 
         verify(root, times(1)).fetch(eq(AppointmentSearchConstants.REASONS), eq(JoinType.LEFT));
         verify(serviceFetch, times(1)).fetch(eq(AppointmentSearchConstants.ATTRIBUTES), eq(JoinType.LEFT));
@@ -149,32 +170,69 @@ public class AppointmentSearchDaoImplTest {
     }
 
     @Test
-    public void shouldDelegateCriteriaToAppointmentCriteriaBuilder() {
-        when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
-        SearchCondition condition = searchCondition();
-
-        appointmentSearchDao.search(condition, null, "desc", "next", 101);
-
-        verify(appointmentCriteriaBuilder, times(1)).apply(any(QueryContext.class), eq(condition));
-    }
-
-    @Test
-    public void shouldApplyDistinctAndPassDistinctThroughFalseHintToAvoidDuplicateRows() {
+    public void shouldApplyDistinctAndPassDistinctThroughFalseHintWhenFindingByIdsToAvoidDuplicateRows() {
         when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
 
-        appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
+        appointmentSearchDao.findByIds(Arrays.asList(1));
 
         verify(criteriaQuery, times(1)).distinct(true);
         verify(hibernateQuery, times(1)).setHint("hibernate.query.passDistinctThrough", false);
     }
 
     @Test
-    public void shouldReturnAppointmentsReturnedByHibernateQuery() {
+    public void shouldReturnAppointmentsReturnedByHibernateQueryWhenFindingByIds() {
         Appointment appointment = new Appointment();
+        appointment.setAppointmentId(1);
         List<Appointment> expected = Arrays.asList(appointment);
         when(hibernateQuery.getResultList()).thenReturn(expected);
 
-        List<Appointment> actual = appointmentSearchDao.search(searchCondition(), null, "desc", "next", 101);
+        List<Appointment> actual = appointmentSearchDao.findByIds(Arrays.asList(1));
+
+        assertThat(actual, is(expected));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWithoutQueryingWhenFindingByIdsWithNoIds() {
+        List<Appointment> actual = appointmentSearchDao.findByIds(Collections.emptyList());
+
+        assertThat(actual, is(Collections.emptyList()));
+    }
+
+    @Test
+    public void shouldDelegateCriteriaToAppointmentCriteriaBuilderWhenFindingMatchingIds() {
+        when(idHibernateQuery.getResultList()).thenReturn(Collections.emptyList());
+        SearchCondition condition = searchCondition();
+
+        appointmentSearchDao.findMatchingIds(condition, null, "desc", "next", 101);
+
+        verify(appointmentCriteriaBuilder, times(1)).apply(any(QueryContext.class), eq(condition));
+    }
+
+    @Test
+    public void shouldNotApplyFetchJoinsWhenFindingMatchingIds() {
+        when(idHibernateQuery.getResultList()).thenReturn(Collections.emptyList());
+
+        appointmentSearchDao.findMatchingIds(searchCondition(), null, "desc", "next", 101);
+
+        verify(root, times(0)).fetch(eq(AppointmentSearchConstants.PATIENT), any(JoinType.class));
+        verify(root, times(0)).fetch(eq(AppointmentSearchConstants.SERVICE), any(JoinType.class));
+    }
+
+    @Test
+    public void shouldApplyLimitWhenFindingMatchingIds() {
+        when(idHibernateQuery.getResultList()).thenReturn(Collections.emptyList());
+
+        appointmentSearchDao.findMatchingIds(searchCondition(), null, "desc", "next", 101);
+
+        verify(idHibernateQuery, times(1)).setMaxResults(101);
+    }
+
+    @Test
+    public void shouldReturnMatchingIdsReturnedByHibernateQuery() {
+        List<Integer> expected = Arrays.asList(1, 2, 3);
+        when(idHibernateQuery.getResultList()).thenReturn(expected);
+
+        List<Integer> actual = appointmentSearchDao.findMatchingIds(searchCondition(), null, "desc", "next", 101);
 
         assertThat(actual, is(expected));
     }

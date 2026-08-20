@@ -11,6 +11,6 @@ public class CriteriaValidator {
 
     public void validateRequest(AppointmentSearchRequest request) {
         SearchCriteriaValidationUtils.validateCriteria(request.getCriteria());
-        SearchCriteriaValidationUtils.validateMeta(request.getMeta());
+        SearchCriteriaValidationUtils.validateMeta(request.getEntity(), request.getMeta());
     }
 }
