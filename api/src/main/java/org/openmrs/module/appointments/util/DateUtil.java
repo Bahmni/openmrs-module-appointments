@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
@@ -74,6 +75,11 @@ public class DateUtil {
         int seconds = calendar.get(Calendar.SECOND);
         long milliSeconds = ((hours * 3600 + minutes * 60 + seconds) * 1000);
         return milliSeconds;
+    }
+
+     public static long getEpochTime(long date, ZoneId zone) {
+        java.time.ZonedDateTime zdt = new Date(date).toInstant().atZone(zone);
+        return (zdt.getHour() * 3600L + zdt.getMinute() * 60L + zdt.getSecond()) * 1000L;
     }
 
     public static Date getEndOfDay() {

@@ -7,6 +7,7 @@ import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
+import org.openmrs.module.appointments.web.contract.AppointmentStatusChangeRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
@@ -133,6 +134,25 @@ public class AppointmentsController extends BaseRestController {
             return new ResponseEntity<>(HttpStatus.OK);
         }catch (RuntimeException e) {
             log.error("Runtime error while trying to update appointment provider response", e);
+            return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @RequestMapping(method = RequestMethod.POST, value = "/status-change")
+    @ResponseBody
+    public ResponseEntity<Object> updateAppointmentStatus(@Valid @RequestBody AppointmentStatusChangeRequest request) throws ParseException {
+        log.info("inside cancel appointments by UUIDs");
+        try {
+            List<String> appointmentUuids = request.getAppointmentUuids();
+            
+            log.info("Updating " + appointmentUuids.size() + " appointment(s) to status: " + request.getToStatus());
+
+            List<Appointment> updatedAppointments = appointmentsService.changeStatusForAppointments(
+                appointmentUuids, request.getToStatus());
+            
+            return new ResponseEntity<>(appointmentMapper.constructResponse(updatedAppointments), HttpStatus.OK);
+        } catch (RuntimeException e) {
+            log.error("Runtime error while trying to update appointments by UUIDs", e);
             return new ResponseEntity<>(RestUtil.wrapErrorResponse(e, e.getMessage()), HttpStatus.BAD_REQUEST);
         }
     }

@@ -44,7 +44,7 @@
 		<hamcrestVersion>2.2</hamcrestVersion>
 		<mockitoVersion>3.5.11</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
-		<jacocoVersion>0.7.9</jacocoVersion>
+		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
@@ -104,18 +104,44 @@
 						</excludes>
 					</configuration>
 				</plugin>
+				<plugin>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacocoVersion}</version>
+					<executions>
+						<execution>
+							<id>prepare-agent</id>
+							<phase>initialize</phase>
+							<goals>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report</goal>
+							</goals>
+						</execution>
+					</executions>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
-						<plugin>
-					<groupId>org.sonatype.central</groupId>
-					<artifactId>central-publishing-maven-plugin</artifactId>
-					<version>0.7.0</version>
-					<extensions>true</extensions>
-					<configuration>
-						<publishingServerId>nexus-sonatype</publishingServerId>
-					</configuration>
-				</plugin>
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.7.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>nexus-sonatype</publishingServerId>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacocoVersion}</version>
+			</plugin>
 		</plugins>
 <!--		<plugins>-->
 <!--			<plugin>-->

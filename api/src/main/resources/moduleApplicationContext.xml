@@ -26,8 +26,18 @@
 
     <bean id="appointmentNumberGenerator" class="org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl"/>
 
+    <bean id="defaultRecurringAppointmentNumberGenerator"
+          class="org.openmrs.module.appointments.service.impl.DefaultRecurringAppointmentNumberGeneratorImpl">
+        <constructor-arg name="appointmentNumberGeneratorLocator">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
+                <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
     <bean id="appointmentNumberGeneratorLocator" class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
         <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+        <constructor-arg name="recurringAppointmentNumberGenerator" ref="defaultRecurringAppointmentNumberGenerator"/>
     </bean>
 
     <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
@@ -153,7 +163,9 @@
                 </property>
                 <property name="appointmentConflicts">
                     <list>
-                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
+                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict">
+                            <property name="appointmentUnavailabilityDao" ref="appointmentUnavailabilityDao"/>
+                        </bean>
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
                 </property>
@@ -338,4 +350,68 @@
         </property>
     </bean>
 
+    <bean id="appointmentUnavailabilityDao" class="org.openmrs.module.appointments.dao.impl.AppointmentUnavailabilityDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
+    <bean id="appointmentUnavailabilityService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentUnavailabilityServiceImpl">
+                <constructor-arg ref="appointmentUnavailabilityDao"/>
+                <constructor-arg ref="appointmentServiceService"/>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.appointments.service.AppointmentUnavailabilityService</value>
+                <ref bean="appointmentUnavailabilityService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="appointmentCriteriaBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder"/>
+
+    <bean id="appointmentResponseBuilder" class="org.openmrs.module.appointments.search.builder.AppointmentResponseBuilder"/>
+
+    <bean id="appointmentSearchDao" class="org.openmrs.module.appointments.dao.impl.AppointmentSearchDaoImpl">
+        <constructor-arg ref="sessionFactory"/>
+        <constructor-arg ref="appointmentCriteriaBuilder"/>
+    </bean>
+
+    <bean id="criteriaValidator" class="org.openmrs.module.appointments.search.validation.CriteriaValidator"/>
+
+    <bean id="appointmentSearchService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentSearchServiceImpl">
+                <constructor-arg ref="appointmentSearchDao"/>
+                <constructor-arg ref="criteriaValidator"/>
+                <constructor-arg ref="appointmentResponseBuilder"/>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
+
 </beans>
+

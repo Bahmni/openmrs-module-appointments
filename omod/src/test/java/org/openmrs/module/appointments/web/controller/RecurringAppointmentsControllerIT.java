@@ -27,6 +27,7 @@ import java.util.TimeZone;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 
 public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
@@ -615,5 +616,109 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
         MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/uuid", content));
         assertNotNull(response);
         assertEquals(200, response.getStatus());
+    }
+
+    @Test
+    public void shouldAssignSameAppointmentNumberToDailyRecurringAppointments() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2019-05-19T23:45:00.000Z\", " +
+                "\"endDateTime\": \"2019-05-20T00:15:00.000Z\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": []}," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":3," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"endDate\":\"\"," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        List<RecurringAppointmentDefaultResponse> appointmentResponses = deserialize(response,
+                new TypeReference<List<RecurringAppointmentDefaultResponse>>() {});
+        assertEquals(3, appointmentResponses.size());
+
+        String appointmentNumber = appointmentResponses.get(0).getAppointmentDefaultResponse().getAppointmentNumber();
+        assertNotNull(appointmentNumber);
+        for (RecurringAppointmentDefaultResponse appointmentResponse : appointmentResponses) {
+            assertEquals(appointmentNumber, appointmentResponse.getAppointmentDefaultResponse().getAppointmentNumber());
+        }
+
+        // Verify appointment numbers are persisted in the database
+        String firstAppointmentUuid = appointmentResponses.get(0).getAppointmentDefaultResponse().getUuid();
+        Appointment persistedAppointment = appointmentsService.getAppointmentByUuid(firstAppointmentUuid);
+        assertNotNull(persistedAppointment.getAppointmentNumber());
+        assertEquals(appointmentNumber, persistedAppointment.getAppointmentNumber());
+    }
+
+    @Test
+    public void shouldAssignSameAppointmentNumberToWeeklyRecurringAppointments() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"providerUuid\": \"823fdcd7-3f10-11e4-adec-0800271c1b75\", " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"startDateTime\": \"2019-05-19T23:45:00.000Z\", " +
+                "\"endDateTime\": \"2019-05-20T00:15:00.000Z\",  " +
+                "\"appointmentKind\": \"WalkIn\", " +
+                "\"providers\": []}," +
+                "\"recurringPattern\":{" +
+                "\"period\":1," +
+                "\"daysOfWeek\":[\"SUNDAY\",\"WEDNESDAY\",\"FRIDAY\"]," +
+                "\"endDate\":\"2019-05-25T23:45:00.000Z\"," +
+                "\"type\":\"WEEK\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/recurring-appointments", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        List<RecurringAppointmentDefaultResponse> appointmentResponses = deserialize(response,
+                new TypeReference<List<RecurringAppointmentDefaultResponse>>() {});
+        assertTrue(appointmentResponses.size() > 1);
+
+        String appointmentNumber = appointmentResponses.get(0).getAppointmentDefaultResponse().getAppointmentNumber();
+        assertNotNull(appointmentNumber);
+        for (RecurringAppointmentDefaultResponse appointmentResponse : appointmentResponses) {
+            assertEquals(appointmentNumber, appointmentResponse.getAppointmentDefaultResponse().getAppointmentNumber());
+        }
+    }
+
+    @Test
+    public void shouldPreserveAppointmentNumberWhenIncreasingFrequency() throws Exception {
+        String content = "{ \"appointmentRequest\":{" +
+                "\"uuid\": \"c36006e5-9fbb-4f20-866b-0ece245615a7\", " +
+                "\"appointmentNumber\": \"1\",  " +
+                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\", " +
+                "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\", " +
+                "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\", " +
+                "\"startDateTime\": \"2017-07-20\", " +
+                "\"endDateTime\": \"2017-07-20\",  " +
+                "\"comments\": \"Some notes\",  " +
+                "\"appointmentKind\": \"WalkIn\"," +
+                "\"providers\": []}," +
+                "\"applyForAll\": true," +
+                "\"timeZone\": \"UTC\"," +
+                "\"recurringPattern\":{" +
+                "\"frequency\":4," +
+                "\"period\":1," +
+                "\"daysOfWeek\":[]," +
+                "\"type\":\"Day\"" +
+                "}}";
+        MockHttpServletResponse response = handle(newPutRequest("/rest/v1/recurring-appointments/c36006e5-9fbb-4f20-866b-0ece245615a7", content));
+        assertNotNull(response);
+        assertEquals(200, response.getStatus());
+
+        List<RecurringAppointmentDefaultResponse> appointmentResponses = deserialize(response,
+                new TypeReference<List<RecurringAppointmentDefaultResponse>>() {});
+        assertEquals(4, appointmentResponses.size());
+
+        String expectedAppointmentNumber = "1";
+        for (RecurringAppointmentDefaultResponse appointmentResponse : appointmentResponses) {
+            assertEquals(expectedAppointmentNumber, appointmentResponse.getAppointmentDefaultResponse().getAppointmentNumber());
+        }
     }
 }

@@ -15,10 +15,12 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentRequest;
+import org.openmrs.module.appointments.web.contract.AppointmentStatusChangeRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.springframework.http.HttpStatus;
@@ -26,6 +28,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +42,7 @@ import java.util.Map;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyListOf;
 import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -240,5 +244,42 @@ public class AppointmentsControllerTest {
 
         verify(appointmentMapper).fromRequestClonedAppointment(appointmentRequest);
         verify(appointmentsService).getAppointmentConflicts(appointment);
+    }
+
+    @Test
+    public void shouldUpdateStatusForMultipleAppointments() throws Exception {
+        AppointmentStatusChangeRequest request = new AppointmentStatusChangeRequest();
+        request.setAppointmentUuids(Arrays.asList("uuid1", "uuid2"));
+        request.setToStatus(AppointmentStatus.Cancelled);
+        
+        List<Appointment> updatedAppointments = new ArrayList<>();
+        List<AppointmentDefaultResponse> expectedResponse = new ArrayList<>();
+        
+        when(appointmentsService.changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled))
+                .thenReturn(updatedAppointments);
+        when(appointmentMapper.constructResponse(updatedAppointments)).thenReturn(expectedResponse);
+        
+        ResponseEntity<Object> response = appointmentsController.updateAppointmentStatus(request);
+        
+        verify(appointmentsService, times(1)).changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
+        verify(appointmentMapper, times(1)).constructResponse(updatedAppointments);
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void shouldReturnNotFoundErrorWhenAppointmentIsNotFound() throws Exception {
+        AppointmentStatusChangeRequest request = new AppointmentStatusChangeRequest();
+        request.setAppointmentUuids(Arrays.asList("uuid1", "uuid2"));
+        request.setToStatus(AppointmentStatus.Cancelled);
+        
+        doThrow(new RuntimeException("Appointments not found"))
+                .when(appointmentsService)
+                .changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
+        
+        ResponseEntity<Object> response = appointmentsController.updateAppointmentStatus(request);
+        
+        verify(appointmentsService, times(1)).changeStatusForAppointments(request.getAppointmentUuids(), AppointmentStatus.Cancelled);
+        verify(appointmentMapper, never()).constructResponse(anyList());
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 }

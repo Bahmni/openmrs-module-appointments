@@ -301,6 +301,40 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldGetAppointmentsReminderWithNullHours() {
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(null);
+        assertNotNull(result);
+        assertTrue(result.size() > 0);
+        assertTrue(result.stream().noneMatch(apt -> apt.getStatus() == AppointmentStatus.Cancelled));
+    }
+
+    @Test
+    public void shouldGetAppointmentsReminderWithSpecificHours() {
+        String hours = "24";
+        List<Appointment> result = appointmentDao.getAllAppointmentsReminder(hours);
+        assertNotNull(result);
+        assertTrue(result.stream().noneMatch(apt -> apt.getStatus() == AppointmentStatus.Cancelled));
+    }
+
+    @Test
+    public void shouldExcludeCancelledAppointmentsFromReminder() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        long cancelledCount = allAppointments.stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
+                .count();
+        
+        List<Appointment> reminderAppointments = appointmentDao.getAllAppointmentsReminder(null);
+        
+        assertEquals(0, reminderAppointments.stream()
+                .filter(apt -> apt.getStatus() == AppointmentStatus.Cancelled)
+                .count());
+        
+        if (cancelledCount > 0) {
+            assertTrue(reminderAppointments.size() < allAppointments.size());
+        }
+    }
+
+    @Test
     public void testSearch() {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         appointmentSearchRequest.setStartDate(new Date());
@@ -389,5 +423,147 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
         assertNotNull(appointments);
         assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldGetAppointmentsByUuids() {
+        List<String> uuids = Arrays.asList(
+            "75504r42-3ca8-11e3-bf2b-0800271c1b77",
+            "75504r42-3ca8-11e3-bf2b-0800271c1111"
+        );
+        
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+        
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1b77")));
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1111")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithEmptyList() {
+        List<String> uuids = new ArrayList<>();
+        
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+        
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenGetAppointmentsByUuidsCalledWithNull() {
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(null);
+        
+        assertNotNull(appointments);
+        assertEquals(0, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnOnlyValidAppointmentsWhenGetAppointmentsByUuidsCalledWithMixedValidAndInvalidUuids() {
+        List<String> uuids = Arrays.asList(
+            "75504r42-3ca8-11e3-bf2b-0800271c1b77",
+            "invalid-uuid-does-not-exist",
+            "75504r42-3ca8-11e3-bf2b-0800271c1111"
+        );
+
+        List<Appointment> appointments = appointmentDao.getAppointmentsByUuids(uuids);
+
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1b77")));
+        assertTrue(appointments.stream().anyMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c1111")));
+    }
+
+    @Test
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelWithStatus() {
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        searchQuery.setStatus("Scheduled");
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertTrue(appointments.size() > 0);
+        assertTrue(appointments.stream().allMatch(a -> a.getStatus() == AppointmentStatus.Scheduled));
+    }
+
+    @Test
+    public void shouldReturnAllNonVoidedPatientsAppointmentsWhenSearchQueryIsNull() {
+        List<Appointment> appointments = appointmentDao.search((AppointmentSearchRequestModel) null);
+
+        assertNotNull(appointments);
+        // This method filters out appointments with voided patients
+        assertEquals(11, appointments.size());
+    }
+
+    @Test
+    public void shouldReturnAppointmentsBasedOnAppointmentSearchRequestModelWithProviderUuids() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointmentWithProvider = allAppointments.stream()
+            .filter(a -> a.getProviders() != null && !a.getProviders().isEmpty())
+            .findFirst()
+            .orElse(null);
+
+        assertNotNull("Test data should have appointments with providers", appointmentWithProvider);
+
+        String providerUuid = appointmentWithProvider.getProviders().iterator().next().getProvider().getUuid();
+
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        List<String> providerUuids = new ArrayList<>();
+        providerUuids.add(providerUuid);
+        searchQuery.setProviderUuids(providerUuids);
+
+        List<Appointment> appointments = appointmentDao.search(searchQuery);
+
+        assertNotNull(appointments);
+        assertTrue(appointments.size() > 0);
+    }
+
+    @Test
+    public void shouldReturnAppointmentsWithoutDatesWithNullLimit() {
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(searchQuery, null);
+
+        assertNotNull(appointments);
+        assertEquals(3, appointments.size());
+        assertTrue(appointments.stream().allMatch(a -> a.getStartDateTime() == null && a.getEndDateTime() == null));
+    }
+
+    @Test
+    public void shouldReturnLimitedAppointmentsWithoutDates() {
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(searchQuery, 2);
+
+        assertNotNull(appointments);
+        assertEquals(2, appointments.size());
+        assertTrue(appointments.stream().allMatch(a -> a.getStartDateTime() == null && a.getEndDateTime() == null));
+    }
+
+    @Test
+    public void shouldReturnAppointmentsWithoutDatesOrderedByDateCreated() {
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+
+        List<Appointment> appointments = appointmentDao.getAppointmentsWithoutDates(searchQuery, null);
+
+        assertNotNull(appointments);
+        assertTrue(appointments.size() > 1);
+
+        for (int i = 0; i < appointments.size() - 1; i++) {
+            Date currentDate = appointments.get(i).getDateCreated();
+            Date nextDate = appointments.get(i + 1).getDateCreated();
+            assertTrue("Appointments should be ordered by dateCreated ascending",
+                currentDate.compareTo(nextDate) <= 0);
+        }
+    }
+
+    @Test
+    public void shouldReturnAppointmentsAfterStartDateWhenEndDateIsNotProvided() throws ParseException {
+        Date from = DateUtil.convertToDate("2108-08-16T00:00:00.0Z", DateUtil.DateFormatType.UTC);
+        List<Appointment> allAppointments = appointmentDao.getAllAppointmentsInDateRange(from, null);
+
+        assertNotNull(allAppointments);
+        assertTrue(allAppointments.size() > 0);
+        assertTrue(allAppointments.stream().allMatch(a -> a.getStartDateTime().compareTo(from) >= 0));
     }
 }
