@@ -14,7 +14,7 @@ import org.bahmni.search.model.SearchResponseMeta;
 import org.bahmni.search.pagination.PageResult;
 import org.bahmni.search.pagination.PaginationHelper;
 import org.bahmni.search.pagination.ResolvedPagination;
-import org.openmrs.api.context.Context;
+import org.openmrs.api.AdministrationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -28,23 +28,27 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
 
     private static final String ENTITY = AppointmentSearchConstants.ENTITY_APPOINTMENT;
 
-    private static final String GP_PAGINATION_DEFAULT_LIMIT = "bahmni.appointmentSearch.pagination.defaultLimit";
-    private static final String GP_PAGINATION_MAX_LIMIT = "bahmni.appointmentSearch.pagination.maxLimit";
+    private static final String GP_PAGINATION_DEFAULT_LIMIT = "bahmni.search.pagination.defaultLimit";
+    private static final String GP_PAGINATION_MAX_LIMIT = "bahmni.search.pagination.maxLimit";
+
     private static final int FALLBACK_DEFAULT_LIMIT = 100;
     private static final int FALLBACK_MAX_LIMIT = 500;
-
 
     private final AppointmentSearchDao appointmentSearchDao;
     private final CriteriaValidator validator;
     private final AppointmentResponseBuilder responseBuilder;
+    private final AdministrationService administrationService;
 
     public AppointmentSearchServiceImpl(AppointmentSearchDao appointmentSearchDao,
                                         CriteriaValidator validator,
-                                        AppointmentResponseBuilder responseBuilder) {
+                                        AppointmentResponseBuilder responseBuilder,
+                                        AdministrationService administrationService) {
         this.appointmentSearchDao = appointmentSearchDao;
         this.validator = validator;
         this.responseBuilder = responseBuilder;
+        this.administrationService = administrationService;
     }
+
 
     @Override
     public AppointmentSearchResponse search(AppointmentSearchRequest request) {
@@ -53,9 +57,10 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
 
         SearchRequestMeta meta = request.getMeta();
         int defaultLimit = PaginationHelper.resolveGlobalProperty(
-                Context.getAdministrationService().getGlobalProperty(GP_PAGINATION_DEFAULT_LIMIT), FALLBACK_DEFAULT_LIMIT, GP_PAGINATION_DEFAULT_LIMIT);
+                administrationService.getGlobalProperty(GP_PAGINATION_DEFAULT_LIMIT), FALLBACK_DEFAULT_LIMIT, GP_PAGINATION_DEFAULT_LIMIT);
         int maxLimit = PaginationHelper.resolveGlobalProperty(
-                Context.getAdministrationService().getGlobalProperty(GP_PAGINATION_MAX_LIMIT), FALLBACK_MAX_LIMIT, GP_PAGINATION_MAX_LIMIT);
+                administrationService.getGlobalProperty(GP_PAGINATION_MAX_LIMIT), FALLBACK_MAX_LIMIT, GP_PAGINATION_MAX_LIMIT);
+
 
         ResolvedPagination resolved = PaginationHelper.resolvePaginationContext(meta, ENTITY, defaultLimit, maxLimit);
 
@@ -63,10 +68,15 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
                 request.getCriteria(), resolved.getCursorId(), resolved.getSortOrder(),
                 resolved.getDirection(), resolved.getFetchSize());
 
-        List<Appointment> rawAppointments = appointmentSearchDao.findByIds(matchingIds);
+        boolean hasMore = PaginationHelper.hasMore(matchingIds.size(), resolved.getEffectiveLimit());
+        List<Integer> idsToFetch = hasMore
+                ? matchingIds.subList(0, resolved.getEffectiveLimit())
+                : matchingIds;
+
+        List<Appointment> rawAppointments = appointmentSearchDao.findByIds(idsToFetch);
 
         PageResult<Appointment> pageResult = PaginationHelper.paginate(
-                ENTITY, rawAppointments, appointment -> appointment.getAppointmentId().longValue(), resolved);
+                ENTITY, rawAppointments, appointment -> appointment.getAppointmentId().longValue(), resolved, hasMore);
 
         List<Map<String, Object>> results = new ArrayList<>();
 
@@ -83,5 +93,3 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
     }
 
 }
-
-

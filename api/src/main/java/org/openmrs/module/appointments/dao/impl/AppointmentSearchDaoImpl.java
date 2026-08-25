@@ -17,7 +17,6 @@ import javax.persistence.criteria.JoinType;
 import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 
 public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
@@ -80,13 +79,15 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         addFetchJoins(root);
 
         query.select(root).distinct(true);
-        query.where(root.get(FIELD_APPOINTMENT_ID).in(appointmentIds));
+        query.where(
+                root.get(FIELD_APPOINTMENT_ID).in(appointmentIds),
+                cb.isFalse(root.get(AppointmentSearchConstants.VOIDED)));
 
         List<Appointment> appointments = session.createQuery(query)
                 .setHint(PaginationHelper.HINT_PASS_DISTINCT_THROUGH, false)
                 .getResultList();
 
-        return reorderByIds(appointments, appointmentIds);
+        return PaginationHelper.reorderByIds(appointments, appointmentIds, Appointment::getAppointmentId);
     }
 
     @Override
@@ -115,11 +116,6 @@ public class AppointmentSearchDaoImpl implements AppointmentSearchDao {
         return predicates;
     }
 
-    private List<Appointment> reorderByIds(List<Appointment> appointments, List<Integer> orderedIds) {
-        List<Appointment> reordered = new ArrayList<>(appointments);
-        reordered.sort(Comparator.comparingInt(appointment -> orderedIds.indexOf(appointment.getAppointmentId())));
-        return reordered;
-    }
 
     private void addFetchJoins(Root<Appointment> root) {
         Fetch<Appointment, ?> patientFetch = root.fetch(AppointmentSearchConstants.PATIENT, JoinType.INNER);

@@ -1,7 +1,6 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.bahmni.search.cursor.CursorCodec;
-import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.model.PaginationRequest;
 import org.bahmni.search.model.SearchCondition;
 import org.bahmni.search.model.SearchRequestMeta;
@@ -9,8 +8,8 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
@@ -18,9 +17,6 @@ import org.openmrs.module.appointments.search.builder.AppointmentResponseBuilder
 import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
 import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
 import org.openmrs.module.appointments.search.validation.CriteriaValidator;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -33,20 +29,18 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.hamcrest.Matchers.nullValue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.isNull;
-import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.mock;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
+
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
+@RunWith(MockitoJUnitRunner.Silent.class)
 public class AppointmentSearchServiceImplTest {
 
     @Mock
@@ -65,10 +59,7 @@ public class AppointmentSearchServiceImplTest {
 
     @Before
     public void setUp() {
-        initMocks(this);
-        PowerMockito.mockStatic(Context.class);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        searchService = new AppointmentSearchServiceImpl(appointmentSearchDao, validator, responseBuilder);
+        searchService = new AppointmentSearchServiceImpl(appointmentSearchDao, validator, responseBuilder, administrationService);
     }
 
     @Test
@@ -175,17 +166,19 @@ public class AppointmentSearchServiceImplTest {
 
     @Test
     public void shouldReorderResultsAndSetCursorsWhenDirectionIsPrev() {
+        // direction=prev with cursor=20 issues WHERE id > 20 ORDER BY id ASC, so the ids
+        // returned by the DAO must be greater than the cursor (21, 22, 23), not less than it.
         String cursor = CursorCodec.encode(AppointmentSearchConstants.ENTITY_APPOINTMENT, 20L);
         AppointmentSearchRequest request = requestWithPagination(2, cursor, "prev");
 
-        Appointment a8 = appointmentWithId(8);
-        Appointment a9 = appointmentWithId(9);
-        Appointment a10 = appointmentWithId(10); // extra row returned signals hasMore
-        mockDaoReturns(Arrays.asList(a8, a9, a10));
+        Appointment a21 = appointmentWithId(21);
+        Appointment a22 = appointmentWithId(22);
+        Appointment a23 = appointmentWithId(23); // extra row returned signals hasMore
+        mockDaoReturns(Arrays.asList(a21, a22, a23));
 
-        when(responseBuilder.mapAppointment(a8)).thenReturn(mapWithId(8));
-        when(responseBuilder.mapAppointment(a9)).thenReturn(mapWithId(9));
-        when(responseBuilder.mapAppointment(a10)).thenReturn(mapWithId(10));
+        when(responseBuilder.mapAppointment(a21)).thenReturn(mapWithId(21));
+        when(responseBuilder.mapAppointment(a22)).thenReturn(mapWithId(22));
+        when(responseBuilder.mapAppointment(a23)).thenReturn(mapWithId(23));
 
         AppointmentSearchResponse response = searchService.search(request);
 
@@ -193,20 +186,26 @@ public class AppointmentSearchServiceImplTest {
                 any(SearchCondition.class), eq(20L), anyString(), eq("prev"), eq(3));
 
         assertThat(response.getResults().size(), is(2));
-        assertThat(response.getResults().get(0).get("id"), is(9));
-        assertThat(response.getResults().get(1).get("id"), is(8));
+        assertThat(response.getResults().get(0).get("id"), is(22));
+        assertThat(response.getResults().get(1).get("id"), is(21));
         assertThat(response.getMeta().getPagination().getNextCursor(),
-                is(CursorCodec.encode(AppointmentSearchConstants.ENTITY_APPOINTMENT, 8L)));
+                is(CursorCodec.encode(AppointmentSearchConstants.ENTITY_APPOINTMENT, 21L)));
         assertThat(response.getMeta().getPagination().getPrevCursor(),
-                is(CursorCodec.encode(AppointmentSearchConstants.ENTITY_APPOINTMENT, 9L)));
+                is(CursorCodec.encode(AppointmentSearchConstants.ENTITY_APPOINTMENT, 22L)));
     }
 
-    @Test(expected = InvalidSearchCriteriaException.class)
-    public void shouldThrowWhenConfiguredMaxLimitGlobalPropertyIsNonPositive() {
-        when(administrationService.getGlobalProperty("bahmni.appointmentSearch.pagination.maxLimit")).thenReturn("0");
-        AppointmentSearchRequest request = validRequest();
+
+    @Test
+    public void shouldFallbackToDefaultMaxLimitWhenConfiguredMaxLimitGlobalPropertyIsNonPositive() {
+        when(administrationService.getGlobalProperty("bahmni.search.pagination.maxLimit")).thenReturn("0");
+
+        AppointmentSearchRequest request = requestWithPagination(1000, null, null);
+        mockDaoReturns(Collections.<Appointment>emptyList());
 
         searchService.search(request);
+
+        verify(appointmentSearchDao, times(1)).findMatchingIds(
+                any(SearchCondition.class), (Long) isNull(), anyString(), (String) isNull(), eq(501));
     }
 
     @Test
@@ -238,7 +237,8 @@ public class AppointmentSearchServiceImplTest {
 
     @Test
     public void shouldUseConfiguredDefaultLimitFromGlobalProperty() {
-        when(administrationService.getGlobalProperty("bahmni.appointmentSearch.pagination.defaultLimit")).thenReturn("20");
+        when(administrationService.getGlobalProperty("bahmni.search.pagination.defaultLimit")).thenReturn("20");
+
         AppointmentSearchRequest request = validRequest();
         mockDaoReturns(Collections.<Appointment>emptyList());
 
@@ -251,7 +251,8 @@ public class AppointmentSearchServiceImplTest {
 
     @Test
     public void shouldUseConfiguredMaxLimitFromGlobalProperty() {
-        when(administrationService.getGlobalProperty("bahmni.appointmentSearch.pagination.maxLimit")).thenReturn("50");
+        when(administrationService.getGlobalProperty("bahmni.search.pagination.maxLimit")).thenReturn("50");
+
         AppointmentSearchRequest request = requestWithPagination(1000, null, null);
         mockDaoReturns(Collections.<Appointment>emptyList());
 
@@ -264,7 +265,8 @@ public class AppointmentSearchServiceImplTest {
 
     @Test
     public void shouldFallbackToDefaultWhenGlobalPropertyIsInvalid() {
-        when(administrationService.getGlobalProperty("bahmni.appointmentSearch.pagination.defaultLimit")).thenReturn("not-a-number");
+        when(administrationService.getGlobalProperty("bahmni.search.pagination.defaultLimit")).thenReturn("not-a-number");
+
         AppointmentSearchRequest request = validRequest();
         mockDaoReturns(Collections.<Appointment>emptyList());
 

@@ -164,18 +164,16 @@
 	</globalProperty>
 
 	<globalProperty>
-		<property>bahmni.appointmentSearch.pagination.defaultLimit</property>
+		<property>bahmni.search.pagination.defaultLimit</property>
 		<defaultValue>100</defaultValue>
-		<description>The default number of appointment search results returned per page when the client does not specify a batch size in the search request.</description>
+		<description>The default number of results returned per page for Bahmni cursor-based searches (patients, appointments, episodes/patient programs, etc.) when the client does not specify a batch size in the search request. This global property is shared across all Bahmni search endpoints.</description>
 	</globalProperty>
 
 	<globalProperty>
-		<property>bahmni.appointmentSearch.pagination.maxLimit</property>
+		<property>bahmni.search.pagination.maxLimit</property>
 		<defaultValue>500</defaultValue>
-		<description>The maximum number of appointment search results that can be returned per page, regardless of the batch size requested by the client. Requested limits greater than this value are clamped to this maximum.</description>
+		<description>The maximum number of results that can be returned per page for Bahmni cursor-based searches (patients, appointments, episodes/patient programs, etc.), regardless of the batch size requested by the client. Requested limits greater than this value are clamped to this maximum. This global property is shared across all Bahmni search endpoints.</description>
 	</globalProperty>
-
-
 
 	<privilege>
 		<name>app:appointments:manageServiceAvailability</name>

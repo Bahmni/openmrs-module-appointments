@@ -30,14 +30,15 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
 
 @RunWith(MockitoJUnitRunner.Silent.class)
 public class AppointmentSearchDaoImplTest {
@@ -196,6 +197,16 @@ public class AppointmentSearchDaoImplTest {
         List<Appointment> actual = appointmentSearchDao.findByIds(Collections.emptyList());
 
         assertThat(actual, is(Collections.emptyList()));
+    }
+
+    @Test
+    public void shouldExcludeVoidedAppointmentsWhenFindingByIds() {
+        when(hibernateQuery.getResultList()).thenReturn(Collections.emptyList());
+
+        appointmentSearchDao.findByIds(Arrays.asList(1));
+
+        verify(criteriaBuilder, times(1)).isFalse(voidedPath);
+        verify(criteriaQuery, times(1)).where(inPredicate, voidedPredicate);
     }
 
     @Test
