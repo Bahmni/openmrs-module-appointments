@@ -645,7 +645,7 @@
         </preConditions>
         <comment> Add email address in registration page </comment>
         <sql>
-            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, uuid());
+            INSERT INTO person_attribute_type (name, description, format, searchable, creator, date_created, retired, uuid) VALUES ('email', 'Email Address', 'java.lang.String', '1', 1, now(), 0, '770943ca-b8bb-4f5d-9cdc-48beff86f62b');
         </sql>
     </changeSet>
     <changeSet id="create-column-tele_health_video_link-202106211857" author="Angshu">
