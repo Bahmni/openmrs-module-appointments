@@ -7,5 +7,11 @@ import java.util.List;
 
 public interface AppointmentSearchDao {
 
-    List<Appointment> search(SearchCondition criteria);
+    List<Integer> findMatchingIds(SearchCondition criteria, Long cursorId,
+                                   String sortOrder, String direction, int limit);
+
+    List<Appointment> findByIds(List<Integer> appointmentIds);
+
+    long count(SearchCondition criteria);
 }
+
