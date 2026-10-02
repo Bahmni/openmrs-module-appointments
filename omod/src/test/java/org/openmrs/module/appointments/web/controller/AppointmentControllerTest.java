@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -25,19 +23,35 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import org.junit.jupiter.api.AfterEach;
+import org.mockito.MockedStatic;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
+import static org.mockito.Mockito.mock;
+import org.openmrs.api.AdministrationService;
 
 
 public class AppointmentControllerTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        contextMockedStatic.close();
+    }
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -53,13 +67,13 @@ public class AppointmentControllerTest {
 
     @InjectMocks
     private AppointmentController appointmentController;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
+        // RestUtil.wrapErrorResponse of webservices.rest 5.x reads global properties and the message source
+        contextMockedStatic = Mockito.mockStatic(Context.class);
+        when(Context.getMessageSourceService()).thenReturn(mock(MessageSourceService.class));
+        when(Context.getAdministrationService()).thenReturn(mock(AdministrationService.class));
     }
 
     @Test
@@ -190,9 +204,10 @@ public class AppointmentControllerTest {
     @Test
     public void shouldThrowExceptionIfAppointmentDoesNotExist() throws Exception {
         when(appointmentsService.getAppointmentByUuid(any(String.class))).thenReturn(null);
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment does not exist");
-        appointmentController.getAppointmentByUuid("randomUuid");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            appointmentController.getAppointmentByUuid("randomUuid");
+        });
+        assertThat(exception.getMessage(), containsString("Appointment does not exist"));
     }
 
     @Test

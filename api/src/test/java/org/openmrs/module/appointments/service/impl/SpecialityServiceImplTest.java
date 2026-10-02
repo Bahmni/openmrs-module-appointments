@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -11,20 +10,16 @@ import org.openmrs.User;
 import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.Speciality;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.MessageFormat;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
 public class SpecialityServiceImplTest {
     @Mock
     private SpecialityDao specialityDao;
@@ -32,9 +27,9 @@ public class SpecialityServiceImplTest {
     @InjectMocks
     private SpecialityServiceImpl specialityService;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     User creator;

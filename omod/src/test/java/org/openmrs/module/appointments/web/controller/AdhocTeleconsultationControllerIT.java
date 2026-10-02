@@ -1,21 +1,21 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Test;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class AdhocTeleconsultationControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AdhocTeleconsultationController adhocTeleconsultationController;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
         Context.getAdministrationService().setGlobalProperty("bahmni.adhoc.teleConsultation.id", "OpenMRS Identification Number");

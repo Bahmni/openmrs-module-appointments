@@ -1,8 +1,8 @@
 package org.openmrs.module.appointments.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.openmrs.Patient;
 import org.openmrs.Provider;
@@ -18,9 +18,8 @@ import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -29,12 +28,12 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
-public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
+public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
     private String adminUser;
     private String adminUserPassword;
     private String manageUser;
@@ -66,7 +65,7 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     @Autowired
     AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         adminUser = "super-user";
         adminUserPassword = "P@ssw0rd";
@@ -82,6 +81,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         resetUserPassword = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
         executeDataSet("appointmentTestData.xml");
+        // the role privilege cache loads roles on a background thread with its own session, which cannot see this
+        // test's uncommitted rows, so commit them (tearDown deletes them again)
+        getConnection().commit();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        deleteAllData();
     }
 
     @Test
@@ -157,16 +164,20 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(app);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotSaveAppointmentsIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        assertNotNull(appointmentsService.validateAndSave(new Appointment()));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            assertNotNull(appointmentsService.validateAndSave(new Appointment()));
+        });
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotSaveAppointmentIfUserHasReadOnlyPrivilege() {
-        Context.authenticate(readOnlyUser, readOnlyUserPassword);
-        assertNotNull(appointmentsService.validateAndSave(new Appointment()));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(readOnlyUser, readOnlyUserPassword);
+            assertNotNull(appointmentsService.validateAndSave(new Appointment()));
+        });
     }
 
     @Test
@@ -175,10 +186,12 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAllAppointments(null));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllAppointmentsIfUserDoesNotHaveAnyPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        assertNotNull(appointmentsService.getAllAppointments(null));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            assertNotNull(appointmentsService.getAllAppointments(null));
+        });
     }
 
     @Test
@@ -187,10 +200,12 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.search(new Appointment()));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToSearchAppointmentsIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        assertNotNull(appointmentsService.search(new Appointment()));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            assertNotNull(appointmentsService.search(new Appointment()));
+        });
     }
 
     @Test
@@ -201,12 +216,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllFutureAppointmentsForServiceIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setId(1);
+            assertNotNull(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition));
+        });
     }
 
     @Test
@@ -217,12 +234,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllFutureAppointmentsForServiceTypeIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
-        appointmentServiceType.setId(1);
-        assertNotNull(appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
+            appointmentServiceType.setId(1);
+            assertNotNull(appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType));
+        });
     }
 
     @Test
@@ -233,12 +252,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, null, null, null));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAppointmentsForServiceIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, null, null, null));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setId(1);
+            assertNotNull(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, null, null, null));
+        });
     }
 
     @Test
@@ -247,10 +268,12 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertEquals(null, appointmentsService.getAppointmentByUuid("uuid"));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAppointmentByUuidIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
-        assertEquals(null, appointmentsService.getAppointmentByUuid("uuid"));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
+            assertEquals(null, appointmentsService.getAppointmentByUuid("uuid"));
+        });
     }
 
     @Test
@@ -265,10 +288,12 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         appointmentsService.changeStatus(new Appointment(), "Completed", null);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToChangeStatusIfUserHasReadOnlyPrivilege() {
-        Context.authenticate(readOnlyUser, readOnlyUserPassword);
-        appointmentsService.changeStatus(new Appointment(), "Completed", null);
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(readOnlyUser, readOnlyUserPassword);
+            appointmentsService.changeStatus(new Appointment(), "Completed", null);
+        });
     }
 
     @Test
@@ -277,34 +302,42 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(appointmentsService.getAllAppointmentsInDateRange(null, null));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllAppointmentsInDateRangeIfUserHasNoPrivilege() {
-        Context.authenticate(noPrivilegeUser, readOnlyUserPassword);
-        assertNotNull(appointmentsService.getAllAppointmentsInDateRange(null, null));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, readOnlyUserPassword);
+            assertNotNull(appointmentsService.getAllAppointmentsInDateRange(null, null));
+        });
     }
 
-    @Test(expected = APIException.class)
+    @Test
     public void shouldBeAbleToUndoStatusChangeIfUserHasManagePrivilege() {
-        Context.authenticate(manageUser, manageUserPassword);
-        Appointment appointment = new Appointment();
-        appointment.setId(1);
-        appointmentsService.undoStatusChange(appointment);
+        assertThrows(APIException.class, () -> {
+            Context.authenticate(manageUser, manageUserPassword);
+            Appointment appointment = new Appointment();
+            appointment.setId(1);
+            appointmentsService.undoStatusChange(appointment);
+        });
     }
 
-    @Test(expected = APIException.class)
+    @Test
     public void shouldBeAbleToUndoStatusChangeIfUserHasManageOwnPrivilege() {
-        Context.authenticate(manageOwnUser, manageOwnUserPassword);
-        Appointment appointment = new Appointment();
-        appointment.setId(1);
-        appointmentsService.undoStatusChange(appointment);
+        assertThrows(APIException.class, () -> {
+            Context.authenticate(manageOwnUser, manageOwnUserPassword);
+            Appointment appointment = new Appointment();
+            appointment.setId(1);
+            appointmentsService.undoStatusChange(appointment);
+        });
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToUndoStatusChangeIfUserHasReadOnlyPrivilege() {
-        Context.authenticate(readOnlyUser, manageUserPassword);
-        Appointment appointment = new Appointment();
-        appointment.setId(1);
-        appointmentsService.undoStatusChange(appointment);
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(readOnlyUser, manageUserPassword);
+            Appointment appointment = new Appointment();
+            appointment.setId(1);
+            appointmentsService.undoStatusChange(appointment);
+        });
     }
 
     @Test
@@ -334,11 +367,13 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         appointmentsService.changeStatus(appointment, "Scheduled", null);
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToChangeStatusFromMissedToScheduledIfUserDoNotHaveResetAppointmentStatusPrivilege() {
-        Context.authenticate(manageUser, manageUserPassword);
-        Appointment appointment = new Appointment();
-        appointment.setStatus(AppointmentStatus.Missed);
-        appointmentsService.changeStatus(appointment, "Scheduled", null);
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(manageUser, manageUserPassword);
+            Appointment appointment = new Appointment();
+            appointment.setStatus(AppointmentStatus.Missed);
+            appointmentsService.changeStatus(appointment, "Scheduled", null);
+        });
     }
 }

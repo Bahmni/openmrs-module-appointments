@@ -22,15 +22,16 @@
     <person person_id="6" uuid="5631b434-78aa-102b-91a0-001e378e0013" gender="M" birthdate="1950-04-01" dead="false" creator="1" date_created="2005-01-01 00:00:00.0" voided="false"/>
     <person_name person_name_id="6" preferred="true" person_id="6" given_name="Reset" middle_name="Appointment" family_name="Status" creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="0f127d08-076b-4fc6-acac-4bb915155554"/>
 
-    <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module"/>
-    <privilege privilege="Manage Appointments" description="Able to manage Appointments in Appointments module"/>
-    <privilege privilege="View Appointment Services" description="Able to view Services in Appointments module"/>
-    <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
-    <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module"/>
-    <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module"/>
-    <privilege privilege="Manage Appointment Specialities" description="Able to manage Specialities in Appointments module"/>
-    <privilege privilege="Get Providers" description="Able to view Providers"/>
-    <privilege privilege="Reset Appointment Status" description="Able to reset the status of appointments back to scheduled"/>
+    <privilege privilege="View Appointments" description="Able to view Appointments in Appointments module" uuid="b4dff15d-74b0-5642-8ec7-cd4b2ac08e08" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Manage Appointments" description="Able to manage Appointments in Appointments module" uuid="34130c6d-89f8-5152-b178-883f6195b90d" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="View Appointment Services" description="Able to view Services in Appointments module" uuid="ae892982-ad98-50dd-8913-27d177185866" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module" uuid="7a3a09b4-3bf4-54e1-8bb7-d854b4a178f6" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Manage Own Appointments" description="Able to manage own Appointments in Appointments module" uuid="3b8855a4-af6e-5ded-8d60-4d5b3f91b26f" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Manage Appointment Services" description="Able to manage Services in Appointments module" uuid="7a3a09b4-3bf4-54e1-8bb7-d854b4a178f6" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Manage Appointment Specialities" description="Able to manage Specialities in Appointments module" uuid="8da57579-e257-5ab7-8f25-40ea5ab7c0b3" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Get Providers" description="Able to view Providers" uuid="6b521f36-5609-5a0c-8750-d32c60720002" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Get Global Properties" description="Able to get global properties on the administration screen" uuid="bcbfb30a-ae12-5f0b-804e-7e10228de387" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
+    <privilege privilege="Reset Appointment Status" description="Able to reset the status of appointments back to scheduled" uuid="f2eb9933-b212-557a-b33e-f30d8d5aaf14" creator="1" retired="false" date_created="2005-01-01 00:00:00.0"/>
 
 
     <role role="Appointment: FullAccess" description="To allow full access to Appointments module" uuid="3480cb6d-c551-46c8-8d3a-96dc33d109fb"/>
@@ -54,6 +55,9 @@
     <role_privilege role="Appointment: FullAccess" privilege="Get Providers"/>
     <role_privilege role="Appointment: Manage" privilege="Get Providers"/>
     <role_privilege role="Appointment: ReadOnly" privilege="Get Providers"/>
+    <!-- Platform 3.0 requires Get Global Properties to read the global properties used when changing appointment status -->
+    <role_privilege role="Appointment: Manage" privilege="Get Global Properties"/>
+    <role_privilege role="Appointment: Own" privilege="Get Global Properties"/>
 
     <users user_id="100" person_id="1" system_id="1-8" username="super-user" password="6c3de14392481ae4a55e1e8f2a58ec9906b033a9486dd8311eff9f91313b63d34d4c6efab3d9b4a2b206244c0bb9926a624bfdfb7494c3e31a3fcd66414aea0b" salt="77ee0588fa43f003557d7dc26c66448ededc912a928cedc310698bf1839ee703258dcbfa0dbc0583fda93c7a4f60f49bec02afde244ff9d7e222ed30c6ecf81c" secret_question="" creator="1" date_created="2005-01-01 00:00:00.0" changed_by="1" date_changed="2007-09-20 21:54:12.0" retired="false" retire_reason="" uuid="1210d442-e135-11de-babe-001e378eb670"/>
     <user_role user_id="100" role="Appointment: FullAccess"/>

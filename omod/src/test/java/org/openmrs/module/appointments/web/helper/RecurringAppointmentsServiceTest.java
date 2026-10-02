@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.web.helper;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
@@ -21,12 +19,10 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RecurringAppointmentsServiceTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @InjectMocks
     private RecurringAppointmentsService recurringAppointmentsService;
 
@@ -38,7 +34,7 @@ public class RecurringAppointmentsServiceTest {
     @Qualifier("weeklyRecurringAppointmentsGenerationService")
     AbstractRecurringAppointmentsService weeklyRecurringAppointmentsGenerationService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }

@@ -1,28 +1,32 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.bahmni.search.builder.QueryContext;
+import org.openmrs.module.appointments.search.builder.QueryContext;
 import org.bahmni.search.model.SearchCondition;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Order;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import org.hibernate.query.criteria.HibernateCriteriaBuilder;
+import org.hibernate.query.criteria.JpaCriteriaQuery;
+import org.hibernate.query.criteria.JpaFetch;
+import org.hibernate.query.criteria.JpaOrder;
+import org.hibernate.query.criteria.JpaPath;
+import org.hibernate.query.criteria.JpaPredicate;
+import org.hibernate.query.criteria.JpaRoot;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Expression;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Order;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,9 +42,15 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.Mockito;
 
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AppointmentSearchDaoImplTest {
 
     @Mock
@@ -50,49 +60,49 @@ public class AppointmentSearchDaoImplTest {
     private Session session;
 
     @Mock
-    private CriteriaBuilder criteriaBuilder;
+    private HibernateCriteriaBuilder criteriaBuilder;
 
     @Mock
-    private CriteriaQuery<Appointment> criteriaQuery;
+    private JpaCriteriaQuery<Appointment> criteriaQuery;
 
     @Mock
-    private CriteriaQuery<Integer> idCriteriaQuery;
+    private JpaCriteriaQuery<Integer> idCriteriaQuery;
 
     @Mock
-    private Root<Appointment> root;
+    private JpaRoot<Appointment> root;
 
     @Mock
     private AppointmentCriteriaBuilder appointmentCriteriaBuilder;
 
     @Mock
-    private Fetch patientFetch;
+    private JpaFetch patientFetch;
 
     @Mock
-    private Fetch serviceFetch;
+    private JpaFetch serviceFetch;
 
     @Mock
-    private Fetch locationFetch;
+    private JpaFetch locationFetch;
 
     @Mock
-    private Fetch reasonsFetch;
+    private JpaFetch reasonsFetch;
 
     @Mock
-    private Fetch serviceAttributesFetch;
+    private JpaFetch serviceAttributesFetch;
 
     @Mock
-    private Fetch patientIdentifiersFetch;
+    private JpaFetch patientIdentifiersFetch;
 
     @Mock
-    private Path<Boolean> voidedPath;
+    private JpaPath<Boolean> voidedPath;
 
     @Mock
-    private Path<Integer> appointmentIdPath;
+    private JpaPath<Integer> appointmentIdPath;
 
     @Mock
-    private Predicate voidedPredicate;
+    private JpaPredicate voidedPredicate;
 
     @Mock
-    private Order order;
+    private JpaOrder order;
 
     @Mock
     private Query<Appointment> hibernateQuery;
@@ -101,11 +111,11 @@ public class AppointmentSearchDaoImplTest {
     private Query<Integer> idHibernateQuery;
 
     @Mock
-    private Predicate inPredicate;
+    private JpaPredicate inPredicate;
 
     private AppointmentSearchDaoImpl appointmentSearchDao;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         appointmentSearchDao = new AppointmentSearchDaoImpl(sessionFactory, appointmentCriteriaBuilder);
 

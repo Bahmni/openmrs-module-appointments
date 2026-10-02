@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
@@ -13,8 +13,8 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.openmrs.module.appointments.service.impl.RecurringAppointmentType.DAY;
 
 public class AppointmentRecurringPatternDaoIT extends BaseIntegrationTest {
@@ -25,7 +25,7 @@ public class AppointmentRecurringPatternDaoIT extends BaseIntegrationTest {
     @Autowired
     private AppointmentRecurringPatternDao appointmentRecurringPatternDao;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
     }

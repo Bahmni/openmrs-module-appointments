@@ -1,9 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -18,13 +16,17 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 
 public class AppointmentServiceDefinitionControllerTest {
@@ -37,11 +39,7 @@ public class AppointmentServiceDefinitionControllerTest {
 
     @InjectMocks
     private AppointmentServiceController appointmentServiceController;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
@@ -70,10 +68,10 @@ public class AppointmentServiceDefinitionControllerTest {
     public void shouldThrowExceptionWhenCreateAppointmentServiceWhenEmptyPayloadIsGiven() throws Exception {
         AppointmentServiceDescription appointmentServiceDescription = new AppointmentServiceDescription();
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment Service name should not be null");
-
-        appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            appointmentServiceController.defineAppointmentService(appointmentServiceDescription);
+        });
+        assertThat(exception.getMessage(), containsString("Appointment Service name should not be null"));
     }
 
     @Test
@@ -115,10 +113,12 @@ public class AppointmentServiceDefinitionControllerTest {
         verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDefinition);
     }
     
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldThrowExceptionIfServiceNotFound() throws Exception {
-        appointmentServiceController.getAppointmentServiceByUuid("random");
-        verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid("random");
+        assertThrows(RuntimeException.class, () -> {
+            appointmentServiceController.getAppointmentServiceByUuid("random");
+            verify(appointmentServiceDefinitionService, times(1)).getAppointmentServiceByUuid("random");
+        });
     }
 
     @Test

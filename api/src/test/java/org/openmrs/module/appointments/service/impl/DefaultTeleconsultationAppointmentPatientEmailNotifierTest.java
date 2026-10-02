@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.AdditionalMatchers;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,22 +15,28 @@ import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.impl.DefaultTCAppointmentPatientEmailNotifier;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.UUID;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
-@PowerMockIgnore( {"javax.*", "org.apache.*", "org.slf4j.*"} )
 public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT = "bahmni.appointment.teleConsultation.patientEmailNotificationSubject";
     private static final String BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE = "bahmni.appointment.teleConsultation.patientEmailNotificationTemplate";
@@ -44,19 +47,15 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
 
     @Mock
     private MailSender mailSender;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private AdministrationService administrationService;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        MockitoAnnotations.openMocks(this);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         tcAppointmentEventNotifier = new DefaultTCAppointmentPatientEmailNotifier(mailSender);
-        PowerMockito.when(Context.getAdministrationService()).thenReturn(administrationService);
+        Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT)).thenReturn("Email subject");
         when(administrationService.getGlobalProperty(BAHMNI_APPOINTMENT_TELE_CONSULTATION_EMAIL_NOTIFICATION_TEMPLATE)).thenReturn("Email body");
         when(administrationService.getGlobalProperty(BAHMNI_ADHOC_TELE_CONSULTATION_EMAIL_NOTIFICATION_SUBJECT)).thenReturn("Email subject");
@@ -80,8 +79,9 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
     public void shouldThrowExceptionIfSendingFails() throws NotificationException {
         Appointment appointment = buildAppointment();
         doThrow(new RuntimeException()).when(mailSender).send(any(), any(), any(), any(), any());
-        expectedException.expect(NotificationException.class);
-        tcAppointmentEventNotifier.sendNotification(appointment);
+        assertThrows(NotificationException.class, () -> {
+            tcAppointmentEventNotifier.sendNotification(appointment);
+        });
     }
 
     @Test

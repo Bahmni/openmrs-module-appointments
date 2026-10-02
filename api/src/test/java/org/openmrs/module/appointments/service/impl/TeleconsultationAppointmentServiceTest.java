@@ -1,9 +1,8 @@
 package org.openmrs.module.appointments.service.impl;
 
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -15,24 +14,29 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
 public class TeleconsultationAppointmentServiceTest {
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
+
     public static final String PATIENT_IDENTIFIER = "GAN230901";
     @Mock
     private AdministrationService administrationService;
@@ -51,9 +55,9 @@ public class TeleconsultationAppointmentServiceTest {
 
     private Patient patient;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         patient = new Patient();
         patient.setUuid("patientUuid");
         PersonName name = new PersonName();
@@ -68,7 +72,7 @@ public class TeleconsultationAppointmentServiceTest {
         identifier.setIdentifierType(patientIdentifierType);
         patient.setIdentifiers(new HashSet<>(Arrays.asList(identifier)));
         when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
-        PowerMockito.mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(Context.getService(TeleconsultationService.class)).thenReturn(teleconsultationService);
         when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.serverUrlPattern")).thenReturn("https://test.server/{0}");

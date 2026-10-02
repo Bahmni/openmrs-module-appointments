@@ -1,9 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
@@ -25,13 +23,13 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyList;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.never;
@@ -39,6 +37,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class AppointmentUnavailabilityControllerTest {
 
@@ -53,11 +55,7 @@ public class AppointmentUnavailabilityControllerTest {
 
     @InjectMocks
     private AppointmentUnavailabilityController controller;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
     }
@@ -94,9 +92,10 @@ public class AppointmentUnavailabilityControllerTest {
             return null;
         }).when(unavailabilityRequestValidator).validate(anyList(), any(Errors.class));
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Validation failed: locationUuid is required");
-        controller.createAppointmentUnavailability(requests);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            controller.createAppointmentUnavailability(requests);
+        });
+        assertThat(exception.getMessage(), containsString("Validation failed: locationUuid is required"));
     }
 
     @Test

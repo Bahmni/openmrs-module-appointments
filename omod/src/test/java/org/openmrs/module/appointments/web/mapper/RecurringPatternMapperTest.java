@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.impl.RecurringAppointmentType;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
@@ -9,13 +9,13 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import java.util.Arrays;
 import java.util.Date;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class RecurringPatternMapperTest {
 
     private RecurringPatternMapper recurringPatternMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         recurringPatternMapper = new RecurringPatternMapper();
     }

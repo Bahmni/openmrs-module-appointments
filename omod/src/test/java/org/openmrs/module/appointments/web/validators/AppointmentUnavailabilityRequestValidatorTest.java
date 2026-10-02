@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.validators;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
@@ -9,15 +9,15 @@ import org.springframework.validation.Errors;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppointmentUnavailabilityRequestValidatorTest {
 
     private AppointmentUnavailabilityRequestValidator validator;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         validator = new AppointmentUnavailabilityRequestValidator();
     }

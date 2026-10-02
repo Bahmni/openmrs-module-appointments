@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.validator.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -13,8 +13,9 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
 
 public class DefaultEditAppointmentValidatorTest {
 
@@ -24,9 +25,9 @@ public class DefaultEditAppointmentValidatorTest {
     @InjectMocks
     private DefaultEditAppointmentValidator defaultEditAppointmentValidator;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     private Appointment createAppointment(String uuid, Patient patient) {

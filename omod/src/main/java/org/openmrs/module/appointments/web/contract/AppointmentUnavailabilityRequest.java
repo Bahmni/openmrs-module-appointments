@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.web.contract;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 
 public class AppointmentUnavailabilityRequest {
 

@@ -2,11 +2,11 @@ package org.openmrs.module.appointments.web.service.impl;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.apache.commons.lang.time.DateUtils.addDays;
-import static org.apache.commons.lang.time.DateUtils.addHours;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.apache.commons.lang3.time.DateUtils.addDays;
+import static org.apache.commons.lang3.time.DateUtils.addHours;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 
 import java.util.ArrayList;
@@ -19,11 +19,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -40,13 +38,11 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
 import org.openmrs.module.appointments.web.util.RecurringPatternBuilder;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class WeeklyRecurringAppointmentsGenerationServiceTest {
-
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @InjectMocks
     private WeeklyRecurringAppointmentsGenerationService weeklyRecurringAppointmentsGenerationService;
 
@@ -56,9 +52,9 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     @Mock
     TeleconsultationAppointmentService teleconsultationAppointmentService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     private RecurringAppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
@@ -1247,10 +1243,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         String error = "Changes cannot be made as the appointments are already Checked-In";
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
-
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        APIException exception = assertThrows(APIException.class, () -> {
+            weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString(error));
     }
 
     @Test
@@ -1329,10 +1325,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         String error = "Changes cannot be made as the appointments are already Missed";
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
-
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        APIException exception = assertThrows(APIException.class, () -> {
+            weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString(error));
     }
     
     @Test
@@ -1352,10 +1348,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
             add(new AppointmentBuilder().withStartDateTime(addDays(date, +6)).withEndDateTime(addHours(addDays(date, +6), +1)).build());
         }});
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Changes cannot be made as the appointments are from past date");
-
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(recurringPattern, recurringRequest);
+        APIException exception = assertThrows(APIException.class, () -> {
+            weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(recurringPattern, recurringRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Changes cannot be made as the appointments are from past date"));
     }
 
     @Test
@@ -1407,11 +1403,10 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         String error = "Changes cannot be made as the appointments are from past date";
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
-
-        weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
-
+        APIException exception = assertThrows(APIException.class, () -> {
+            weeklyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString(error));
     }
 
     @Test

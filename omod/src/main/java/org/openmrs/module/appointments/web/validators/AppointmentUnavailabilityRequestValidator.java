@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.web.validators;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityRequest;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;

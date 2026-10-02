@@ -5,14 +5,11 @@
 <hibernate-mapping package="org.openmrs.module.appointments.model">
     <class name="AppointmentRecurringPattern" table="patient_appointment_recurring_time" batch-size="50">
         <id name="id" type="java.lang.Integer" column="patient_appointment_timings_id">
-            <generator class="native">
-                <param name="sequence">patient_appointment_timings_id</param>
-            </generator>
+            <generator class="identity"/>
         </id>
         <property name="type" column="recurrence_type">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.service.impl.RecurringAppointmentType</param>
-                <param name="useNamed">true</param>
             </type>
         </property>
         <property name="period" type="java.lang.Integer" column="period"/>
@@ -20,7 +17,7 @@
         <property name="endDate" type="java.util.Date" column="end_date"/>
         <property name="daysOfWeek" type="java.lang.String" column="days_of_week" />
 
-        <set name="appointments" cascade="save-update" table="patient_appointment_occurrence">
+        <set name="appointments" cascade="merge,persist" table="patient_appointment_occurrence">
             <key column="patient_appointment_timings_id"/>
             <many-to-many column = "patient_appointment_id" class="org.openmrs.module.appointments.model.Appointment"
                 unique="true"/>

@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentServiceAttributeTypeDao;
 import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
@@ -9,14 +9,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppointmentServiceAttributeTypeDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentServiceAttributeTestData.xml");
     }
@@ -29,7 +29,7 @@ public class AppointmentServiceAttributeTypeDaoImplIT extends BaseIntegrationTes
         assertEquals(2, attributeTypes.size());
 
         for (AppointmentServiceAttributeType type : attributeTypes) {
-            assertFalse("Should not include retired types", type.getRetired());
+            assertFalse(type.getRetired(), "Should not include retired types");
         }
     }
 
@@ -182,13 +182,11 @@ public class AppointmentServiceAttributeTypeDaoImplIT extends BaseIntegrationTes
         List<AppointmentServiceAttributeType> activeTypes =
             appointmentServiceAttributeTypeDao.getAllAttributeTypes(false);
         assertEquals(1, activeTypes.size());
-        assertFalse("Should not contain retired type",
-            activeTypes.stream().anyMatch(t -> t.getUuid().equals(uuid)));
+        assertFalse(activeTypes.stream().anyMatch(t -> t.getUuid().equals(uuid)), "Should not contain retired type");
 
         List<AppointmentServiceAttributeType> allTypes =
             appointmentServiceAttributeTypeDao.getAllAttributeTypes(true);
         assertEquals(3, allTypes.size());
-        assertTrue("Should contain retired type when includeRetired is true",
-            allTypes.stream().anyMatch(t -> t.getUuid().equals(uuid) && t.getRetired()));
+        assertTrue(allTypes.stream().anyMatch(t -> t.getUuid().equals(uuid) && t.getRetired()), "Should contain retired type when includeRetired is true");
     }
 }

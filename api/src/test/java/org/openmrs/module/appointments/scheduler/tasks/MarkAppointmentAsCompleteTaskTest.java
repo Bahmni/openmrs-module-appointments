@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.scheduler.tasks;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openmrs.GlobalProperty;
@@ -11,25 +10,35 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.MockedStatic;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class MarkAppointmentAsCompleteTaskTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -40,9 +49,9 @@ public class MarkAppointmentAsCompleteTaskTest {
     private MarkAppointmentAsCompleteTask markAppointmentAsCompleteTask;
     private GlobalProperty globalProperty;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
         markAppointmentAsCompleteTask = new MarkAppointmentAsCompleteTask();

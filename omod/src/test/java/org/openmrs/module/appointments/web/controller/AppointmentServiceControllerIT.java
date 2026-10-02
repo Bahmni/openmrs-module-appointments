@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
@@ -19,9 +17,12 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.*;
 
-import static junit.framework.TestCase.assertNull;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -32,11 +33,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentsService appointmentsService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentServicesTestData.xml");
     }
@@ -147,10 +144,12 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
     }
 
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_notCreateAppointmentServiceWhenNameIsNull() throws Exception {
-        String dataJson = "{}";
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        assertThrows(RuntimeException.class, () -> {
+            String dataJson = "{}";
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
     @Test
@@ -271,13 +270,13 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldGetCurrentLoadForServiceForGivenDateTimes() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment Service does not exist");
-        deserialize(handle(newGetRequest("/rest/v1/appointmentService/load",
-                new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245625b4"),
-                new Parameter("startDateTime", "2108-08-14T18:30:00.0Z"), new Parameter("endDateTime", "2108-08-15T18:29:29.0Z"))),
-                new TypeReference<Integer>() {});
-
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            deserialize(handle(newGetRequest("/rest/v1/appointmentService/load",
+                    new Parameter("uuid", "c36006d4-9fbb-4f20-866b-0ece245625b4"),
+                    new Parameter("startDateTime", "2108-08-14T18:30:00.0Z"), new Parameter("endDateTime", "2108-08-15T18:29:29.0Z"))),
+                    new TypeReference<Integer>() {});
+        });
+        assertThat(exception.getMessage(), containsString("Appointment Service does not exist"));
     }
 
     @Test
@@ -309,9 +308,10 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldThrowErrorWhenAppointmentServiceIsNotAvailable() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment Service does not exist");
-        MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            MockHttpServletResponse asResponse = handle(newGetRequest("/rest/v1/appointmentService", new Parameter("uuid", "b123406d4-9fbb-4f20-866b-0ece245615a1")));
+        });
+        assertThat(exception.getMessage(), containsString("Appointment Service does not exist"));
     }
 
     @Test
@@ -325,14 +325,14 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 .filter(s -> s.getName().equals("Consultation"))
                 .findFirst().orElse(null);
 
-        assertNotNull("Consultation service should exist", service);
-        assertNotNull("Service should have attributes", service.getAttributes());
-        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+        assertNotNull(service, "Consultation service should exist");
+        assertNotNull(service.getAttributes(), "Service should have attributes");
+        assertEquals(2, service.getAttributes().size(), "Should have 2 non-voided attributes");
 
         AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
                 .filter(a -> a.getAttributeType().equals("Consultation Fee"))
                 .findFirst().orElse(null);
-        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertNotNull(feeAttr, "Consultation Fee attribute should exist");
         assertEquals("Consultation Fee", feeAttr.getAttributeType());
         assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a1", feeAttr.getAttributeTypeUuid());
         assertEquals("500", feeAttr.getValue());
@@ -341,7 +341,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         AppointmentServiceAttributeResponse roomAttr = service.getAttributes().stream()
                 .filter(a -> a.getAttributeType().equals("Room Number"))
                 .findFirst().orElse(null);
-        assertNotNull("Room Number attribute should exist", roomAttr);
+        assertNotNull(roomAttr, "Room Number attribute should exist");
         assertEquals("Room Number", roomAttr.getAttributeType());
         assertEquals("d36006e5-9fbb-4f20-866b-0ece245615a2", roomAttr.getAttributeTypeUuid());
         assertEquals("Room 101", roomAttr.getValue());
@@ -359,14 +359,14 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 .filter(s -> s.getName().equals("Consultation"))
                 .findFirst().orElse(null);
 
-        assertNotNull("Consultation service should exist", service);
-        assertNotNull("Service should have attributes", service.getAttributes());
+        assertNotNull(service, "Consultation service should exist");
+        assertNotNull(service.getAttributes(), "Service should have attributes");
 
         boolean hasVoidedAttribute = service.getAttributes().stream()
                 .anyMatch(a -> a.getUuid().equals("e36006e5-9fbb-4f20-866b-0ece245615a3"));
 
-        assertEquals("Voided attribute should not be in response", false, hasVoidedAttribute);
-        assertEquals("Should only have 2 non-voided attributes", 2, service.getAttributes().size());
+        assertEquals(false, hasVoidedAttribute, "Voided attribute should not be in response");
+        assertEquals(2, service.getAttributes().size(), "Should only have 2 non-voided attributes");
     }
 
     @Test
@@ -380,9 +380,9 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 .filter(s -> s.getName().equals("Consultation"))
                 .findFirst().orElse(null);
 
-        assertNotNull("Consultation service should exist", service);
-        assertNotNull("Full response should include attributes (inherited from default)", service.getAttributes());
-        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+        assertNotNull(service, "Consultation service should exist");
+        assertNotNull(service.getAttributes(), "Full response should include attributes (inherited from default)");
+        assertEquals(2, service.getAttributes().size(), "Should have 2 non-voided attributes");
     }
 
     @Test
@@ -394,13 +394,13 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
 
         assertNotNull(service);
         assertEquals("Consultation", service.getName());
-        assertNotNull("Service should have attributes", service.getAttributes());
-        assertEquals("Should have 2 non-voided attributes", 2, service.getAttributes().size());
+        assertNotNull(service.getAttributes(), "Service should have attributes");
+        assertEquals(2, service.getAttributes().size(), "Should have 2 non-voided attributes");
 
         AppointmentServiceAttributeResponse feeAttr = service.getAttributes().stream()
                 .filter(a -> a.getAttributeType().equals("Consultation Fee"))
                 .findFirst().orElse(null);
-        assertNotNull("Consultation Fee attribute should exist", feeAttr);
+        assertNotNull(feeAttr, "Consultation Fee attribute should exist");
         assertEquals("500", feeAttr.getValue());
     }
 
@@ -421,8 +421,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertNotNull(serviceResponse.get("uuid"));
 
         ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
-        assertNotNull("Service should have attributes", attributes);
-        assertEquals("Should have 2 attributes", 2, attributes.size());
+        assertNotNull(attributes, "Service should have attributes");
+        assertEquals(2, attributes.size(), "Should have 2 attributes");
 
         Map<String, LinkedHashMap<String, Object>> attrMap = new HashMap<>();
         for (Object attr : attributes) {
@@ -431,13 +431,13 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         }
 
         LinkedHashMap<String, Object> consultationFeeAttr = attrMap.get("Consultation Fee");
-        assertNotNull("Consultation Fee attribute should exist", consultationFeeAttr);
+        assertNotNull(consultationFeeAttr, "Consultation Fee attribute should exist");
         assertEquals("Consultation Fee", consultationFeeAttr.get("attributeType"));
         assertEquals("600", consultationFeeAttr.get("value"));
         assertNotNull(consultationFeeAttr.get("uuid"));
 
         LinkedHashMap<String, Object> roomNumberAttr = attrMap.get("Room Number");
-        assertNotNull("Room Number attribute should exist", roomNumberAttr);
+        assertNotNull(roomNumberAttr, "Room Number attribute should exist");
         assertEquals("Room Number", roomNumberAttr.get("attributeType"));
         assertEquals("Room 202", roomNumberAttr.get("value"));
         assertNotNull(roomNumberAttr.get("uuid"));
@@ -467,7 +467,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(existingServiceUuid, serviceResponse.get("uuid"));
 
         ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
-        assertNotNull("Service should have attributes", attributes);
+        assertNotNull(attributes, "Service should have attributes");
 
         boolean hasNewAttribute = false;
         for (Object attr : attributes) {
@@ -477,7 +477,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
                 assertEquals("Special instructions here", attrMap.get("value"));
             }
         }
-        assertEquals("Should have new attribute", true, hasNewAttribute);
+        assertEquals(true, hasNewAttribute, "Should have new attribute");
     }
 
     @Test
@@ -500,17 +500,17 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         assertEquals(existingServiceUuid, serviceResponse.get("uuid"));
 
         ArrayList attributes = (ArrayList) serviceResponse.get("attributes");
-        assertNotNull("Service should have attributes", attributes);
+        assertNotNull(attributes, "Service should have attributes");
 
         boolean foundUpdated = false;
         for (Object attr : attributes) {
             LinkedHashMap<String, Object> attrMap = (LinkedHashMap<String, Object>) attr;
             if (existingAttributeUuid.equals(attrMap.get("uuid"))) {
                 foundUpdated = true;
-                assertEquals("Value should be updated to 750", "750", attrMap.get("value"));
+                assertEquals("750", attrMap.get("value"), "Value should be updated to 750");
             }
         }
-        assertEquals("Should find and verify updated attribute", true, foundUpdated);
+        assertEquals(true, foundUpdated, "Should find and verify updated attribute");
     }
 
     @Test
@@ -545,8 +545,8 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         boolean hasVoidedAttribute = afterVoid.getAttributes().stream()
                 .anyMatch(a -> a.getUuid().equals(existingAttributeUuid));
 
-        assertEquals("Voided attribute should not be in response", false, hasVoidedAttribute);
-        assertEquals("Should have one less attribute", initialCount - 1, afterVoid.getAttributes().size());
+        assertEquals(false, hasVoidedAttribute, "Voided attribute should not be in response");
+        assertEquals(initialCount - 1, afterVoid.getAttributes().size(), "Should have one less attribute");
     }
 
     @Test
@@ -580,7 +580,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         SimpleObject serviceResponse2 = SimpleObject.parseJson(response2.getContentAsString());
 
         ArrayList finalAttributes = (ArrayList) serviceResponse2.get("attributes");
-        assertEquals("Should have 2 non-voided attributes", 2, finalAttributes.size());
+        assertEquals(2, finalAttributes.size(), "Should have 2 non-voided attributes");
 
         boolean foundUpdated = false;
         boolean foundNew = false;
@@ -588,89 +588,99 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
             LinkedHashMap<String, Object> attrMap = (LinkedHashMap<String, Object>) attr;
             if (firstAttributeUuid.equals(attrMap.get("uuid"))) {
                 foundUpdated = true;
-                assertEquals("First attribute should be updated", "200", attrMap.get("value"));
+                assertEquals("200", attrMap.get("value"), "First attribute should be updated");
             }
             if ("Room Number".equals(attrMap.get("attributeType"))) {
                 foundNew = true;
-                assertEquals("New attribute should exist", "New Room", attrMap.get("value"));
+                assertEquals("New Room", attrMap.get("value"), "New attribute should exist");
             }
         }
 
-        assertEquals("Should find updated attribute", true, foundUpdated);
-        assertEquals("Should find new attribute", true, foundNew);
+        assertEquals(true, foundUpdated, "Should find updated attribute");
+        assertEquals(true, foundNew, "Should find new attribute");
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_throwErrorForInvalidAttributeTypeUuid() throws Exception {
-        String dataJson = "{\"name\":\"Service With Invalid Attribute\"," +
-                "\"attributes\": [" +
-                "{\"attributeTypeUuid\":\"invalid-uuid-12345\", \"value\":\"test\"}" +
-                "]}";
+        assertThrows(RuntimeException.class, () -> {
+            String dataJson = "{\"name\":\"Service With Invalid Attribute\"," +
+                    "\"attributes\": [" +
+                    "{\"attributeTypeUuid\":\"invalid-uuid-12345\", \"value\":\"test\"}" +
+                    "]}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_throwErrorForNonExistentAttributeUuid() throws Exception {
-        String dataJson = "{\"name\":\"Test Service\"," +
-                "\"uuid\":\"c36006d4-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"attributes\": [" +
-                "{\"uuid\":\"non-existent-attribute-uuid\"," +
-                " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                " \"value\":\"test\"}" +
-                "]}";
+        assertThrows(RuntimeException.class, () -> {
+            String dataJson = "{\"name\":\"Test Service\"," +
+                    "\"uuid\":\"c36006d4-9fbb-4f20-866b-0ece245615a1\"," +
+                    "\"attributes\": [" +
+                    "{\"uuid\":\"non-existent-attribute-uuid\"," +
+                    " \"attributeTypeUuid\":\"d36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                    " \"value\":\"test\"}" +
+                    "]}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_throwErrorWhenMinOccursNotSatisfied() throws Exception {
-        String dataJson = "{\"name\":\"New Service Without Required Attribute\"," +
-                "\"durationMins\":30," +
-                "\"startTime\":\"09:00:00\"," +
-                "\"endTime\":\"17:00:00\"," +
-                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"attributes\": [" +
-                "{\"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
-                " \"value\":\"DEPT-999\"}" +
-                "]}";
+        assertThrows(RuntimeException.class, () -> {
+            String dataJson = "{\"name\":\"New Service Without Required Attribute\"," +
+                    "\"durationMins\":30," +
+                    "\"startTime\":\"09:00:00\"," +
+                    "\"endTime\":\"17:00:00\"," +
+                    "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                    "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                    "\"attributes\": [" +
+                    "{\"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                    " \"value\":\"DEPT-999\"}" +
+                    "]}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_throwErrorWhenMaxOccursExceeded() throws Exception {
-        String dataJson = "{\"name\":\"Service With Too Many Attributes\"," +
-                "\"durationMins\":30," +
-                "\"startTime\":\"09:00:00\"," +
-                "\"endTime\":\"17:00:00\"," +
-                "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
-                "\"attributes\": [" +
-                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
-                " \"value\":\"Category 1\"}," +
-                "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
-                " \"value\":\"Category 2\"}" +
-                "]}";
+        assertThrows(RuntimeException.class, () -> {
+            String dataJson = "{\"name\":\"Service With Too Many Attributes\"," +
+                    "\"durationMins\":30," +
+                    "\"startTime\":\"09:00:00\"," +
+                    "\"endTime\":\"17:00:00\"," +
+                    "\"locationUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                    "\"specialityUuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a1\"," +
+                    "\"attributes\": [" +
+                    "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                    " \"value\":\"Category 1\"}," +
+                    "{\"attributeTypeUuid\":\"e8588d22-555g-5gg1-b59g-c98c72d5c9b9\"," +
+                    " \"value\":\"Category 2\"}" +
+                    "]}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void should_throwErrorWhenTryingToUpdateVoidedAttribute() throws Exception {
-        String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
-        String voidedAttributeUuid = "d4567890-4444-4f20-866b-0ece245615d4";
+        assertThrows(RuntimeException.class, () -> {
+            String existingServiceUuid = "c36006d4-9fbb-4f20-866b-0ece245615a1";
+            String voidedAttributeUuid = "d4567890-4444-4f20-866b-0ece245615d4";
 
-        String dataJson = "{\"name\":\"Consultation\"," +
-                "\"uuid\":\"" + existingServiceUuid + "\"," +
-                "\"attributes\": [" +
-                "{\"uuid\":\"" + voidedAttributeUuid + "\"," +
-                " \"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
-                " \"value\":\"Updated Value\"}" +
-                "]}";
+            String dataJson = "{\"name\":\"Consultation\"," +
+                    "\"uuid\":\"" + existingServiceUuid + "\"," +
+                    "\"attributes\": [" +
+                    "{\"uuid\":\"" + voidedAttributeUuid + "\"," +
+                    " \"attributeTypeUuid\":\"d7477c21-444f-4ff0-a48f-b87b61c4b8a8\"," +
+                    " \"value\":\"Updated Value\"}" +
+                    "]}";
 
-        handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+            handle(newPostRequest("/rest/v1/appointmentService", dataJson));
+        });
     }
 
     @Test
@@ -751,7 +761,7 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
             }
         }
 
-        assertEquals("Should include voided Treatment service", true, hasVoidedService);
+        assertEquals(true, hasVoidedService, "Should include voided Treatment service");
     }
 
     @Test
@@ -821,12 +831,11 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         for (AppointmentServiceFullResponse service : results) {
             if ("Tele Ortho".equals(service.getName())) {
                 hasTeleOrtho = true;
-                assertEquals("Tele Ortho should have empty or null location", true,
-                    service.getLocation() == null || service.getLocation().isEmpty());
+                assertEquals(true, service.getLocation() == null || service.getLocation().isEmpty(), "Tele Ortho should have empty or null location");
             }
         }
 
-        assertEquals("Should include Tele Ortho service without location", true, hasTeleOrtho);
+        assertEquals(true, hasTeleOrtho, "Should include Tele Ortho service without location");
     }
 
     @Test
@@ -841,11 +850,10 @@ public class AppointmentServiceControllerIT extends BaseIntegrationTest {
         for (AppointmentServiceFullResponse service : results) {
             if ("General Room1".equals(service.getName())) {
                 hasGeneralService = true;
-                assertEquals("General Room1 should have empty or null speciality", true,
-                    service.getSpeciality() == null || service.getSpeciality().isEmpty());
+                assertEquals(true, service.getSpeciality() == null || service.getSpeciality().isEmpty(), "General Room1 should have empty or null speciality");
             }
         }
 
-        assertEquals("Should include General Room1 service without speciality", true, hasGeneralService);
+        assertEquals(true, hasGeneralService, "Should include General Room1 service without speciality");
     }
 }

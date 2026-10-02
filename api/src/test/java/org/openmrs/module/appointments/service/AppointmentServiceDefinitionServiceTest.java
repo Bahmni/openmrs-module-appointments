@@ -1,21 +1,20 @@
 package org.openmrs.module.appointments.service;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
-public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContextSensitiveTest {
+public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSensitiveTest {
     private String adminUser;
     private String manageUser;
     private String readOnlyUser;
@@ -25,7 +24,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         adminUser = "super-user";
         manageUser = "manage-user";
@@ -33,6 +32,14 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         noPrivilegeUser = "no-privilege-user";
         password = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
+        // the role privilege cache loads roles on a background thread with its own session, which cannot see this
+        // test's uncommitted rows, so commit them (tearDown deletes them again)
+        getConnection().commit();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        deleteAllData();
     }
 
     @Test
@@ -43,12 +50,14 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         assertNotNull(appointmentServiceDefinitionService.save(appointmentServiceDefinition));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToSaveServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
-        Context.authenticate(manageUser, password);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setName("service");
-        assertNotNull(appointmentServiceDefinitionService.save(appointmentServiceDefinition));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(manageUser, password);
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setName("service");
+            assertNotNull(appointmentServiceDefinitionService.save(appointmentServiceDefinition));
+        });
     }
 
     @Test
@@ -57,10 +66,12 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllAppointmentServicesIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
+        });
     }
 
     @Test
@@ -69,26 +80,31 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAppointmentServiceByUuidIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
+        });
     }
 
     @Test
     public void shouldBeAbleToDeleteServiceIfUserHasManageServicesPrivilege() throws Exception {
+        executeDataSet("appointmentServicesTestData.xml");
         Context.authenticate(adminUser, password);
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setId(1);
         assertNotNull(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, null));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToDeleteServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
-        Context.authenticate(readOnlyUser, password);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, null));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(readOnlyUser, password);
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setId(1);
+            assertNotNull(appointmentServiceDefinitionService.voidAppointmentService(appointmentServiceDefinition, null));
+        });
     }
 
     @Test
@@ -98,10 +114,12 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
 
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAppointmentServiceTypeByUuidIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
+        });
     }
 
     @Test
@@ -112,11 +130,13 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         assertNotNull(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, null, null));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotCalculateCurrentLoadIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setId(1);
-        assertNotNull(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, null, null));
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setId(1);
+            assertNotNull(appointmentServiceDefinitionService.calculateCurrentLoad(appointmentServiceDefinition, null, null));
+        });
     }
 }

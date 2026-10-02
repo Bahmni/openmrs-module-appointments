@@ -3,7 +3,7 @@ package org.openmrs.module.appointments.service.impl;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 
-import javax.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotNull;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 

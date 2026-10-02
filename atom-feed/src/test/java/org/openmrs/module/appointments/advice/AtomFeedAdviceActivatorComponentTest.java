@@ -1,25 +1,35 @@
 package org.openmrs.module.appointments.advice;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.openmrs.api.context.ServiceContext;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.MockedStatic;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore({"javax.*", "org.apache.*", "org.slf4j.*"})
-@PrepareForTest({ServiceContext.class})
-@RunWith(PowerMockRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AtomFeedAdviceActivatorComponentTest {
+
+    private MockedStatic<ServiceContext> serviceContextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (serviceContextMockedStatic != null) {
+            serviceContextMockedStatic.close();
+        }
+    }
 
     @Mock
     ServiceContext serviceContext;
@@ -35,9 +45,9 @@ public class AtomFeedAdviceActivatorComponentTest {
 
     AtomFeedAdviceActivatorComponent component;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        mockStatic(ServiceContext.class);
+        serviceContextMockedStatic = Mockito.mockStatic(ServiceContext.class);
         when(ServiceContext.getInstance()).thenReturn(serviceContext);
         component = new AtomFeedAdviceActivatorComponent(appointmentServiceDefinitionAdvice, appointmentAdvice, recurringAppointmentsAdvice);
     }

@@ -1,8 +1,8 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Test;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceAttributeTypeResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,17 +10,17 @@ import org.springframework.mock.web.MockHttpServletResponse;
 
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppointmentServiceAttributeTypeControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentServiceAttributeTypeController controller;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentServiceAttributeTestData.xml");
     }
@@ -34,12 +34,12 @@ public class AppointmentServiceAttributeTypeControllerIT extends BaseIntegration
                 new TypeReference<List<AppointmentServiceAttributeTypeResponse>>() {});
 
         assertNotNull(attributeTypes);
-        assertEquals("Should return 2 non-retired attribute types", 2, attributeTypes.size());
+        assertEquals(2, attributeTypes.size(), "Should return 2 non-retired attribute types");
 
         for (AppointmentServiceAttributeTypeResponse attr : attributeTypes) {
-            assertFalse("All attribute types should be non-retired", attr.getRetired());
-            assertNotNull("UUID should not be null", attr.getUuid());
-            assertNotNull("Name should not be null", attr.getName());
+            assertFalse(attr.getRetired(), "All attribute types should be non-retired");
+            assertNotNull(attr.getUuid(), "UUID should not be null");
+            assertNotNull(attr.getName(), "Name should not be null");
         }
     }
 
@@ -53,10 +53,10 @@ public class AppointmentServiceAttributeTypeControllerIT extends BaseIntegration
                 new TypeReference<List<AppointmentServiceAttributeTypeResponse>>() {});
 
         assertNotNull(attributeTypes);
-        assertEquals("Should return all 3 attribute types including retired", 3, attributeTypes.size());
+        assertEquals(3, attributeTypes.size(), "Should return all 3 attribute types including retired");
 
         boolean hasRetired = attributeTypes.stream().anyMatch(AppointmentServiceAttributeTypeResponse::getRetired);
-        assertTrue("Should include at least one retired attribute type", hasRetired);
+        assertTrue(hasRetired, "Should include at least one retired attribute type");
     }
 
     @Test
@@ -97,12 +97,12 @@ public class AppointmentServiceAttributeTypeControllerIT extends BaseIntegration
                 response,
                 new TypeReference<AppointmentServiceAttributeTypeResponse>() {});
 
-        assertNotNull("UUID should be present", attributeType.getUuid());
-        assertNotNull("Name should be present", attributeType.getName());
-        assertNotNull("Description should be present", attributeType.getDescription());
-        assertNotNull("Datatype should be present", attributeType.getDatatype());
-        assertNotNull("MinOccurs should be present", attributeType.getMinOccurs());
-        assertNotNull("Retired status should be present", attributeType.getRetired());
+        assertNotNull(attributeType.getUuid(), "UUID should be present");
+        assertNotNull(attributeType.getName(), "Name should be present");
+        assertNotNull(attributeType.getDescription(), "Description should be present");
+        assertNotNull(attributeType.getDatatype(), "Datatype should be present");
+        assertNotNull(attributeType.getMinOccurs(), "MinOccurs should be present");
+        assertNotNull(attributeType.getRetired(), "Retired status should be present");
     }
 
     @Test
@@ -114,14 +114,13 @@ public class AppointmentServiceAttributeTypeControllerIT extends BaseIntegration
                 new TypeReference<List<AppointmentServiceAttributeTypeResponse>>() {});
 
         assertNotNull(attributeTypes);
-        assertFalse("Should not return empty list", attributeTypes.isEmpty());
+        assertFalse(attributeTypes.isEmpty(), "Should not return empty list");
 
         AppointmentServiceAttributeTypeResponse firstType = attributeTypes.get(0);
 
         assertNotNull(firstType.getUuid());
         assertNotNull(firstType.getName());
         assertNotNull(firstType.getDatatype());
-        assertTrue("Datatype should be fully qualified classname",
-                firstType.getDatatype().contains("org.openmrs.customdatatype"));
+        assertTrue(firstType.getDatatype().contains("org.openmrs.customdatatype"), "Datatype should be fully qualified classname");
     }
 }

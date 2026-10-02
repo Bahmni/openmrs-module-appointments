@@ -1,11 +1,11 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.util.List;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.SpecialityDao;
 import org.openmrs.module.appointments.model.Speciality;
@@ -16,7 +16,7 @@ public class SpecialityDaoImplIT  extends BaseIntegrationTest {
     @Autowired
     SpecialityDao specialityDao;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("specialityTestData.xml");
     }

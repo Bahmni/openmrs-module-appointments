@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -18,24 +17,29 @@ import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeSe
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.*;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
 public class AppointmentServiceDefinitionMapperTest {
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
+
     @Mock
     private LocationService locationService;
 
@@ -56,12 +60,12 @@ public class AppointmentServiceDefinitionMapperTest {
     private Speciality speciality;
     private User authenticatedUser;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        MockitoAnnotations.openMocks(this);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         authenticatedUser = new User(8);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        Mockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
         when(appointmentServiceAttributeTypeService.getAllAttributeTypes(false)).thenReturn(Collections.emptyList());
     }
 

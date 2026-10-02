@@ -5,14 +5,11 @@
 <hibernate-mapping package="org.openmrs.module.appointments.model">
     <class name="ServiceWeeklyAvailability" table="appointment_service_weekly_availability" batch-size="50">
         <id name="serviceWeeklyAvailabilityId" type="java.lang.Integer" column="service_weekly_availability_id">
-            <generator class="native">
-                <param name="sequence">service_weekly_availability_seq</param>
-            </generator>
+            <generator class="identity"/>
         </id>
         <property name="dayOfWeek" column="day_of_week" not-null="true" length="45">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">java.time.DayOfWeek</param>
-                <param name="type">12</param>
             </type>
         </property>
         <property name="startTime" type="java.sql.Time" column="start_time"/>

@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.openmrs.User;
 import org.openmrs.api.context.Context;
@@ -12,32 +9,36 @@ import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
 public class AppointmentServiceDefinitionServiceImplTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     @Captor
     private ArgumentCaptor<AppointmentServiceDefinition> captor;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private AppointmentServiceDao appointmentServiceDao;
 
@@ -49,12 +50,12 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
     private User authenticatedUser;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        MockitoAnnotations.openMocks(this);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         authenticatedUser = new User(8);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        Mockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
     }
 
     @Test
@@ -214,13 +215,14 @@ public class AppointmentServiceDefinitionServiceImplTest {
         existingAppointmentServiceDefinition.setServiceTypes(serviceTypes);
         when(appointmentServiceDao.getNonVoidedAppointmentServiceByName(serviceName)).thenReturn(existingAppointmentServiceDefinition);
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("The service 'serviceName' is already present");
-        AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
-        appointmentServiceDefinition.setName(serviceName);
-        appointmentServiceDefinition.setUuid("otherUuid");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
+            appointmentServiceDefinition.setName(serviceName);
+            appointmentServiceDefinition.setUuid("otherUuid");
     
-        appointmentServiceService.save(appointmentServiceDefinition);
+            appointmentServiceService.save(appointmentServiceDefinition);
+        });
+        assertThat(exception.getMessage(), containsString("The service 'serviceName' is already present"));
     }
 
     @Test
@@ -236,13 +238,13 @@ public class AppointmentServiceDefinitionServiceImplTest {
         appointments.add(appointment);
         when(appointmentsService.getAllFutureAppointmentsForService(appointmentServiceDefinition)).thenReturn(appointments);
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
 
-        appointmentServiceService.voidAppointmentService(appointmentServiceDefinition, voidReason);
-
-        Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentServiceDefinition);
-        Mockito.verify(appointmentServiceDao, times(0)).save(captor.capture());
+            Mockito.verify(appointmentsService, times(1)).getAllFutureAppointmentsForService(appointmentServiceDefinition);
+            Mockito.verify(appointmentServiceDao, times(0)).save(captor.capture());
+        });
+        assertThat(exception.getMessage(), containsString("Please cancel all future appointments for this service to proceed. After deleting this service, you will not be able to see any appointments for it"));
     }
 
     @Test

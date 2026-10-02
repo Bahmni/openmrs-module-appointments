@@ -1,21 +1,20 @@
 package org.openmrs.module.appointments.service;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Speciality;
-import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
-@RunWith(SpringJUnit4ClassRunner.class)
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
-public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
+public class SpecialityServiceTest extends BaseModuleContextSensitiveTest {
     private String adminUser;
     private String manageUser;
     private String readOnlyUser;
@@ -25,7 +24,7 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
     @Autowired
     SpecialityService specialityService;
 
-    @Before
+    @BeforeEach
     public void init() throws Exception {
         adminUser = "super-user";
         manageUser = "manage-user";
@@ -33,6 +32,14 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         noPrivilegeUser = "no-privilege-user";
         password = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
+        // the role privilege cache loads roles on a background thread with its own session, which cannot see this
+        // test's uncommitted rows, so commit them (tearDown deletes them again)
+        getConnection().commit();
+    }
+
+    @AfterEach
+    public void tearDown() {
+        deleteAllData();
     }
 
     @Test
@@ -41,10 +48,12 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         assertEquals(null, specialityService.getSpecialityByUuid("uuid"));
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetSpecialityByUuidIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        specialityService.getSpecialityByUuid("uuid");
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            specialityService.getSpecialityByUuid("uuid");
+        });
     }
 
     @Test
@@ -53,10 +62,12 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(specialityService.getAllSpecialities());
     }
 
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotGetAllSpecialitiesIfUserHasNoPrivilege() throws Exception {
-        Context.authenticate(noPrivilegeUser, password);
-        specialityService.getAllSpecialities();
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(noPrivilegeUser, password);
+            specialityService.getAllSpecialities();
+        });
     }
     
     @Test
@@ -67,11 +78,13 @@ public class SpecialityServiceTest extends BaseModuleWebContextSensitiveTest {
         assertNotNull(specialityService.save(speciality));
     }
     
-    @Test(expected = APIAuthenticationException.class)
+    @Test
     public void shouldNotBeAbleToSaveSpecialityIfUserDoesNotHaveManageSpecialitiesPrivilege() throws Exception {
-        Context.authenticate(manageUser, password);
-        Speciality speciality = new Speciality();
-        speciality.setName("speciality");
-        specialityService.save(speciality);
+        assertThrows(APIAuthenticationException.class, () -> {
+            Context.authenticate(manageUser, password);
+            Speciality speciality = new Speciality();
+            speciality.setName("speciality");
+            specialityService.save(speciality);
+        });
     }
 }

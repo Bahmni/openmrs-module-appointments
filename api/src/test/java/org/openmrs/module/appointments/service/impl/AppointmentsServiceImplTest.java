@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.openmrs.*;
 import org.openmrs.api.APIAuthenticationException;
@@ -33,9 +30,6 @@ import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.context.ApplicationEventPublisher;
 
 import java.io.IOException;
@@ -48,12 +42,12 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static java.util.Arrays.asList;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -65,16 +59,24 @@ import static org.openmrs.module.appointments.constants.PrivilegeConstants.RESET
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.PATIENT_DOUBLE_BOOKING;
 import static org.openmrs.module.appointments.model.AppointmentConflictType.SERVICE_UNAVAILABLE;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class AppointmentsServiceImplTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private MockedStatic<Context> contextMockedStatic;
 
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
     @Mock
     private AppointmentDao appointmentDao;
 
@@ -139,10 +141,10 @@ public class AppointmentsServiceImplTest {
 
     private String exceptionCode = "error.privilegesRequired";
 
-    @Before
+    @BeforeEach
     public void init() throws NoSuchFieldException, IllegalAccessException {
-        MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+        MockitoAnnotations.openMocks(this);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         appointmentValidators.add(appointmentValidator);
         statusChangeValidators.add(statusChangeValidator);
         appointmentConflicts.add(appointmentServiceUnavailabilityConflict);
@@ -331,11 +333,12 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionIfValidationFailsOnAppointmentSave() {
         String errorMessage = "Appointment cannot be created without Patient";
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
-                .validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
-        appointmentsService.validateAndSave(new Appointment());
-        verify(appointmentDao, never()).save(any(Appointment.class));
+                .validate(any(Appointment.class), anyList());
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentsService.validateAndSave(new Appointment());
+            verify(appointmentDao, never()).save(any(Appointment.class));
+        });
+        assertThat(exception.getMessage(), containsString(errorMessage));
     }
 
     @Test
@@ -346,7 +349,7 @@ public class AppointmentsServiceImplTest {
         verify(appointmentServiceHelper, times(1))
                 .validateStatusChangeAndGetErrors(any(Appointment.class),
                         any(AppointmentStatus.class),
-                        anyListOf(AppointmentStatusChangeValidator.class));
+                        anyList());
     }
 
     @Test
@@ -355,13 +358,14 @@ public class AppointmentsServiceImplTest {
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
                 .validateStatusChangeAndGetErrors(any(Appointment.class),
                         any(AppointmentStatus.class),
-                        anyListOf(AppointmentStatusChangeValidator.class));
+                        anyList());
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Completed);
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
-        appointmentsService.changeStatus(appointment, "Missed", null);
-        verify(appointmentAuditDao, times(1)).save(any(AppointmentAudit.class));
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentsService.changeStatus(appointment, "Missed", null);
+            verify(appointmentAuditDao, times(1)).save(any(AppointmentAudit.class));
+        });
+        assertThat(exception.getMessage(), containsString(errorMessage));
     }
 
     @Test
@@ -472,32 +476,36 @@ public class AppointmentsServiceImplTest {
         Appointment appointment = new Appointment();
         appointment.setStatus(AppointmentStatus.Scheduled);
         when(appointmentAuditDao.getPriorStatusChangeEvent(appointment)).thenReturn(null);
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("No status change actions to undo");
-        appointmentsService.undoStatusChange(appointment);
-        verify(appointmentAuditDao, times(0)).getPriorStatusChangeEvent(appointment);
-        verify(appointmentDao, times(0)).save(appointment);
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentsService.undoStatusChange(appointment);
+            verify(appointmentAuditDao, times(0)).getPriorStatusChangeEvent(appointment);
+            verify(appointmentDao, times(0)).save(appointment);
+        });
+        assertThat(exception.getMessage(), containsString("No status change actions to undo"));
     }
 
     @Test
     public void shouldThrowExceptionOnAppointmentSaveIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-        expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.validateAndSave(appointment);
+        assertThrows(APIAuthenticationException.class, () -> {
+            appointmentsService.validateAndSave(appointment);
+        });
     }
 
     @Test
     public void shouldThrowExceptionOnAppointmentStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-        expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.changeStatus(appointment, AppointmentStatus.Scheduled.name(), null);
+        assertThrows(APIAuthenticationException.class, () -> {
+            appointmentsService.changeStatus(appointment, AppointmentStatus.Scheduled.name(), null);
+        });
     }
 
     @Test
     public void shouldThrowExceptionOnAppointmentUndoStatusChangeIfUserHasOnlyOwnPrivilegeAndProviderAndUserIsNotTheSamePerson() {
         setupForOwnPrivilegeAccess(exceptionCode);
-        expectedException.expect(APIAuthenticationException.class);
-        appointmentsService.undoStatusChange(appointment);
+        assertThrows(APIAuthenticationException.class, () -> {
+            appointmentsService.undoStatusChange(appointment);
+        });
     }
 
     private void setupForOwnPrivilegeAccess(String exceptionCode) {
@@ -561,9 +569,10 @@ public class AppointmentsServiceImplTest {
         when(messageSourceService.getMessage(any(), any(), any())).thenReturn(exceptionMessage);
 
         try {
-            expectedException.expect(APIAuthenticationException.class);
-            expectedException.expectMessage(exceptionMessage);
-            appointmentsService.changeStatus(appointment, "Scheduled", null);
+            APIAuthenticationException exception = assertThrows(APIAuthenticationException.class, () -> {
+                appointmentsService.changeStatus(appointment, "Scheduled", null);
+            });
+            assertThat(exception.getMessage(), containsString(exceptionMessage));
         } finally {
             verify(messageSourceService).getMessage(exceptionCode, new Object[]{RESET_APPOINTMENT_STATUS}, null);
             Context.hasPrivilege(RESET_APPOINTMENT_STATUS);
@@ -592,15 +601,15 @@ public class AppointmentsServiceImplTest {
     public void shouldThrowExceptionWhenThereIsErrorWhileValidatingBeforeUpdate() throws IOException {
         appointment.setService(null);
         String errorMessage = "Appointment cannot be updated without Service";
-        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
+        doThrow(new APIException(errorMessage)).when(appointmentServiceHelper).validate(any(Appointment.class), anyList());
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentsService.validateAndSave(appointment);
 
-        appointmentsService.validateAndSave(appointment);
-
-        verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
-        verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
-        verify(appointmentDao, never()).save(any(Appointment.class));
+            verify(appointmentServiceHelper, never()).getAppointmentAsJsonString(any(Appointment.class));
+            verify(appointmentServiceHelper, never()).getAppointmentAuditEvent(any(Appointment.class), any(String.class));
+            verify(appointmentDao, never()).save(any(Appointment.class));
+        });
+        assertThat(exception.getMessage(), containsString(errorMessage));
     }
 
     @Test
@@ -737,57 +746,57 @@ public class AppointmentsServiceImplTest {
 
     @Test
     public void shouldThrowErrorWhenProviderIsNotPartOfAppointment() {
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Provider is not part of Appointment");
+        APIException exception = assertThrows(APIException.class, () -> {
+            Provider provider1 = new Provider();
+            provider1.setUuid("provider-uuid1");
 
-        Provider provider1 = new Provider();
-        provider1.setUuid("provider-uuid1");
+            Provider provider2 = new Provider();
+            provider1.setUuid("provider-uuid2");
 
-        Provider provider2 = new Provider();
-        provider1.setUuid("provider-uuid2");
+            Appointment appointment = new Appointment();
+            AppointmentProvider existingProvider = new AppointmentProvider();
+            existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+            existingProvider.setProvider(provider1);
+            existingProvider.setAppointment(appointment);
+            appointment.setProviders(new HashSet<>(asList(existingProvider)));
 
-        Appointment appointment = new Appointment();
-        AppointmentProvider existingProvider = new AppointmentProvider();
-        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
-        existingProvider.setProvider(provider1);
-        existingProvider.setAppointment(appointment);
-        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+            AppointmentProvider providerRequest = new AppointmentProvider();
+            providerRequest.setProvider(provider2);
+            providerRequest.setAppointment(appointment);
+            providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
 
-        AppointmentProvider providerRequest = new AppointmentProvider();
-        providerRequest.setProvider(provider2);
-        providerRequest.setAppointment(appointment);
-        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
-
-        appointmentsService.updateAppointmentProviderResponse(providerRequest);
+            appointmentsService.updateAppointmentProviderResponse(providerRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Provider is not part of Appointment"));
     }
 
     @Test
     public void shouldThrowErrorWhenTryingToChangeProviderResponseForOtherProvider() {
-        expectedException.expect(APIAuthenticationException.class);
-        expectedException.expectMessage("Cannot change Provider Response for other providers");
+        APIAuthenticationException exception = assertThrows(APIAuthenticationException.class, () -> {
+            when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
+            when(user.getPerson()).thenReturn(new Person());
+            when(Context.getAuthenticatedUser()).thenReturn(user);
 
-        when(Context.hasPrivilege(MANAGE_OWN_APPOINTMENTS)).thenReturn(true);
-        when(user.getPerson()).thenReturn(new Person());
-        when(Context.getAuthenticatedUser()).thenReturn(user);
+            Provider provider = new Provider();
+            provider.setPerson(new Person());
+            provider.setUuid("provider-uuid");
 
-        Provider provider = new Provider();
-        provider.setPerson(new Person());
-        provider.setUuid("provider-uuid");
+            Appointment appointment = new Appointment();
 
-        Appointment appointment = new Appointment();
+            AppointmentProvider existingProvider = new AppointmentProvider();
+            existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
+            existingProvider.setProvider(provider);
+            existingProvider.setAppointment(appointment);
+            appointment.setProviders(new HashSet<>(asList(existingProvider)));
 
-        AppointmentProvider existingProvider = new AppointmentProvider();
-        existingProvider.setResponse(AppointmentProviderResponse.AWAITING);
-        existingProvider.setProvider(provider);
-        existingProvider.setAppointment(appointment);
-        appointment.setProviders(new HashSet<>(asList(existingProvider)));
+            AppointmentProvider providerRequest = new AppointmentProvider();
+            providerRequest.setProvider(provider);
+            providerRequest.setAppointment(appointment);
+            providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
 
-        AppointmentProvider providerRequest = new AppointmentProvider();
-        providerRequest.setProvider(provider);
-        providerRequest.setAppointment(appointment);
-        providerRequest.setResponse(AppointmentProviderResponse.ACCEPTED);
-
-        appointmentsService.updateAppointmentProviderResponse(providerRequest);
+            appointmentsService.updateAppointmentProviderResponse(providerRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Cannot change Provider Response for other providers"));
     }
 
     @Test
@@ -821,10 +830,10 @@ public class AppointmentsServiceImplTest {
         List<String> appointmentUuids = asList("uuid1", "uuid2");
         when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(Collections.emptyList());
         
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("No valid appointments found for the provided UUIDs");
-
-        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+        });
+        assertThat(exception.getMessage(), containsString("No valid appointments found for the provided UUIDs"));
     }
 
     @Test
@@ -836,10 +845,10 @@ public class AppointmentsServiceImplTest {
         
         when(appointmentDao.getAppointmentsByUuids(appointmentUuids)).thenReturn(appointments);
         
-        expectedException.expect(IllegalArgumentException.class);
-        expectedException.expectMessage("Appointments not found for some UUIDs");
-        
-        appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> {
+            appointmentsService.changeStatusForAppointments(appointmentUuids, AppointmentStatus.Cancelled);
+        });
+        assertThat(exception.getMessage(), containsString("Appointments not found for some UUIDs"));
     }
 
     @Test
@@ -872,14 +881,14 @@ public class AppointmentsServiceImplTest {
         
         doThrow(new APIException(errorMessage))
             .when(appointmentServiceHelper)
-            .validate(any(Appointment.class), anyListOf(AppointmentValidator.class));
+            .validate(any(Appointment.class), anyList());
         
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentsService.validateAndSave(mapper);
         
-        appointmentsService.validateAndSave(mapper);
-        
-        verify(appointmentDao, never()).save(any(Appointment.class));
+            verify(appointmentDao, never()).save(any(Appointment.class));
+        });
+        assertThat(exception.getMessage(), containsString(errorMessage));
     }
 
     @Test

@@ -10,8 +10,8 @@ package org.openmrs.module.appointments.search.validation;
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
 import org.bahmni.search.model.SearchCondition;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.search.dto.AppointmentSearchRequest;
 
 import java.util.ArrayList;
@@ -22,15 +22,15 @@ import java.util.List;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class CriteriaValidatorTest {
 
     private CriteriaValidator criteriaValidator;
     private static final List<String> SUPPORTED_COMPARATORS_UNDER_TEST = Arrays.asList("eq", "gt", "lt", "ge", "le");
 
-    @Before
+    @BeforeEach
     public void setUp() {
         criteriaValidator = new CriteriaValidator();
     }

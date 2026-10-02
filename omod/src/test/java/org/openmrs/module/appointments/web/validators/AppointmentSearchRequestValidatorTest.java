@@ -1,22 +1,18 @@
 package org.openmrs.module.appointments.web.validators;
 
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 import java.util.Date;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AppointmentSearchRequestValidatorTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private AppointmentSearchValidator appointmentSearchValidator = new AppointmentSearchValidator();
     private Errors errors;
     private AppointmentSearchRequest appointmentSearchRequest;
@@ -28,7 +24,7 @@ public class AppointmentSearchRequestValidatorTest {
         return appointmentSearchRequest;
     }
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         appointmentSearchRequest = getAppointmentSearchRequest();
         errors = new BeanPropertyBindingResult(appointmentSearchRequest, "appointmentSearchRequest");

@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.api.APIException;

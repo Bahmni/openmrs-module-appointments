@@ -1,10 +1,9 @@
 package org.openmrs.module.appointments.web;
 
-import junit.framework.Assert;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Ignore;
-import org.openmrs.web.test.BaseModuleWebContextSensitiveTest;
+import org.junit.jupiter.api.Assertions;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.openmrs.web.test.jupiter.BaseModuleWebContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -13,11 +12,10 @@ import org.springframework.web.servlet.HandlerExecutionChain;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
-@Ignore
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
 public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
 
@@ -140,7 +138,7 @@ public class BaseWebControllerTest extends BaseModuleWebContextSensitiveTest {
                 break;
             }
         }
-        Assert.assertNotNull("The request URI does not exist", handlerExecutionChain);
+        Assertions.assertNotNull(handlerExecutionChain, "The request URI does not exist");
 
         handlerAdapter.handle(request, response, handlerExecutionChain.getHandler());
 

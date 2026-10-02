@@ -1,13 +1,9 @@
 package org.openmrs.module.appointments.helper;
 
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.*;
@@ -22,20 +18,22 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AppointmentServiceHelperTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @InjectMocks
     private AppointmentServiceHelper appointmentServiceHelper;
 
@@ -59,7 +57,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(appointment, appointmentValidators);
 
         verify(appointmentValidator, times(1)).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Test
@@ -75,10 +73,10 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(appointment, null);
 
         verify(appointmentValidator, never()).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 
-    @Ignore("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
+    @Disabled("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
     @Test
     public void shouldAssignAppointmentNumberIfNumberIsNull() {
         Appointment appointment = new Appointment();
@@ -88,7 +86,7 @@ public class AppointmentServiceHelperTest {
         assertEquals("0000", appointment.getAppointmentNumber());
     }
 
-    @Ignore("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
+    @Disabled("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
     @Test
     public void shouldNotAssignAppointmentNumberIfNumberIsNotNull() {
         Appointment appointment = new Appointment();
@@ -144,7 +142,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, AppointmentStatus.CheckedIn, appointmentValidators);
         verify(appointmentStatusChangeValidator, times(1)).validate(any(Appointment.class),
                 any(AppointmentStatus.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Test
@@ -159,15 +157,15 @@ public class AppointmentServiceHelperTest {
             List<String> errors = (List) args[2];
             errors.add(errorMessage);
             return null;
-        }).when(appointmentStatusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
+        }).when(appointmentStatusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyList());
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(errorMessage);
-
-        appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, AppointmentStatus.CheckedIn, appointmentValidators);
-        verify(appointmentStatusChangeValidator, times(1)).validate(any(Appointment.class),
-                any(AppointmentStatus.class),
-                anyListOf(String.class));
+        APIException exception = assertThrows(APIException.class, () -> {
+            appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, AppointmentStatus.CheckedIn, appointmentValidators);
+            verify(appointmentStatusChangeValidator, times(1)).validate(any(Appointment.class),
+                    any(AppointmentStatus.class),
+                    anyList());
+        });
+        assertThat(exception.getMessage(), containsString(errorMessage));
     }
 
     @Test
@@ -176,6 +174,6 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(null, appointmentValidators);
 
         verify(appointmentValidator, never()).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 }

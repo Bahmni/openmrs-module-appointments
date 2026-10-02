@@ -2,7 +2,7 @@ package org.openmrs.module.appointments.web.service.impl;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.util.RecurringPatternBuilder;
@@ -18,7 +18,7 @@ import static java.util.Calendar.FEBRUARY;
 import static java.util.Calendar.MARCH;
 import static java.util.Calendar.MONDAY;
 import static java.util.Calendar.SATURDAY;
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getAppointmentDates;
 import static org.openmrs.module.appointments.web.service.impl.WeeklyRecurringAppointmentDate.getEndDate;

@@ -1,9 +1,7 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.Location;
@@ -25,11 +23,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -37,6 +35,10 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class AppointmentUnavailabilityMapperTest {
 
@@ -51,15 +53,11 @@ public class AppointmentUnavailabilityMapperTest {
 
     @InjectMocks
     private AppointmentUnavailabilityMapper mapper;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     private Location testLocation;
     private Provider testProvider;
     private AppointmentServiceDefinition testService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         initMocks(this);
 
@@ -132,9 +130,10 @@ public class AppointmentUnavailabilityMapperTest {
         when(locationService.getLocationByUuid("location-uuid")).thenReturn(null);
 
         // Execute & Verify
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Invalid location or location not found");
-        mapper.fromRequest(request);
+        APIException exception = assertThrows(APIException.class, () -> {
+            mapper.fromRequest(request);
+        });
+        assertThat(exception.getMessage(), containsString("Invalid location or location not found"));
     }
 
     @Test
@@ -147,9 +146,10 @@ public class AppointmentUnavailabilityMapperTest {
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("invalid-service-uuid")).thenReturn(null);
 
         // Execute & Verify
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Invalid service or service not found");
-        mapper.fromRequest(request);
+        APIException exception = assertThrows(APIException.class, () -> {
+            mapper.fromRequest(request);
+        });
+        assertThat(exception.getMessage(), containsString("Invalid service or service not found"));
     }
 
     @Test
@@ -211,9 +211,10 @@ public class AppointmentUnavailabilityMapperTest {
         when(locationService.getLocationByUuid("location-uuid")).thenReturn(testLocation);
 
         // Execute & Verify
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Invalid date or time format");
-        mapper.fromRequest(request);
+        APIException exception = assertThrows(APIException.class, () -> {
+            mapper.fromRequest(request);
+        });
+        assertThat(exception.getMessage(), containsString("Invalid date or time format"));
     }
 
     @Test
@@ -225,9 +226,10 @@ public class AppointmentUnavailabilityMapperTest {
         when(locationService.getLocationByUuid("location-uuid")).thenReturn(testLocation);
 
         // Execute & Verify
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Invalid date or time format");
-        mapper.fromRequest(request);
+        APIException exception = assertThrows(APIException.class, () -> {
+            mapper.fromRequest(request);
+        });
+        assertThat(exception.getMessage(), containsString("Invalid date or time format"));
     }
 
 

@@ -997,4 +997,19 @@
             <column name="end_date"/>
         </createIndex>
     </changeSet>
+    <changeSet id="appointments-2026-10-02-scheduler-task-creator" author="openmrs">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="scheduler_task_config" columnName="creator"/>
+        </preConditions>
+        <comment>
+            Platform 3.0 maps TaskDefinition.creator to the new scheduler_task_config.creator column instead of created_by,
+            so copy the creator of this module's scheduled tasks into it
+        </comment>
+        <sql>
+            UPDATE scheduler_task_config SET creator = created_by WHERE creator IS NULL AND created_by IS NOT NULL
+            AND schedulable_class IN ('org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsMissedTask',
+            'org.openmrs.module.appointments.scheduler.tasks.MarkAppointmentAsCompleteTask',
+            'org.openmrs.module.appointments.scheduler.tasks.ReminderForAppointment')
+        </sql>
+    </changeSet>
 </databaseChangeLog>

@@ -2,8 +2,8 @@ package org.openmrs.module.appointments.web.controller.advice;
 
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.ContextAuthenticationException;
 import org.openmrs.module.appointments.search.dto.AppointmentSearchResponse;
@@ -13,8 +13,8 @@ import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.context.request.WebRequest;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class AppointmentSearchExceptionHandlerTest {
 
@@ -24,7 +24,7 @@ public class AppointmentSearchExceptionHandlerTest {
 
     private WebRequest webRequest;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         exceptionHandler = new AppointmentSearchExceptionHandler();
         MockHttpServletRequest mockHttpServletRequest = new MockHttpServletRequest();
@@ -43,7 +43,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleInvalidSearchCriteria(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(400, response.getBody().getError().getStatus());
@@ -58,7 +58,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleAuthenticationRequired(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(401, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(401, response.getBody().getError().getStatus());
@@ -72,7 +72,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleAccessDenied(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(403, response.getStatusCodeValue());
+        assertEquals(403, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(403, response.getBody().getError().getStatus());
@@ -87,7 +87,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleMethodNotSupported(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(405, response.getStatusCodeValue());
+        assertEquals(405, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(405, response.getBody().getError().getStatus());
@@ -101,7 +101,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleUnexpectedError(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(500, response.getBody().getError().getStatus());
@@ -115,7 +115,7 @@ public class AppointmentSearchExceptionHandlerTest {
                 exceptionHandler.handleUnexpectedCheckedError(exception, webRequest);
 
         assertNotNull(response);
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertNotNull(response.getBody());
         assertNotNull(response.getBody().getError());
         assertEquals(500, response.getBody().getError().getStatus());
