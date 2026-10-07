@@ -10,6 +10,7 @@ public class AppointmentSearchRequest {
     private String providerUuid;
     private int limit;
     private AppointmentStatus status;
+    private String appointmentNumber;
 
     public Date getStartDate() {
         return startDate;
@@ -58,4 +59,7 @@ public class AppointmentSearchRequest {
     public void setStatus(AppointmentStatus status) {
         this.status = status;
     }
+
+    public String getAppointmentNumber() {return appointmentNumber; }
+
 }

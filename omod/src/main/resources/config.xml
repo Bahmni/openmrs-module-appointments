@@ -37,12 +37,16 @@
 	<mappingFiles>
 		Speciality.hbm.xml
 		AppointmentServiceDefinition.hbm.xml
+		AppointmentServiceAttributeType.hbm.xml
+		AppointmentServiceAttribute.hbm.xml
 		ServiceWeeklyAvailability.hbm.xml
 		Appointment.hbm.xml
 		AppointmentAudit.hbm.xml
 		AppointmentServiceType.hbm.xml
 		AppointmentProvider.hbm.xml
 		AppointmentRecurringPattern.hbm.xml
+		AppointmentReason.hbm.xml
+		AppointmentUnavailability.hbm.xml
 	</mappingFiles>
 
 	<!-- Internationalization -->
@@ -158,6 +162,43 @@
 		<property>sms.dateformat</property>
 		<defaultValue>dd-MM-yyyy' Time 'HH:mm</defaultValue>
 	</globalProperty>
+
+	<globalProperty>
+		<property>bahmni.search.pagination.defaultLimit</property>
+		<defaultValue>100</defaultValue>
+		<description>The default number of results returned per page for Bahmni cursor-based searches (patients, appointments, episodes/patient programs, etc.) when the client does not specify a batch size in the search request. This global property is shared across all Bahmni search endpoints.</description>
+	</globalProperty>
+
+	<globalProperty>
+		<property>bahmni.search.pagination.maxLimit</property>
+		<defaultValue>500</defaultValue>
+		<description>The maximum number of results that can be returned per page for Bahmni cursor-based searches (patients, appointments, episodes/patient programs, etc.), regardless of the batch size requested by the client. Requested limits greater than this value are clamped to this maximum. This global property is shared across all Bahmni search endpoints.</description>
+	</globalProperty>
+
+	<privilege>
+		<name>app:appointments:manageServiceAvailability</name>
+		<description>Able to Edit Appointment Service Availability in Appointments module</description>
+	</privilege>
+
+	<privilege>
+		<name>app:appointments:manageServices</name>
+		<description>Able to Manage Appointment Services in Appointments module</description>
+	</privilege>
+
+	<privilege>
+		<name>Add Appointment Unavailability</name>
+		<description>Able to add Appointment Unavailability blocks</description>
+	</privilege>
+
+	<privilege>
+		<name>Get Appointment Unavailability</name>
+		<description>Able to view Appointment Unavailability blocks</description>
+	</privilege>
+
+	<privilege>
+		<name>Delete Appointment Unavailability</name>
+		<description>Able to delete Appointment Unavailability blocks</description>
+	</privilege>
 
 
 </module>

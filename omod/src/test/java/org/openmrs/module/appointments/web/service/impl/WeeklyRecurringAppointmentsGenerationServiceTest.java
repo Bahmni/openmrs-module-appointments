@@ -1337,7 +1337,6 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
     
     @Test
     public void setAppointments_shouldThrowWhenFrequecyIsDecreasedSuchThatEndDateIsInPast() {
-    	TimeZone.setDefault(TimeZone.getTimeZone("IST"));
         Date date = new Date();
         
         RecurringAppointmentRequest recurringRequest = getAppointmentRequest(addDays(date, +7), addHours(addDays(date, +7), +1));

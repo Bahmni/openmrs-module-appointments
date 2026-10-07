@@ -12,7 +12,7 @@
 	<licenses>
 		<license>
 			<name>Mozilla Public License 2.0 with Healthcare Disclaimer</name>
-			<url>https://openmrs.org/license</url>
+			<url>https://www.bahmni.org/license/mplv2hd</url>
 		</license>
 	</licenses>
 	<developers>
@@ -44,7 +44,7 @@
 		<hamcrestVersion>2.2</hamcrestVersion>
 		<mockitoVersion>3.5.11</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
-		<jacocoVersion>0.7.9</jacocoVersion>
+		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
@@ -105,26 +105,44 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.sonatype.plugins</groupId>
-					<artifactId>nexus-staging-maven-plugin</artifactId>
-					<version>1.5.1</version>
-					<extensions>true</extensions>
+					<groupId>org.jacoco</groupId>
+					<artifactId>jacoco-maven-plugin</artifactId>
+					<version>${jacocoVersion}</version>
 					<executions>
 						<execution>
-							<id>default-deploy</id>
-							<phase>deploy</phase>
+							<id>prepare-agent</id>
+							<phase>initialize</phase>
 							<goals>
-								<goal>deploy</goal>
+								<goal>prepare-agent</goal>
+							</goals>
+						</execution>
+						<execution>
+							<id>report</id>
+							<phase>verify</phase>
+							<goals>
+								<goal>report</goal>
 							</goals>
 						</execution>
 					</executions>
-					<configuration>
-						<serverId>nexus-sonatype</serverId>
-						<nexusUrl>https://oss.sonatype.org</nexusUrl>
-					</configuration>
 				</plugin>
 			</plugins>
 		</pluginManagement>
+		<plugins>
+			<plugin>
+				<groupId>org.sonatype.central</groupId>
+				<artifactId>central-publishing-maven-plugin</artifactId>
+				<version>0.8.0</version>
+				<extensions>true</extensions>
+				<configuration>
+					<publishingServerId>nexus-sonatype</publishingServerId>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>${jacocoVersion}</version>
+			</plugin>
+		</plugins>
 <!--		<plugins>-->
 <!--			<plugin>-->
 <!--				<artifactId>maven-compiler-plugin</artifactId>-->
@@ -272,24 +290,13 @@
 			<repository>
 				<id>sonatype-nexus-snapshots</id>
 				<name>Sonatype Nexus Snapshots</name>
-				<url>https://oss.sonatype.org/content/repositories/snapshots</url>
+				<url>https://central.sonatype.com/repository/maven-snapshots</url>
 				<releases>
 					<enabled>false</enabled>
 				</releases>
 				<snapshots>
 					<enabled>true</enabled>
 					<updatePolicy>interval:10080</updatePolicy>
-				</snapshots>
-			</repository>
-			<repository>
-				<id>sonatype-nexus-releases</id>
-				<name>Sonatype Nexus Snapshots</name>
-				<url>https://oss.sonatype.org/content/repositories/releases</url>
-				<releases>
-					<enabled>true</enabled>
-				</releases>
-				<snapshots>
-					<enabled>false</enabled>
 				</snapshots>
 			</repository>
 		</repositories>
@@ -304,17 +311,6 @@
 			</snapshots>
 		</pluginRepository>
 	</pluginRepositories>
-
-	<distributionManagement>
-			<snapshotRepository>
-						<id>nexus-sonatype</id>
-						<url>https://oss.sonatype.org/content/repositories/snapshots</url>
-			</snapshotRepository>
-			<repository>
-						<id>nexus-sonatype</id>
-				<url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url>
-			</repository>
-	</distributionManagement>
 
 	<profiles>
 		<profile>

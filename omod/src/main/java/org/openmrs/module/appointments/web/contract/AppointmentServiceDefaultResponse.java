@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.contract;
 
+import java.util.List;
 import java.util.Map;
 
 public class AppointmentServiceDefaultResponse {
@@ -16,6 +17,7 @@ public class AppointmentServiceDefaultResponse {
 	private String color;
 	private String initialAppointmentStatus;
 	private String creatorName;
+	private List<AppointmentServiceAttributeResponse> attributes;
 
 	public Integer getAppointmentServiceId() {
 		return appointmentServiceId;
@@ -120,5 +122,13 @@ public class AppointmentServiceDefaultResponse {
 
 	public void setInitialAppointmentStatus(String initialAppointmentStatus) {
 		this.initialAppointmentStatus = initialAppointmentStatus;
+	}
+
+	public List<AppointmentServiceAttributeResponse> getAttributes() {
+		return attributes;
+	}
+
+	public void setAttributes(List<AppointmentServiceAttributeResponse> attributes) {
+		this.attributes = attributes;
 	}
 }

@@ -24,6 +24,22 @@
   		    http://www.springframework.org/schema/util/spring-util-3.0.xsd http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
     <context:component-scan base-package="org.openmrs.module.appointments"/>
 
+    <bean id="appointmentNumberGenerator" class="org.openmrs.module.appointments.service.impl.DefaultAppointmentNumberGeneratorImpl"/>
+
+    <bean id="defaultRecurringAppointmentNumberGenerator"
+          class="org.openmrs.module.appointments.service.impl.DefaultRecurringAppointmentNumberGeneratorImpl">
+        <constructor-arg name="appointmentNumberGeneratorLocator">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
+                <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+            </bean>
+        </constructor-arg>
+    </bean>
+
+    <bean id="appointmentNumberGeneratorLocator" class="org.openmrs.module.appointments.service.impl.AppointmentNumberGeneratorLocatorImpl">
+        <constructor-arg name="appointmentNumberGenerator" ref="appointmentNumberGenerator"/>
+        <constructor-arg name="recurringAppointmentNumberGenerator" ref="defaultRecurringAppointmentNumberGenerator"/>
+    </bean>
+
     <bean id="appointmentServiceHelper" class="org.openmrs.module.appointments.helper.AppointmentServiceHelper"/>
     <bean id="defaultTCApptMailSender" class="org.openmrs.module.appointments.notification.impl.DefaultMailSender">
         <constructor-arg ref="adminService"/>
@@ -147,7 +163,9 @@
                 </property>
                 <property name="appointmentConflicts">
                     <list>
-                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict"/>
+                        <bean class="org.openmrs.module.appointments.conflicts.impl.AppointmentServiceUnavailabilityConflict">
+                            <property name="appointmentUnavailabilityDao" ref="appointmentUnavailabilityDao"/>
+                        </bean>
                         <ref bean="patientDoubleBookingConflict"/>
                     </list>
                 </property>
@@ -157,6 +175,7 @@
                 <property name="appointmentNotifierService">
                     <ref bean="patientAppointmentNotifierService"/>
                 </property>
+                <property name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -198,6 +217,7 @@
                 <property name="appointmentDao">
                     <ref bean="appointmentDao"/>
                 </property>
+                <property name="appointmentNumberGeneratorLocator" ref="appointmentNumberGeneratorLocator"/>
             </bean>
         </property>
         <property name="preInterceptors">
@@ -336,3 +356,4 @@
         </property>
     </bean>
 </beans>
+

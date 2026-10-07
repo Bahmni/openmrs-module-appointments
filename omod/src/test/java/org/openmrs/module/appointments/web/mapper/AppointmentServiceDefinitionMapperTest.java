@@ -14,6 +14,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.ServiceWeeklyAvailability;
 import org.openmrs.module.appointments.model.Speciality;
+import org.openmrs.module.appointments.service.AppointmentServiceAttributeTypeService;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.contract.*;
@@ -44,6 +45,9 @@ public class AppointmentServiceDefinitionMapperTest {
     @Mock
     private AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
+    @Mock
+    private AppointmentServiceAttributeTypeService appointmentServiceAttributeTypeService;
+
     @InjectMocks
     private AppointmentServiceMapper appointmentServiceMapper;
 
@@ -58,6 +62,7 @@ public class AppointmentServiceDefinitionMapperTest {
         mockStatic(Context.class);
         authenticatedUser = new User(8);
         PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        when(appointmentServiceAttributeTypeService.getAllAttributeTypes(false)).thenReturn(Collections.emptyList());
     }
 
     @Test

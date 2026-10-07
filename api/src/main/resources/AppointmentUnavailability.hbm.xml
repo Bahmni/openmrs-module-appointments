@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd" >
+<hibernate-mapping package="org.openmrs.module.appointments.model">
+    <class name="AppointmentUnavailability" table="appointment_unavailability" batch-size="50">
+        <id name="appointmentUnavailabilityId" type="java.lang.Integer" column="appointment_unavailability_id">
+            <generator class="native">
+                <param name="sequence">appointment_unavailability_id_seq</param>
+            </generator>
+        </id>
+
+        <property name="startDate" type="java.sql.Date" column="start_date" not-null="true"/>
+        <property name="startTime" type="java.sql.Time" column="start_time" not-null="true"/>
+        <property name="endDate" type="java.sql.Date" column="end_date" not-null="true"/>
+        <property name="endTime" type="java.sql.Time" column="end_time" not-null="true"/>
+
+        <property name="dateCreated" type="java.util.Date" column="date_created" not-null="true"/>
+        <property name="dateChanged" type="java.util.Date" column="date_changed"/>
+        <property name="uuid" type="java.lang.String" column="uuid" length="38" unique="true" not-null="true"/>
+
+        <property name="voided" type="java.lang.Boolean" column="voided" length="1"/>
+        <property name="dateVoided" type="java.util.Date" column="date_voided" length="19" />
+        <property name="voidReason" type="java.lang.String" column="void_reason" length="255" />
+        <many-to-one name="voidedBy" class="org.openmrs.User" column="voided_by" />
+
+        <many-to-one name="changedBy" class="org.openmrs.User" column="changed_by" />
+        <many-to-one name="creator" class="org.openmrs.User" column="creator" not-null="true"/>
+        <many-to-one name="location" class="org.openmrs.Location" column="location_id" not-null="true"/>
+        <many-to-one name="service" class="org.openmrs.module.appointments.model.AppointmentServiceDefinition" column="appointment_service_id"/>
+        <many-to-one name="provider" class="org.openmrs.Provider" column="provider_id"/>
+    </class>
+</hibernate-mapping>

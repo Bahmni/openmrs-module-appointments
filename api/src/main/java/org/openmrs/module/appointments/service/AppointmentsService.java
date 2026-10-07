@@ -109,5 +109,9 @@ public interface AppointmentsService {
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery);
+
+    @Transactional
+    @Authorized({MANAGE_APPOINTMENTS, MANAGE_OWN_APPOINTMENTS})
+    List<Appointment> changeStatusForAppointments(List<String> appointmentUuids, AppointmentStatus toStatus);
 }
 

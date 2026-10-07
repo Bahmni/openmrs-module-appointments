@@ -20,6 +20,7 @@ import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -176,6 +177,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         setLimitCriteria(appointmentSearchRequest, criteria);
         setProviderCriteria(appointmentSearchRequest, criteria);
         setStatusCriteria(appointmentSearchRequest, criteria);
+        setAppointmentNumberCriteria(appointmentSearchRequest, criteria);
+
 
         return criteria.list();
     }
@@ -310,6 +313,23 @@ public class AppointmentDaoImpl implements AppointmentDao {
                 criteria.add(disjunction);
             }
         }
+    }
+
+    private void setAppointmentNumberCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+        if (StringUtils.isNotEmpty(appointmentSearchRequest.getAppointmentNumber())) {
+            criteria.add(Restrictions.eq("appointmentNumber", appointmentSearchRequest.getAppointmentNumber()));
+        }
+    }
+
+    @Override
+    public List<Appointment> getAppointmentsByUuids(List<String> uuids) {
+        if (uuids == null || uuids.isEmpty()) {
+            return Collections.emptyList();
+        }
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.in("uuid", uuids));
+        criteria.add(Restrictions.eq("voided", false));
+        return criteria.list();
     }
 
 }

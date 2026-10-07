@@ -1,5 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
+import org.apache.commons.lang.time.DateUtils;
 import org.codehaus.jackson.type.TypeReference;
 import org.junit.Before;
 import org.junit.Rule;
@@ -240,14 +241,20 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldNotUpdateAppointmentMetadataOnConflictsCall() throws Exception {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS");
+        Date startDatetime = dateFormat.parse("2107-07-15T17:30:00.0");
+        Date endDatetime = DateUtils.addHours(startDatetime, 1);
+        dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+        String startDateStr = dateFormat.format(startDatetime);
+        String endDateStr = dateFormat.format(endDatetime);
+
         String content = "{" +
                 "\"uuid\":\"c36006e5-9fbb-4f20-866b-0ece245615a7\"," +
                 "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
                 "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
                 "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
-                "\"startDateTime\": \"2107-07-15T17:30:00.0\"," +
-                "\"endDateTime\": \"2107-07-15T18:30:00.0\"," +
+                "\"startDateTime\": \"" + startDateStr + "\"," +
+                "\"endDateTime\": \"" + endDateStr + "\"," +
                 "\"providers\": [{" +
                 "\"uuid\": \"2bdc3f7d-d911-401a-84e9-5494dda83e8e\"," +
                 "\"response\": \"ACCEPTED\"," +
@@ -266,8 +273,9 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
         assertNotNull(editResponse);
         assertEquals(200, editResponse.getStatus());
         AppointmentDefaultResponse  appointmentEditResponse = deserialize(editResponse, new TypeReference<AppointmentDefaultResponse>() {});
+
         assertEquals("c36006e5-9fbb-4f20-866b-0ece245615a7", appointmentEditResponse.getUuid());
-        assertEquals("Fri Jul 15 17:30:00 UTC 2107", appointmentEditResponse.getStartDateTime().toString());
-        assertEquals("Fri Jul 15 18:30:00 UTC 2107", appointmentEditResponse.getEndDateTime().toString());
+        assertEquals(startDatetime, appointmentEditResponse.getStartDateTime());
+        assertEquals(endDatetime, appointmentEditResponse.getEndDateTime());
     }
 }

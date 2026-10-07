@@ -26,6 +26,11 @@
 			<version>${project.parent.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.bahmni.module</groupId>
+			<artifactId>search-commons</artifactId>
+			<version>2.0.0</version>
+		</dependency>
+		<dependency>
 			<groupId>${project.parent.groupId}</groupId>
 			<artifactId>${project.parent.artifactId}-atom-feed</artifactId>
 			<version>${project.parent.version}</version>
@@ -143,7 +148,7 @@
 							<includeGroupIds>${project.parent.groupId}</includeGroupIds>
 							<includeArtifactIds>${project.parent.artifactId}-api</includeArtifactIds>
 							<excludeTransitive>true</excludeTransitive>
-							<includes>**\/*.xml,**\/*.properties</includes>
+							<includes>**\/*.xml,**\/*.properties,**\/*.sql</includes>
 							<outputDirectory>${project.build.directory}/classes</outputDirectory>
 						</configuration>
 					</execution>

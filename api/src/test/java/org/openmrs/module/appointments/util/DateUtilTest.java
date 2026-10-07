@@ -9,6 +9,7 @@ import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -89,6 +90,13 @@ public class DateUtilTest {
         String dateString = "2017-03-15T16:57:09.0Z";
         Date date = convertToLocalDateFromUTC(dateString);
         long milliSeconds = getEpochTime(date.getTime());
+        assertEquals(80829000, milliSeconds);
+    }
+
+    @Test
+    public void shouldConvertDateToMilliSecondsInGivenTimezone() throws ParseException {
+        Date date = convertToLocalDateFromUTC("2017-03-15T16:57:09.0Z");
+        long milliSeconds = getEpochTime(date.getTime(), ZoneId.of("Asia/Kolkata"));
         assertEquals(80829000, milliSeconds);
     }
 

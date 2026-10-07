@@ -63,6 +63,9 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
     @Autowired
     AppointmentServiceDefinitionService appointmentServiceDefinitionService;
 
+    @Autowired
+    AppointmentNumberGeneratorLocator appointmentNumberGeneratorLocator;
+
     @Before
     public void init() throws Exception {
         adminUser = "super-user";
