@@ -295,4 +295,44 @@
             <ref bean="sessionFactory"/>
         </property>
     </bean>
+
+    <!--    Alphonce-->
+    <bean id="appointmentStatusMarkerDao" class="org.openmrs.module.appointments.dao.impl.AppointmentStatusMarkerDaoImpl">
+        <property name="sessionFactory">
+            <ref bean="sessionFactory"/>
+        </property>
+    </bean>
+
+    <!--    &lt;!&ndash; CagService Bean&ndash;&gt;-->
+    <!--    <bean id="appointmentStatusMarkerService" class="org.openmrs.module.appointments.service.impl.AppointmentStatusMarkerServiceImpl">-->
+    <!--        <property name="appointmentStatusMarkerDao"  ref="appointmentStatusMarkerDao"/>-->
+    <!--    </bean>-->
+
+    <bean parent="serviceContext">
+        <property name="moduleService">
+            <list merge="true">
+                <value>org.openmrs.module.appointments.service.AppointmentStatusMarkerService</value>
+                <ref bean="appointmentStatusMarkerService"/>
+            </list>
+        </property>
+    </bean>
+
+    <bean id="appointmentStatusMarkerService" class="org.springframework.transaction.interceptor.TransactionProxyFactoryBean">
+        <property name="transactionManager">
+            <ref bean="transactionManager"/>
+        </property>
+        <property name="target">
+            <bean class="org.openmrs.module.appointments.service.impl.AppointmentStatusMarkerServiceImpl">
+                <property name="appointmentStatusMarkerDao">
+                    <ref bean="appointmentStatusMarkerDao"/>
+                </property>
+            </bean>
+        </property>
+        <property name="preInterceptors">
+            <ref bean="serviceInterceptors"/>
+        </property>
+        <property name="transactionAttributeSource">
+            <ref bean="transactionAttributeSource"/>
+        </property>
+    </bean>
 </beans>

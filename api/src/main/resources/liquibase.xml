@@ -749,4 +749,39 @@
             update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
         </sql>
     </changeSet>
+
+    <!--||||||||||||||||||||||MISSED SCHEDULER||||||||||||||||||||||||||||-->
+    <changeSet id="Auto-Mark-Missed-Appointment-Scheduler-20240725-1525" author="Alphonce Raseabi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Auto Mark Appointment As Missed Task";
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO
+                scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+                                      start_on_startup, created_by, date_created, uuid)
+            VALUES
+                ('Auto Mark Appointment As Missed Task', 'Auto mark non consulted patients appointments as Missed',
+                 'org.openmrs.module.appointments.scheduler.tasks.AppointmentsMissedScheduler',
+                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+        </sql>
+    </changeSet>
+    <!--||||||||||||||||||||||MISSED WEEKLY SCHEDULER||||||||||||||||||||||||||||-->
+    <changeSet id="Auto-Mark-Missed-Appointment-Weekly-Scheduler-20240801-2105" author="Alphonce Raseabi">
+        <preConditions onFail="MARK_RAN">
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Auto Mark Appointment As Missed Weekly Task";
+            </sqlCheck>
+        </preConditions>
+        <sql>
+            INSERT INTO
+                scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+                                      start_on_startup, created_by, date_created, uuid)
+            VALUES
+                ('Auto Mark Appointment As Missed Weekly Task', 'Auto mark non consulted patients appointments as Missed - weekly scheduler',
+                 'org.openmrs.module.appointments.scheduler.tasks.AppointmentsMissedWeeklyScheduler',
+                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 604800, TRUE, 1, NOW(), UUID());
+        </sql>
+    </changeSet>
 </databaseChangeLog>
