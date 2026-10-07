@@ -30,7 +30,7 @@ public class AppointmentStatusMarkerDaoImpl implements AppointmentStatusMarkerDa
     @Override
     public List<String> getAllAppointmentsNotConsultedUuidList(Date startDateTime, Date endDateTime) {
         Query query = sessionFactory.getCurrentSession().
-                createSQLQuery("SELECT uuid FROM patient_appointment WHERE status='Scheduled' AND start_date_time>=:startDateTime AND start_date_time<=:endDateTime");
+                createSQLQuery("SELECT uuid FROM patient_appointment WHERE status IN ('Scheduled', 'CheckedIn') AND start_date_time>=:startDateTime AND start_date_time<=:endDateTime");
         query.setDate("startDateTime", startDateTime);
         query.setDate("endDateTime", endDateTime);
         List<String> appointmentsUuidList = (List<String>) query.list();

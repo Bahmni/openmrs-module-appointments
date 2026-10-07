@@ -49,6 +49,8 @@ public class AppointmentStatusMarkerServiceImpl implements AppointmentStatusMark
     public void markAllMissedAppointments(Date startDateTime, Date endDateTime) {
         List<String> missedAppointmentsUuid = getAllAppointmentsNotConsultedUuidList(startDateTime, endDateTime);
 
+        System.out.println("\n================= markAllMissedAppointments Called ============================\n");
+
         String concatenatedUuidList = concatenateUuidList(missedAppointmentsUuid);
 
         if (!Objects.equals(concatenatedUuidList, ""))
