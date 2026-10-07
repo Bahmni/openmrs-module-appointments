@@ -403,7 +403,9 @@
                 <constructor-arg ref="appointmentSearchDao"/>
                 <constructor-arg ref="criteriaValidator"/>
                 <constructor-arg ref="appointmentResponseBuilder"/>
+                <constructor-arg ref="adminService"/>
             </bean>
+
         </property>
         <property name="preInterceptors">
             <ref bean="serviceInterceptors"/>
