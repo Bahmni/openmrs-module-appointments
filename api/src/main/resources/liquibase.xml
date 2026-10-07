@@ -749,252 +749,39 @@
             update patient_appointment set date_appointment_scheduled = date_created where date_appointment_scheduled is null;
         </sql>
     </changeSet>
-    <changeSet id="create-patient_appointment_reason_table-20251002" author="Mohan">
-        <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="patient_appointment_reason" />
-            </not>
-        </preConditions>
-        <comment>Create table to store appointment reasons linked to concepts</comment>
-        <createTable tableName="patient_appointment_reason">
-            <column name="patient_appointment_reason_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="patient_appointment_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="reason_code" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="uuid" type="varchar(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_changed" type="datetime"/>
-            <column name="changed_by" type="int"/>
-            <column name="voided" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-        </createTable>
-        <addForeignKeyConstraint
-                constraintName="fk_patient_appointment_reason_appointment"
-                baseTableName="patient_appointment_reason"
-                baseColumnNames="patient_appointment_id"
-                referencedTableName="patient_appointment"
-                referencedColumnNames="patient_appointment_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_patient_appointment_reason_concept"
-                baseTableName="patient_appointment_reason"
-                baseColumnNames="reason_code"
-                referencedTableName="concept"
-                referencedColumnNames="concept_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_patient_appointment_reason_creator"
-                baseTableName="patient_appointment_reason"
-                baseColumnNames="creator"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_patient_appointment_reason_changed_by"
-                baseTableName="patient_appointment_reason"
-                baseColumnNames="changed_by"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_patient_appointment_reason_voided_by"
-                baseTableName="patient_appointment_reason"
-                baseColumnNames="voided_by"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-    </changeSet>
 
-    <changeSet id="create-table-appointment-service-attribute-type-202510211630" author="Bahmni">
-        <preConditions onFail="MARK_RAN" onError="HALT">
-            <not>
-                <tableExists tableName="appointment_service_attribute_type"/>
-            </not>
-        </preConditions>
-        <comment>Creating appointment_service_attribute_type table</comment>
-        <createTable tableName="appointment_service_attribute_type">
-            <column name="appointment_service_attribute_type_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="name" type="varchar(255)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="description" type="varchar(1024)" />
-            <column name="datatype" type="varchar(255)" />
-            <column name="datatype_config" type="text" />
-            <column name="preferred_handler" type="varchar(255)" />
-            <column name="handler_config" type="text" />
-            <column name="min_occurs" type="int">
-                <constraints nullable="false" />
-            </column>
-            <column name="max_occurs" type="int"></column>
-            <column name="creator" type="int">
-                <constraints nullable="false" />
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false" />
-            </column>
-            <column name="changed_by" type="int" />
-            <column name="date_changed" type="datetime" />
-            <column name="retired" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false" />
-            </column>
-            <column name="retired_by" type="int" />
-            <column name="date_retired" type="datetime" />
-            <column name="retire_reason" type="varchar(255)" defaultValue="null" />
-            <column name="uuid" type="char(38)">
-                <constraints nullable="false" unique="true" />
-            </column>
-        </createTable>
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_creator_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="creator" referencedTableName="users" referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_changed_by_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_type_retired_by_fk" baseTableName="appointment_service_attribute_type" baseColumnNames="retired_by" referencedTableName="users" referencedColumnNames="user_id"/>
-    </changeSet>
-
-    <changeSet id="create-table-appointment-service-attribute-202510211645" author="Bahmni">
-        <preConditions onFail="MARK_RAN" onError="HALT">
-            <not>
-                <tableExists tableName="appointment_service_attribute"/>
-            </not>
-        </preConditions>
-        <comment>Creating appointment_service_attribute table</comment>
-        <createTable tableName="appointment_service_attribute">
-            <column name="appointment_service_attribute_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false" />
-            </column>
-            <column name="appointment_service_id" type="int"><constraints nullable="false" /></column>
-            <column name="attribute_type_id" type="int"><constraints nullable="false" /></column>
-            <column name="value_reference" type="text"><constraints nullable="false" /></column>
-            <column name="uuid" type="char(38)"><constraints nullable="false" unique="true" /></column>
-            <column name="creator" type="int"><constraints nullable="false"/></column>
-            <column name="date_created" type="datetime"><constraints nullable="false"/></column>
-            <column name="changed_by" type="int"/>
-            <column name="date_changed" type="datetime" />
-            <column name="voided" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int" />
-            <column name="date_voided" type="datetime" />
-            <column name="void_reason" type="varchar(255)" defaultValue="null"/>
-        </createTable>
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_appointment_service_fk" baseTableName="appointment_service_attribute" baseColumnNames="appointment_service_id" referencedTableName="appointment_service" referencedColumnNames="appointment_service_id" />
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_attribute_type_id_fk" baseTableName="appointment_service_attribute" baseColumnNames="attribute_type_id" referencedTableName="appointment_service_attribute_type" referencedColumnNames="appointment_service_attribute_type_id" />
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_creator_fk" baseTableName="appointment_service_attribute" baseColumnNames="creator" referencedTableName="users" referencedColumnNames="user_id" />
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_changed_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="changed_by" referencedTableName="users" referencedColumnNames="user_id" />
-        <addForeignKeyConstraint constraintName="appointment_service_attribute_voided_by_fk" baseTableName="appointment_service_attribute" baseColumnNames="voided_by" referencedTableName="users" referencedColumnNames="user_id" />
-    </changeSet>
-    <changeSet id="add-index-patient-appointment-appointment-number-202510231900" author="Srijan Ram, Kousalya">
+    <!--||||||||||||||||||||||MISSED SCHEDULER||||||||||||||||||||||||||||-->
+    <changeSet id="Auto-Mark-Missed-Appointment-Scheduler-20240725-1525" author="Alphonce Raseabi">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <indexExists indexName="patient_appointment_appointment_number_idx" tableName="patient_appointment"/>
-            </not>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Auto Mark Appointment As Missed Task";
+            </sqlCheck>
         </preConditions>
-        <comment>Adding index on appointment_number column to improve search performance</comment>
-        <createIndex indexName="patient_appointment_appointment_number_idx" tableName="patient_appointment">
-            <column name="appointment_number"/>
-        </createIndex>
+        <sql>
+            INSERT INTO
+                scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+                                      start_on_startup, created_by, date_created, uuid)
+            VALUES
+                ('Auto Mark Appointment As Missed Task', 'Auto mark non consulted patients appointments as Missed',
+                 'org.openmrs.module.appointments.scheduler.tasks.AppointmentsMissedScheduler',
+                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 86400, TRUE, 1, NOW(), UUID());
+        </sql>
     </changeSet>
-    <changeSet id="create-appointment-unavailability-table-20260514" author="Bahmni">
+    <!--||||||||||||||||||||||MISSED WEEKLY SCHEDULER||||||||||||||||||||||||||||-->
+    <changeSet id="Auto-Mark-Missed-Appointment-Weekly-Scheduler-20240801-2105" author="Alphonce Raseabi">
         <preConditions onFail="MARK_RAN">
-            <not>
-                <tableExists tableName="appointment_unavailability" />
-            </not>
+            <sqlCheck expectedResult="0">
+                SELECT COUNT(*) FROM scheduler_task_config WHERE name = "Auto Mark Appointment As Missed Weekly Task";
+            </sqlCheck>
         </preConditions>
-        <comment>Create table to store appointment unavailability blocks</comment>
-        <createTable tableName="appointment_unavailability">
-            <column name="appointment_unavailability_id" type="int" autoIncrement="true">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="location_id" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="appointment_service_id" type="int">
-                <constraints nullable="true"/>
-            </column>
-            <column name="provider_id" type="int">
-                <constraints nullable="true"/>
-            </column>
-            <column name="start_date" type="date">
-                <constraints nullable="false"/>
-            </column>
-            <column name="start_time" type="time">
-                <constraints nullable="false"/>
-            </column>
-            <column name="end_date" type="date">
-                <constraints nullable="false"/>
-            </column>
-            <column name="end_time" type="time">
-                <constraints nullable="false"/>
-            </column>
-            <column name="uuid" type="varchar(38)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="date_created" type="datetime">
-                <constraints nullable="false"/>
-            </column>
-            <column name="creator" type="int">
-                <constraints nullable="false"/>
-            </column>
-            <column name="date_changed" type="datetime"/>
-            <column name="changed_by" type="int"/>
-            <column name="voided" type="boolean" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="voided_by" type="int"/>
-            <column name="date_voided" type="datetime"/>
-            <column name="void_reason" type="varchar(255)"/>
-        </createTable>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_location"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="location_id"
-                referencedTableName="location"
-                referencedColumnNames="location_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_service"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="appointment_service_id"
-                referencedTableName="appointment_service"
-                referencedColumnNames="appointment_service_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_provider"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="provider_id"
-                referencedTableName="provider"
-                referencedColumnNames="provider_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_creator"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="creator"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_changed_by"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="changed_by"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-        <addForeignKeyConstraint
-                constraintName="fk_appointment_unavailability_voided_by"
-                baseTableName="appointment_unavailability"
-                baseColumnNames="voided_by"
-                referencedTableName="users"
-                referencedColumnNames="user_id"/>
-        <createIndex indexName="idx_appointment_unavailability_location_dates" tableName="appointment_unavailability">
-            <column name="location_id"/>
-            <column name="start_date"/>
-            <column name="end_date"/>
-        </createIndex>
+        <sql>
+            INSERT INTO
+                scheduler_task_config(name, description, schedulable_class, start_time, start_time_pattern, repeat_interval,
+                                      start_on_startup, created_by, date_created, uuid)
+            VALUES
+                ('Auto Mark Appointment As Missed Weekly Task', 'Auto mark non consulted patients appointments as Missed - weekly scheduler',
+                 'org.openmrs.module.appointments.scheduler.tasks.AppointmentsMissedWeeklyScheduler',
+                 TIMESTAMP(CURDATE()), 'MM/dd/yyyy HH:mm:ss', 604800, TRUE, 1, NOW(), UUID());
+        </sql>
     </changeSet>
 </databaseChangeLog>
