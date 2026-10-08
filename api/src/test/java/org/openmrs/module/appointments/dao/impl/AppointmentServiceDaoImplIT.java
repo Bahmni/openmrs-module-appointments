@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.BaseIntegrationTest;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -17,14 +17,14 @@ import java.util.List;
 import java.util.Set;
 import java.util.LinkedHashSet;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppointmentServiceDaoImplIT extends BaseIntegrationTest {
 
     @Autowired
     private AppointmentServiceDao appointmentServiceDao;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentServicesTestData.xml");
     }

@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.web.mapper;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -44,9 +41,6 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -60,28 +54,35 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.mockStatic;
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
 public class AppointmentMapperTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private MockedStatic<Context> contextMockedStatic;
 
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
     @Mock
     private PatientService patientService;
 
@@ -128,9 +129,9 @@ public class AppointmentMapperTest {
 
     private AppointmentServiceDefinition service2;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         patient = new Patient();
         patient.setUuid("patientUuid");
         PersonName name = new PersonName();
@@ -173,7 +174,7 @@ public class AppointmentMapperTest {
         location.setUuid("locationUuid");
         when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
 
-        mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         when(Context.getAdministrationService()).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
         when(Context.getLocale()).thenReturn(java.util.Locale.ENGLISH);
@@ -286,11 +287,13 @@ public class AppointmentMapperTest {
         assertEquals(AppointmentPriority.Routine, appointment.getPriority());
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldThrowExceptionWhenPayloadHasInvalidAppointmentPriority() throws ParseException {
-        AppointmentRequest appointmentRequest = createAppointmentRequest();
-        appointmentRequest.setPriority("abcd");
-        appointmentMapper.fromRequest(appointmentRequest);
+        assertThrows(RuntimeException.class, () -> {
+            AppointmentRequest appointmentRequest = createAppointmentRequest();
+            appointmentRequest.setPriority("abcd");
+            appointmentMapper.fromRequest(appointmentRequest);
+        });
     }
 
     @Test
@@ -936,10 +939,10 @@ public class AppointmentMapperTest {
         // Mock conceptService to return null for non-existent concept
         when(conceptService.getConceptByUuid("nonExistentConceptUuid")).thenReturn(null);
 
-        expectedException.expect(ConversionException.class);
-        expectedException.expectMessage("Bad Request. No concept found with UUID: nonExistentConceptUuid");
-
-        appointmentMapper.fromRequest(appointmentRequest);
+        ConversionException exception = assertThrows(ConversionException.class, () -> {
+            appointmentMapper.fromRequest(appointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Bad Request. No concept found with UUID: nonExistentConceptUuid"));
     }
 
     @Test
@@ -954,10 +957,10 @@ public class AppointmentMapperTest {
 
         when(conceptService.getConceptByUuid("retiredConceptUuid")).thenReturn(retiredConcept);
 
-        expectedException.expect(ConversionException.class);
-        expectedException.expectMessage("Bad Request. Concept with UUID: retiredConceptUuid is retired");
-
-        appointmentMapper.fromRequest(appointmentRequest);
+        ConversionException exception = assertThrows(ConversionException.class, () -> {
+            appointmentMapper.fromRequest(appointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Bad Request. Concept with UUID: retiredConceptUuid is retired"));
     }
 
     @Test
@@ -968,9 +971,9 @@ public class AppointmentMapperTest {
         // Mock first concept as valid, second as null
         when(conceptService.getConceptByUuid("invalidConceptUuid")).thenReturn(null);
 
-        expectedException.expect(ConversionException.class);
-        expectedException.expectMessage("Bad Request. No concept found with UUID: invalidConceptUuid");
-
-        appointmentMapper.fromRequest(appointmentRequest);
+        ConversionException exception = assertThrows(ConversionException.class, () -> {
+            appointmentMapper.fromRequest(appointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Bad Request. No concept found with UUID: invalidConceptUuid"));
     }
 }

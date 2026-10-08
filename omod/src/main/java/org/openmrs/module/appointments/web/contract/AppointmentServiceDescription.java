@@ -3,8 +3,8 @@ package org.openmrs.module.appointments.web.contract;
 import java.sql.Time;
 import java.util.List;
 import java.util.Set;
-import javax.validation.constraints.Size;
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
+import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class AppointmentServiceDescription {

@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Location;
 import org.openmrs.api.LocationService;
 import org.openmrs.module.appointments.BaseIntegrationTest;
@@ -14,10 +14,10 @@ import java.sql.Time;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
 
@@ -33,7 +33,7 @@ public class AppointmentUnavailabilityDaoImplIT extends BaseIntegrationTest {
     private static final String SERVICE_UUID = "fff006e5-9fbb-4f20-866b-0ece245615a1";
     private static final String PROVIDER_UUID = "ccc006e5-9fbb-4f20-866b-0ece245615a1";
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentUnavailabilityTestData.xml");
     }

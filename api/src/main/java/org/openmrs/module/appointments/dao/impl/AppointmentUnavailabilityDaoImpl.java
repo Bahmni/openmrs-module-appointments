@@ -1,20 +1,19 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
+import org.apache.commons.lang3.StringUtils;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.appointments.dao.AppointmentUnavailabilityDao;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -33,16 +32,15 @@ public class AppointmentUnavailabilityDaoImpl implements AppointmentUnavailabili
     @Override
     public AppointmentUnavailability save(AppointmentUnavailability appointmentUnavailability) {
         Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(appointmentUnavailability);
-        return appointmentUnavailability;
+        return HibernateUtil.saveOrUpdate(currentSession, appointmentUnavailability);
     }
 
     @Override
     public AppointmentUnavailability getByUuid(String uuid) {
         Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentUnavailability.class, "appointmentUnavailability");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        AppointmentUnavailability appointmentUnavailability = (AppointmentUnavailability) criteria.uniqueResult();
+        AppointmentUnavailability appointmentUnavailability = currentSession
+                .createQuery("from AppointmentUnavailability where uuid = :uuid", AppointmentUnavailability.class)
+                .setParameter("uuid", uuid).uniqueResult();
         evictObjectFromSession(currentSession, appointmentUnavailability);
         return appointmentUnavailability;
     }

@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -29,21 +26,17 @@ import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsSer
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
 
 import java.util.*;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -51,11 +44,29 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.MockedStatic;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import org.openmrs.messagesource.MessageSourceService;
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class RecurringAppointmentsControllerTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     @InjectMocks
     private RecurringAppointmentsController recurringAppointmentsController;
@@ -91,16 +102,14 @@ public class RecurringAppointmentsControllerTest {
 
     @Mock
     private AppointmentsService appointmentsService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
-        PowerMockito.mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
         when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        // RestUtil.wrapErrorResponse of webservices.rest 5.x reads the message source to build the error response
+        when(Context.getMessageSourceService()).thenReturn(Mockito.mock(MessageSourceService.class));
     }
 
     @Test
@@ -256,10 +265,10 @@ public class RecurringAppointmentsControllerTest {
     @Test
     public void shouldThrowExceptionIfAppointmentDoesNotExist() {
         when(appointmentsService.getAppointmentByUuid(any(String.class))).thenReturn(null);
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment does not exist");
-
-        recurringAppointmentsController.getAppointmentByUuid("randomUuid");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            recurringAppointmentsController.getAppointmentByUuid("randomUuid");
+        });
+        assertThat(exception.getMessage(), containsString("Appointment does not exist"));
     }
 
     @Test

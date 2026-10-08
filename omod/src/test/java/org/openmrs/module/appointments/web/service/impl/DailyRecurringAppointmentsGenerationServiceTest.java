@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.web.service.impl;
 
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -23,22 +21,21 @@ import java.text.ParseException;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.openmrs.module.appointments.web.helper.DateHelper.getDate;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 public class DailyRecurringAppointmentsGenerationServiceTest {
 
     @InjectMocks
     private DailyRecurringAppointmentsGenerationService dailyRecurringAppointmentsGenerationService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     private AppointmentMapper appointmentMapper;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     private RecurringAppointmentRequest getAppointmentRequest(Date appointmentStartDateTime, Date appointmentEndDateTime) {
@@ -527,7 +524,7 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         }
     }
 
-    @Ignore
+    @Disabled
     public void shouldThrowExceptionWhenFrequencyIsDecreasedAndFutureRecurringAppointmentHaveMissedStatus() {
         Date appointmentStartDateTime = getDate(2020, Calendar.FEBRUARY, 01, 8, 45, 00);
         Date appointmentEndDateTime = getDate(2020, Calendar.FEBRUARY, 01, 9, 15, 00);
@@ -569,10 +566,10 @@ public class DailyRecurringAppointmentsGenerationServiceTest {
         appointmentRecurringPattern.setAppointments(appointments);
 
         String error = "Changes cannot be made as the appointments are already Missed";
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage(error);
-
-        dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        APIException exception = assertThrows(APIException.class, () -> {
+            dailyRecurringAppointmentsGenerationService.removeRecurringAppointments(appointmentRecurringPattern, recurringAppointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString(error));
     }
 
     @Test

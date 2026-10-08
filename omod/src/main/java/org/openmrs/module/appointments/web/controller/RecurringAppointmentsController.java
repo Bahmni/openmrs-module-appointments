@@ -36,7 +36,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import javax.validation.Valid;
+import jakarta.validation.Valid;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;

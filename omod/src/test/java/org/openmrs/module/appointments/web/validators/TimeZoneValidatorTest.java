@@ -1,23 +1,19 @@
 package org.openmrs.module.appointments.web.validators;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TimeZoneValidatorTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private TimeZoneValidator timeZoneValidator = new TimeZoneValidator();
     private Errors errors;
     private String timeZone;
 
-    @Before
+    @BeforeEach
     public void setup() throws Exception {
         timeZone = null;
         errors = new BeanPropertyBindingResult(timeZone, "timeZone");

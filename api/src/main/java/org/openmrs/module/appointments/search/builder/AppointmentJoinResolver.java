@@ -1,13 +1,11 @@
 package org.openmrs.module.appointments.search.builder;
 
-import org.bahmni.search.builder.JoinResolvers;
-import org.bahmni.search.builder.QueryContext;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
 
 public class AppointmentJoinResolver {
 

@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.model;
 
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,9 +15,9 @@ public class AppointmentTest {
         Appointment appointment = getAppointment();
         Set<AppointmentProvider> providersWithResponse =
                 appointment.getProvidersWithResponse(AppointmentProviderResponse.ACCEPTED);
-        Assert.assertEquals(2, providersWithResponse.size());
-        Assert.assertTrue(providersWithResponse.stream().anyMatch(provider -> "1DummyUuidJustForTest".equals(provider.getUuid())));
-        Assert.assertTrue(providersWithResponse.stream().anyMatch(provider -> "2DummyUuidJustForTest".equals(provider.getUuid())));
+        Assertions.assertEquals(2, providersWithResponse.size());
+        Assertions.assertTrue(providersWithResponse.stream().anyMatch(provider -> "1DummyUuidJustForTest".equals(provider.getUuid())));
+        Assertions.assertTrue(providersWithResponse.stream().anyMatch(provider -> "2DummyUuidJustForTest".equals(provider.getUuid())));
     }
 
     @Test
@@ -25,8 +25,8 @@ public class AppointmentTest {
         Appointment appointment = getAppointment();
         Set<AppointmentProvider> providersWithResponse =
                 appointment.getProvidersWithResponse(AppointmentProviderResponse.REJECTED);
-        Assert.assertEquals(1, providersWithResponse.size());
-        Assert.assertTrue(providersWithResponse.stream().anyMatch(provider -> "3DummyUuidJustForTest".equals(provider.getUuid())));
+        Assertions.assertEquals(1, providersWithResponse.size());
+        Assertions.assertTrue(providersWithResponse.stream().anyMatch(provider -> "3DummyUuidJustForTest".equals(provider.getUuid())));
     }
 
     private Appointment getAppointment() {

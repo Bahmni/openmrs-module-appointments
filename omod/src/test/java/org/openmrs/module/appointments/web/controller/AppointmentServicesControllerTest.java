@@ -1,7 +1,7 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -11,7 +11,9 @@ import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AppointmentServicesControllerTest {
 
@@ -25,7 +27,7 @@ public class AppointmentServicesControllerTest {
     private AppointmentServicesController appointmentServicesController;
 
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }
@@ -42,11 +44,13 @@ public class AppointmentServicesControllerTest {
         verify(appointmentServiceMapper, times(1)).constructResponse(appointmentServiceDef);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldThrowErrorIf() {
-        AppointmentServiceDefinition appointmentServiceDef = new AppointmentServiceDefinition();
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("randomUuid")).thenReturn(null);
-        appointmentServicesController.getAppointmentServiceByUuid("randomUuid");
+        assertThrows(RuntimeException.class, () -> {
+            AppointmentServiceDefinition appointmentServiceDef = new AppointmentServiceDefinition();
+            when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("randomUuid")).thenReturn(null);
+            appointmentServicesController.getAppointmentServiceByUuid("randomUuid");
+        });
     }
 
 }

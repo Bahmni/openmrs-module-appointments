@@ -5,9 +5,7 @@
 <hibernate-mapping package="org.openmrs.module.appointments.model">
     <class name="Appointment" table="patient_appointment" batch-size="50">
         <id name="appointmentId" type="java.lang.Integer" column="patient_appointment_id">
-            <generator class="native">
-                <param name="sequence">patient_appointment_id_seq</param>
-            </generator>
+            <generator class="identity"/>
         </id>
         <property name="appointmentNumber" type="java.lang.String" column="appointment_number"/>
         <many-to-one name="patient" class="org.openmrs.Patient" column="patient_id"/>
@@ -25,21 +23,18 @@
         <property name="startDateTime" type="java.util.Date" column="start_date_time"/>
         <property name="endDateTime" type="java.util.Date" column="end_date_time"/>
         <property name="appointmentKind" column="appointment_kind">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentKind</param>
-                <param name="useNamed">true</param>
             </type>
         </property>
         <property name="status" column="status">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentStatus</param>
-                <param name="useNamed">true</param>
             </type>
         </property>
         <property name="priority" column="priority">
-            <type name="org.hibernate.type.EnumType">
+            <type name="org.openmrs.api.db.hibernate.type.StringEnumType">
                 <param name="enumClass">org.openmrs.module.appointments.model.AppointmentPriority</param>
-                <param name="useNamed">true</param>
             </type>
         </property>
         <property name="comments" type="java.lang.String" column="comments"/>
@@ -58,7 +53,7 @@
         <many-to-one name="relatedAppointment" class="org.openmrs.module.appointments.model.Appointment"
                     column="related_appointment_id" unique="true"/>
 
-        <set name="appointmentAudits" cascade="save-update" table="patient_appointment_audit" lazy="true">
+        <set name="appointmentAudits" cascade="merge,persist" table="patient_appointment_audit" lazy="true">
             <key foreign-key="patient_appointment_id" column="appointment_id"/>
             <one-to-many class="AppointmentAudit"/>
         </set>

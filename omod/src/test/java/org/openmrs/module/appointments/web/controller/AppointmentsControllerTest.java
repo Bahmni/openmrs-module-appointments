@@ -1,17 +1,13 @@
 package org.openmrs.module.appointments.web.controller;
 
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openmrs.Patient;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -35,24 +31,42 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.anyList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.anyList;
 import java.util.Map;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.doAnswer;
-import static org.powermock.api.mockito.PowerMockito.mock;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import org.junit.jupiter.api.AfterEach;
+import org.mockito.MockedStatic;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
+import org.openmrs.api.AdministrationService;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class AppointmentsControllerTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        contextMockedStatic.close();
+    }
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -65,13 +79,13 @@ public class AppointmentsControllerTest {
 
     @InjectMocks
     private AppointmentsController appointmentsController;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
+        // RestUtil.wrapErrorResponse of webservices.rest 5.x reads global properties and the message source
+        contextMockedStatic = Mockito.mockStatic(Context.class);
+        when(Context.getMessageSourceService()).thenReturn(mock(MessageSourceService.class));
+        when(Context.getAdministrationService()).thenReturn(mock(AdministrationService.class));
     }
 
     @Test
@@ -185,23 +199,25 @@ public class AppointmentsControllerTest {
         assertEquals(expectedResponse, actualResponse);
     }
 
-    @Test(expected = RuntimeException.class)
+    @Test
     public void shouldThrowExceptionWhenAppointmentsServiceSearchMethodReturnsNull() {
-        AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
-        doAnswer(new Answer() {
-            @Override
-            public Object answer(InvocationOnMock invocationOnMock) {
-                Object[] args = invocationOnMock.getArguments();
-                Errors errors = (Errors) args[1];
-                errors.reject("Either StartDate or EndDate not provided");
-                return null;
-            }
-        }).when(appointmentSearchValidator).validate(any(), any());
+        assertThrows(RuntimeException.class, () -> {
+            AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
+            doAnswer(new Answer() {
+                @Override
+                public Object answer(InvocationOnMock invocationOnMock) {
+                    Object[] args = invocationOnMock.getArguments();
+                    Errors errors = (Errors) args[1];
+                    errors.reject("Either StartDate or EndDate not provided");
+                    return null;
+                }
+            }).when(appointmentSearchValidator).validate(any(), any());
 
-        appointmentsController.search(appointmentSearchRequest);
+            appointmentsController.search(appointmentSearchRequest);
 
-        verify(appointmentsService, never()).search(appointmentSearchRequest);
-        verify(appointmentMapper, never()).constructResponse(anyListOf(Appointment.class));
+            verify(appointmentsService, never()).search(appointmentSearchRequest);
+            verify(appointmentMapper, never()).constructResponse(anyList());
+        });
     }
 
     @Test
@@ -223,13 +239,13 @@ public class AppointmentsControllerTest {
         statusDetails.put("toStatus", "Completed");
         when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(null);
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment does not exist");
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            appointmentsController.transitionAppointment("appointmentUuid", statusDetails);
 
-        appointmentsController.transitionAppointment("appointmentUuid", statusDetails);
-
-        verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
-        verify(appointmentsService, never()).changeStatus(any(), any(), any());
+            verify(appointmentsService, times(1)).getAppointmentByUuid("appointmentUuid");
+            verify(appointmentsService, never()).changeStatus(any(), any(), any());
+        });
+        assertThat(exception.getMessage(), containsString("Appointment does not exist"));
     }
 
     @Test

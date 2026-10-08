@@ -31,7 +31,7 @@
 		<!--  default properties must be set in the hibernate.default.properties -->
 	</bean>
 
-	<bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl"/>
+	<bean id="administrationService" name="administrationService" class="org.openmrs.api.impl.AdministrationServiceImpl" autowire-candidate="false"/>
 	<bean parent="serviceContext">
 		<property name="moduleService">
 			<list merge="true">

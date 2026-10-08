@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -10,24 +9,29 @@ import org.openmrs.User;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentServiceAttributeTypeDao;
 import org.openmrs.module.appointments.model.AppointmentServiceAttributeType;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Context.class)
 public class AppointmentServiceAttributeTypeServiceImplTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     @Mock
     private AppointmentServiceAttributeTypeDao appointmentServiceAttributeTypeDao;
@@ -35,9 +39,9 @@ public class AppointmentServiceAttributeTypeServiceImplTest {
     @InjectMocks
     private AppointmentServiceAttributeTypeServiceImpl attributeTypeService;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test
@@ -80,7 +84,7 @@ public class AppointmentServiceAttributeTypeServiceImplTest {
 
     @Test
     public void shouldRetireAttributeType() {
-        PowerMockito.mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         User authenticatedUser = new User();
         when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
 

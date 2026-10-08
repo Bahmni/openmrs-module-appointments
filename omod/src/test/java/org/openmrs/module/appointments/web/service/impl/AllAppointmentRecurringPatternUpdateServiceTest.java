@@ -1,9 +1,9 @@
 package org.openmrs.module.appointments.web.service.impl;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -24,12 +24,9 @@ import java.util.List;
 import java.util.Set;
 import java.util.TimeZone;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.apache.commons.lang3.time.DateUtils;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -54,11 +51,11 @@ import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.mapper.RecurringPatternMapper;
 import org.openmrs.module.appointments.web.util.AppointmentBuilder;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
 public class AllAppointmentRecurringPatternUpdateServiceTest {
     @Mock
     private AppointmentsService appointmentsService;
@@ -74,16 +71,12 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
 
     @InjectMocks
     AllAppointmentRecurringPatternUpdateService allAppointmentRecurringPatternUpdateService;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Mock
     RecurringAppointmentsService recurringAppointmentsService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
 
     // TODO Add tests for weekly. All tests are for daily
@@ -632,10 +625,10 @@ public class AllAppointmentRecurringPatternUpdateServiceTest {
         RecurringAppointmentRequest recurringAppointmentRequest = new RecurringAppointmentRequest();
         recurringAppointmentRequest.setTimeZone("some time zone");
         recurringAppointmentRequest.setAppointmentRequest(new AppointmentRequest());
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("Invalid appointment for edit");
-
-        allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
+        APIException exception = assertThrows(APIException.class, () -> {
+            allAppointmentRecurringPatternUpdateService.getUpdatedRecurringPattern(recurringAppointmentRequest);
+        });
+        assertThat(exception.getMessage(), containsString("Invalid appointment for edit"));
     }
 
     @Test

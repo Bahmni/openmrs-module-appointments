@@ -1,36 +1,29 @@
 package org.openmrs.module.appointments.notification.impl;
 
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.api.AdministrationService;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
 public class DefaultMailSenderTest {
 
     @Mock
     AdministrationService administrationService;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
     }
-
-    @Rule
-    public ExpectedException expectedEx = ExpectedException.none();
-
     @Test
     public void shouldThrowErrorForInvalidEmailAddress() {
         DefaultMailSender mailSender = new DefaultMailSender(administrationService);
@@ -46,10 +39,11 @@ public class DefaultMailSenderTest {
         when(administrationService.getGlobalProperty("mail.user", "")).thenReturn("test");
         when(administrationService.getGlobalProperty("mail.password", "")).thenReturn("random");
 
-        expectedEx.expect(RuntimeException.class);
-        expectedEx.expectMessage("Error occurred while sending email");
-        expectedEx.expectCause(instanceOf(java.lang.NullPointerException.class));
-        mailSender.send("test", "nothing", new String[] {""}, null, null);
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            mailSender.send("test", "nothing", new String[] {""}, null, null);
+        });
+        assertThat(exception.getMessage(), containsString("Error occurred while sending email"));
+        assertThat(exception.getCause(), instanceOf(java.lang.NullPointerException.class));
     }
 
 }

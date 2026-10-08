@@ -1,24 +1,21 @@
 package org.openmrs.module.appointments.search.builder;
 
-import org.bahmni.search.builder.QueryContext;
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
 import org.bahmni.search.model.SearchCondition;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.AppointmentSearchFields;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -29,20 +26,26 @@ import java.util.List;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.fail;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.Mockito;
 
 /**
  * Unit tests for {@link AppointmentCriteriaBuilder} (which in turn exercises
  * {@link AppointmentJoinResolver} since it is used internally to build joins).
  */
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AppointmentCriteriaBuilderTest {
 
     @Mock
@@ -131,7 +134,7 @@ public class AppointmentCriteriaBuilderTest {
     private static final String VALUE_REFERENCE_VALUE = "India";
     private static final String VALID_DATE = "2024-01-01T10:30:00.000+0530";
 
-    @Before
+    @BeforeEach
     public void setUp() {
         appointmentCriteriaBuilder = new AppointmentCriteriaBuilder();
         predicates = new ArrayList<>();

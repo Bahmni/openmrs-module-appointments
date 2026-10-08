@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.validator.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -10,21 +9,26 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Context.class})
 public class DefaultAppointmentStatusChangeValidatorTest {
+
+    private MockedStatic<Context> contextMockedStatic;
+
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
 
     private Appointment appointment;
 
@@ -34,16 +38,16 @@ public class DefaultAppointmentStatusChangeValidatorTest {
     @InjectMocks
     private DefaultAppointmentStatusChangeValidator validator;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
-        PowerMockito.mockStatic(Context.class);
+        MockitoAnnotations.openMocks(this);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
 
         when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("false");
         when(Context.getAdministrationService()).thenReturn(administrationService);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() {
         appointment = new Appointment();
     }

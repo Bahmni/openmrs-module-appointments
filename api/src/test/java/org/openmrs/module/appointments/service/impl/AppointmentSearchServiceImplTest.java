@@ -4,11 +4,9 @@ import org.bahmni.search.cursor.CursorCodec;
 import org.bahmni.search.model.PaginationRequest;
 import org.bahmni.search.model.SearchCondition;
 import org.bahmni.search.model.SearchRequestMeta;
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -39,8 +37,14 @@ import static org.mockito.Mockito.times;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.mockito.Mockito;
 
-@RunWith(MockitoJUnitRunner.Silent.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AppointmentSearchServiceImplTest {
 
     @Mock
@@ -57,7 +61,7 @@ public class AppointmentSearchServiceImplTest {
 
     private AppointmentSearchServiceImpl searchService;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         searchService = new AppointmentSearchServiceImpl(appointmentSearchDao, validator, responseBuilder, administrationService);
     }

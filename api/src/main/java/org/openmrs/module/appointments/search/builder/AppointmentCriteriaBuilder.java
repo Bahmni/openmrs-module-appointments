@@ -1,7 +1,5 @@
 package org.openmrs.module.appointments.search.builder;
 
-import org.bahmni.search.builder.QueryContext;
-import org.bahmni.search.builder.SearchFieldPredicate;
 import org.bahmni.search.exceptions.InvalidSearchCriteriaException;
 import org.bahmni.search.exceptions.SearchResponseErrorStatus;
 import org.bahmni.search.model.ConditionOperator;
@@ -12,10 +10,10 @@ import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
 import org.openmrs.module.appointments.search.AppointmentSearchFields;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.From;
-import javax.persistence.criteria.Path;
-import javax.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Path;
+import jakarta.persistence.criteria.Predicate;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;

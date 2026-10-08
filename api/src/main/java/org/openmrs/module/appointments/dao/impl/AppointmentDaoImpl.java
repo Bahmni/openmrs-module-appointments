@@ -1,14 +1,9 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.apache.commons.lang.StringUtils;
-import org.hibernate.Criteria;
+import org.apache.commons.lang3.StringUtils;
+import org.hibernate.Hibernate;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Example;
-
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
-import org.hibernate.criterion.Disjunction;
-import org.hibernate.sql.JoinType;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.appointments.dao.AppointmentDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequestModel;
@@ -20,10 +15,26 @@ import org.openmrs.module.appointments.model.AppointmentPriority;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.From;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import jakarta.persistence.metamodel.Attribute;
+import jakarta.persistence.metamodel.SingularAttribute;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class AppointmentDaoImpl implements AppointmentDao {
 
@@ -36,288 +47,241 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public List<Appointment> getAllAppointments(Date forDate) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        Query query = new Query();
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        addNonVoidedPatientCriteria(query);
         if (forDate != null) {
             Date maxDate = new Date(forDate.getTime() + TimeUnit.DAYS.toMillis(1));
-            criteria.add(Restrictions.ge("startDateTime", forDate));
-            criteria.add(Restrictions.lt("endDateTime", maxDate));
+            query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), forDate));
+            query.predicates.add(query.cb.lessThan(query.root.get("endDateTime"), maxDate));
         }
-        return criteria.list();
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAllAppointmentsReminder(String hours) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        Query query = new Query();
+        addNonVoidedPatientCriteria(query);
         if (hours != null) {
             Date minDate = new Date(System.currentTimeMillis() + TimeUnit.HOURS.toMillis(Integer.valueOf(hours)));
             Date maxDate = new Date(minDate.getTime() + TimeUnit.HOURS.toMillis(1));
-            criteria.add(Restrictions.ge("startDateTime", minDate));
-            criteria.add(Restrictions.lt("startDateTime", maxDate));
+            query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), minDate));
+            query.predicates.add(query.cb.lessThan(query.root.get("startDateTime"), maxDate));
         }
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+        query.predicates.add(query.cb.notEqual(query.root.get("status"), AppointmentStatus.Cancelled));
+        return query.list();
     }
 
     @Transactional
     @Override
     public void save(Appointment appointment) {
-        sessionFactory.getCurrentSession().saveOrUpdate(appointment);
+        HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), appointment);
     }
 
     @Override
     public List<Appointment> search(Appointment appointment) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
-                Example.create(appointment).excludeProperty("uuid"));
+        Query query = new Query();
+        addExampleCriteria(query, query.root, appointment, "uuid");
 
-        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
-                Example.create(appointment.getPatient()));
+        if (appointment.getPatient() != null) addExampleCriteria(query, query.root.join("patient"), appointment.getPatient());
 
-        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
-                Example.create(appointment.getLocation()));
+        if (appointment.getLocation() != null) addExampleCriteria(query, query.root.join("location"), appointment.getLocation());
 
-        if (appointment.getService() != null) criteria.createCriteria("service").add(
-                Example.create(appointment.getService()));
+        if (appointment.getService() != null) addExampleCriteria(query, query.root.join("service"), appointment.getService());
 
-        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
-                Example.create(appointment.getProvider()));
+        if (appointment.getProvider() != null) addExampleCriteria(query, query.root.join("provider"), appointment.getProvider());
 
-        return criteria.list();
+        return query.list();
     }
 
     @Override
     public List<Appointment> search(AppointmentSearchRequestModel searchQuery) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        addSearchCriteria(criteria, searchQuery);
-        return criteria.list();
+        Query query = new Query();
+        addSearchCriteria(query, searchQuery);
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("service", appointmentServiceDefinition));
-        criteria.add(Restrictions.gt("endDateTime", new Date()));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+        Query query = new Query();
+        query.predicates.add(query.cb.equal(query.root.get("service"), appointmentServiceDefinition));
+        query.predicates.add(query.cb.greaterThan(query.root.get("endDateTime"), new Date()));
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        addNonVoidedPatientCriteria(query);
+        query.predicates.add(query.cb.notEqual(query.root.get("status"), AppointmentStatus.Cancelled));
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAllFutureAppointmentsForServiceType(AppointmentServiceType appointmentServiceType) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("serviceType", appointmentServiceType));
-        criteria.add(Restrictions.gt("endDateTime", new Date()));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ne("status", AppointmentStatus.Cancelled));
-        return criteria.list();
+        Query query = new Query();
+        query.predicates.add(query.cb.equal(query.root.get("serviceType"), appointmentServiceType));
+        query.predicates.add(query.cb.greaterThan(query.root.get("endDateTime"), new Date()));
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        addNonVoidedPatientCriteria(query);
+        query.predicates.add(query.cb.notEqual(query.root.get("status"), AppointmentStatus.Cancelled));
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("serviceType", "serviceType", JoinType.LEFT_OUTER_JOIN);
-        criteria.add(Restrictions.or(Restrictions.isNull("serviceType"), Restrictions.eq("serviceType.voided", false)));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ge("startDateTime", startDate));
-        criteria.add(Restrictions.le("startDateTime", endDate));
-        criteria.createCriteria("service").add(Example.create(appointmentServiceDefinition));
+        Query query = new Query();
+        Join<Appointment, ?> serviceType = query.root.join("serviceType", JoinType.LEFT);
+        query.predicates.add(query.cb.or(query.root.get("serviceType").isNull(), query.cb.equal(serviceType.get("voided"), false)));
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        addNonVoidedPatientCriteria(query);
+        query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), startDate));
+        query.predicates.add(query.cb.lessThanOrEqualTo(query.root.get("startDateTime"), endDate));
+        addExampleCriteria(query, query.root.join("service"), appointmentServiceDefinition);
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
-            criteria.add(Restrictions.in("status", appointmentStatusFilterList));
+            query.predicates.add(query.root.get("status").in(appointmentStatusFilterList));
         }
-        return criteria.list();
+        return query.list();
 
     }
 
     @Override
     public Appointment getAppointmentByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class, "appointment");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        return (Appointment) criteria.uniqueResult();
+        return sessionFactory.getCurrentSession()
+                .createQuery("from Appointment appointment where appointment.uuid = :uuid", Appointment.class)
+                .setParameter("uuid", uuid)
+                .uniqueResult();
     }
 
     @Override
     public List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+        Query query = new Query();
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        addNonVoidedPatientCriteria(query);
         if (startDate != null) {
-            criteria.add(Restrictions.ge("startDateTime", startDate));
+            query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), startDate));
         }
         if (endDate != null) {
-            criteria.add(Restrictions.lt("endDateTime", endDate));
+            query.predicates.add(query.cb.lessThan(query.root.get("endDateTime"), endDate));
         }
-        return criteria.list();
+        return query.list();
     }
 
     @Override
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        Query query = new Query();
 
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.addOrder(Order.asc("startDateTime"));
-        setDateCriteria(appointmentSearchRequest, criteria);
-        setPatientCriteria(appointmentSearchRequest, criteria);
-        setLimitCriteria(appointmentSearchRequest, criteria);
-        setProviderCriteria(appointmentSearchRequest, criteria);
-        setStatusCriteria(appointmentSearchRequest, criteria);
-        setAppointmentNumberCriteria(appointmentSearchRequest, criteria);
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        query.criteriaQuery.orderBy(query.cb.asc(query.root.get("startDateTime")));
+        setDateCriteria(appointmentSearchRequest, query);
+        setPatientCriteria(appointmentSearchRequest, query);
+        setProviderCriteria(appointmentSearchRequest, query);
+        setStatusCriteria(appointmentSearchRequest, query);
+        setAppointmentNumberCriteria(appointmentSearchRequest, query);
 
 
-        return criteria.list();
+        return query.list(getLimit(appointmentSearchRequest));
     }
 
-    private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+    private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Query query) {
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
-            criteria.createAlias("providers", "providers");
-            criteria.createAlias("providers.provider", "provider");
-            criteria.add(Restrictions.eq("provider.uuid", appointmentSearchRequest.getProviderUuid()));
+            Join<?, ?> provider = query.root.join("providers").join("provider");
+            query.predicates.add(query.cb.equal(provider.get("uuid"), appointmentSearchRequest.getProviderUuid()));
         }
     }
 
-    private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
+    private void setPatientCriteria(AppointmentSearchRequest appointmentSearchRequest, Query query) {
+        Join<Appointment, ?> patient = addNonVoidedPatientCriteria(query);
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getPatientUuid())) {
-            criteria.add(Restrictions.eq("patient.uuid", appointmentSearchRequest.getPatientUuid()));
+            query.predicates.add(query.cb.equal(patient.get("uuid"), appointmentSearchRequest.getPatientUuid()));
         }
     }
 
-    private void setDateCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+    private void setDateCriteria(AppointmentSearchRequest appointmentSearchRequest, Query query) {
         if (appointmentSearchRequest.getStartDate() != null) {
-            criteria.add(Restrictions.ge("startDateTime", appointmentSearchRequest.getStartDate()));
+            query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), appointmentSearchRequest.getStartDate()));
         }
         if (appointmentSearchRequest.getEndDate() != null) {
-            criteria.add(Restrictions.le("startDateTime", appointmentSearchRequest.getEndDate()));
+            query.predicates.add(query.cb.lessThanOrEqualTo(query.root.get("startDateTime"), appointmentSearchRequest.getEndDate()));
         }
     }
 
-    private void setLimitCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+    private Integer getLimit(AppointmentSearchRequest appointmentSearchRequest) {
         if (appointmentSearchRequest.getLimit() > 0) {
-            criteria.setMaxResults(appointmentSearchRequest.getLimit());
+            return appointmentSearchRequest.getLimit();
         } else if (appointmentSearchRequest.getEndDate() == null) {
-            criteria.setMaxResults(APPOINTMENT_SEARCH_DEFAULT_LIMIT);
+            return APPOINTMENT_SEARCH_DEFAULT_LIMIT;
         }
+        return null;
     }
 
-    private void setStatusCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+    private void setStatusCriteria(AppointmentSearchRequest appointmentSearchRequest, Query query) {
         if(appointmentSearchRequest.getStatus() != null) {
-            criteria.add(Restrictions.eq("status", appointmentSearchRequest.getStatus()));
+            query.predicates.add(query.cb.equal(query.root.get("status"), appointmentSearchRequest.getStatus()));
         }
     }
 
     @Override
     public List<Appointment> getAppointmentsForPatient(Integer patientId) {
 
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.patientId", patientId));
-        criteria.add(Restrictions.eq("voided", false));
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.add(Restrictions.ge("startDateTime", DateUtil.getStartOfDay()));
+        Query query = new Query();
+        Join<Appointment, ?> patient = query.root.join("patient");
+        query.predicates.add(query.cb.equal(patient.get("patientId"), patientId));
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        query.predicates.add(query.cb.equal(patient.get("voided"), false));
+        query.predicates.add(query.cb.equal(patient.get("personVoided"), false));
+        query.predicates.add(query.cb.greaterThanOrEqualTo(query.root.get("startDateTime"), DateUtil.getStartOfDay()));
 
-        return criteria.list();
+        return query.list();
     }
 
     @Override
     public List<Appointment> getAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery, Integer limit) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        addSearchCriteria(criteria, searchQuery);
-        criteria.add(Restrictions.isNull("startDateTime"));
-        criteria.add(Restrictions.isNull("endDateTime"));
-        criteria.addOrder(Order.asc("dateCreated"));
-        if (limit != null) {
-            criteria.setMaxResults(limit);
-        }
-        return criteria.list();
+        Query query = new Query();
+        addSearchCriteria(query, searchQuery);
+        query.predicates.add(query.root.get("startDateTime").isNull());
+        query.predicates.add(query.root.get("endDateTime").isNull());
+        query.criteriaQuery.orderBy(query.cb.asc(query.root.get("dateCreated")));
+        return query.list(limit);
     }
 
-    private void addSearchCriteria(Criteria criteria, AppointmentSearchRequestModel searchQuery) {
-        criteria.createAlias("patient", "patient");
-        criteria.add(Restrictions.eq("patient.voided", false));
-        criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.createAlias("service", "service");
+    private void addSearchCriteria(Query query, AppointmentSearchRequestModel searchQuery) {
+        Join<Appointment, ?> patient = addNonVoidedPatientCriteria(query);
+        Join<Appointment, ?> service = query.root.join("service");
 
         if (searchQuery != null) {
             if (searchQuery.getPatientUuids() != null && !searchQuery.getPatientUuids().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getPatientUuids().stream()
-                        .map(patientUuid -> Restrictions.eq("patient.uuid", patientUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                query.predicates.add(anyEqual(query.cb, patient.get("uuid"), searchQuery.getPatientUuids()));
             }
 
             if (searchQuery.getServiceUuids() != null && !searchQuery.getServiceUuids().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getServiceUuids().stream()
-                        .map(serviceUuid -> Restrictions.eq("service.uuid", serviceUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                query.predicates.add(anyEqual(query.cb, service.get("uuid"), searchQuery.getServiceUuids()));
             }
 
             if (searchQuery.getServiceTypeUuids() != null && !searchQuery.getServiceTypeUuids().isEmpty()) {
-                criteria.createAlias("serviceType", "serviceType");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getServiceTypeUuids().stream()
-                        .map(serviceTypeUuid -> Restrictions.eq("serviceType.uuid", serviceTypeUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                Join<Appointment, ?> serviceType = query.root.join("serviceType");
+                query.predicates.add(anyEqual(query.cb, serviceType.get("uuid"), searchQuery.getServiceTypeUuids()));
             }
 
             if (searchQuery.getStatus() != null) {
-                criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(searchQuery.getStatus())));
+                query.predicates.add(query.cb.equal(query.root.get("status"), AppointmentStatus.valueOf(searchQuery.getStatus())));
             }
 
             if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
-                criteria.createAlias("providers", "providers");
-                criteria.createAlias("providers.provider", "provider");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getProviderUuids().stream()
-                        .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                Join<?, ?> provider = query.root.join("providers").join("provider");
+                query.predicates.add(anyEqual(query.cb, provider.get("uuid"), searchQuery.getProviderUuids()));
             }
 
             if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
-                criteria.createAlias("location", "location");
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getLocationUuids().stream()
-                        .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                Join<Appointment, ?> location = query.root.join("location");
+                query.predicates.add(anyEqual(query.cb, location.get("uuid"), searchQuery.getLocationUuids()));
             }
 
             if (searchQuery.getPriorities() != null && !searchQuery.getPriorities().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getPriorities().stream()
-                        .map(priority -> Restrictions.eq("priority", AppointmentPriority.valueOf(priority)))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
+                query.predicates.add(anyEqual(query.cb, query.root.get("priority"), searchQuery.getPriorities().stream()
+                        .map(AppointmentPriority::valueOf).collect(Collectors.toList())));
             }
         }
     }
 
-    private void setAppointmentNumberCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
+    private void setAppointmentNumberCriteria(AppointmentSearchRequest appointmentSearchRequest, Query query) {
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getAppointmentNumber())) {
-            criteria.add(Restrictions.eq("appointmentNumber", appointmentSearchRequest.getAppointmentNumber()));
+            query.predicates.add(query.cb.equal(query.root.get("appointmentNumber"), appointmentSearchRequest.getAppointmentNumber()));
         }
     }
 
@@ -326,10 +290,80 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (uuids == null || uuids.isEmpty()) {
             return Collections.emptyList();
         }
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.in("uuid", uuids));
-        criteria.add(Restrictions.eq("voided", false));
-        return criteria.list();
+        Query query = new Query();
+        query.predicates.add(query.root.get("uuid").in(uuids));
+        query.predicates.add(query.cb.equal(query.root.get("voided"), false));
+        return query.list();
+    }
+
+    private Join<Appointment, ?> addNonVoidedPatientCriteria(Query query) {
+        Join<Appointment, ?> patient = query.root.join("patient");
+        query.predicates.add(query.cb.equal(patient.get("voided"), false));
+        query.predicates.add(query.cb.equal(patient.get("personVoided"), false));
+        return patient;
+    }
+
+    private Predicate anyEqual(CriteriaBuilder cb, jakarta.persistence.criteria.Path<?> path, List<?> values) {
+        return cb.or(values.stream().map(value -> cb.equal(path, value)).toArray(Predicate[]::new));
+    }
+
+    /**
+     * Replacement for the removed Hibernate {@code Example.create(example)} query-by-example criterion: adds an equality
+     * restriction for every non-null basic (non-identifier, non-association) property of the example entity.
+     */
+    private void addExampleCriteria(Query query, From<?, ?> from, Object example, String... excludedProperties) {
+        Object entity = Hibernate.unproxy(example);
+        List<String> excluded = Arrays.asList(excludedProperties);
+        for (SingularAttribute<?, ?> attribute : sessionFactory.getMetamodel().entity(Hibernate.getClass(entity)).getSingularAttributes()) {
+            if (attribute.isId() || attribute.isVersion()
+                    || attribute.getPersistentAttributeType() != Attribute.PersistentAttributeType.BASIC
+                    || excluded.contains(attribute.getName())) {
+                continue;
+            }
+            Object value = getPropertyValue(entity, attribute.getJavaMember());
+            if (value != null) {
+                query.predicates.add(query.cb.equal(from.get(attribute.getName()), value));
+            }
+        }
+    }
+
+    private Object getPropertyValue(Object entity, Member member) {
+        try {
+            if (member instanceof Method) {
+                Method method = (Method) member;
+                method.setAccessible(true);
+                return method.invoke(entity);
+            }
+            Field field = (Field) member;
+            field.setAccessible(true);
+            return field.get(entity);
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Unable to read property " + member.getName() + " of " + entity.getClass(), e);
+        }
+    }
+
+    private class Query {
+
+        private final CriteriaBuilder cb = sessionFactory.getCurrentSession().getCriteriaBuilder();
+
+        private final CriteriaQuery<Appointment> criteriaQuery = cb.createQuery(Appointment.class);
+
+        private final Root<Appointment> root = criteriaQuery.from(Appointment.class);
+
+        private final List<Predicate> predicates = new ArrayList<>();
+
+        private List<Appointment> list() {
+            return list(null);
+        }
+
+        private List<Appointment> list(Integer maxResults) {
+            criteriaQuery.where(predicates.toArray(new Predicate[0]));
+            TypedQuery<Appointment> typedQuery = sessionFactory.getCurrentSession().createQuery(criteriaQuery);
+            if (maxResults != null) {
+                typedQuery.setMaxResults(maxResults);
+            }
+            return typedQuery.getResultList();
+        }
     }
 
 }

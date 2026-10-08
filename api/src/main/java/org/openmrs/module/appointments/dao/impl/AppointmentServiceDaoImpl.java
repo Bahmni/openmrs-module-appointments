@@ -1,23 +1,22 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.Criteria;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Restrictions;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentServiceSearchParams;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.TypedQuery;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.TypedQuery;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Join;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,27 +30,23 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
 
     @Override
     public List<AppointmentServiceDefinition> getAllAppointmentServices(boolean includeVoided) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceDefinition.class, "appointmentService");
-        if(!includeVoided) {
-            criteria.add(Restrictions.eq("voided", includeVoided));
-        }
-        return criteria.list();
+        String hql = "from AppointmentServiceDefinition appointmentService" + (includeVoided ? "" : " where appointmentService.voided = false");
+        return sessionFactory.getCurrentSession().createQuery(hql, AppointmentServiceDefinition.class).list();
     }
 
     @Transactional
     @Override
     public AppointmentServiceDefinition save(AppointmentServiceDefinition appointmentServiceDefinition) {
         Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(appointmentServiceDefinition);
-        return appointmentServiceDefinition;
+        return HibernateUtil.saveOrUpdate(currentSession, appointmentServiceDefinition);
     }
 
     @Override
     public AppointmentServiceDefinition getAppointmentServiceByUuid(String uuid) {
         Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
+        AppointmentServiceDefinition appointmentServiceDefinition = currentSession
+                .createQuery("from AppointmentServiceDefinition where uuid = :uuid", AppointmentServiceDefinition.class)
+                .setParameter("uuid", uuid).uniqueResult();
         evictObjectFromSession(currentSession, appointmentServiceDefinition);
         return appointmentServiceDefinition;
     }
@@ -59,19 +54,18 @@ public class AppointmentServiceDaoImpl implements AppointmentServiceDao{
     @Override
     public AppointmentServiceDefinition getNonVoidedAppointmentServiceByName(String serviceName) {
         Session currentSession = sessionFactory.getCurrentSession();
-        Criteria criteria = currentSession.createCriteria(AppointmentServiceDefinition.class, "appointmentServiceDefinition");
-        criteria.add(Restrictions.eq("name", serviceName));
-        criteria.add(Restrictions.eq("voided", false));
-        AppointmentServiceDefinition appointmentServiceDefinition = (AppointmentServiceDefinition) criteria.uniqueResult();
+        AppointmentServiceDefinition appointmentServiceDefinition = currentSession
+                .createQuery("from AppointmentServiceDefinition where name = :name and voided = false", AppointmentServiceDefinition.class)
+                .setParameter("name", serviceName).uniqueResult();
         evictObjectFromSession(currentSession, appointmentServiceDefinition);
         return appointmentServiceDefinition;
     }
 
     @Override
     public AppointmentServiceType getAppointmentServiceTypeByUuid(String uuid) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentServiceType.class, "appointmentServiceType");
-        criteria.add(Restrictions.eq("uuid", uuid));
-        return (AppointmentServiceType) criteria.uniqueResult();
+        return sessionFactory.getCurrentSession()
+                .createQuery("from AppointmentServiceType where uuid = :uuid", AppointmentServiceType.class)
+                .setParameter("uuid", uuid).uniqueResult();
     }
 
     @Override

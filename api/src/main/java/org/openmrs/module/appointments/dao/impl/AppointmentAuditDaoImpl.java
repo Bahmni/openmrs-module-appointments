@@ -1,9 +1,7 @@
 package org.openmrs.module.appointments.dao.impl;
 
-import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.Restrictions;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentAudit;
@@ -24,24 +22,28 @@ public class AppointmentAuditDaoImpl implements AppointmentAuditDao{
 	@Transactional
 	@Override
 	public void save(AppointmentAudit appointmentAuditEvent) {
-		sessionFactory.getCurrentSession().saveOrUpdate(appointmentAuditEvent);
+		HibernateUtil.saveOrUpdate(sessionFactory.getCurrentSession(), appointmentAuditEvent);
 	}
 
 	@Override
 	public List<AppointmentAudit> getAppointmentHistoryForAppointment(Appointment appointment) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
-		criteria.add(Restrictions.eq("appointment", appointment));
-		return criteria.list();
+		return sessionFactory.getCurrentSession()
+				.createQuery("from AppointmentAudit appointmentAudit where appointmentAudit.appointment = :appointment",
+						AppointmentAudit.class)
+				.setParameter("appointment", appointment)
+				.list();
 	}
 
 	@Override
 	public AppointmentAudit getPriorStatusChangeEvent(Appointment appointment) {
-		Criteria criteria = sessionFactory.getCurrentSession().createCriteria(AppointmentAudit.class, "appointmentAudit");
-		criteria.add(Restrictions.eq("appointment", appointment));
-		criteria.add(Restrictions.ne("status", appointment.getStatus()));
-		criteria.addOrder(Order.desc("dateCreated"));
-		criteria.setMaxResults(1);
-		return (AppointmentAudit) criteria.uniqueResult();
+		return sessionFactory.getCurrentSession()
+				.createQuery("from AppointmentAudit appointmentAudit where appointmentAudit.appointment = :appointment"
+						+ " and appointmentAudit.status <> :status order by appointmentAudit.dateCreated desc",
+						AppointmentAudit.class)
+				.setParameter("appointment", appointment)
+				.setParameter("status", appointment.getStatus())
+				.setMaxResults(1)
+				.uniqueResult();
 	}
 
 }

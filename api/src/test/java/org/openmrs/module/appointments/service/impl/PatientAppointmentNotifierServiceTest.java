@@ -1,8 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Patient;
@@ -10,18 +9,15 @@ import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.model.Appointment;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.Collections;
 
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
 public class PatientAppointmentNotifierServiceTest {
 
     private PatientAppointmentNotifierService notifierService;
@@ -29,9 +25,9 @@ public class PatientAppointmentNotifierServiceTest {
     @Mock
     private AppointmentEventNotifier appointmentEventNotifier;
 
-    @Before
+    @BeforeEach
     public void init() {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         notifierService =  new PatientAppointmentNotifierService(Collections.singletonList(appointmentEventNotifier));
     }
 

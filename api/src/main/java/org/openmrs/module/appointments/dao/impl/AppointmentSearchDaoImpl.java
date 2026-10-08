@@ -7,15 +7,15 @@ import org.hibernate.SessionFactory;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
-import org.bahmni.search.builder.QueryContext;
+import org.openmrs.module.appointments.search.builder.QueryContext;
 import org.openmrs.module.appointments.search.builder.AppointmentCriteriaBuilder;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Fetch;
-import javax.persistence.criteria.JoinType;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Fetch;
+import jakarta.persistence.criteria.JoinType;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 

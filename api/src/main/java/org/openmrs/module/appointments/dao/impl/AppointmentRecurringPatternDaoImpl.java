@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.dao.impl;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.openmrs.api.db.hibernate.HibernateUtil;
 import org.openmrs.module.appointments.dao.AppointmentRecurringPatternDao;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,12 +20,12 @@ public class AppointmentRecurringPatternDaoImpl implements AppointmentRecurringP
     @Transactional
     @Override
     public void save(AppointmentRecurringPattern appointmentRecurringPattern) {
-        session().saveOrUpdate(appointmentRecurringPattern);
+        HibernateUtil.saveOrUpdate(session(), appointmentRecurringPattern);
     }
 
     @Override
     public List<AppointmentRecurringPattern> getAllAppointmentRecurringPatterns() {
-        return session().createCriteria(AppointmentRecurringPattern.class).list();
+        return session().createQuery("from AppointmentRecurringPattern", AppointmentRecurringPattern.class).list();
     }
 
     private Session session() {

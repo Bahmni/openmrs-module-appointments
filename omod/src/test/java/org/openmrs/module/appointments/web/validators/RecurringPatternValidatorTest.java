@@ -1,21 +1,17 @@
 package org.openmrs.module.appointments.web.validators;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.web.contract.RecurringPattern;
 import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.Errors;
 
 import java.util.Arrays;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class RecurringPatternValidatorTest {
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
     private RecurringPatternValidator recurringPatternValidator = new RecurringPatternValidator();
     private Errors errors;
     private RecurringPattern recurringPattern;
@@ -28,7 +24,7 @@ public class RecurringPatternValidatorTest {
         return recurringPattern;
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         recurringPattern = getRecurringPattern();
         errors = new BeanPropertyBindingResult(recurringPattern, "recurringPattern");

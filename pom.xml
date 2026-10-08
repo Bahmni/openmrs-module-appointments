@@ -4,7 +4,7 @@
 
 	<groupId>org.bahmni.module</groupId>
 	<artifactId>appointments</artifactId>
-	<version>2.3.0-SNAPSHOT</version>
+	<version>3.0.0-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>Bahmni Appointment Scheduling</name>
 	<description>OpenMRS Module Scheduling and managing Appointments.</description>
@@ -37,21 +37,14 @@
     </modules>
 
 	<properties>
-		<openmrs.platform.version>2.4.2</openmrs.platform.version>
-		<!--test dependencies-->
-		<junitVersion>4.13</junitVersion>
-		<powerMockVersion>2.0.7</powerMockVersion>
-		<hamcrestVersion>2.2</hamcrestVersion>
-		<mockitoVersion>3.5.11</mockitoVersion>
+		<openmrs.platform.version>3.0.0-SNAPSHOT</openmrs.platform.version>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
-		<javaxMail.version>1.6.2</javaxMail.version>
-		<servletApi.version>3.0.1</servletApi.version>
-		<webServices.version>2.29.0</webServices.version>
+		<webServices.version>5.0.0-SNAPSHOT</webServices.version>
 		<communications.version>1.2.0</communications.version>
-		<teleconsultation.version>2.0.0</teleconsultation.version>
+		<teleconsultation.version>3.0.0-SNAPSHOT</teleconsultation.version>
 		<webClients.version>1.0.0</webClients.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -63,9 +56,10 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
+					<version>3.13.0</version>
 					<configuration>
-						<target>1.8</target>
-						<source>1.8</source>
+						<release>21</release>
+						<parameters>true</parameters>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -94,7 +88,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.10</version>
+					<version>3.5.4</version>
 					<configuration>
 						<includes>
 							<include>**/*Test.java</include>
@@ -102,6 +96,10 @@
 						<excludes>
 							<exclude>**/BaseIntegrationTest.java</exclude>
 						</excludes>
+						<!-- the communication module is optional and is not available for Platform 3.0, so test without it -->
+						<classpathDependencyExcludes>
+							<classpathDependencyExclude>org.bahmni.module:communication-api</classpathDependencyExclude>
+						</classpathDependencyExcludes>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -157,16 +155,11 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito2</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
+				<groupId>org.openmrs</groupId>
+				<artifactId>openmrs-bom</artifactId>
+				<version>${openmrs.platform.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.bahmni.module</groupId>
@@ -226,12 +219,6 @@
 				<artifactId>openmrs-web</artifactId>
 				<version>${openmrs.platform.version}</version>
 				<scope>provided</scope>
-				<exclusions>
-					<exclusion>
-						<groupId>javax.servlet</groupId>
-						<artifactId>servlet-api</artifactId>
-					</exclusion>
-				</exclusions>
 			</dependency>
 
 			<dependency>
@@ -239,36 +226,6 @@
 				<artifactId>openmrs-web</artifactId>
 				<version>${openmrs.platform.version}</version>
 				<type>test-jar</type>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>junit</groupId>
-				<artifactId>junit</artifactId>
-				<version>${junitVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-core</artifactId>
-					</exclusion>
-				</exclusions>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.hamcrest</groupId>
-				<artifactId>hamcrest-all</artifactId>
-				<version>${hamcrestVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.mockito</groupId>
-				<artifactId>mockito-core</artifactId>
-				<version>${mockitoVersion}</version>
-				<exclusions>
-					<exclusion>
-						<groupId>org.hamcrest</groupId>
-						<artifactId>hamcrest-core</artifactId>
-					</exclusion>
-				</exclusions>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -323,7 +280,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>2.17</version>
+						<version>3.5.4</version>
 						<executions>
 							<execution>
 								<goals>

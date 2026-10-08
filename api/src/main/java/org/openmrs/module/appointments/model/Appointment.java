@@ -1,6 +1,6 @@
 package org.openmrs.module.appointments.model;
 
-import org.apache.commons.lang.time.DateUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.openmrs.BaseOpenmrsData;
 import org.openmrs.Encounter;
 import org.openmrs.Location;

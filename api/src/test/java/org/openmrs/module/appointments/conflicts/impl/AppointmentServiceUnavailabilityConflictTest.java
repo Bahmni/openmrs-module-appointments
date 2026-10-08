@@ -1,11 +1,9 @@
 package org.openmrs.module.appointments.conflicts.impl;
 
-import org.junit.Before;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.Location;
 import org.openmrs.Provider;
 import org.openmrs.module.appointments.model.Appointment;
@@ -26,14 +24,20 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.helper.DateHelper.getDate;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.Mockito;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 public class AppointmentServiceUnavailabilityConflictTest {
 
     @InjectMocks
@@ -42,7 +46,7 @@ public class AppointmentServiceUnavailabilityConflictTest {
     @Mock
     private AppointmentUnavailabilityDao appointmentUnavailabilityDao;
 
-    @Before
+    @BeforeEach
     public void setUp() {
         when(appointmentUnavailabilityDao.getAll(any(AppointmentUnavailabilitySearchParams.class)))
                 .thenReturn(Collections.emptyList());

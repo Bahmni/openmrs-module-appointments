@@ -1,9 +1,9 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.type.TypeReference;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.Test;
+import com.fasterxml.jackson.core.type.TypeReference;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.module.appointments.service.SpecialityService;
 import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,7 @@ public class SpecialityControllerIT extends BaseIntegrationTest{
     @Autowired
     SpecialityService specialityService;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("specialityTestData.xml");
     }

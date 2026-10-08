@@ -1,8 +1,8 @@
 package org.openmrs.module.appointments.dao.impl;
 
 import org.hibernate.SessionFactory;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.Encounter;
 import org.openmrs.api.EncounterService;
 import org.openmrs.api.context.Context;
@@ -17,7 +17,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
@@ -33,7 +33,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     @Autowired
     SessionFactory sessionFactory;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
     }
@@ -503,7 +503,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
             .findFirst()
             .orElse(null);
 
-        assertNotNull("Test data should have appointments with providers", appointmentWithProvider);
+        assertNotNull(appointmentWithProvider, "Test data should have appointments with providers");
 
         String providerUuid = appointmentWithProvider.getProviders().iterator().next().getProvider().getUuid();
 
@@ -552,8 +552,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         for (int i = 0; i < appointments.size() - 1; i++) {
             Date currentDate = appointments.get(i).getDateCreated();
             Date nextDate = appointments.get(i + 1).getDateCreated();
-            assertTrue("Appointments should be ordered by dateCreated ascending",
-                currentDate.compareTo(nextDate) <= 0);
+            assertTrue(currentDate.compareTo(nextDate) <= 0, "Appointments should be ordered by dateCreated ascending");
         }
     }
 

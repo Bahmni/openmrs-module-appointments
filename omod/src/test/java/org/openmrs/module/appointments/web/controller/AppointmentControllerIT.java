@@ -1,11 +1,9 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.apache.commons.lang.time.DateUtils;
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.apache.commons.lang3.time.DateUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -26,9 +24,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AppointmentControllerIT extends BaseIntegrationTest {
     @Autowired
@@ -39,11 +38,7 @@ public class AppointmentControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
         Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "false");

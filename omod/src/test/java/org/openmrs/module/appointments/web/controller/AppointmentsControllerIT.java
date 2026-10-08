@@ -1,13 +1,13 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -29,9 +29,12 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class AppointmentsControllerIT extends BaseIntegrationTest {
 
@@ -40,14 +43,18 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
+        // the role privilege cache loads roles on a background thread with its own session, which cannot see this
+        // test's uncommitted rows, so commit them (tearDown deletes them again)
+        getConnection().commit();
         Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "false");
+    }
+
+    @AfterEach
+    public void tearDown() {
+        deleteAllData();
     }
 
     @Test
@@ -195,20 +202,20 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     public void should_throwExceptionForInvalidStatusChange() throws Exception {
         String content = "{ \"toStatus\": \"Completed\"}";
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment status can not be changed from Missed to Completed");
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13555/status-change", content));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/75504r42-3ca8-11e3-bf2b-0800271c13555/status-change", content));
+        });
+        assertThat(exception.getMessage(), containsString("Appointment status can not be changed from Missed to Completed"));
     }
 
     @Test
     public void should_throwExceptionForInvalidAppointment() throws Exception {
         String content = "{ \"toStatus\": \"Scheduled\"}";
 
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment does not exist");
-
-        MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/status-change", content));
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            MockHttpServletResponse response = handle(newPostRequest("/rest/v1/appointments/c36006e5-9fbb-4f20-866b-0ece245615a8/status-change", content));
+        });
+        assertThat(exception.getMessage(), containsString("Appointment does not exist"));
     }
 
     @Test

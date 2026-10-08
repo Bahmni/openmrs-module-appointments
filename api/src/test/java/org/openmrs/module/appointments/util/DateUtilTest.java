@@ -1,9 +1,9 @@
 package org.openmrs.module.appointments.util;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.openmrs.module.appointments.util.DateUtil.convertToLocalDateFromUTC;
 import static org.openmrs.module.appointments.util.DateUtil.getEpochTime;
 
@@ -15,7 +15,7 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class DateUtilTest {
     @Test

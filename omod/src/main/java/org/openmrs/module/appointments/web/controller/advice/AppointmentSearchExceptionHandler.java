@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -39,10 +40,11 @@ public class AppointmentSearchExceptionHandler {
         return errorResponse(currentEntity(webRequest), HttpStatus.UNAUTHORIZED.value(), message);
     }
 
-    @ExceptionHandler(APIAuthenticationException.class)
+    // Platform 3.0's @Authorized denies with Spring Security's AccessDeniedException
+    @ExceptionHandler({APIAuthenticationException.class, AccessDeniedException.class})
     @ResponseBody
     public ResponseEntity<AppointmentSearchResponse> handleAccessDenied(
-            APIAuthenticationException e, WebRequest webRequest) {
+            RuntimeException e, WebRequest webRequest) {
         String message = e.getMessage() != null ? e.getMessage() : "Access denied";
         return errorResponse(currentEntity(webRequest), HttpStatus.FORBIDDEN.value(), message);
     }

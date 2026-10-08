@@ -12,6 +12,8 @@
 
 	<activator>org.openmrs.module.appointments.AppointmentsActivator</activator>
 
+	<require_version>3.0.0</require_version>
+
 	<require_modules>
 		<require_module>org.openmrs.module.webservices.rest</require_module>
 		<require_module>org.bahmni.module.teleconsultation</require_module>

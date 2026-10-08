@@ -1,10 +1,7 @@
 package org.openmrs.module.appointments.service.impl;
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.Location;
@@ -19,10 +16,6 @@ import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.LocalDate;
@@ -31,23 +24,31 @@ import java.util.List;
 
 import static java.util.Collections.emptyList;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import static org.mockito.Mockito.mockStatic;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.junit.jupiter.api.AfterEach;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
 public class AppointmentUnavailabilityServiceImplTest {
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
+    private MockedStatic<Context> contextMockedStatic;
 
+    @AfterEach
+    public void closeStaticMocks() {
+        if (contextMockedStatic != null) {
+            contextMockedStatic.close();
+        }
+    }
     @Mock
     private AppointmentUnavailabilityDao appointmentUnavailabilityDao;
 
@@ -64,15 +65,15 @@ public class AppointmentUnavailabilityServiceImplTest {
 
     private User authenticatedUser;
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
-        MockitoAnnotations.initMocks(this);
+        MockitoAnnotations.openMocks(this);
         service = new AppointmentUnavailabilityServiceImpl(appointmentUnavailabilityDao, appointmentServiceDefinitionService);
-        mockStatic(Context.class);
+        contextMockedStatic = Mockito.mockStatic(Context.class);
         authenticatedUser = new User(1);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
-        PowerMockito.when(Context.getLocationService()).thenReturn(locationService);
-        PowerMockito.when(Context.getProviderService()).thenReturn(providerService);
+        Mockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        Mockito.when(Context.getLocationService()).thenReturn(locationService);
+        Mockito.when(Context.getProviderService()).thenReturn(providerService);
     }
 
     @Test
@@ -93,18 +94,18 @@ public class AppointmentUnavailabilityServiceImplTest {
 
     @Test
     public void shouldRejectEmptyList() {
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("at least one unavailability block");
-
-        service.save(new ArrayList<>());
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(new ArrayList<>());
+        });
+        assertThat(exception.getMessage(), containsString("at least one unavailability block"));
     }
 
     @Test
     public void shouldRejectNullList() {
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("at least one unavailability block");
-
-        service.save(null);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(null);
+        });
+        assertThat(exception.getMessage(), containsString("at least one unavailability block"));
     }
 
     @Test
@@ -114,10 +115,10 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] location is invalid or retired");
-
-        service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] location is invalid or retired"));
     }
 
     @Test
@@ -131,10 +132,10 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
                 .thenReturn(appointmentService);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] service is invalid or voided");
-
-        this.service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            this.service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] service is invalid or voided"));
     }
 
     @Test
@@ -149,10 +150,10 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("service-uuid"))
                 .thenReturn(appointmentService);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] Service does not belong to the specified location");
-
-        this.service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            this.service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] Service does not belong to the specified location"));
     }
 
     @Test
@@ -165,10 +166,10 @@ public class AppointmentUnavailabilityServiceImplTest {
         when(locationService.getLocation(1)).thenReturn(location);
         when(providerService.getProvider(1)).thenReturn(provider);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] provider is invalid or retired");
-
-        service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] provider is invalid or retired"));
     }
 
     @Test
@@ -182,10 +183,10 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] End date/time must be after start date/time");
-
-        service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] End date/time must be after start date/time"));
     }
 
     @Test
@@ -200,10 +201,10 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] End date/time must be after start date/time");
-
-        service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] End date/time must be after start date/time"));
     }
 
     @Test
@@ -215,10 +216,10 @@ public class AppointmentUnavailabilityServiceImplTest {
 
         when(locationService.getLocation(1)).thenReturn(location);
 
-        expectedException.expect(APIException.class);
-        expectedException.expectMessage("[0] Cannot create unavailability block that has already ended");
-
-        service.save(unavailabilities);
+        APIException exception = assertThrows(APIException.class, () -> {
+            service.save(unavailabilities);
+        });
+        assertThat(exception.getMessage(), containsString("[0] Cannot create unavailability block that has already ended"));
     }
 
     @Test

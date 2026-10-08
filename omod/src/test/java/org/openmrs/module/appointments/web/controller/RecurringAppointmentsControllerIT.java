@@ -1,11 +1,9 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.type.TypeReference;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentAuditDao;
 import org.openmrs.module.appointments.model.Appointment;
@@ -24,10 +22,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 
 public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
@@ -39,11 +40,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
     @Autowired
     AppointmentAuditDao appointmentAuditDao;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentTestData.xml");
         Context.getAdministrationService().setGlobalProperty("disableDefaultAppointmentValidations", "false");
@@ -405,12 +402,12 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
 
     @Test
     public void shouldThrowExceptionIfAppointmentDoesNotExist() throws Exception {
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectMessage("Appointment does not exist");
-        deserialize(handle(newGetRequest("/rest/v1/recurring-appointments",
-                new Parameter("uuid", "randomUuid"))),
-                new TypeReference<RecurringAppointmentDefaultResponse>() {});
-
+        RuntimeException exception = assertThrows(RuntimeException.class, () -> {
+            deserialize(handle(newGetRequest("/rest/v1/recurring-appointments",
+                    new Parameter("uuid", "randomUuid"))),
+                    new TypeReference<RecurringAppointmentDefaultResponse>() {});
+        });
+        assertThat(exception.getMessage(), containsString("Appointment does not exist"));
     }
 
     @Test
@@ -487,7 +484,7 @@ public class RecurringAppointmentsControllerIT extends BaseIntegrationTest {
     }
 
     @Test
-    @Ignore
+    @Disabled
     // This test is hard to understand and makes an assumption of IST timezone which would suffer failure if the execution env is set to universal
     //FIXME rewrite and fix test
     public void shouldReturnResponseForRecurringAppointmentsForNoConflicts() throws Exception {

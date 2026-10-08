@@ -1,10 +1,8 @@
 package org.openmrs.module.appointments.web.controller;
 
 
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.openmrs.module.appointments.model.Speciality;
@@ -13,9 +11,11 @@ import org.openmrs.module.appointments.service.SpecialityService;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class SpecialityControllerTest {
 
@@ -24,13 +24,7 @@ public class SpecialityControllerTest {
 
     @InjectMocks
     private SpecialityController controller;
-
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
-
-
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         initMocks(this);
     }

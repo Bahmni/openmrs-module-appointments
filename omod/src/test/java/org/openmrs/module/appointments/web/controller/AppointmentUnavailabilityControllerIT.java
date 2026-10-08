@@ -1,9 +1,13 @@
 package org.openmrs.module.appointments.web.controller;
 
-import org.codehaus.jackson.map.ObjectMapper;
-import org.junit.Before;
-import org.junit.Test;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.openmrs.Person;
+import org.openmrs.PersonName;
+import org.openmrs.User;
 import org.openmrs.api.APIException;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentUnavailability;
 import org.openmrs.module.appointments.search.param.AppointmentUnavailabilitySearchParams;
 import org.openmrs.module.appointments.service.AppointmentUnavailabilityService;
@@ -11,17 +15,20 @@ import org.openmrs.module.appointments.web.BaseIntegrationTest;
 import org.openmrs.module.appointments.web.contract.AppointmentUnavailabilityResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.web.context.WebApplicationContext;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
 public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
 
@@ -31,6 +38,9 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
     @Autowired
     private AppointmentUnavailabilityService service;
 
+    @Autowired
+    private WebApplicationContext webApplicationContext;
+
     private ObjectMapper objectMapper = new ObjectMapper();
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
@@ -38,7 +48,7 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         return LocalDate.now().plusDays(plusDays).format(DATE_FORMATTER);
     }
 
-    @Before
+    @BeforeEach
     public void setUp() throws Exception {
         executeDataSet("appointmentUnavailabilityTestData.xml");
     }
@@ -373,5 +383,34 @@ public class AppointmentUnavailabilityControllerIT extends BaseIntegrationTest {
         String secondBlockUuid = secondCreatedBlock.getUuid();
         AppointmentUnavailability notVoidedBlock = service.getByUuid(secondBlockUuid);
         assertFalse(notVoidedBlock.getVoided());
+    }
+
+    @Test
+    public void shouldRespondForbiddenWhenTheUserLacksTheGetAppointmentUnavailabilityPrivilege() throws Exception {
+        Person person = new Person();
+        person.setGender("F");
+        person.addName(new PersonName("Unavailability", null, "Denied"));
+        User user = new User(person);
+        user.setUsername("unavailability-denied");
+        Context.getUserService().createUser(user, "Denied123");
+        Context.logout();
+        Context.authenticate("unavailability-denied", "Denied123");
+
+        assertEquals(403, getAllThroughTheDispatcher().getStatus());
+    }
+
+    @Test
+    public void shouldRespondUnauthorizedWhenTheUserIsNotLoggedIn() throws Exception {
+        Context.logout();
+
+        assertEquals(401, getAllThroughTheDispatcher().getStatus());
+    }
+
+    // handle() calls the handler adapter directly, so the denial would skip exception resolution. MockMvc dispatches
+    // like the real DispatcherServlet, so the denial meets this controller's @ExceptionHandler and BaseRestController's
+    // the way it does on a server
+    private MockHttpServletResponse getAllThroughTheDispatcher() throws Exception {
+        return MockMvcBuilders.webAppContextSetup(webApplicationContext).build()
+                .perform(get("/rest/v1/appointmentUnavailability")).andReturn().getResponse();
     }
 }
