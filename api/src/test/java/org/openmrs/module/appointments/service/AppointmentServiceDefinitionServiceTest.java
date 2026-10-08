@@ -3,11 +3,11 @@ package org.openmrs.module.appointments.service;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -52,7 +52,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotBeAbleToSaveServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(manageUser, password);
             AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
             appointmentServiceDefinition.setName("service");
@@ -68,7 +68,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotGetAllAppointmentServicesIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             assertNotNull(appointmentServiceDefinitionService.getAllAppointmentServices(false));
         });
@@ -82,7 +82,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotGetAppointmentServiceByUuidIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceByUuid("uuid"));
         });
@@ -99,7 +99,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotBeAbleToDeleteServiceIfUserDoesNotHaveManageServicesPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(readOnlyUser, password);
             AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
             appointmentServiceDefinition.setId(1);
@@ -116,7 +116,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotGetAppointmentServiceTypeByUuidIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             assertEquals(null, appointmentServiceDefinitionService.getAppointmentServiceTypeByUuid("serviceTypeUuid"));
         });
@@ -132,7 +132,7 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleContextSe
 
     @Test
     public void shouldNotCalculateCurrentLoadIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
             appointmentServiceDefinition.setId(1);

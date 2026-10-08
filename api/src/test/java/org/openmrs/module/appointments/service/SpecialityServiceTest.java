@@ -6,11 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.openmrs.api.APIAuthenticationException;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Speciality;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @org.springframework.test.context.ContextConfiguration(locations = {"classpath:TestingApplicationContext.xml"}, inheritLocations = true)
@@ -50,7 +50,7 @@ public class SpecialityServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetSpecialityByUuidIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             specialityService.getSpecialityByUuid("uuid");
         });
@@ -64,7 +64,7 @@ public class SpecialityServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAllSpecialitiesIfUserHasNoPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, password);
             specialityService.getAllSpecialities();
         });
@@ -80,7 +80,7 @@ public class SpecialityServiceTest extends BaseModuleContextSensitiveTest {
     
     @Test
     public void shouldNotBeAbleToSaveSpecialityIfUserDoesNotHaveManageSpecialitiesPrivilege() throws Exception {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(manageUser, password);
             Speciality speciality = new Speciality();
             speciality.setName("speciality");

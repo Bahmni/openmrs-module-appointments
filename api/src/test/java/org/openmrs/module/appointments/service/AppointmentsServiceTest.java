@@ -20,6 +20,7 @@ import org.openmrs.module.appointments.service.impl.PatientAppointmentNotifierSe
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.test.jupiter.BaseModuleContextSensitiveTest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.text.ParseException;
 import java.util.Date;
@@ -166,7 +167,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotSaveAppointmentsIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             assertNotNull(appointmentsService.validateAndSave(new Appointment()));
         });
@@ -174,7 +175,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotSaveAppointmentIfUserHasReadOnlyPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(readOnlyUser, readOnlyUserPassword);
             assertNotNull(appointmentsService.validateAndSave(new Appointment()));
         });
@@ -188,7 +189,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAllAppointmentsIfUserDoesNotHaveAnyPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             assertNotNull(appointmentsService.getAllAppointments(null));
         });
@@ -202,7 +203,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotBeAbleToSearchAppointmentsIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             assertNotNull(appointmentsService.search(new Appointment()));
         });
@@ -218,7 +219,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAllFutureAppointmentsForServiceIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
             appointmentServiceDefinition.setId(1);
@@ -236,7 +237,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAllFutureAppointmentsForServiceTypeIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             AppointmentServiceType appointmentServiceType = new AppointmentServiceType();
             appointmentServiceType.setId(1);
@@ -254,7 +255,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAppointmentsForServiceIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
             appointmentServiceDefinition.setId(1);
@@ -270,7 +271,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAppointmentByUuidIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, noPrivilegeUserPassword);
             assertEquals(null, appointmentsService.getAppointmentByUuid("uuid"));
         });
@@ -290,7 +291,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotBeAbleToChangeStatusIfUserHasReadOnlyPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(readOnlyUser, readOnlyUserPassword);
             appointmentsService.changeStatus(new Appointment(), "Completed", null);
         });
@@ -304,7 +305,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotGetAllAppointmentsInDateRangeIfUserHasNoPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(noPrivilegeUser, readOnlyUserPassword);
             assertNotNull(appointmentsService.getAllAppointmentsInDateRange(null, null));
         });
@@ -332,7 +333,7 @@ public class AppointmentsServiceTest extends BaseModuleContextSensitiveTest {
 
     @Test
     public void shouldNotBeAbleToUndoStatusChangeIfUserHasReadOnlyPrivilege() {
-        assertThrows(APIAuthenticationException.class, () -> {
+        assertThrows(AccessDeniedException.class, () -> {
             Context.authenticate(readOnlyUser, manageUserPassword);
             Appointment appointment = new Appointment();
             appointment.setId(1);
