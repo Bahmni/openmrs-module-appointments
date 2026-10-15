@@ -29,10 +29,7 @@ import org.openmrs.module.appointments.web.service.impl.RecurringAppointmentsSer
 import org.openmrs.module.appointments.web.service.impl.SingleAppointmentRecurringPatternUpdateService;
 import org.openmrs.module.appointments.web.validators.RecurringPatternValidator;
 import org.openmrs.module.appointments.web.validators.TimeZoneValidator;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -42,8 +39,8 @@ import java.util.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
@@ -51,11 +48,13 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.junit.After;
+@RunWith(MockitoJUnitRunner.class)
 public class RecurringAppointmentsControllerTest {
+    private MockedStatic<Context> contextMock;
+
 
     @InjectMocks
     private RecurringAppointmentsController recurringAppointmentsController;
@@ -98,9 +97,9 @@ public class RecurringAppointmentsControllerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        PowerMockito.mockStatic(Context.class);
-        Mockito.when(Context.getAdministrationService()).thenReturn(administrationService);
-        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        contextMock = Mockito.mockStatic(Context.class);
+        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
+        contextMock.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
     }
 
     @Test
@@ -123,7 +122,6 @@ public class RecurringAppointmentsControllerTest {
         when(appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern)).thenReturn(appointmentRecurringPattern);
         when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(appointments);
         when(recurringAppointmentMapper.constructResponse((List<Appointment>) any())).thenReturn(Collections.emptyList());
-        doNothing().when(recurringPatternValidator).validate(recurringPattern, mock(Errors.class));
         appointmentRecurringPattern.setAppointments(Collections.emptySet());
 
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.save(recurringAppointmentRequest);
@@ -193,7 +191,6 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         RecurringAppointmentDefaultResponse defaultResponse = mock(RecurringAppointmentDefaultResponse.class);
         List<RecurringAppointmentDefaultResponse> defaultResponses = Arrays.asList(defaultResponse);
-        when(recurringAppointmentRequest.getAppointmentRequest()).thenReturn(appointmentRequest);
         when(recurringAppointmentRequest.getApplyForAll()).thenReturn(false);
         Appointment appointment = mock(Appointment.class);
         Appointment newAppointment = mock(Appointment.class);
@@ -284,7 +281,6 @@ public class RecurringAppointmentsControllerTest {
             return null;
         }).when(timeZoneValidator).validate(any(), any());
         statusDetails.put("toStatus", "Cancelled");
-        when(appointmentsService.getAppointmentByUuid(anyString())).thenReturn(new Appointment());
 
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.transitionAppointment("appointmentUuid", statusDetails);
         Mockito.verify(appointmentRecurringPatternService, never()).changeStatus(any(),any(), any());
@@ -362,10 +358,7 @@ public class RecurringAppointmentsControllerTest {
         AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
         appointmentRecurringPattern.setAppointments(Collections.emptySet());
         when(recurringPatternMapper.fromRequest(recurringPattern)).thenReturn(appointmentRecurringPattern);
-        when(appointmentRecurringPatternService.validateAndSave(appointmentRecurringPattern)).thenReturn(appointmentRecurringPattern);
         when(recurringAppointmentsService.generateRecurringAppointments(recurringAppointmentRequest)).thenReturn(Collections.emptyList());
-        when(recurringAppointmentMapper.constructResponse((List<Appointment>) any())).thenReturn(Collections.emptyList());
-        doNothing().when(recurringPatternValidator).validate(recurringPattern, mock(Errors.class));
         appointmentRecurringPattern.setAppointments(Collections.emptySet());
 
         ResponseEntity<Object> responseEntity = recurringAppointmentsController.save(recurringAppointmentRequest);
@@ -373,5 +366,13 @@ public class RecurringAppointmentsControllerTest {
         verify(recurringPatternMapper).fromRequest(recurringPattern);
         verify(recurringAppointmentsService).generateRecurringAppointments(recurringAppointmentRequest);
         assertEquals(responseEntity.getStatusCode(), HttpStatus.NO_CONTENT);
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 }

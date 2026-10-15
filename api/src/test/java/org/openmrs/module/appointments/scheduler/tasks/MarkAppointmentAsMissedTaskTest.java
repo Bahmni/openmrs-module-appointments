@@ -11,26 +11,24 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
-import static org.powermock.api.mockito.PowerMockito.when;
-
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest(Context.class)
-@RunWith(PowerMockRunner.class)
+import static org.mockito.Mockito.when;
+import org.junit.After;
+import org.mockito.MockedStatic;
+@RunWith(MockitoJUnitRunner.class)
 public class MarkAppointmentAsMissedTaskTest {
+    private MockedStatic<Context> contextMock;
+
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -44,9 +42,9 @@ public class MarkAppointmentAsMissedTaskTest {
 
     @Before
     public void setUp() throws Exception {
-        PowerMockito.mockStatic(Context.class);
-        when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
-        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        contextMock = Mockito.mockStatic(Context.class);
+        contextMock.when(() -> Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
+        contextMock.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
         String schedulerMarksMissed = "SchedulerMarksMissed";
         GlobalProperty missedGlobalProperty = new GlobalProperty(schedulerMarksMissed, "true");
         when(administrationService.getGlobalPropertyObject(schedulerMarksMissed)).thenReturn(missedGlobalProperty);
@@ -102,7 +100,6 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.CheckedIn);
-        when(appointmentsService.getAllAppointmentsInDateRange(any(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();
@@ -118,10 +115,17 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.Cancelled);
-        when(appointmentsService.getAllAppointmentsInDateRange(any(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();
         Mockito.verify(appointmentsService, times(0)).changeStatus(eq(appointment), eq(missedStatus), any(Date.class));
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 }

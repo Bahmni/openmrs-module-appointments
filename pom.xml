@@ -40,9 +40,8 @@
 		<openmrs.platform.version>2.4.2</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.13</junitVersion>
-		<powerMockVersion>2.0.7</powerMockVersion>
 		<hamcrestVersion>2.2</hamcrestVersion>
-		<mockitoVersion>3.5.11</mockitoVersion>
+		<mockitoVersion>4.11.0</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
@@ -157,15 +156,9 @@
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito2</artifactId>
-				<version>${powerMockVersion}</version>
+				<groupId>org.mockito</groupId>
+				<artifactId>mockito-inline</artifactId>
+				<version>${mockitoVersion}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>

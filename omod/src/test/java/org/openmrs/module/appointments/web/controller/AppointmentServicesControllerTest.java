@@ -11,7 +11,7 @@ import org.openmrs.module.appointments.web.mapper.AppointmentServiceMapper;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 public class AppointmentServicesControllerTest {
 

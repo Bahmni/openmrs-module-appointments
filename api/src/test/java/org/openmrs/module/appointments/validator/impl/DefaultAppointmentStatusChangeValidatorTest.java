@@ -10,21 +10,21 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.junit.After;
+import org.mockito.Mockito;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
-@PrepareForTest({Context.class})
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultAppointmentStatusChangeValidatorTest {
+    private MockedStatic<Context> contextMock;
+
 
     private Appointment appointment;
 
@@ -37,10 +37,10 @@ public class DefaultAppointmentStatusChangeValidatorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        PowerMockito.mockStatic(Context.class);
+        contextMock = Mockito.mockStatic(Context.class);
 
         when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("false");
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
     }
 
     @Before
@@ -273,5 +273,13 @@ public class DefaultAppointmentStatusChangeValidatorTest {
         List<String> errors = new ArrayList<>();
         validator.validate(appointment, AppointmentStatus.Scheduled, errors);
         assertEquals(0, errors.size());
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 }
