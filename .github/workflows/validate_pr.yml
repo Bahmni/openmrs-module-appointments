@@ -20,7 +20,7 @@ jobs:
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
-        java-version: '8'
+        java-version: '17'
     - name: Build and Test with Maven
       run: mvn clean verify
 
@@ -36,7 +36,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '8'
+          java-version: '17'
       - name: Build and generate coverage
         run: mvn clean verify
       - name: SonarCloud Scan
