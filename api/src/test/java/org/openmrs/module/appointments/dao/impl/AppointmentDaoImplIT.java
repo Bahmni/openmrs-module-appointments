@@ -274,7 +274,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnAllNonVoidedFutureAppointmentsOfPatient() {
-        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
+        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1001);
         assertEquals(5, appointments.size());
     }
 

@@ -73,21 +73,24 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public List<Appointment> search(Appointment appointment) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
-                Example.create(appointment).excludeProperty("uuid"));
-
-        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
-                Example.create(appointment.getPatient()));
-
-        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
-                Example.create(appointment.getLocation()));
-
-        if (appointment.getService() != null) criteria.createCriteria("service").add(
-                Example.create(appointment.getService()));
-
-        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
-                Example.create(appointment.getProvider()));
-
+        // Query by example (Example.create) constrains on every non-null
+        // property of the entity, including defaults such as
+        // isTeleconsultationEnabled; on OpenMRS 2.8.9 (Hibernate 5.6) that
+        // makes the search match nothing. Restrict explicitly on the fields
+        // the callers of this search actually populate.
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        if (appointment.getPatient() != null) {
+            criteria.add(Restrictions.eq("patient", appointment.getPatient()));
+        }
+        if (appointment.getLocation() != null) {
+            criteria.add(Restrictions.eq("location", appointment.getLocation()));
+        }
+        if (appointment.getService() != null) {
+            criteria.add(Restrictions.eq("service", appointment.getService()));
+        }
+        if (appointment.getProvider() != null) {
+            criteria.add(Restrictions.eq("provider", appointment.getProvider()));
+        }
         return criteria.list();
     }
 
