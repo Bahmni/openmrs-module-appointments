@@ -13,6 +13,7 @@ import org.mockito.stubbing.Answer;
 import org.openmrs.GlobalProperty;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.appointments.service.AppointmentRecurringPatternService;
@@ -91,6 +92,9 @@ public class RecurringAppointmentsControllerTest {
     @Mock
     private AppointmentsService appointmentsService;
 
+    @Mock
+    private MessageSourceService messageSourceService;
+
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
 
@@ -100,6 +104,9 @@ public class RecurringAppointmentsControllerTest {
         contextMock = Mockito.mockStatic(Context.class);
         contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
         contextMock.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        // webservices.rest 3.x RestUtil.wrapErrorResponse also resolves the
+        // translated message through the Context message source.
+        contextMock.when(Context::getMessageSourceService).thenReturn(messageSourceService);
     }
 
     @Test

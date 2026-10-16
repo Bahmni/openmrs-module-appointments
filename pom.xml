@@ -48,7 +48,7 @@
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
 		<servletApi.version>3.1.0</servletApi.version>
-		<webServices.version>2.29.0</webServices.version>
+		<webServices.version>3.6.0</webServices.version>
 		<communications.version>1.2.0</communications.version>
 		<teleconsultation.version>2.0.0</teleconsultation.version>
 		<webClients.version>1.0.0</webClients.version>
