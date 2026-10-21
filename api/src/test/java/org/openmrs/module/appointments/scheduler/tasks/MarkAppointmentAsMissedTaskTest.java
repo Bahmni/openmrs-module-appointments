@@ -100,6 +100,7 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.CheckedIn);
+        when(appointmentsService.getAllAppointmentsInDateRange(nullable(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();
@@ -115,6 +116,7 @@ public class MarkAppointmentAsMissedTaskTest {
         Appointment appointment = new Appointment();
         appointments.add(appointment);
         appointment.setStatus(AppointmentStatus.Cancelled);
+        when(appointmentsService.getAllAppointmentsInDateRange(nullable(Date.class), any(Date.class))).thenReturn(appointments);
         markAppointmentAsMissedTask.execute();
 
         String missedStatus = AppointmentStatus.Missed.toString();

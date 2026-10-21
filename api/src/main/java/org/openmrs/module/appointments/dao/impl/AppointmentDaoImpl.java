@@ -79,6 +79,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         // makes the search match nothing. Restrict explicitly on the fields
         // the callers of this search actually populate.
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
         if (appointment.getPatient() != null) {
             criteria.add(Restrictions.eq("patient", appointment.getPatient()));
         }
