@@ -89,11 +89,8 @@ public class AppointmentAdviceTest {
 
     @After
     public void tearDown() {
-        eventMockedConstruction.close();
-        eventServiceMockedConstruction.close();
-        eventRecordsQueueMockedConstruction.close();
-        transactionManagerMockedConstruction.close();
-        contextMock.close();
+        ScopedMocks.closeAll(eventMockedConstruction, eventServiceMockedConstruction,
+                eventRecordsQueueMockedConstruction, transactionManagerMockedConstruction, contextMock);
     }
 
     private AtomFeedSpringTransactionManager constructedTransactionManager() {

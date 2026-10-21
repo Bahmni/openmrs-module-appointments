@@ -58,6 +58,9 @@ public class AppointmentsActivatorTest {
 
     @After
     public void tearDownServiceContextMock() {
-        serviceContextMock.close();
+        if (serviceContextMock != null) {
+            serviceContextMock.close();
+            serviceContextMock = null;
+        }
     }
 }

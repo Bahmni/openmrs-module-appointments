@@ -41,7 +41,10 @@ public class AtomFeedAdviceActivatorComponentTest {
 
     @After
     public void tearDownServiceContextMock() {
-        serviceContextMock.close();
+        if (serviceContextMock != null) {
+            serviceContextMock.close();
+            serviceContextMock = null;
+        }
     }
 
     @Test
