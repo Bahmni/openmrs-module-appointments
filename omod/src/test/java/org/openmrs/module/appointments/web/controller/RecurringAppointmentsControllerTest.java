@@ -195,7 +195,6 @@ public class RecurringAppointmentsControllerTest {
     @Test
     public void shouldCallUpdateWithRecurringPatternAndUpdatedAppointmentsWhenApplyForAllIsNull() {
         RecurringAppointmentRequest recurringAppointmentRequest = mock(RecurringAppointmentRequest.class);
-        AppointmentRequest appointmentRequest = mock(AppointmentRequest.class);
         RecurringAppointmentDefaultResponse defaultResponse = mock(RecurringAppointmentDefaultResponse.class);
         List<RecurringAppointmentDefaultResponse> defaultResponses = Arrays.asList(defaultResponse);
         when(recurringAppointmentRequest.getApplyForAll()).thenReturn(false);
