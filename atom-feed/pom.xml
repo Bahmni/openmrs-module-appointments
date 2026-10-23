@@ -76,7 +76,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <!-- Lowered as PowerMockito is not covered -->
+                                            <!-- Lowered threshold; advice classes are only partly covered by unit tests -->
                                             <minimum>0.35</minimum>
                                         </limit>
                                         <limit>

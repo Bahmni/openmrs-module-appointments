@@ -5,9 +5,9 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
+import org.openmrs.util.PrivilegeConstants;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.mockito.junit.MockitoJUnitRunner;
@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.when;
 import org.mockito.MockedStatic;
 import org.junit.After;
@@ -36,7 +37,6 @@ public class DefaultAppointmentStatusChangeValidatorTest {
 
     @Before
     public void init() {
-        MockitoAnnotations.initMocks(this);
         contextMock = Mockito.mockStatic(Context.class);
 
         when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("false");
@@ -273,6 +273,28 @@ public class DefaultAppointmentStatusChangeValidatorTest {
         List<String> errors = new ArrayList<>();
         validator.validate(appointment, AppointmentStatus.Scheduled, errors);
         assertEquals(0, errors.size());
+    }
+
+    @Test
+    public void shouldAddAndRemoveProxyPrivilegeAroundGlobalPropertyRead() {
+        appointment.setStatus(AppointmentStatus.Scheduled);
+        validator.validate(appointment, AppointmentStatus.CheckedIn, new ArrayList<>());
+        contextMock.verify(() -> Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES));
+        contextMock.verify(() -> Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES));
+    }
+
+    @Test
+    public void shouldRemoveProxyPrivilegeWhenGlobalPropertyReadThrows() {
+        when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations"))
+                .thenThrow(new IllegalStateException("boom"));
+        appointment.setStatus(AppointmentStatus.Scheduled);
+        try {
+            validator.validate(appointment, AppointmentStatus.CheckedIn, new ArrayList<>());
+            fail("expected exception");
+        } catch (IllegalStateException expected) {
+            // proxy privilege must still be removed
+        }
+        contextMock.verify(() -> Context.removeProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES));
     }
 
     @After

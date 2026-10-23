@@ -3,7 +3,6 @@ package org.openmrs.module.appointments.dao.impl;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Example;
 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -142,7 +141,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("patient.personVoided", false));
         criteria.add(Restrictions.ge("startDateTime", startDate));
         criteria.add(Restrictions.le("startDateTime", endDate));
-        criteria.createCriteria(SERVICE).add(Example.create(appointmentServiceDefinition));
+        criteria.add(Restrictions.eq(SERVICE, appointmentServiceDefinition));
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
             criteria.add(Restrictions.in("status", appointmentStatusFilterList));
         }
