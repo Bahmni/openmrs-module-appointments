@@ -3,7 +3,6 @@ package org.openmrs.module.appointments.dao.impl;
 import org.apache.commons.lang.StringUtils;
 import org.hibernate.Criteria;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Example;
 
 import org.hibernate.criterion.Order;
 import org.hibernate.criterion.Restrictions;
@@ -28,6 +27,9 @@ import java.util.concurrent.TimeUnit;
 public class AppointmentDaoImpl implements AppointmentDao {
 
     private static final int APPOINTMENT_SEARCH_DEFAULT_LIMIT = 50;
+    private static final String LOCATION = "location";
+    private static final String SERVICE = "service";
+    private static final String PROVIDER = "provider";
     private SessionFactory sessionFactory;
 
     public void setSessionFactory(SessionFactory sessionFactory) {
@@ -73,21 +75,25 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     @Override
     public List<Appointment> search(Appointment appointment) {
-        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class).add(
-                Example.create(appointment).excludeProperty("uuid"));
-
-        if (appointment.getPatient() != null) criteria.createCriteria("patient").add(
-                Example.create(appointment.getPatient()));
-
-        if (appointment.getLocation() != null) criteria.createCriteria("location").add(
-                Example.create(appointment.getLocation()));
-
-        if (appointment.getService() != null) criteria.createCriteria("service").add(
-                Example.create(appointment.getService()));
-
-        if (appointment.getProvider() != null) criteria.createCriteria("provider").add(
-                Example.create(appointment.getProvider()));
-
+        // Query by example (Example.create) constrains on every non-null
+        // property of the entity, including defaults such as
+        // isTeleconsultationEnabled; on OpenMRS 2.8.9 (Hibernate 5.6) that
+        // makes the search match nothing. Restrict explicitly on the fields
+        // the callers of this search actually populate.
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        if (appointment.getPatient() != null) {
+            criteria.add(Restrictions.eq("patient", appointment.getPatient()));
+        }
+        if (appointment.getLocation() != null) {
+            criteria.add(Restrictions.eq(LOCATION, appointment.getLocation()));
+        }
+        if (appointment.getService() != null) {
+            criteria.add(Restrictions.eq(SERVICE, appointment.getService()));
+        }
+        if (appointment.getProvider() != null) {
+            criteria.add(Restrictions.eq(PROVIDER, appointment.getProvider()));
+        }
         return criteria.list();
     }
 
@@ -101,7 +107,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     @Override
     public List<Appointment> getAllFutureAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition) {
         Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
-        criteria.add(Restrictions.eq("service", appointmentServiceDefinition));
+        criteria.add(Restrictions.eq(SERVICE, appointmentServiceDefinition));
         criteria.add(Restrictions.gt("endDateTime", new Date()));
         criteria.add(Restrictions.eq("voided", false));
         criteria.createAlias("patient", "patient");
@@ -135,7 +141,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.add(Restrictions.eq("patient.personVoided", false));
         criteria.add(Restrictions.ge("startDateTime", startDate));
         criteria.add(Restrictions.le("startDateTime", endDate));
-        criteria.createCriteria("service").add(Example.create(appointmentServiceDefinition));
+        criteria.add(Restrictions.eq(SERVICE, appointmentServiceDefinition));
         if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
             criteria.add(Restrictions.in("status", appointmentStatusFilterList));
         }
@@ -186,7 +192,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
     private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
             criteria.createAlias("providers", "providers");
-            criteria.createAlias("providers.provider", "provider");
+            criteria.createAlias("providers.provider", PROVIDER);
             criteria.add(Restrictions.eq("provider.uuid", appointmentSearchRequest.getProviderUuid()));
         }
     }
@@ -254,7 +260,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.createAlias("patient", "patient");
         criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.createAlias("service", "service");
+        criteria.createAlias(SERVICE, SERVICE);
 
         if (searchQuery != null) {
             if (searchQuery.getPatientUuids() != null && !searchQuery.getPatientUuids().isEmpty()) {
@@ -288,7 +294,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
             if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
                 criteria.createAlias("providers", "providers");
-                criteria.createAlias("providers.provider", "provider");
+                criteria.createAlias("providers.provider", PROVIDER);
                 Disjunction disjunction = Restrictions.disjunction();
                 searchQuery.getProviderUuids().stream()
                         .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
@@ -297,7 +303,7 @@ public class AppointmentDaoImpl implements AppointmentDao {
             }
 
             if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
-                criteria.createAlias("location", "location");
+                criteria.createAlias(LOCATION, LOCATION);
                 Disjunction disjunction = Restrictions.disjunction();
                 searchQuery.getLocationUuids().stream()
                         .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))

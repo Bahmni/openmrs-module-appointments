@@ -12,10 +12,7 @@ import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
@@ -25,12 +22,14 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import org.mockito.MockedStatic;
+import org.junit.After;
+import org.mockito.Mockito;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AppointmentServiceDefinitionServiceImplTest {
+    private MockedStatic<Context> contextMock;
+
 
     @Captor
     private ArgumentCaptor<AppointmentServiceDefinition> captor;
@@ -52,9 +51,9 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mockStatic(Context.class);
+		contextMock = Mockito.mockStatic(Context.class);
         authenticatedUser = new User(8);
-        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
+        contextMock.when(Context::getAuthenticatedUser).thenReturn(authenticatedUser);
     }
 
     @Test
@@ -299,5 +298,13 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
         Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDateTime, endDateTime,
                 Arrays.asList(includeStatus));
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 }

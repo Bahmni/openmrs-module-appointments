@@ -37,19 +37,18 @@
     </modules>
 
 	<properties>
-		<openmrs.platform.version>2.4.2</openmrs.platform.version>
+		<openmrs.platform.version>2.8.9</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.13</junitVersion>
-		<powerMockVersion>2.0.7</powerMockVersion>
 		<hamcrestVersion>2.2</hamcrestVersion>
-		<mockitoVersion>3.5.11</mockitoVersion>
+		<mockitoVersion>5.7.0</mockitoVersion>
 		<argLine>-Xmx1024m</argLine>
 		<jacocoVersion>0.8.12</jacocoVersion>
 		<openmrsAtomfeedVersion>2.6.2</openmrsAtomfeedVersion>
 		<atomfeed.version>1.10.1</atomfeed.version>
 		<javaxMail.version>1.6.2</javaxMail.version>
-		<servletApi.version>3.0.1</servletApi.version>
-		<webServices.version>2.29.0</webServices.version>
+		<servletApi.version>3.1.0</servletApi.version>
+		<webServices.version>3.6.0</webServices.version>
 		<communications.version>1.2.0</communications.version>
 		<teleconsultation.version>2.0.0</teleconsultation.version>
 		<webClients.version>1.0.0</webClients.version>
@@ -64,8 +63,8 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-compiler-plugin</artifactId>
 					<configuration>
-						<target>1.8</target>
-						<source>1.8</source>
+						<target>17</target>
+						<source>17</source>
 					</configuration>
 				</plugin>
 				<plugin>
@@ -94,7 +93,7 @@
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
-					<version>2.10</version>
+					<version>3.2.5</version>
 					<configuration>
 						<includes>
 							<include>**/*Test.java</include>
@@ -143,31 +142,10 @@
 				<version>${jacocoVersion}</version>
 			</plugin>
 		</plugins>
-<!--		<plugins>-->
-<!--			<plugin>-->
-<!--				<artifactId>maven-compiler-plugin</artifactId>-->
-<!--				<configuration>-->
-<!--					<source>1.8</source>-->
-<!--					<target>1.8</target>-->
-<!--				</configuration>-->
-<!--			</plugin>-->
-<!--		</plugins>-->
 	</build>
 
 	<dependencyManagement>
 		<dependencies>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-module-junit4</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
-			</dependency>
-			<dependency>
-				<groupId>org.powermock</groupId>
-				<artifactId>powermock-api-mockito2</artifactId>
-				<version>${powerMockVersion}</version>
-				<scope>test</scope>
-			</dependency>
 			<dependency>
 				<groupId>org.bahmni.module</groupId>
 				<artifactId>teleconsultation-api</artifactId>
@@ -323,7 +301,7 @@
 					<plugin>
 						<groupId>org.apache.maven.plugins</groupId>
 						<artifactId>maven-failsafe-plugin</artifactId>
-						<version>2.17</version>
+						<version>3.2.5</version>
 						<executions>
 							<execution>
 								<goals>

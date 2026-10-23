@@ -9,15 +9,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.openmrs.api.AdministrationService;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import static org.hamcrest.Matchers.instanceOf;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@PowerMockIgnore("javax.management.*")
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultMailSenderTest {
 
     @Mock
@@ -41,10 +39,6 @@ public class DefaultMailSenderTest {
         when(administrationService.getGlobalProperty("mail.smtp_port", "25")).thenReturn("25");
         when(administrationService.getGlobalProperty("mail.smtp_auth", "false")).thenReturn("true");
         when(administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true")).thenReturn("true");
-        when(administrationService.getGlobalProperty("mail.debug", "false")).thenReturn("false");
-        when(administrationService.getGlobalProperty("mail.from", "")).thenReturn("noreply@bahmni.org");
-        when(administrationService.getGlobalProperty("mail.user", "")).thenReturn("test");
-        when(administrationService.getGlobalProperty("mail.password", "")).thenReturn("random");
 
         expectedEx.expect(RuntimeException.class);
         expectedEx.expectMessage("Error occurred while sending email");

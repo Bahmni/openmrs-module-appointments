@@ -3,44 +3,40 @@ package org.openmrs.module.appointments.advice;
 import org.ict4h.atomfeed.server.repository.jdbc.AllEventRecordsQueueJdbcImpl;
 import org.ict4h.atomfeed.server.service.Event;
 import org.ict4h.atomfeed.server.service.EventServiceImpl;
+import org.ict4h.atomfeed.transaction.AFTransactionWork;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedConstruction;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentRecurringPattern;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.transaction.PlatformTransactionManager;
 
-import java.net.URI;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashSet;
+import java.util.List;
 
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.internal.verification.VerificationModeFactory.times;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.spy;
-import static org.powermock.api.mockito.PowerMockito.verifyNew;
-import static org.powermock.api.mockito.PowerMockito.whenNew;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class, AppointmentAdvice.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class RecurringAppointmentsAdviceTest {
 
     private static final String UUID = "5631b434-78aa-102b-91a0-001e378eb17e";
@@ -48,22 +44,20 @@ public class RecurringAppointmentsAdviceTest {
     private static final String RAISE_EVENT_GLOBAL_PROPERTY = "atomfeed.publish.eventsForAppointments";
     private static final String URL_PATTERN_GLOBAL_PROPERTY = "atomfeed.event.urlPatternForRecurringAppointments";
 
-    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
+    private MockedStatic<Context> contextMock;
+    private MockedConstruction<AtomFeedSpringTransactionManager> transactionManagerMockedConstruction;
+    private MockedConstruction<AllEventRecordsQueueJdbcImpl> eventRecordsQueueMockedConstruction;
+    private MockedConstruction<EventServiceImpl> eventServiceMockedConstruction;
+    private MockedConstruction<Event> eventMockedConstruction;
+
+    // constructor arguments (uuid, title, timestamp, uri, contents, category) of every constructed Event
+    private final List<List<?>> eventConstructorArguments = new ArrayList<>();
 
     @Mock
     private PlatformTransactionManager platformTransactionManager;
 
     @Mock
-    private AllEventRecordsQueueJdbcImpl allEventRecordsQueue;
-
-    @Mock
-    private EventServiceImpl eventService;
-
-    @Mock
     private AdministrationService administrationService;
-
-    @Mock
-    private Event event;
 
     private AppointmentRecurringPattern appointmentRecurringPattern = new AppointmentRecurringPattern();
 
@@ -71,34 +65,78 @@ public class RecurringAppointmentsAdviceTest {
 
     @Before
     public void setUp() throws Exception {
-        mockStatic(Context.class);
+        contextMock = Mockito.mockStatic(Context.class);
+        contextMock.when(() -> Context.getRegisteredComponents(PlatformTransactionManager.class))
+                .thenReturn(Collections.singletonList(platformTransactionManager));
+        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
+        lenient().when(administrationService.getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY)).thenReturn("true");
+        lenient().when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN))
+                .thenReturn(DEFAULT_URL_PATTERN);
 
-        atomFeedSpringTransactionManager = spy(new AtomFeedSpringTransactionManager(platformTransactionManager));
+        // AbstractBaseAdvice's constructor news up the transaction manager, the queue and the event service
+        transactionManagerMockedConstruction = Mockito.mockConstruction(AtomFeedSpringTransactionManager.class,
+                (mock, context) -> Mockito.lenient().doAnswer(invocation -> {
+                    ((AFTransactionWork<?>) invocation.getArgument(0)).execute();
+                    return null;
+                }).when(mock).executeWithTransaction(any(AFTransactionWork.class)));
+        eventRecordsQueueMockedConstruction = Mockito.mockConstruction(AllEventRecordsQueueJdbcImpl.class);
+        eventServiceMockedConstruction = Mockito.mockConstruction(EventServiceImpl.class,
+                (mock, context) -> Mockito.lenient().doNothing().when(mock).notify(any(Event.class)));
+        eventMockedConstruction = Mockito.mockConstruction(Event.class,
+                (mock, context) -> eventConstructorArguments.add(context.arguments()));
 
-        when(Context.getRegisteredComponents(PlatformTransactionManager.class)).thenReturn(Collections.singletonList(platformTransactionManager));
-        when(Context.getAdministrationService()).thenReturn(administrationService);
-        when(administrationService.getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY)).thenReturn("true");
-        when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)).thenReturn(DEFAULT_URL_PATTERN);
-
-        whenNew(AtomFeedSpringTransactionManager.class).withAnyArguments().thenReturn(atomFeedSpringTransactionManager);
-        whenNew(AllEventRecordsQueueJdbcImpl.class).withArguments(this.atomFeedSpringTransactionManager).thenReturn(allEventRecordsQueue);
-        whenNew(EventServiceImpl.class).withArguments(allEventRecordsQueue).thenReturn(eventService);
-        whenNew(Event.class).withAnyArguments().thenReturn(event);
         Appointment appointment = new Appointment();
         appointment.setUuid(UUID);
         appointmentRecurringPattern.setAppointments(new HashSet<>(Collections.singletonList(appointment)));
-        doNothing().when(eventService).notify(any());
 
         recurringAppointmentsAdvice = new RecurringAppointmentsAdvice();
+    }
+
+    @After
+    public void tearDown() {
+        ScopedMocks.closeAll(eventMockedConstruction, eventServiceMockedConstruction,
+                eventRecordsQueueMockedConstruction, transactionManagerMockedConstruction, contextMock);
+    }
+
+    private AtomFeedSpringTransactionManager constructedTransactionManager() {
+        return transactionManagerMockedConstruction.constructed().get(0);
+    }
+
+    private EventServiceImpl constructedEventService() {
+        return eventServiceMockedConstruction.constructed().get(0);
+    }
+
+    private void assertNoEventConstructed() {
+        assertEquals(0, eventConstructorArguments.size());
+    }
+
+    private void assertEventsConstructedWith(String title, String category, String... expectedContents) {
+        assertEquals(expectedContents.length, eventConstructorArguments.size());
+        List<String> actualContents = new ArrayList<>();
+        for (List<?> arguments : eventConstructorArguments) {
+            assertEquals(6, arguments.size());
+            assertNotNull(arguments.get(0));
+            assertEquals(title, arguments.get(1));
+            assertNotNull(arguments.get(2));
+            actualContents.add((String) arguments.get(4));
+            assertEquals(category, arguments.get(5));
+        }
+        for (String contents : expectedContents) {
+            assertTrue("expected an Event with contents " + contents, actualContents.contains(contents));
+        }
+    }
+
+    private String defaultUrlPatternFor(String uuid) {
+        return String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", uuid);
     }
 
     @Test
     public void shouldRaiseAppointmentServiceChangeEventToEventRecordsTable() throws Throwable {
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("validateAndSave"), null, null);
 
-        verify(eventService, times(1)).notify(any(Event.class));
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
+        verify(constructedEventService(), times(1)).notify(any(Event.class));
+        verify(constructedTransactionManager(), times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        assertEventsConstructedWith("RecurringAppointments", "appointments", defaultUrlPatternFor(UUID));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -111,9 +149,9 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
-        verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
+        verify(constructedTransactionManager(), times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(constructedEventService(), times(0)).notify(any(Event.class));
+        assertNoEventConstructed();
     }
 
     @Test
@@ -122,23 +160,24 @@ public class RecurringAppointmentsAdviceTest {
 
         verify(administrationService, times(0)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
         verify(administrationService, times(0)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
-        verify(atomFeedSpringTransactionManager, times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(0)).notify(any(Event.class));
-        verifyNew(Event.class, times(0)).withArguments(anyString(), anyString(), any(LocalDateTime.class), nullable(URI.class), anyString(), anyString());
+        verify(constructedTransactionManager(), times(0)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(constructedEventService(), times(0)).notify(any(Event.class));
+        assertNoEventConstructed();
     }
 
     @Test
     public void shouldRaiseEventWithCustomUrlPatternGivenInGlobalProperty() throws Throwable {
-        when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN)).thenReturn("/openmrs/ws/rest/v1/appointment/test/{uuid}");
+        when(administrationService.getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN))
+                .thenReturn("/openmrs/ws/rest/v1/appointment/test/{uuid}");
 
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("validateAndSave"), null, null);
 
         verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
-        verify(atomFeedSpringTransactionManager, times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verify(eventService, times(1)).notify(any(Event.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/appointment/test/%s", UUID)), eq("appointments"));
+        verify(constructedTransactionManager(), times(1)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        verify(constructedEventService(), times(1)).notify(any(Event.class));
+        assertEventsConstructedWith("RecurringAppointments", "appointments",
+                String.format("/openmrs/ws/rest/v1/appointment/test/%s", UUID));
         verify(administrationService, times(1)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
-        verify(administrationService, times(1)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
 
     public void validateAndSave() {
@@ -163,10 +202,10 @@ public class RecurringAppointmentsAdviceTest {
         appointmentRecurringPattern.setAppointments(new HashSet<>(Arrays.asList(appointmentOne, appointmentTwo)));
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern, this.getClass().getMethod("update"), null, null);
 
-        verify(eventService, times(2)).notify(any(Event.class));
-        verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
+        verify(constructedEventService(), times(2)).notify(any(Event.class));
+        verify(constructedTransactionManager(), times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        assertEventsConstructedWith("RecurringAppointments", "appointments",
+                defaultUrlPatternFor(UUID), defaultUrlPatternFor(anotherUuid));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -185,10 +224,10 @@ public class RecurringAppointmentsAdviceTest {
         recurringAppointmentsAdvice.afterReturning(appointmentRecurringPattern.getAppointments().iterator().next(),
                 this.getClass().getMethod("update"), arguments, null);
 
-        verify(eventService, times(2)).notify(any(Event.class));
-        verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
+        verify(constructedEventService(), times(2)).notify(any(Event.class));
+        verify(constructedTransactionManager(), times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        assertEventsConstructedWith("RecurringAppointments", "appointments",
+                defaultUrlPatternFor(UUID), defaultUrlPatternFor(anotherUuid));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
@@ -202,10 +241,10 @@ public class RecurringAppointmentsAdviceTest {
         appointmentTwo.setUuid(anotherUuid);
         recurringAppointmentsAdvice.afterReturning(Arrays.asList(appointmentOne, appointmentTwo), this.getClass().getMethod("changeStatus"), null, null);
 
-        verify(eventService, times(2)).notify(any(Event.class));
-        verify(atomFeedSpringTransactionManager, times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", UUID)), eq("appointments"));
-        verifyNew(Event.class, times(1)).withArguments(anyString(), eq("RecurringAppointments"), any(LocalDateTime.class), nullable(URI.class), eq(String.format("/openmrs/ws/rest/v1/recurring-appointments?uuid=%s", anotherUuid)), eq("appointments"));
+        verify(constructedEventService(), times(2)).notify(any(Event.class));
+        verify(constructedTransactionManager(), times(2)).executeWithTransaction(any(AFTransactionWorkWithoutResult.class));
+        assertEventsConstructedWith("RecurringAppointments", "appointments",
+                defaultUrlPatternFor(UUID), defaultUrlPatternFor(anotherUuid));
         verify(administrationService, times(2)).getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY);
         verify(administrationService, times(2)).getGlobalProperty(URL_PATTERN_GLOBAL_PROPERTY, DEFAULT_URL_PATTERN);
     }
