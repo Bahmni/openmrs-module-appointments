@@ -14,6 +14,7 @@ import org.openmrs.PersonAttributeType;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.model.AppointmentKind;
 import org.openmrs.module.appointments.notification.AppointmentEventNotifier;
 import org.openmrs.module.appointments.notification.MailSender;
 import org.openmrs.module.appointments.notification.NotificationException;
@@ -22,6 +23,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 
 import java.util.UUID;
 
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
@@ -94,6 +96,15 @@ public class DefaultTeleconsultationAppointmentPatientEmailNotifierTest {
                 AdditionalMatchers.aryEq(new String[]{ "someemail@gmail.com" }),
                 any(),
                 AdditionalMatchers.aryEq(new String[]{ "someemail1@gmail.com", "someemail2@gmail.com" }));
+    }
+
+    @Test
+    public void shouldBeApplicableForVirtualAppointmentWhenSendEmailIsEnabled() {
+        when(administrationService.getGlobalProperty("bahmni.appointment.teleConsultation.sendEmail", "false")).thenReturn("true");
+        Appointment appointment = new Appointment();
+        appointment.setAppointmentKind(AppointmentKind.Virtual);
+
+        assertTrue(tcAppointmentEventNotifier.isApplicable(appointment));
     }
 
     private Appointment buildAppointment() {
