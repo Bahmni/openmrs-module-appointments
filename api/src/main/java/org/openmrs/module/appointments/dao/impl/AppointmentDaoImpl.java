@@ -92,7 +92,11 @@ public class AppointmentDaoImpl implements AppointmentDao {
             criteria.add(Restrictions.eq(SERVICE, appointment.getService()));
         }
         if (appointment.getProvider() != null) {
-            criteria.add(Restrictions.eq(PROVIDER, appointment.getProvider()));
+            // Appointment.provider is not a mapped Hibernate property (see Appointment.hbm.xml);
+            // the actual provider association lives on the "providers" collection.
+            criteria.createAlias("providers", "providers");
+            criteria.createAlias("providers.provider", PROVIDER);
+            criteria.add(Restrictions.eq(PROVIDER + ".providerId", appointment.getProvider().getProviderId()));
         }
         return criteria.list();
     }

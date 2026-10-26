@@ -7,6 +7,7 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.service.AppointmentArgumentsMapper;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 
 
 import java.util.ArrayList;
@@ -59,10 +60,15 @@ public class AppointmentArgumentsMapperImpl implements AppointmentArgumentsMappe
         String appointmentKind = appointment.getAppointmentKind().getValue();
         String service = appointment.getService().getName();
         String teleLink = appointment.getTeleHealthVideoLink();
-        String smsTimeZone = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("sms.timezone"), null, new Locale("en"));
-        String smsDateFormat = Context.getMessageSourceService().getMessage(Context.getAdministrationService().getGlobalProperty("sms.dateformat"), null, new Locale("en"));
+        String smsTimezoneProperty = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty("sms.timezone"));
+        String smsDateFormatProperty = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty("sms.dateformat"));
+        String smsTimeZone = Context.getMessageSourceService().getMessage(smsTimezoneProperty, null, new Locale("en"));
+        String smsDateFormat = Context.getMessageSourceService().getMessage(smsDateFormatProperty, null, new Locale("en"));
         String date = convertUTCToGivenFormat(appointmentDate, smsDateFormat, smsTimeZone);
-        String helpdeskNumber = Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue();
+        String helpdeskNumber = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalPropertyObject("clinic.helpDeskNumber").getPropertyValue());
         String facilityName = getFacilityName(appointment.getLocation());
         arguments.put("patientname", givenName + " " + familyName);
         arguments.put("identifier", identifier);

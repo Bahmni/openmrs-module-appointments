@@ -5,6 +5,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.openmrs.api.AdministrationService;
 import org.openmrs.module.appointments.notification.MailSender;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.util.OpenmrsUtil;
 
 import javax.mail.Address;
@@ -43,7 +44,8 @@ public class DefaultMailSender implements MailSender {
         try {
             MimeMessage mail = new MimeMessage(getSession());
             if(!Objects.equals(mail.getSession().getProperty("mail.send"), "true")) return;
-            mail.setFrom(new InternetAddress(this.administrationService.getGlobalProperty("mail.from", "")));
+            mail.setFrom(new InternetAddress(GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                    this.administrationService.getGlobalProperty("mail.from", ""))));
             Address[] toAddresses = new Address[1];
             toAddresses[0] = new InternetAddress(to[0]);
             mail.setRecipients(Message.RecipientType.TO, getAddresses(to));
@@ -120,19 +122,21 @@ public class DefaultMailSender implements MailSender {
      * @return
      */
     private Properties mailSessionPropertiesFromOMRS() {
-        Properties p = new Properties();
-        p.put("mail.transport.protocol", administrationService.getGlobalProperty("mail.transport_protocol", "smtp"));
-        p.put("mail.smtp.host", administrationService.getGlobalProperty("mail.smtp_host", ""));
-        p.put("mail.smtp.port", administrationService.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
-        p.put("mail.smtp.auth", administrationService.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
-        p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
-        p.put("mail.smtp.ssl.enable", administrationService.getGlobalProperty("mail.smtp.ssl.enable", "true"));
-        p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
-        p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
-        p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
-        p.put("mail.password", administrationService.getGlobalProperty("mail.password", ""));
-        //p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
-        return p;
+        return GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() -> {
+            Properties p = new Properties();
+            p.put("mail.transport.protocol", administrationService.getGlobalProperty("mail.transport_protocol", "smtp"));
+            p.put("mail.smtp.host", administrationService.getGlobalProperty("mail.smtp_host", ""));
+            p.put("mail.smtp.port", administrationService.getGlobalProperty("mail.smtp_port", "25")); // mail.smtp_port
+            p.put("mail.smtp.auth", administrationService.getGlobalProperty("mail.smtp_auth", "false")); // mail.smtp_auth
+            p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
+            p.put("mail.smtp.ssl.enable", administrationService.getGlobalProperty("mail.smtp.ssl.enable", "true"));
+            p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
+            p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
+            p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
+            p.put("mail.password", administrationService.getGlobalProperty("mail.password", ""));
+            //p.put("mail.smtp.ssl.trust", "smtp.gmail.com");
+            return p;
+        });
     }
 
     private Properties mailSessionPropertiesFromPath() {

@@ -166,6 +166,57 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldFilterSearchByProvider() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointmentWithProvider = allAppointments.stream()
+                .filter(a -> a.getProviders() != null && !a.getProviders().isEmpty())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have appointments with providers"));
+        var provider = appointmentWithProvider.getProviders().iterator().next().getProvider();
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setProvider(provider);
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().anyMatch(a -> a.getUuid().equals(appointmentWithProvider.getUuid())));
+    }
+
+    @Test
+    public void shouldExcludeVoidedAppointmentsFromSearch() {
+        Appointment appointmentServiceSample = appointmentDao.getAllAppointments(null).get(0);
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(appointmentServiceSample.getPatient());
+        searchCriteria.setService(appointmentServiceSample.getService());
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().noneMatch(a -> Boolean.TRUE.equals(a.getVoided())));
+        assertTrue(searchedAppointments.stream().noneMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c13344")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoAppointmentMatchesSearchCriteria() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment patientTwoAppointment = allAppointments.stream()
+                .filter(a -> a.getPatient().getPatientId().equals(2))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have an appointment for patient 2"));
+        Appointment appointmentWithLocation = allAppointments.get(0);
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(patientTwoAppointment.getPatient());
+        searchCriteria.setLocation(appointmentWithLocation.getLocation());
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertTrue(searchedAppointments.isEmpty());
+    }
+
+    @Test
     public void shouldReturnAllAppointmentsBetweenGivenDatesWithoutLimiting() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);

@@ -14,6 +14,7 @@ import org.openmrs.module.appointments.notification.NotificationException;
 import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.util.LocaleUtility;
 
 import java.text.MessageFormat;
@@ -112,12 +113,14 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     private boolean shouldSendEmailToPatient() {
-        String shouldSendEmail = Context.getAdministrationService().getGlobalProperty(PROP_SEND_TC_APPT_EMAIL, "false");
+        String shouldSendEmail = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_SEND_TC_APPT_EMAIL, "false"));
         return Boolean.valueOf(shouldSendEmail);
     }
 
     private String getEmailBody(String patientName, AppointmentServiceDefinition service, Set<AppointmentProvider> providers, Date appointmentDate, String link) {
-        String emailTemplate = Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_TEMPLATE);
+        String emailTemplate = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_TEMPLATE));
         String practitioners =
                 providers != null ?
                         providers.stream()
@@ -133,7 +136,8 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     private String getEmailSubject() {
-        String emailSubject = Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_SUBJECT);
+        String emailSubject = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_PATIENT_EMAIL_SUBJECT));
         if (emailSubject == null || "".equals(emailSubject)) {
             emailSubject = Context.getMessageSourceService().getMessage(PROP_PATIENT_EMAIL_SUBJECT, null, LocaleUtility.getDefaultLocale());
         }
@@ -141,7 +145,8 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     private String getAdhocTeleconsultationEmailSubject() {
-        String emailSubject = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT);
+        String emailSubject = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT));
         if (StringUtils.isBlank(emailSubject)) {
             emailSubject = Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_SUBJECT,
                     null, LocaleUtility.getDefaultLocale());
@@ -150,7 +155,8 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     private String getAdhocTeleconsultationEmailBody(String patientName, String provider, String link) {
-        String emailTemplate = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE);
+        String emailTemplate = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE));
         Object[] arguments = {patientName, provider, link};
         if (StringUtils.isBlank(emailTemplate)) {
             return Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_PATIENT_EMAIL_TEMPLATE, arguments, LocaleUtility.getDefaultLocale());
@@ -160,7 +166,8 @@ public class DefaultTCAppointmentPatientEmailNotifier implements AppointmentEven
     }
 
     private String getAdhocTeleconsultationBCCEmails() {
-        String bccEmails = Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_BCC_EMAILS);
+        String bccEmails = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(PROP_ADHOC_TELECONSULTATION_BCC_EMAILS));
         if (bccEmails == null || "".equals(bccEmails)) {
             bccEmails = Context.getMessageSourceService().getMessage(PROP_ADHOC_TELECONSULTATION_BCC_EMAILS, null, LocaleUtility.getDefaultLocale());
         }

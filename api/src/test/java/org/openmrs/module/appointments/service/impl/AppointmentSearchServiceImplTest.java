@@ -4,12 +4,16 @@ import org.bahmni.search.cursor.CursorCodec;
 import org.bahmni.search.model.PaginationRequest;
 import org.bahmni.search.model.SearchCondition;
 import org.bahmni.search.model.SearchRequestMeta;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.dao.AppointmentSearchDao;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.search.AppointmentSearchConstants;
@@ -57,9 +61,19 @@ public class AppointmentSearchServiceImplTest {
 
     private AppointmentSearchServiceImpl searchService;
 
+    private MockedStatic<Context> contextMock;
+
     @Before
     public void setUp() {
+        contextMock = Mockito.mockStatic(Context.class, Mockito.CALLS_REAL_METHODS);
+        contextMock.when(() -> Context.addProxyPrivilege(anyString())).thenAnswer(invocation -> null);
+        contextMock.when(() -> Context.removeProxyPrivilege(anyString())).thenAnswer(invocation -> null);
         searchService = new AppointmentSearchServiceImpl(appointmentSearchDao, validator, responseBuilder, administrationService);
+    }
+
+    @After
+    public void tearDown() {
+        contextMock.close();
     }
 
     @Test

@@ -36,15 +36,12 @@ public class DefaultAppointmentStatusChangeValidatorTest {
     private DefaultAppointmentStatusChangeValidator validator;
 
     @Before
-    public void init() {
+    public void setUp() {
         contextMock = Mockito.mockStatic(Context.class);
 
         when(administrationService.getGlobalProperty("disableDefaultAppointmentValidations")).thenReturn("false");
         contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
-    }
 
-    @Before
-    public void setUp() {
         appointment = new Appointment();
     }
 
