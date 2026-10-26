@@ -37,7 +37,7 @@
     </modules>
 
 	<properties>
-		<openmrs.platform.version>2.8.10</openmrs.platform.version>
+		<openmrs.platform.version>2.8.9</openmrs.platform.version>
 		<!--test dependencies-->
 		<junitVersion>4.13</junitVersion>
 		<hamcrestVersion>2.2</hamcrestVersion>

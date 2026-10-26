@@ -2,7 +2,7 @@
 
 ## Build
 
-- Module version: `2.3.0-SNAPSHOT`. Platform: OpenMRS 2.8.10 (needs 2.8.0+ to start),
+- Module version: `2.3.0-SNAPSHOT`. Platform: OpenMRS 2.8.9 (needs 2.8.0+ to start),
   webservices.rest 3.6.0, Java 17 source/target, Liquibase 4.32 at runtime.
 - Build and test on JDK 17 (`export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home`
   on this machine; adapt per host) with `./mvnw clean verify`.
@@ -42,7 +42,7 @@
   `Context.addProxyPrivilege(PrivilegeConstants.GET_GLOBAL_PROPERTIES)` /
   `removeProxyPrivilege` in `try/finally` (see
   `DefaultAppointmentStatusChangeValidator`).
-- Hibernate `Example.create` over-constrains on 2.8.x (it matches on
+- Hibernate `Example.create` over-constrains on 2.8.9 (it matches on
   defaults such as `isTeleconsultationEnabled`). Search criteria must
   restrict explicitly on the fields callers populate (see
   `AppointmentDaoImpl.search`).
@@ -52,7 +52,7 @@
 
 ## Host boot (Docker)
 
-- `openmrs/openmrs-core:2.8.x` against an **existing** database needs
+- `openmrs/openmrs-core:2.8.9` against an **existing** database needs
   `OMRS_CREATE_TABLES=false`; with the default the wizard runs the
   fresh-install schema snapshot against the populated schema and the
   startup rolls back to the `initialsetup` screen.
