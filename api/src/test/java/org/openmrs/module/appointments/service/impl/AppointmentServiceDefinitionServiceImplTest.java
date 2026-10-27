@@ -122,13 +122,8 @@ public class AppointmentServiceDefinitionServiceImplTest {
         assertNotNull(captor.getValue().getDateVoided());
         assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
         assertEquals(voidReason, captor.getValue().getVoidReason());
-        List toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
-        toSort.sort(new Comparator<ServiceWeeklyAvailability>() {
-            public int compare(ServiceWeeklyAvailability o1, ServiceWeeklyAvailability o2) {
-
-                return (o1.getId() > o2.getId() ? 1 : -1);
-            }
-        });
+        List<ServiceWeeklyAvailability> toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
+        toSort.sort((o1, o2) -> (o1.getId() > o2.getId() ? 1 : -1));
         Iterator<ServiceWeeklyAvailability> iterator = toSort.iterator();
         ServiceWeeklyAvailability firstWeeklyAvailability = iterator.next();
         ServiceWeeklyAvailability secondWeeklyAvailability = iterator.next();
@@ -175,13 +170,8 @@ public class AppointmentServiceDefinitionServiceImplTest {
         assertEquals(voidReason, captor.getValue().getVoidReason());
 
         serviceTypes = captor.getValue().getServiceTypes(true);
-        List toSort = new ArrayList<>(serviceTypes);
-        toSort.sort(new Comparator<AppointmentServiceType>() {
-            public int compare(AppointmentServiceType o1, AppointmentServiceType o2) {
-
-                return (o1.getId() > o2.getId() ? 1 : -1);
-            }
-        });
+        List<AppointmentServiceType> toSort = new ArrayList<>(serviceTypes);
+        toSort.sort((o1, o2) -> (o1.getId() > o2.getId() ? 1 : -1));
         Iterator<AppointmentServiceType> iterator = toSort.iterator();
         AppointmentServiceType serviceType1 = iterator.next();
         AppointmentServiceType serviceType2 = iterator.next();
