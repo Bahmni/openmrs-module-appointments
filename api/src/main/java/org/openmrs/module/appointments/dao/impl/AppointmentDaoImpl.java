@@ -30,6 +30,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     private static final String LOCATION = "location";
     private static final String SERVICE = "service";
     private static final String PROVIDER = "provider";
+    private static final String PROVIDERS = "providers";
+    private static final String PROVIDERS_PROVIDER = "providers.provider";
     private SessionFactory sessionFactory;
 
     public void setSessionFactory(SessionFactory sessionFactory) {
@@ -94,8 +96,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
         if (appointment.getProvider() != null) {
             // Appointment.provider is not a mapped Hibernate property (see Appointment.hbm.xml);
             // the actual provider association lives on the "providers" collection.
-            criteria.createAlias("providers", "providers");
-            criteria.createAlias("providers.provider", PROVIDER);
+            criteria.createAlias(PROVIDERS, PROVIDERS);
+            criteria.createAlias(PROVIDERS_PROVIDER, PROVIDER);
             criteria.add(Restrictions.eq(PROVIDER + ".providerId", appointment.getProvider().getProviderId()));
         }
         return criteria.list();
@@ -195,8 +197,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
 
     private void setProviderCriteria(AppointmentSearchRequest appointmentSearchRequest, Criteria criteria) {
         if (StringUtils.isNotEmpty(appointmentSearchRequest.getProviderUuid())) {
-            criteria.createAlias("providers", "providers");
-            criteria.createAlias("providers.provider", PROVIDER);
+            criteria.createAlias(PROVIDERS, PROVIDERS);
+            criteria.createAlias(PROVIDERS_PROVIDER, PROVIDER);
             criteria.add(Restrictions.eq("provider.uuid", appointmentSearchRequest.getProviderUuid()));
         }
     }
@@ -297,8 +299,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
             }
 
             if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
-                criteria.createAlias("providers", "providers");
-                criteria.createAlias("providers.provider", PROVIDER);
+                criteria.createAlias(PROVIDERS, PROVIDERS);
+                criteria.createAlias(PROVIDERS_PROVIDER, PROVIDER);
                 Disjunction disjunction = Restrictions.disjunction();
                 searchQuery.getProviderUuids().stream()
                         .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))

@@ -47,7 +47,7 @@ import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
     private AppointmentDao appointmentDao;
 
     private List<AppointmentStatusChangeValidator> statusChangeValidators;

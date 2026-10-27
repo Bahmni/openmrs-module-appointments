@@ -30,10 +30,11 @@ import java.util.Properties;
 
 public class DefaultMailSender implements MailSender {
     private static final String EMAIL_PROPERTIES_FILENAME = "mail-config.properties";
-    private Log log = LogFactory.getLog(this.getClass());
+    private static final String MAIL_FROM = "mail.from";
+    private final Log log = LogFactory.getLog(this.getClass());
     private volatile Session session = null;
 
-    private AdministrationService administrationService;
+    private final AdministrationService administrationService;
 
     public DefaultMailSender(AdministrationService administrationService) {
         this.administrationService = administrationService;
@@ -45,7 +46,7 @@ public class DefaultMailSender implements MailSender {
             MimeMessage mail = new MimeMessage(getSession());
             if(!Objects.equals(mail.getSession().getProperty("mail.send"), "true")) return;
             mail.setFrom(new InternetAddress(GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
-                    this.administrationService.getGlobalProperty("mail.from", ""))));
+                    this.administrationService.getGlobalProperty(MAIL_FROM, ""))));
             Address[] toAddresses = new Address[1];
             toAddresses[0] = new InternetAddress(to[0]);
             mail.setRecipients(Message.RecipientType.TO, getAddresses(to));
@@ -131,7 +132,7 @@ public class DefaultMailSender implements MailSender {
             p.put("mail.smtp.starttls.enable", administrationService.getGlobalProperty("mail.smtp.starttls.enable", "true"));
             p.put("mail.smtp.ssl.enable", administrationService.getGlobalProperty("mail.smtp.ssl.enable", "true"));
             p.put("mail.debug", administrationService.getGlobalProperty("mail.debug", "false"));
-            p.put("mail.from", administrationService.getGlobalProperty("mail.from", ""));
+            p.put(MAIL_FROM, administrationService.getGlobalProperty(MAIL_FROM, ""));
             p.put("mail.user", administrationService.getGlobalProperty("mail.user", ""));
             p.put("mail.password", administrationService.getGlobalProperty("mail.password", ""));
             //p.put("mail.smtp.ssl.trust", "smtp.gmail.com");

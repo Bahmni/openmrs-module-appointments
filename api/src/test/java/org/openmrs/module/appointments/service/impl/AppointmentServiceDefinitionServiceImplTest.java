@@ -123,7 +123,7 @@ public class AppointmentServiceDefinitionServiceImplTest {
         assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
         assertEquals(voidReason, captor.getValue().getVoidReason());
         List toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
-        Collections.sort(toSort, new Comparator<ServiceWeeklyAvailability>() {
+        toSort.sort(new Comparator<ServiceWeeklyAvailability>() {
             public int compare(ServiceWeeklyAvailability o1, ServiceWeeklyAvailability o2) {
 
                 return (o1.getId() > o2.getId() ? 1 : -1);
@@ -176,7 +176,7 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
         serviceTypes = captor.getValue().getServiceTypes(true);
         List toSort = new ArrayList<>(serviceTypes);
-        Collections.sort(toSort, new Comparator<AppointmentServiceType>() {
+        toSort.sort(new Comparator<AppointmentServiceType>() {
             public int compare(AppointmentServiceType o1, AppointmentServiceType o2) {
 
                 return (o1.getId() > o2.getId() ? 1 : -1);
