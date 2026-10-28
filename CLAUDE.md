@@ -4,8 +4,8 @@
 
 - Module version: `2.3.0-SNAPSHOT`. Platform: OpenMRS 2.8.9 (needs 2.8.0+ to start),
   webservices.rest 3.6.0, Java 17 source/target, Liquibase 4.32 at runtime.
-- Build and test on JDK 17 (`export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk-17.jdk/Contents/Home`
-  on this machine; adapt per host) with `./mvnw clean verify`.
+- Build and test on JDK 17 (point `JAVA_HOME` at a local JDK 17 install) with
+  `./mvnw clean verify`.
 - Suite baseline: 859 tests, 0 failures, 4 skipped (api unit 328/2S, api IT 106,
   atom-feed 20, omod unit 276/1S, omod IT 129/1S). A run that reports different
   totals changed behaviour, not just code.

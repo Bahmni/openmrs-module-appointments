@@ -23,6 +23,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
@@ -382,7 +383,8 @@ public class AppointmentMapper {
     }
 
     private static Map<String, String> mapAttributeTypes(Patient p) {
-        String customPersonAttributeTypes = Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes");
+        String customPersonAttributeTypes = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes"));
         String[] attributeTypes = customPersonAttributeTypes != null ? customPersonAttributeTypes.split(",") : new String[0];
         Map<String, String> customAttributesMap = new HashMap<>();
         for (String attributeType : attributeTypes) {
