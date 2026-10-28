@@ -217,6 +217,24 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void shouldFilterSearchByStatus() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointmentWithStatus = allAppointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.Scheduled)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have a Scheduled appointment"));
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(appointmentWithStatus.getPatient());
+        searchCriteria.setStatus(AppointmentStatus.Scheduled);
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().allMatch(a -> a.getStatus() == AppointmentStatus.Scheduled));
+    }
+
+    @Test
     public void shouldReturnAllAppointmentsBetweenGivenDatesWithoutLimiting() throws ParseException {
         AppointmentSearchRequest appointmentSearchRequest = new AppointmentSearchRequest();
         Date startDate = DateUtil.convertToDate("2108-08-10T18:30:00.0Z", DateUtil.DateFormatType.UTC);

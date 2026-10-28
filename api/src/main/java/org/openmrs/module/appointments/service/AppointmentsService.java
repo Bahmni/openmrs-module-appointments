@@ -38,8 +38,8 @@ public interface AppointmentsService {
     List<Appointment> getAllAppointmentsReminder(String hours);
 
     /**
-     * Returns non-voided appointments matching the patient, location, service and provider
-     * set on the given appointment. Other fields (e.g. status) are not used as criteria.
+     * Returns non-voided appointments matching the patient, location, service, provider and
+     * status set on the given appointment. Other fields are not used as criteria.
      */
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
