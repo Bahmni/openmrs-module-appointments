@@ -18,8 +18,8 @@ import java.util.UUID;
 
 public abstract class AbstractBaseAdvice implements AfterReturningAdvice {
 
-    private EventServiceImpl eventService;
-    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
+    private final EventServiceImpl eventService;
+    private final AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
 
     public AbstractBaseAdvice() {

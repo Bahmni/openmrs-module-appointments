@@ -19,7 +19,7 @@ public class TeleconsultationAppointmentService {
     private final static String PROP_TC_SERVER = "bahmni.appointment.teleConsultation.serverUrlPattern";
     private final static String ADHOC_TC_ID = "bahmni.adhoc.teleConsultation.id";
     private final static String DEFAULT_TC_SERVER_URL_PATTERN = "https://meet.jit.si/{0}";
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     private PatientService patientService;
     private PatientAppointmentNotifierService patientAppointmentNotifierService;

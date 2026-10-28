@@ -69,7 +69,7 @@ public class AppointmentMapper {
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
 
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
