@@ -9,7 +9,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.dao.AppointmentDao;
@@ -41,9 +41,8 @@ import java.util.Set;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyListOf;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
@@ -56,6 +55,7 @@ import static org.mockito.Mockito.when;
 import static org.openmrs.module.appointments.model.AppointmentStatus.CheckedIn;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Requested;
 import static org.openmrs.module.appointments.model.AppointmentStatus.Scheduled;
+import static org.mockito.ArgumentMatchers.anyList;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppointmentRecurringPatternServiceImplTest {
@@ -113,7 +113,7 @@ public class AppointmentRecurringPatternServiceImplTest {
             appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
             return null;
         }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
 
         //setting up the locators
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
@@ -127,7 +127,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         verify(recurringAppointmentNumberGenerator).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
         assertEquals(1, appointmentRecurringPattern.getAppointments().size());
         assertEquals(1, appointmentsList.get(0).getAppointmentAudits().size());
     }
@@ -311,7 +311,7 @@ public class AppointmentRecurringPatternServiceImplTest {
             appts.forEach(a -> a.setAppointmentNumber(generatedNumber));
             return null;
         }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
 
         recurringAppointmentService.setAppointmentNumberGeneratorLocator(
                 new AppointmentNumberGeneratorLocatorImpl(appointmentNumberGenerator, recurringAppointmentNumberGenerator));
@@ -321,7 +321,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         verify(appointmentServiceHelper).getAppointmentAsJsonString(appointment);
         verify(appointmentServiceHelper).getAppointmentAuditEvent(appointment, notes);
         verify(recurringAppointmentNumberGenerator).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
     }
 
     @Test
@@ -383,7 +383,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         List<Appointment> updatedAppointments = Arrays.asList(voidedAppointment, newAppointment);
         String errorMessage = "Appointment cannot be updated without Patient";
         doThrow(new APIException(errorMessage)).when(appointmentServiceHelper)
-                .validate(any(), anyListOf(AppointmentValidator.class));
+                .validate(any(), anyList());
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
 
@@ -425,7 +425,7 @@ public class AppointmentRecurringPatternServiceImplTest {
             });
             return null;
         }).when(recurringAppointmentNumberGenerator).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
 
         doReturn(notes).when(appointmentServiceHelper).getAppointmentAsJsonString(any());
         doReturn(appointmentAudit).when(appointmentServiceHelper).getAppointmentAuditEvent(any(), anyString());
@@ -439,7 +439,7 @@ public class AppointmentRecurringPatternServiceImplTest {
         assertEquals(sharedAppointmentNumber, appointmentTwo.getAppointmentNumber());
         assertEquals(sharedAppointmentNumber, appointmentThree.getAppointmentNumber());
         verify(recurringAppointmentNumberGenerator, times(1)).setAppointmentNumbers(
-                anyListOf(Appointment.class), any(AppointmentRecurringPattern.class));
+                anyList(), any(AppointmentRecurringPattern.class));
     }
 
     @Test

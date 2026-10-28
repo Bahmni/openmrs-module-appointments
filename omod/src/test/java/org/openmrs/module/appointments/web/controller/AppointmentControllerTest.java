@@ -1,15 +1,20 @@
 package org.openmrs.module.appointments.web.controller;
 
 import org.apache.commons.lang.time.DateUtils;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
+import org.openmrs.api.AdministrationService;
+import org.openmrs.api.context.Context;
+import org.openmrs.messagesource.MessageSourceService;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
@@ -27,14 +32,14 @@ import java.util.function.Supplier;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
 
 
 public class AppointmentControllerTest {
@@ -51,6 +56,14 @@ public class AppointmentControllerTest {
     @Mock
     private AppointmentServiceMapper appointmentServiceMapper;
 
+    @Mock
+    private AdministrationService administrationService;
+
+    @Mock
+    private MessageSourceService messageSourceService;
+
+    private MockedStatic<Context> contextMock;
+
     @InjectMocks
     private AppointmentController appointmentController;
 
@@ -60,6 +73,20 @@ public class AppointmentControllerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
+        // webservices.rest 3.x RestUtil.wrapErrorResponse, used by the controllers'
+        // catch blocks, reads a global property and the message source through
+        // the Context; plain unit tests have no openMRS session, so mock the statics.
+        contextMock = Mockito.mockStatic(Context.class);
+        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
+        contextMock.when(Context::getMessageSourceService).thenReturn(messageSourceService);
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 
     @Test

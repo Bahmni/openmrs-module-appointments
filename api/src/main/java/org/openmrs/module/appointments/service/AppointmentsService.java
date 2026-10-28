@@ -37,6 +37,10 @@ public interface AppointmentsService {
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAllAppointmentsReminder(String hours);
 
+    /**
+     * Returns non-voided appointments matching the patient, location, service, provider and
+     * status set on the given appointment. Other fields are not used as criteria.
+     */
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> search(Appointment appointment);
