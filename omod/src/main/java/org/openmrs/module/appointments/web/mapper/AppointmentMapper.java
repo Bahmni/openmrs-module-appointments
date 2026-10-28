@@ -1,8 +1,6 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -68,8 +66,6 @@ public class AppointmentMapper {
 
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
-
-    private final Log log = LogFactory.getLog(this.getClass());
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
