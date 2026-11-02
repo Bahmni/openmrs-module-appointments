@@ -33,6 +33,11 @@ public class AppointmentServiceDefinitionServiceTest extends BaseModuleWebContex
         noPrivilegeUser = "no-privilege-user";
         password = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
+        // OpenMRS 2.8.9 resolves role privileges through the role-privilege
+        // cache, whose loader runs on a daemon thread that only sees
+        // committed data; commit the roles and privileges before the first
+        // privilege check runs.
+        getConnection().commit();
     }
 
     @Test
