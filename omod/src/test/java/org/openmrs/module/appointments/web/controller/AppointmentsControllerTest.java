@@ -1,7 +1,6 @@
 package org.openmrs.module.appointments.web.controller;
 
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -9,15 +8,10 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.openmrs.Patient;
-import org.openmrs.api.AdministrationService;
-import org.openmrs.api.context.Context;
-import org.openmrs.messagesource.MessageSourceService;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
@@ -42,19 +36,20 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Matchers.anyList;
 import java.util.Map;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyListOf;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.MockitoAnnotations.initMocks;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.powermock.api.mockito.PowerMockito.doAnswer;
+import static org.powermock.api.mockito.PowerMockito.mock;
+import static org.powermock.api.mockito.PowerMockito.when;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppointmentsControllerTest {
@@ -68,14 +63,6 @@ public class AppointmentsControllerTest {
     @Mock
     private AppointmentMapper appointmentMapper;
 
-    @Mock
-    private AdministrationService administrationService;
-
-    @Mock
-    private MessageSourceService messageSourceService;
-
-    private MockedStatic<Context> contextMock;
-
     @InjectMocks
     private AppointmentsController appointmentsController;
 
@@ -85,20 +72,6 @@ public class AppointmentsControllerTest {
     @Before
     public void setUp() throws Exception {
         initMocks(this);
-        // webservices.rest 3.x RestUtil.wrapErrorResponse, used by the controllers'
-        // catch blocks, reads a global property and the message source through
-        // the Context; plain unit tests have no openMRS session, so mock the statics.
-        contextMock = Mockito.mockStatic(Context.class);
-        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
-        contextMock.when(Context::getMessageSourceService).thenReturn(messageSourceService);
-    }
-
-    @After
-    public void tearDownContextMock() {
-        if (contextMock != null) {
-            contextMock.close();
-            contextMock = null;
-        }
     }
 
     @Test
@@ -228,7 +201,7 @@ public class AppointmentsControllerTest {
         appointmentsController.search(appointmentSearchRequest);
 
         verify(appointmentsService, never()).search(appointmentSearchRequest);
-        verify(appointmentMapper, never()).constructResponse(anyList());
+        verify(appointmentMapper, never()).constructResponse(anyListOf(Appointment.class));
     }
 
     @Test
