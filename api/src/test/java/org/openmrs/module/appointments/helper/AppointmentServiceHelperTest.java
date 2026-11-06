@@ -7,7 +7,7 @@ import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.openmrs.Patient;
 import org.openmrs.api.APIException;
 import org.openmrs.module.appointments.model.*;
@@ -23,12 +23,12 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyListOf;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.ArgumentMatchers.anyList;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AppointmentServiceHelperTest {
@@ -59,7 +59,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(appointment, appointmentValidators);
 
         verify(appointmentValidator, times(1)).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Test
@@ -75,7 +75,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(appointment, null);
 
         verify(appointmentValidator, never()).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Ignore("ignored as it is moved out of appointment service helper and part of Appointment service invoking the appointment number generator")
@@ -144,7 +144,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, AppointmentStatus.CheckedIn, appointmentValidators);
         verify(appointmentStatusChangeValidator, times(1)).validate(any(Appointment.class),
                 any(AppointmentStatus.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Test
@@ -159,7 +159,7 @@ public class AppointmentServiceHelperTest {
             List<String> errors = (List) args[2];
             errors.add(errorMessage);
             return null;
-        }).when(appointmentStatusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyListOf(String.class));
+        }).when(appointmentStatusChangeValidator).validate(any(Appointment.class), any(AppointmentStatus.class), anyList());
 
         expectedException.expect(APIException.class);
         expectedException.expectMessage(errorMessage);
@@ -167,7 +167,7 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validateStatusChangeAndGetErrors(appointment, AppointmentStatus.CheckedIn, appointmentValidators);
         verify(appointmentStatusChangeValidator, times(1)).validate(any(Appointment.class),
                 any(AppointmentStatus.class),
-                anyListOf(String.class));
+                anyList());
     }
 
     @Test
@@ -176,6 +176,6 @@ public class AppointmentServiceHelperTest {
         appointmentServiceHelper.validate(null, appointmentValidators);
 
         verify(appointmentValidator, never()).validate(any(Appointment.class),
-                anyListOf(String.class));
+                anyList());
     }
 }

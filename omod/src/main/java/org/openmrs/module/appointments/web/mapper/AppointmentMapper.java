@@ -1,8 +1,6 @@
 package org.openmrs.module.appointments.web.mapper;
 
 import org.apache.commons.lang.StringUtils;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.openmrs.Concept;
 import org.openmrs.Location;
 import org.openmrs.Patient;
@@ -23,6 +21,7 @@ import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentServiceDefinitionService;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentDefaultResponse;
 import org.openmrs.module.appointments.web.contract.AppointmentProviderDetail;
 import org.openmrs.module.appointments.web.contract.AppointmentQuery;
@@ -67,8 +66,6 @@ public class AppointmentMapper {
 
     @Autowired(required = false)
     AppointmentResponseExtension appointmentResponseExtension;
-
-    private Log log = LogFactory.getLog(this.getClass());
 
     public List<AppointmentDefaultResponse> constructResponse(List<Appointment> appointments) {
         return appointments.stream().map(as -> this.mapToDefaultResponse(as, new AppointmentDefaultResponse())).collect(Collectors.toList());
@@ -382,7 +379,8 @@ public class AppointmentMapper {
     }
 
     private static Map<String, String> mapAttributeTypes(Patient p) {
-        String customPersonAttributeTypes = Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes");
+        String customPersonAttributeTypes = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty("appointments.customPersonAttributeTypes"));
         String[] attributeTypes = customPersonAttributeTypes != null ? customPersonAttributeTypes.split(",") : new String[0];
         Map<String, String> customAttributesMap = new HashMap<>();
         for (String attributeType : attributeTypes) {

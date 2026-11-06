@@ -155,10 +155,6 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldSearchAppointmentsForAPatient() {
-        // TODO: #92
-        // this test fails after adding a default value in Appointment:
-        // private Boolean isTeleconsultationEnabled = Boolean.FALSE;
-        // fix that in the search function (not test)
         List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
         Appointment appointment = new Appointment();
         appointment.setPatient(allAppointments.get(0).getPatient());
@@ -167,6 +163,75 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         appointment.setStatus(null);
         List<Appointment> searchedAppointmentList = appointmentDao.search(appointment);
         assertEquals(3, searchedAppointmentList.size());
+    }
+
+    @Test
+    public void shouldFilterSearchByProvider() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointmentWithProvider = allAppointments.stream()
+                .filter(a -> a.getProviders() != null && !a.getProviders().isEmpty())
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have appointments with providers"));
+        var provider = appointmentWithProvider.getProviders().iterator().next().getProvider();
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setProvider(provider);
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().anyMatch(a -> a.getUuid().equals(appointmentWithProvider.getUuid())));
+    }
+
+    @Test
+    public void shouldExcludeVoidedAppointmentsFromSearch() {
+        Appointment appointmentServiceSample = appointmentDao.getAllAppointments(null).get(0);
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(appointmentServiceSample.getPatient());
+        searchCriteria.setService(appointmentServiceSample.getService());
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().noneMatch(a -> Boolean.TRUE.equals(a.getVoided())));
+        assertTrue(searchedAppointments.stream().noneMatch(a -> a.getUuid().equals("75504r42-3ca8-11e3-bf2b-0800271c13344")));
+    }
+
+    @Test
+    public void shouldReturnEmptyListWhenNoAppointmentMatchesSearchCriteria() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment patientTwoAppointment = allAppointments.stream()
+                .filter(a -> a.getPatient().getPatientId().equals(2))
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have an appointment for patient 2"));
+        Appointment appointmentWithLocation = allAppointments.get(0);
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(patientTwoAppointment.getPatient());
+        searchCriteria.setLocation(appointmentWithLocation.getLocation());
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertTrue(searchedAppointments.isEmpty());
+    }
+
+    @Test
+    public void shouldFilterSearchByStatus() {
+        List<Appointment> allAppointments = appointmentDao.getAllAppointments(null);
+        Appointment appointmentWithStatus = allAppointments.stream()
+                .filter(a -> a.getStatus() == AppointmentStatus.Scheduled)
+                .findFirst()
+                .orElseThrow(() -> new AssertionError("Test data should have a Scheduled appointment"));
+
+        Appointment searchCriteria = new Appointment();
+        searchCriteria.setPatient(appointmentWithStatus.getPatient());
+        searchCriteria.setStatus(AppointmentStatus.Scheduled);
+
+        List<Appointment> searchedAppointments = appointmentDao.search(searchCriteria);
+
+        assertFalse(searchedAppointments.isEmpty());
+        assertTrue(searchedAppointments.stream().allMatch(a -> a.getStatus() == AppointmentStatus.Scheduled));
     }
 
     @Test
@@ -274,7 +339,7 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
 
     @Test
     public void shouldReturnAllNonVoidedFutureAppointmentsOfPatient() {
-        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1);
+        List<Appointment> appointments = appointmentDao.getAppointmentsForPatient(1001);
         assertEquals(5, appointments.size());
     }
 

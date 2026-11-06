@@ -81,6 +81,14 @@ public class AppointmentsServiceTest extends BaseModuleWebContextSensitiveTest {
         resetUser = "reset-user";
         resetUserPassword = "P@ssw0rd";
         executeDataSet("userRolesandPrivileges.xml");
+        // OpenMRS 2.8.9 resolves role privileges through the role-privilege
+        // cache, whose loader runs on a daemon thread that only sees
+        // committed data. The roles and privileges above must therefore be
+        // committed before the first privilege check runs; the appointment
+        // fixtures below must stay uncommitted, because their dataset
+        // refreshes the admin user row and is meant to roll back with the
+        // test transaction.
+        getConnection().commit();
         executeDataSet("appointmentTestData.xml");
     }
 

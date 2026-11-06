@@ -26,6 +26,7 @@ import org.openmrs.module.appointments.notification.NotificationResult;
 import org.openmrs.module.appointments.service.AppointmentNumberGenerator;
 import org.openmrs.module.appointments.service.AppointmentNumberGeneratorLocator;
 import org.openmrs.module.appointments.service.AppointmentsService;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.module.appointments.validator.AppointmentStatusChangeValidator;
 import org.openmrs.module.appointments.validator.AppointmentValidator;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,7 +47,7 @@ import static org.openmrs.module.appointments.util.DateUtil.getStartOfDay;
 public class AppointmentsServiceImpl implements AppointmentsService {
 
     private static final String PRIVILEGES_EXCEPTION_CODE = "error.privilegesRequired";
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
     private AppointmentDao appointmentDao;
 
     private List<AppointmentStatusChangeValidator> statusChangeValidators;
@@ -160,7 +161,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Override
     public List<Appointment> searchAppointmentsWithoutDates(AppointmentSearchRequestModel searchQuery) {
-        String limitString = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+        String limitString = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault"));
         Integer limit = StringUtils.isNotEmpty(limitString) ? Integer.parseInt(limitString) : null;
         return appointmentDao.getAppointmentsWithoutDates(searchQuery, limit);
     }
@@ -326,7 +328,8 @@ public class AppointmentsServiceImpl implements AppointmentsService {
     public List<Appointment> search(AppointmentSearchRequest appointmentSearchRequest) {
 
         if (!isNull(appointmentSearchRequest.getLimit())) {
-            String limit = Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault");
+            String limit = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                    Context.getAdministrationService().getGlobalProperty("webservices.rest.maxResultsDefault"));
             if (StringUtils.isNotEmpty(limit)) {
                 appointmentSearchRequest.setLimit(Integer.parseInt(limit));
             }

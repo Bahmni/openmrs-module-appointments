@@ -116,7 +116,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     public void shouldSearchAppointmentsGivenDateRange() throws Exception {
         String requestBodyJson = "{\"startDate\":\"2108-08-13T18:30:00.000Z\"," +
                 "\"endDate\":\"2108-08-15T18:29:59.000Z\"," +
-                "\"patientUuid\":\"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"patientUuid\":\"0e5a1d28-8e67-4a5b-9c3d-2f1a4b5c6d01\"," +
                 "\"limit\":4}";
 
         List<AppointmentDefaultResponse> response = deserialize(
@@ -306,7 +306,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     public void shouldReturnPatientDoubleBookingConflictsForAnAppointment() throws Exception {
         String content = "{" +
                 "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
-                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"patientUuid\": \"0e5a1d28-8e67-4a5b-9c3d-2f1a4b5c6d01\"," +
                 "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
                 "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
                 "\"startDateTime\": \"2107-07-15T17:30:00\"," +
@@ -332,7 +332,7 @@ public class AppointmentsControllerIT extends BaseIntegrationTest {
     public void shouldReturnPatientDoubleBookingConflictsForExistingAppointment() throws Exception {
         String content = "{" +
                 "\"uuid\":\"4cee2712-d983-48a1-a4e5-1bbbc960bb95\"," +
-                "\"patientUuid\": \"2c33920f-7aa6-48d6-998a-60412d8ff7d5\"," +
+                "\"patientUuid\": \"0e5a1d28-8e67-4a5b-9c3d-2f1a4b5c6d01\"," +
                 "\"serviceUuid\": \"c36006d4-9fbb-4f20-866b-0ece245615c1\"," +
                 "\"serviceTypeUuid\": \"672546e5-9fbb-4f20-866b-0ece24564578\"," +
                 "\"startDateTime\": \"2107-07-15T17:30:00\"," +
