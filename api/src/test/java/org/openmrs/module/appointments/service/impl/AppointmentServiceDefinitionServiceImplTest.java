@@ -12,7 +12,10 @@ import org.openmrs.module.appointments.dao.AppointmentServiceDao;
 import org.openmrs.module.appointments.model.*;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.sql.Time;
 import java.time.DayOfWeek;
@@ -22,14 +25,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.when;
-import org.mockito.MockedStatic;
-import org.junit.After;
-import org.mockito.Mockito;
+import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
-@RunWith(MockitoJUnitRunner.class)
+@PowerMockIgnore("javax.management.*")
+@PrepareForTest({Context.class})
+@RunWith(PowerMockRunner.class)
 public class AppointmentServiceDefinitionServiceImplTest {
-    private MockedStatic<Context> contextMock;
-
 
     @Captor
     private ArgumentCaptor<AppointmentServiceDefinition> captor;
@@ -51,9 +52,9 @@ public class AppointmentServiceDefinitionServiceImplTest {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-		contextMock = Mockito.mockStatic(Context.class);
+        mockStatic(Context.class);
         authenticatedUser = new User(8);
-        contextMock.when(Context::getAuthenticatedUser).thenReturn(authenticatedUser);
+        PowerMockito.when(Context.getAuthenticatedUser()).thenReturn(authenticatedUser);
     }
 
     @Test
@@ -122,8 +123,13 @@ public class AppointmentServiceDefinitionServiceImplTest {
         assertNotNull(captor.getValue().getDateVoided());
         assertEquals(authenticatedUser, captor.getValue().getVoidedBy());
         assertEquals(voidReason, captor.getValue().getVoidReason());
-        List<ServiceWeeklyAvailability> toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
-        toSort.sort((o1, o2) -> (o1.getId() > o2.getId() ? 1 : -1));
+        List toSort = new ArrayList<>(captor.getValue().getWeeklyAvailability(true));
+        Collections.sort(toSort, new Comparator<ServiceWeeklyAvailability>() {
+            public int compare(ServiceWeeklyAvailability o1, ServiceWeeklyAvailability o2) {
+
+                return (o1.getId() > o2.getId() ? 1 : -1);
+            }
+        });
         Iterator<ServiceWeeklyAvailability> iterator = toSort.iterator();
         ServiceWeeklyAvailability firstWeeklyAvailability = iterator.next();
         ServiceWeeklyAvailability secondWeeklyAvailability = iterator.next();
@@ -170,8 +176,13 @@ public class AppointmentServiceDefinitionServiceImplTest {
         assertEquals(voidReason, captor.getValue().getVoidReason());
 
         serviceTypes = captor.getValue().getServiceTypes(true);
-        List<AppointmentServiceType> toSort = new ArrayList<>(serviceTypes);
-        toSort.sort((o1, o2) -> (o1.getId() > o2.getId() ? 1 : -1));
+        List toSort = new ArrayList<>(serviceTypes);
+        Collections.sort(toSort, new Comparator<AppointmentServiceType>() {
+            public int compare(AppointmentServiceType o1, AppointmentServiceType o2) {
+
+                return (o1.getId() > o2.getId() ? 1 : -1);
+            }
+        });
         Iterator<AppointmentServiceType> iterator = toSort.iterator();
         AppointmentServiceType serviceType1 = iterator.next();
         AppointmentServiceType serviceType2 = iterator.next();
@@ -288,13 +299,5 @@ public class AppointmentServiceDefinitionServiceImplTest {
 
         Mockito.verify(appointmentsService, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDateTime, endDateTime,
                 Arrays.asList(includeStatus));
-    }
-
-    @After
-    public void tearDownContextMock() {
-        if (contextMock != null) {
-            contextMock.close();
-            contextMock = null;
-        }
     }
 }

@@ -11,24 +11,25 @@ import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.when;
-import org.mockito.MockedStatic;
-import org.junit.After;
+import static org.powermock.api.mockito.PowerMockito.when;
 
-@RunWith(MockitoJUnitRunner.class)
+@PowerMockIgnore("javax.management.*")
+@PrepareForTest(Context.class)
+@RunWith(PowerMockRunner.class)
 public class MarkAppointmentAsCompleteTaskTest {
-    private MockedStatic<Context> contextMock;
-
 
     @Mock
     private AppointmentsService appointmentsService;
@@ -41,9 +42,9 @@ public class MarkAppointmentAsCompleteTaskTest {
 
     @Before
     public void setUp() throws Exception {
-        contextMock = Mockito.mockStatic(Context.class);
-        contextMock.when(() -> Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
-        contextMock.when(() -> Context.getService(AdministrationService.class)).thenReturn(administrationService);
+        PowerMockito.mockStatic(Context.class);
+        when(Context.getService(AppointmentsService.class)).thenReturn(appointmentsService);
+        when(Context.getService(AdministrationService.class)).thenReturn(administrationService);
         markAppointmentAsCompleteTask = new MarkAppointmentAsCompleteTask();
     }
 
@@ -72,13 +73,5 @@ public class MarkAppointmentAsCompleteTaskTest {
         when(administrationService.getGlobalPropertyObject(schedulerMarksComplete)).thenReturn(globalProperty);
         markAppointmentAsCompleteTask.execute();
         Mockito.verify(appointmentsService, times(0)).changeStatus(any(Appointment.class), any(String.class), any(Date.class));
-    }
-
-    @After
-    public void tearDownContextMock() {
-        if (contextMock != null) {
-            contextMock.close();
-            contextMock = null;
-        }
     }
 }
