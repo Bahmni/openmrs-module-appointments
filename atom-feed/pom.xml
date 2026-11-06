@@ -5,7 +5,7 @@
     <parent>
         <artifactId>appointments</artifactId>
         <groupId>org.bahmni.module</groupId>
-        <version>2.3.0-SNAPSHOT</version>
+        <version>3.0.0-SNAPSHOT</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -76,7 +76,7 @@
                                         <limit>
                                             <counter>LINE</counter>
                                             <value>COVEREDRATIO</value>
-                                            <!-- Lowered as PowerMockito is not covered -->
+                                            <!-- Lowered threshold; advice classes are only partly covered by unit tests -->
                                             <minimum>0.35</minimum>
                                         </limit>
                                         <limit>
@@ -117,6 +117,11 @@
             <groupId>org.openmrs.test</groupId>
             <artifactId>openmrs-test</artifactId>
             <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.openmrs.web</groupId>

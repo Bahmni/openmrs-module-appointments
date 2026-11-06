@@ -8,6 +8,7 @@ import org.openmrs.api.PatientService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.AdhocTeleconsultationResponse;
 import org.openmrs.module.appointments.notification.NotificationResult;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.bahmni.module.teleconsultation.api.TeleconsultationService;
 
 import java.util.List;
@@ -18,7 +19,7 @@ public class TeleconsultationAppointmentService {
     private final static String PROP_TC_SERVER = "bahmni.appointment.teleConsultation.serverUrlPattern";
     private final static String ADHOC_TC_ID = "bahmni.adhoc.teleConsultation.id";
     private final static String DEFAULT_TC_SERVER_URL_PATTERN = "https://meet.jit.si/{0}";
-    private Log log = LogFactory.getLog(this.getClass());
+    private final Log log = LogFactory.getLog(this.getClass());
 
     private PatientService patientService;
     private PatientAppointmentNotifierService patientAppointmentNotifierService;
@@ -36,7 +37,8 @@ public class TeleconsultationAppointmentService {
     }
 
     public AdhocTeleconsultationResponse generateAdhocTeleconsultationLink(String patientUuid, String provider) {
-        String identifierType = Context.getAdministrationService().getGlobalProperty(ADHOC_TC_ID);
+        String identifierType = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(ADHOC_TC_ID));
         Patient patient = patientService.getPatientByUuid(patientUuid);
         PatientIdentifier identifier = patient.getIdentifiers().stream().filter(pi ->
                         identifierType.equals(pi.getIdentifierType().getName()))

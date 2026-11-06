@@ -44,9 +44,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentServiceDefaultResponse;
 import org.openmrs.module.appointments.web.extension.AppointmentResponseExtension;
 import org.openmrs.module.webservices.rest.web.response.ConversionException;
-import org.powermock.core.classloader.annotations.PowerMockIgnore;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.junit.MockitoJUnitRunner;
 
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -67,17 +65,19 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.contains;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
-import static org.powermock.api.mockito.PowerMockito.when;
+import static org.mockito.Mockito.when;
+import org.mockito.MockedStatic;
+import org.junit.After;
+import org.mockito.Mockito;
 
-@PowerMockIgnore("javax.management.*")
-@PrepareForTest({Context.class})
-@RunWith(PowerMockRunner.class)
+@RunWith(MockitoJUnitRunner.class)
 public class AppointmentMapperTest {
+    private MockedStatic<Context> contextMock;
+
 
     @Rule
     public ExpectedException expectedException = ExpectedException.none();
@@ -173,10 +173,10 @@ public class AppointmentMapperTest {
         location.setUuid("locationUuid");
         when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
 
-        mockStatic(Context.class);
-        when(Context.getAdministrationService()).thenReturn(administrationService);
+		contextMock = Mockito.mockStatic(Context.class);
+        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
         when(administrationService.getGlobalProperty(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY)).thenReturn(PERSON_ATTRIBUTE_TYPE_GLOBAL_PROPERTY_VALUES);
-        when(Context.getLocale()).thenReturn(java.util.Locale.ENGLISH);
+        contextMock.when(Context::getLocale).thenReturn(java.util.Locale.ENGLISH);
 
         // Setup test concepts for appointment reasons
         reasonConcept1 = new Concept();
@@ -257,7 +257,6 @@ public class AppointmentMapperTest {
         Appointment existingAppointment = createAppointment();
         existingAppointment.setUuid(appointmentUuid);
         existingAppointment.setStatus(AppointmentStatus.CheckedIn);
-        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(existingAppointment);
 
         Appointment appointment = appointmentMapper.fromRequest(appointmentRequest);
         assertNotNull(appointment);
@@ -535,18 +534,14 @@ public class AppointmentMapperTest {
 
         AppointmentServiceDefinition appointmentServiceDefinition = new AppointmentServiceDefinition();
         appointmentServiceDefinition.setUuid("serviceUuid");
-        when(appointmentServiceDefinitionService.getAppointmentServiceByUuid("someServiceUuid")).thenReturn(appointmentServiceDefinition);
         Patient patient = new Patient();
         patient.setUuid("patientUuid");
-        when(patientService.getPatientByUuid("patientUuid")).thenReturn(patient);
 
         Provider provider = new Provider();
         provider.setUuid("providerUuid");
-        when(providerService.getProviderByUuid("providerUuid")).thenReturn(provider);
 
         Location location = new Location();
         location.setUuid("locationUuid");
-        when(locationService.getLocationByUuid("locationUuid")).thenReturn(location);
 
         assertEquals("locationUuid", appointment.getLocation().getUuid());
         assertEquals("patientUuid", appointment.getPatient().getUuid());
@@ -622,7 +617,6 @@ public class AppointmentMapperTest {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
         Appointment appointment = createAppointment();
         appointment.setUuid(appointmentUuid);
-        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
         appointment.setProvider(null);
         appointment.setProviders(null);
 
@@ -636,7 +630,6 @@ public class AppointmentMapperTest {
         String appointmentUuid = "7869637c-12fe-4121-9692-b01f93f99e55";
         Appointment appointment = createAppointment();
         appointment.setUuid(appointmentUuid);
-        when(appointmentsService.getAppointmentByUuid(appointmentUuid)).thenReturn(appointment);
         appointment.setProvider(null);
         appointment.setProviders(Collections.EMPTY_SET);
 
@@ -972,5 +965,13 @@ public class AppointmentMapperTest {
         expectedException.expectMessage("Bad Request. No concept found with UUID: invalidConceptUuid");
 
         appointmentMapper.fromRequest(appointmentRequest);
+    }
+
+    @After
+    public void tearDownContextMock() {
+        if (contextMock != null) {
+            contextMock.close();
+            contextMock = null;
+        }
     }
 }

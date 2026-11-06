@@ -1348,7 +1348,9 @@ public class WeeklyRecurringAppointmentsGenerationServiceTest {
         recurringPattern.setAppointments(new HashSet<Appointment>() {{
             add(new AppointmentBuilder().withStartDateTime(addDays(date, -7)).withEndDateTime(addHours(addDays(date, -7), +1)).build());
             add(new AppointmentBuilder().withStartDateTime(addDays(date, -1)).withEndDateTime(addHours(addDays(date, -1), +1)).build());
-            add(new AppointmentBuilder().withStartDateTime(addDays(date, +0)).withEndDateTime(addHours(addDays(date, +0), +1)).build());
+            // a minute in the past: at exactly `date` this fixture races with production's Calendar.getInstance()
+            // (Date.before() returns false within the same millisecond) and the expected throw disappears
+            add(new AppointmentBuilder().withStartDateTime(DateUtils.addMinutes(date, -1)).withEndDateTime(addHours(DateUtils.addMinutes(date, -1), +1)).build());
             add(new AppointmentBuilder().withStartDateTime(addDays(date, +6)).withEndDateTime(addHours(addDays(date, +6), +1)).build());
         }});
 

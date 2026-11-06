@@ -2,6 +2,7 @@ package org.openmrs.module.appointments.advice;
 
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
+import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 
 import java.lang.reflect.Method;
 import java.util.ArrayList;
@@ -54,6 +55,7 @@ public class AppointmentAdvice extends AbstractBaseAdvice {
 
     @Override
     protected boolean shouldRaiseEvent() {
-        return Boolean.parseBoolean(Context.getAdministrationService().getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY));
+        return Boolean.parseBoolean(GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
+                Context.getAdministrationService().getGlobalProperty(RAISE_EVENT_GLOBAL_PROPERTY)));
     }
 }
