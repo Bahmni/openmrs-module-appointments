@@ -11,7 +11,10 @@ import org.openmrs.api.AdministrationService;
 import org.openmrs.api.context.Context;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentServiceDefinition;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,14 +22,11 @@ import java.util.List;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.MockedStatic;
-import org.junit.After;
-import org.mockito.Mockito;
 
-@RunWith(MockitoJUnitRunner.class)
+@PowerMockIgnore("javax.management.*")
+@RunWith(PowerMockRunner.class)
+@PrepareForTest({Context.class})
 public class DefaultAppointmentValidatorTest {
-    private MockedStatic<Context> contextMock;
-
 
     @Mock
     private AdministrationService administrationService;
@@ -37,9 +37,9 @@ public class DefaultAppointmentValidatorTest {
     @Before
     public void init() {
         MockitoAnnotations.initMocks(this);
-        contextMock = Mockito.mockStatic(Context.class);
+        PowerMockito.mockStatic(Context.class);
 
-        contextMock.when(Context::getAdministrationService).thenReturn(administrationService);
+        when(Context.getAdministrationService()).thenReturn(administrationService);
     }
 
     @Test
@@ -60,13 +60,5 @@ public class DefaultAppointmentValidatorTest {
         defaultAppointmentValidator.validate(appointment, errors);
         assertEquals(1,errors.size());
         assertEquals("Appointment cannot be created without Service", errors.get(0));
-    }
-
-    @After
-    public void tearDownContextMock() {
-        if (contextMock != null) {
-            contextMock.close();
-            contextMock = null;
-        }
     }
 }

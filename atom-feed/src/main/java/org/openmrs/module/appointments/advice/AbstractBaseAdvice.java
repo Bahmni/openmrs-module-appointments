@@ -7,7 +7,6 @@ import org.ict4h.atomfeed.server.service.EventServiceImpl;
 import org.ict4h.atomfeed.transaction.AFTransactionWorkWithoutResult;
 import java.time.LocalDateTime;
 import org.openmrs.api.context.Context;
-import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.openmrs.module.atomfeed.transaction.support.AtomFeedSpringTransactionManager;
 import org.springframework.aop.AfterReturningAdvice;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -18,8 +17,8 @@ import java.util.UUID;
 
 public abstract class AbstractBaseAdvice implements AfterReturningAdvice {
 
-    private final EventServiceImpl eventService;
-    private final AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
+    private EventServiceImpl eventService;
+    private AtomFeedSpringTransactionManager atomFeedSpringTransactionManager;
 
 
     public AbstractBaseAdvice() {
@@ -57,8 +56,7 @@ public abstract class AbstractBaseAdvice implements AfterReturningAdvice {
     }
 
     protected String getUrlPattern(String urlPatternGlobalProperty, String defaultValue) {
-        return GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
-                Context.getAdministrationService().getGlobalProperty(urlPatternGlobalProperty, defaultValue));
+        return Context.getAdministrationService().getGlobalProperty(urlPatternGlobalProperty, defaultValue);
     }
 
     protected abstract String getContents(Object returnValue);

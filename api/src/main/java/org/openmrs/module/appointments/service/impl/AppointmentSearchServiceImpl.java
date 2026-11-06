@@ -15,7 +15,6 @@ import org.bahmni.search.pagination.PageResult;
 import org.bahmni.search.pagination.PaginationHelper;
 import org.bahmni.search.pagination.ResolvedPagination;
 import org.openmrs.api.AdministrationService;
-import org.openmrs.module.appointments.util.GlobalPropertyLookupUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,14 +56,10 @@ public class AppointmentSearchServiceImpl implements AppointmentSearchService {
         validator.validateRequest(request);
 
         SearchRequestMeta meta = request.getMeta();
-        String defaultLimitProperty = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
-                administrationService.getGlobalProperty(GP_PAGINATION_DEFAULT_LIMIT));
-        String maxLimitProperty = GlobalPropertyLookupUtil.withGlobalPropertyPrivilege(() ->
-                administrationService.getGlobalProperty(GP_PAGINATION_MAX_LIMIT));
         int defaultLimit = PaginationHelper.resolveGlobalProperty(
-                defaultLimitProperty, FALLBACK_DEFAULT_LIMIT, GP_PAGINATION_DEFAULT_LIMIT);
+                administrationService.getGlobalProperty(GP_PAGINATION_DEFAULT_LIMIT), FALLBACK_DEFAULT_LIMIT, GP_PAGINATION_DEFAULT_LIMIT);
         int maxLimit = PaginationHelper.resolveGlobalProperty(
-                maxLimitProperty, FALLBACK_MAX_LIMIT, GP_PAGINATION_MAX_LIMIT);
+                administrationService.getGlobalProperty(GP_PAGINATION_MAX_LIMIT), FALLBACK_MAX_LIMIT, GP_PAGINATION_MAX_LIMIT);
 
 
         ResolvedPagination resolved = PaginationHelper.resolvePaginationContext(meta, ENTITY, defaultLimit, maxLimit);
