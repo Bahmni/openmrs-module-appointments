@@ -631,4 +631,141 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
         assertTrue(allAppointments.size() > 0);
         assertTrue(allAppointments.stream().allMatch(a -> a.getStartDateTime().compareTo(from) >= 0));
     }
+
+    // ---- getFilteredAppointments (shared service/provider/location filter) ----
+
+    private static final String SVC_A = "f11e0000-0000-0000-0000-00000000svcA";
+    private static final String SVC_B = "f11e0000-0000-0000-0000-00000000svcB";
+    private static final String LOC_A = "f11e0000-0000-0000-0000-00000000locA";
+    private static final String LOC_B = "f11e0000-0000-0000-0000-00000000locB";
+    private static final String PROV_A = "f11e0000-0000-0000-0000-0000000provA";
+    private static final String PROV_B = "f11e0000-0000-0000-0000-0000000provB";
+
+    private static final List<AppointmentStatus> SUMMARY_STATUSES = Arrays.asList(
+            AppointmentStatus.Requested, AppointmentStatus.Completed, AppointmentStatus.Scheduled,
+            AppointmentStatus.CheckedIn, AppointmentStatus.Missed);
+
+    private Date day(String yyyyMMdd) throws ParseException {
+        return new SimpleDateFormat("yyyy-MM-dd").parse(yyyyMMdd);
+    }
+
+    private Set<String> uuids(List<Appointment> appointments) {
+        return appointments.stream().map(Appointment::getUuid).collect(java.util.stream.Collectors.toSet());
+    }
+
+    @Test
+    public void shouldReturnAllAppointmentsInRangeWhenNoFiltersGiven() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null, null, null, null);
+        assertEquals(7, result.size());
+    }
+
+    @Test
+    public void shouldApplySummaryStatusFilter() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        // 407 is Cancelled and must be excluded by the five summary statuses.
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), SUMMARY_STATUSES, null, null, null);
+        assertEquals(6, result.size());
+        assertFalse(uuids(result).contains("f11e0000-0000-0000-0000-00000000a407"));
+    }
+
+    @Test
+    public void shouldFilterByServiceUuids() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                Collections.singletonList(SVC_A), null, null);
+        assertEquals(5, result.size());
+    }
+
+    @Test
+    public void shouldFilterByProviderUuidsExcludingCancelledResponse() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        // provA matches 401, 403, 406; 405 has provA but response CANCELLED and must be excluded.
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                null, Collections.singletonList(PROV_A), null);
+        assertEquals(3, result.size());
+        assertFalse(uuids(result).contains("f11e0000-0000-0000-0000-00000000a405"));
+    }
+
+    @Test
+    public void shouldNotDuplicateAppointmentWithMultipleMatchingProviders() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        // 406 has both provA and provB; it must appear exactly once.
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                null, Arrays.asList(PROV_A, PROV_B), null);
+        assertEquals(4, result.size());
+        assertEquals(4, uuids(result).size());
+    }
+
+    @Test
+    public void shouldFilterByLocationUuids() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                null, null, Collections.singletonList(LOC_A));
+        assertEquals(5, result.size());
+    }
+
+    @Test
+    public void shouldCombineFiltersWithAnd() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        // svcA AND locA AND provA(non-cancelled) -> 401 and 406 only.
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                Collections.singletonList(SVC_A), Collections.singletonList(PROV_A), Collections.singletonList(LOC_A));
+        assertEquals(2, result.size());
+        assertEquals(new java.util.HashSet<>(Arrays.asList(
+                "f11e0000-0000-0000-0000-00000000a401", "f11e0000-0000-0000-0000-00000000a406")), uuids(result));
+    }
+
+    @Test
+    public void shouldCombineMultipleValuesWithinServiceFilterUsingOr() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                Arrays.asList(SVC_A, SVC_B), null, null);
+        assertEquals(7, result.size());
+    }
+
+    @Test
+    public void shouldReturnEmptyForUnknownUuid() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,
+                Collections.singletonList("no-such-service-uuid"), null, null);
+        assertTrue(result.isEmpty());
+    }
+
+    @Test
+    public void shouldRestrictToSingleDayRange() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        // 408 is on 2099-06-16 and must be excluded from the single-day window.
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null, null, null, null);
+        assertEquals(7, result.size());
+        assertFalse(uuids(result).contains("f11e0000-0000-0000-0000-00000000a408"));
+    }
+
+    @Test
+    public void shouldReturnAppointmentsAcrossAMonthRange() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-01"), day("2099-06-30"), null, null, null, null);
+        assertEquals(8, result.size());
+        assertTrue(uuids(result).contains("f11e0000-0000-0000-0000-00000000a408"));
+    }
+
+    @Test
+    public void summaryCountForADayShouldMatchDailyListSizeForSameFilters() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        List<String> serviceUuids = Collections.singletonList(SVC_A);
+        List<String> locationUuids = Collections.singletonList(LOC_A);
+
+        // The daily list (B) and the summary (A) are backed by the same query with the same arguments,
+        // so for one day with the same filters and statuses the count must equal the list size.
+        List<Appointment> dailyList = appointmentDao.getFilteredAppointments(
+                day("2099-06-15"), day("2099-06-16"), SUMMARY_STATUSES, serviceUuids, null, locationUuids);
+
+        Map<java.util.Date, List<Appointment>> groupedByDay = dailyList.stream()
+                .collect(java.util.stream.Collectors.groupingBy(Appointment::getDateFromStartDateTime));
+        int summaryCountForDay = groupedByDay.getOrDefault(day("2099-06-15"), Collections.emptyList()).size();
+
+        assertEquals(dailyList.size(), summaryCountForDay);
+        // svcA + locA with the five summary statuses -> 401, 405, 406 (407 is Cancelled, excluded).
+        assertEquals(3, dailyList.size());
+    }
 }

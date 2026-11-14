@@ -16,6 +16,7 @@ import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.model.AppointmentServiceType;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
 import org.openmrs.module.appointments.model.AppointmentPriority;
+import org.openmrs.module.appointments.model.AppointmentProviderResponse;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -156,6 +157,67 @@ public class AppointmentDaoImpl implements AppointmentDao {
         }
         return criteria.list();
 
+    }
+
+    @Override
+    public List<Appointment> getFilteredAppointments(Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList,
+                                                     List<String> serviceUuids, List<String> providerUuids, List<String> locationUuids) {
+        Criteria criteria = sessionFactory.getCurrentSession().createCriteria(Appointment.class);
+        criteria.add(Restrictions.eq("voided", false));
+        criteria.createAlias("patient", "patient");
+        criteria.add(Restrictions.eq("patient.voided", false));
+        criteria.add(Restrictions.eq("patient.personVoided", false));
+        if (startDate != null) {
+            criteria.add(Restrictions.ge("startDateTime", startDate));
+        }
+        if (endDate != null) {
+            criteria.add(Restrictions.le("startDateTime", endDate));
+        }
+        if (appointmentStatusFilterList != null && !appointmentStatusFilterList.isEmpty()) {
+            criteria.add(Restrictions.in("status", appointmentStatusFilterList));
+        }
+        applyServiceProviderLocationFilters(criteria, serviceUuids, providerUuids, locationUuids);
+        return criteria.list();
+    }
+
+    /**
+     * Shared service / provider / location filtering used by both the monthly summary and the daily
+     * appointment list, so the two can never drift apart. Within a filter type the UUIDs combine with
+     * OR; across filter types they combine with AND. Providers with a CANCELLED response are excluded
+     * from the provider match, and a DISTINCT transformer prevents the provider join from returning the
+     * same appointment more than once (which would otherwise over-count the summary).
+     */
+    private void applyServiceProviderLocationFilters(Criteria criteria, List<String> serviceUuids,
+                                                     List<String> providerUuids, List<String> locationUuids) {
+        if (serviceUuids != null && !serviceUuids.isEmpty()) {
+            criteria.createAlias(SERVICE, SERVICE);
+            Disjunction disjunction = Restrictions.disjunction();
+            serviceUuids.stream()
+                    .map(serviceUuid -> Restrictions.eq("service.uuid", serviceUuid))
+                    .forEach(disjunction::add);
+            criteria.add(disjunction);
+        }
+
+        if (providerUuids != null && !providerUuids.isEmpty()) {
+            criteria.createAlias(PROVIDERS, PROVIDERS);
+            criteria.createAlias(PROVIDERS_PROVIDER, PROVIDER);
+            criteria.add(Restrictions.ne(PROVIDERS + ".response", AppointmentProviderResponse.CANCELLED));
+            Disjunction disjunction = Restrictions.disjunction();
+            providerUuids.stream()
+                    .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
+                    .forEach(disjunction::add);
+            criteria.add(disjunction);
+            criteria.setResultTransformer(Criteria.DISTINCT_ROOT_ENTITY);
+        }
+
+        if (locationUuids != null && !locationUuids.isEmpty()) {
+            criteria.createAlias(LOCATION, LOCATION);
+            Disjunction disjunction = Restrictions.disjunction();
+            locationUuids.stream()
+                    .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
+                    .forEach(disjunction::add);
+            criteria.add(disjunction);
+        }
     }
 
     @Override

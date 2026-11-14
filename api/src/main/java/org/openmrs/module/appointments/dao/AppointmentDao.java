@@ -30,6 +30,16 @@ public interface AppointmentDao {
 
     List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList);
 
+    /**
+     * Returns non-voided appointments (with non-voided patients) whose startDateTime falls within
+     * [startDate, endDate], optionally narrowed by status and by the service / provider / location
+     * filters. Within a filter type the values combine with OR; across filter types they combine
+     * with AND. Providers whose response is CANCELLED are not considered a match for the provider
+     * filter. Passing a non-empty filter list that matches nothing yields an empty result.
+     */
+    List<Appointment> getFilteredAppointments(Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusFilterList,
+                                              List<String> serviceUuids, List<String> providerUuids, List<String> locationUuids);
+
 	Appointment getAppointmentByUuid(String uuid);
 
     List<Appointment> getAllAppointmentsInDateRange(Date startDate, Date endDate);
