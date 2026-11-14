@@ -185,6 +185,41 @@ public class AppointmentsControllerTest {
     }
 
     @Test
+    public void shouldRestrictFilteredQueryToForDateWhenNoRangeGiven() throws Exception {
+        String forDateString = "2099-06-15T00:00:00.0Z";
+        Date dayStart = DateUtil.convertToLocalDateFromUTC(forDateString);
+        Date nextDayStart = DateUtil.convertToLocalDateFromUTC("2099-06-16T00:00:00.0Z");
+        Date dayEnd = new Date(nextDayStart.getTime() - 1);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(dayStart, dayEnd, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments(forDateString, null, null, serviceUuids, null, null, null);
+
+        // The range ends before the next day starts, so appointments on 2099-06-16 are not returned.
+        verify(appointmentsService, times(1)).getFilteredAppointments(dayStart, dayEnd, null, serviceUuids, null, null);
+        verify(appointmentsService, never()).getAllAppointments(any());
+    }
+
+    @Test
+    public void shouldPreferExplicitRangeOverForDateWhenFiltering() throws Exception {
+        String startDateString = "2099-06-01T00:00:00.0Z";
+        String endDateString = "2099-06-30T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments("2099-06-15T00:00:00.0Z", startDateString, endDateString,
+                serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(startDate, endDate, null, serviceUuids, null, null);
+    }
+
+    @Test
     public void shouldSaveAppointment() throws Exception {
 
         AppointmentRequest request = new AppointmentRequest();

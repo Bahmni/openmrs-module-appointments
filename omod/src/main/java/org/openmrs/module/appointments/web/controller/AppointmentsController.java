@@ -36,6 +36,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -76,9 +77,15 @@ public class AppointmentsController extends BaseRestController {
             List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
             return appointmentMapper.constructResponse(appointments);
         }
+        Date rangeStart = DateUtil.convertToLocalDateFromUTC(startDate);
+        Date rangeEnd = DateUtil.convertToLocalDateFromUTC(endDate);
+        if (rangeStart == null && rangeEnd == null && forDate != null) {
+            // No explicit range: keep the filters within forDate's day instead of searching all dates.
+            rangeStart = DateUtil.convertToLocalDateFromUTC(forDate);
+            rangeEnd = new Date(rangeStart.getTime() + TimeUnit.DAYS.toMillis(1) - 1);
+        }
         List<Appointment> appointments = appointmentsService.getFilteredAppointments(
-                DateUtil.convertToLocalDateFromUTC(startDate), DateUtil.convertToLocalDateFromUTC(endDate),
-                toAppointmentStatuses(statuses), serviceUuids, providerUuids, locationUuids);
+                rangeStart, rangeEnd, toAppointmentStatuses(statuses), serviceUuids, providerUuids, locationUuids);
         return appointmentMapper.constructResponse(appointments);
     }
 
