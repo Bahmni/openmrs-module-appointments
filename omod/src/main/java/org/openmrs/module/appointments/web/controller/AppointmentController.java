@@ -95,34 +95,53 @@ public class AppointmentController extends BaseRestController {
         return appointmentMapper.constructResponse(appointments);
     }
 
+    private static final List<AppointmentStatus> SUMMARY_STATUSES = Arrays.asList(
+            AppointmentStatus.Requested,
+            AppointmentStatus.Completed,
+            AppointmentStatus.Scheduled,
+            AppointmentStatus.CheckedIn,
+            AppointmentStatus.Missed);
+
     @RequestMapping(method = RequestMethod.GET, value = "appointmentSummary")
     @ResponseBody
-    public List<AppointmentsSummary> getAllAppointmentsSummary(@RequestParam(value = "startDate") String startDateString, @RequestParam(value = "endDate") String endDateString) throws ParseException {
+    public List<AppointmentsSummary> getAllAppointmentsSummary(@RequestParam(value = "startDate") String startDateString,
+                                                               @RequestParam(value = "endDate") String endDateString,
+                                                               @RequestParam(value = "serviceUuids", required = false) List<String> serviceUuids,
+                                                               @RequestParam(value = "providerUuids", required = false) List<String> providerUuids,
+                                                               @RequestParam(value = "locationUuids", required = false) List<String> locationUuids) throws ParseException {
         List<AppointmentsSummary> appointmentsSummaryList = new ArrayList<>();
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-MM-dd");
         Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
         Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+
         List<AppointmentServiceDefinition> appointmentServiceDefinitions = appointmentServiceDefinitionService.getAllAppointmentServices(false);
+        if (serviceUuids != null && !serviceUuids.isEmpty()) {
+            appointmentServiceDefinitions = appointmentServiceDefinitions.stream()
+                    .filter(service -> serviceUuids.contains(service.getUuid()))
+                    .collect(Collectors.toList());
+        }
+
+        // Single shared query (service/provider/location filters applied in the DAO) then grouped per
+        // service, so the counts here always match the daily list produced by GET /appointments.
+        List<Appointment> appointments = appointmentsService.getFilteredAppointments(
+                startDate, endDate, SUMMARY_STATUSES, serviceUuids, providerUuids, locationUuids);
+        Map<String, List<Appointment>> appointmentsGroupedByService = appointments.stream()
+                .filter(appointment -> appointment.getService() != null)
+                .collect(Collectors.groupingBy(appointment -> appointment.getService().getUuid()));
+
         for (AppointmentServiceDefinition appointmentServiceDefinition : appointmentServiceDefinitions) {
             List<Appointment> appointmentsForService =
-                    appointmentsService.getAppointmentsForService(
-                            appointmentServiceDefinition, startDate, endDate,
-                            Arrays.asList(
-                                    AppointmentStatus.Requested,
-                                    AppointmentStatus.Completed,
-                                    AppointmentStatus.Scheduled,
-                                    AppointmentStatus.CheckedIn,
-                                    AppointmentStatus.Missed));
+                    appointmentsGroupedByService.getOrDefault(appointmentServiceDefinition.getUuid(), Collections.emptyList());
 
             Map<Date, List<Appointment>> appointmentsGroupedByDate =
                     appointmentsForService.stream().collect(Collectors.groupingBy(Appointment::getDateFromStartDateTime));
 
             Map<String, DailyAppointmentServiceSummary> appointmentCountMap = new LinkedHashMap<>();
             for (Map.Entry<Date, List<Appointment>> appointmentDateMap : appointmentsGroupedByDate.entrySet()) {
-                List<Appointment> appointments = appointmentDateMap.getValue();
-                Long missedAppointmentsCount = appointments.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
+                List<Appointment> appointmentsForDate = appointmentDateMap.getValue();
+                Long missedAppointmentsCount = appointmentsForDate.stream().filter(s-> s.getStatus().equals(AppointmentStatus.Missed)).count();
                 DailyAppointmentServiceSummary dailyAppointmentServiceSummary = new DailyAppointmentServiceSummary(
-                        appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid(), appointments.size(),Math.toIntExact(missedAppointmentsCount));
+                        appointmentDateMap.getKey(), appointmentServiceDefinition.getUuid(), appointmentsForDate.size(),Math.toIntExact(missedAppointmentsCount));
                 appointmentCountMap.put(simpleDateFormat.format(appointmentDateMap.getKey()), dailyAppointmentServiceSummary);
             }
 
