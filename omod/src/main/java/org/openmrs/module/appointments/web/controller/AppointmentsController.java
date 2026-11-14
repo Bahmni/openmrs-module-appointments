@@ -5,6 +5,7 @@ import org.apache.commons.logging.LogFactory;
 import org.openmrs.module.appointments.model.Appointment;
 import org.openmrs.module.appointments.model.AppointmentProvider;
 import org.openmrs.module.appointments.model.AppointmentSearchRequest;
+import org.openmrs.module.appointments.model.AppointmentStatus;
 import org.openmrs.module.appointments.service.AppointmentsService;
 import org.openmrs.module.appointments.util.DateUtil;
 import org.openmrs.module.appointments.web.contract.AppointmentStatusChangeRequest;
@@ -35,6 +36,7 @@ import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @Controller
@@ -62,9 +64,38 @@ public class AppointmentsController extends BaseRestController {
 
     @RequestMapping(method = RequestMethod.GET)
     @ResponseBody
-    public List<AppointmentDefaultResponse> getAllAppointments(@RequestParam(value = "forDate", required = false) String forDate) throws ParseException {
-        List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+    public List<AppointmentDefaultResponse> getAllAppointments(
+            @RequestParam(value = "forDate", required = false) String forDate,
+            @RequestParam(value = "startDate", required = false) String startDate,
+            @RequestParam(value = "endDate", required = false) String endDate,
+            @RequestParam(value = "serviceUuids", required = false) List<String> serviceUuids,
+            @RequestParam(value = "providerUuids", required = false) List<String> providerUuids,
+            @RequestParam(value = "locationUuids", required = false) List<String> locationUuids,
+            @RequestParam(value = "status", required = false) List<String> statuses) throws ParseException {
+        if (!hasFilterOrRange(startDate, endDate, serviceUuids, providerUuids, locationUuids, statuses)) {
+            List<Appointment> appointments = appointmentsService.getAllAppointments(DateUtil.convertToLocalDateFromUTC(forDate));
+            return appointmentMapper.constructResponse(appointments);
+        }
+        List<Appointment> appointments = appointmentsService.getFilteredAppointments(
+                DateUtil.convertToLocalDateFromUTC(startDate), DateUtil.convertToLocalDateFromUTC(endDate),
+                toAppointmentStatuses(statuses), serviceUuids, providerUuids, locationUuids);
         return appointmentMapper.constructResponse(appointments);
+    }
+
+    private boolean hasFilterOrRange(String startDate, String endDate, List<String> serviceUuids,
+                                     List<String> providerUuids, List<String> locationUuids, List<String> statuses) {
+        return startDate != null || endDate != null
+                || (serviceUuids != null && !serviceUuids.isEmpty())
+                || (providerUuids != null && !providerUuids.isEmpty())
+                || (locationUuids != null && !locationUuids.isEmpty())
+                || (statuses != null && !statuses.isEmpty());
+    }
+
+    private List<AppointmentStatus> toAppointmentStatuses(List<String> statuses) {
+        if (statuses == null || statuses.isEmpty()) {
+            return null;
+        }
+        return statuses.stream().map(AppointmentStatus::valueOf).collect(Collectors.toList());
     }
 
     @RequestMapping(method = RequestMethod.POST)

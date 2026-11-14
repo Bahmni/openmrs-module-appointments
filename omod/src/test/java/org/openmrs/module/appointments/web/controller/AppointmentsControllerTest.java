@@ -136,10 +136,52 @@ public class AppointmentsControllerTest {
                 appointmentsForDate.stream().map(as -> { return new AppointmentDefaultResponse(); }).collect(Collectors.toList()));
 
 
-        List<AppointmentDefaultResponse> allAppointments = appointmentsController.getAllAppointments("2017-03-15T16:57:09.0Z");
+        List<AppointmentDefaultResponse> allAppointments = appointmentsController.getAllAppointments(
+                "2017-03-15T16:57:09.0Z", null, null, null, null, null, null);
         verify(appointmentsService, times(1)).getAllAppointments(searchDate);
         verify(appointmentMapper, times(1)).constructResponse(appointmentsForDate);
         assertEquals(2, allAppointments.size());
+    }
+
+    @Test
+    public void shouldUseFilteredQueryWhenRangeAndFiltersProvided() throws Exception {
+        String startDateString = "2099-06-15T00:00:00.0Z";
+        String endDateString = "2099-06-16T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        List<String> providerUuids = Arrays.asList("prov-1");
+        List<String> locationUuids = Arrays.asList("loc-1");
+        List<AppointmentStatus> statuses = Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn);
+
+        List<Appointment> appointments = Arrays.asList(new Appointment(), new Appointment());
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids))
+                .thenReturn(appointments);
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(
+                appointments.stream().map(a -> new AppointmentDefaultResponse()).collect(Collectors.toList()));
+
+        List<AppointmentDefaultResponse> result = appointmentsController.getAllAppointments(
+                null, startDateString, endDateString, serviceUuids, providerUuids, locationUuids,
+                Arrays.asList("Scheduled", "CheckedIn"));
+
+        verify(appointmentsService, times(1))
+                .getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids);
+        verify(appointmentsService, never()).getAllAppointments(any());
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void shouldPassNullStatusListToFilteredQueryWhenNoStatusGiven() throws Exception {
+        String startDateString = "2099-06-15T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(startDate, null, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments(null, startDateString, null, serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(startDate, null, null, serviceUuids, null, null);
     }
 
     @Test
