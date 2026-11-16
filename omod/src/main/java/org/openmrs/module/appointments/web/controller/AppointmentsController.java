@@ -79,10 +79,11 @@ public class AppointmentsController extends BaseRestController {
         }
         Date rangeStart = DateUtil.convertToLocalDateFromUTC(startDate);
         Date rangeEnd = DateUtil.convertToLocalDateFromUTC(endDate);
-        if (rangeStart == null && rangeEnd == null && forDate != null) {
+        Date forDay = DateUtil.convertToLocalDateFromUTC(forDate);
+        if (rangeStart == null && rangeEnd == null && forDay != null) {
             // No explicit range: keep the filters within forDate's day instead of searching all dates.
-            rangeStart = DateUtil.convertToLocalDateFromUTC(forDate);
-            rangeEnd = new Date(rangeStart.getTime() + TimeUnit.DAYS.toMillis(1) - 1);
+            rangeStart = forDay;
+            rangeEnd = new Date(forDay.getTime() + TimeUnit.DAYS.toMillis(1) - 1);
         }
         List<Appointment> appointments = appointmentsService.getFilteredAppointments(
                 rangeStart, rangeEnd, toAppointmentStatuses(statuses), serviceUuids, providerUuids, locationUuids);

@@ -203,6 +203,18 @@ public class AppointmentsControllerTest {
     }
 
     @Test
+    public void shouldIgnoreEmptyForDateWhenFiltering() throws Exception {
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(null, null, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments("", null, null, serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(null, null, null, serviceUuids, null, null);
+    }
+
+    @Test
     public void shouldPreferExplicitRangeOverForDateWhenFiltering() throws Exception {
         String startDateString = "2099-06-01T00:00:00.0Z";
         String endDateString = "2099-06-30T00:00:00.0Z";
