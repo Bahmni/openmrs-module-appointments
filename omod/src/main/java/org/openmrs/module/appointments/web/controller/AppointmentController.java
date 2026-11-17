@@ -34,6 +34,13 @@ import java.util.stream.Collectors;
 @RequestMapping(value = "/rest/" + RestConstants.VERSION_1 + "/appointment")
 public class AppointmentController extends BaseRestController {
 
+    private static final List<AppointmentStatus> SUMMARY_STATUSES = Arrays.asList(
+            AppointmentStatus.Requested,
+            AppointmentStatus.Completed,
+            AppointmentStatus.Scheduled,
+            AppointmentStatus.CheckedIn,
+            AppointmentStatus.Missed);
+
     private Log log = LogFactory.getLog(this.getClass());
 
     @Autowired
@@ -94,13 +101,6 @@ public class AppointmentController extends BaseRestController {
         List<Appointment> appointments = appointmentsService.getAllFutureAppointmentsForServiceType(appointmentServiceType);
         return appointmentMapper.constructResponse(appointments);
     }
-
-    private static final List<AppointmentStatus> SUMMARY_STATUSES = Arrays.asList(
-            AppointmentStatus.Requested,
-            AppointmentStatus.Completed,
-            AppointmentStatus.Scheduled,
-            AppointmentStatus.CheckedIn,
-            AppointmentStatus.Missed);
 
     @RequestMapping(method = RequestMethod.GET, value = "appointmentSummary")
     @ResponseBody
