@@ -16,6 +16,7 @@ import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
 import org.openmrs.module.webservices.rest.web.RestConstants;
 import org.openmrs.module.webservices.rest.web.RestUtil;
+import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.openmrs.module.webservices.rest.web.v1_0.controller.BaseRestController;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -33,6 +34,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.validation.Valid;
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -103,7 +105,12 @@ public class AppointmentsController extends BaseRestController {
         if (statuses == null || statuses.isEmpty()) {
             return null;
         }
-        return statuses.stream().map(AppointmentStatus::valueOf).collect(Collectors.toList());
+        try {
+            return statuses.stream().map(AppointmentStatus::valueOf).collect(Collectors.toList());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalRequestException("Invalid appointment status in " + statuses
+                    + ". Allowed values: " + Arrays.toString(AppointmentStatus.values()));
+        }
     }
 
     @RequestMapping(method = RequestMethod.POST)

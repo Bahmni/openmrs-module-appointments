@@ -29,6 +29,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentStatusChangeRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
+import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -212,6 +213,14 @@ public class AppointmentsControllerTest {
         appointmentsController.getAllAppointments("", null, null, serviceUuids, null, null, null);
 
         verify(appointmentsService, times(1)).getFilteredAppointments(null, null, null, serviceUuids, null, null);
+    }
+
+    @Test
+    public void shouldThrowIllegalRequestExceptionForInvalidStatus() throws Exception {
+        expectedException.expect(IllegalRequestException.class);
+        expectedException.expectMessage("Invalid appointment status");
+
+        appointmentsController.getAllAppointments(null, null, null, null, null, null, Arrays.asList("Scheduled", "Foo"));
     }
 
     @Test
