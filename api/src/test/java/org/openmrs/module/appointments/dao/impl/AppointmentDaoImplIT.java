@@ -698,6 +698,45 @@ public class AppointmentDaoImplIT extends BaseIntegrationTest {
     }
 
     @Test
+    public void searchShouldExcludeAppointmentsWhereProviderResponseIsCancelled() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        searchQuery.setProviderUuids(Collections.singletonList(PROV_A));
+
+        // provA is on 401, 403 and 406; on 405 provA was removed (response CANCELLED).
+        List<Appointment> result = appointmentDao.search(searchQuery);
+
+        assertEquals(new java.util.HashSet<>(Arrays.asList(
+                "f11e0000-0000-0000-0000-00000000a401", "f11e0000-0000-0000-0000-00000000a403",
+                "f11e0000-0000-0000-0000-00000000a406")), uuids(result));
+    }
+
+    @Test
+    public void searchShouldNotDuplicateAppointmentWithMultipleMatchingProviders() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        searchQuery.setProviderUuids(Arrays.asList(PROV_A, PROV_B));
+
+        // 406 has both provA and provB; it must appear exactly once.
+        List<Appointment> result = appointmentDao.search(searchQuery);
+
+        assertEquals(4, result.size());
+        assertEquals(4, uuids(result).size());
+    }
+
+    @Test
+    public void searchShouldFilterByServiceUuids() throws Exception {
+        executeDataSet("filteredAppointmentsTestData.xml");
+        AppointmentSearchRequestModel searchQuery = new AppointmentSearchRequestModel();
+        searchQuery.setServiceUuids(Collections.singletonList(SVC_B));
+
+        List<Appointment> result = appointmentDao.search(searchQuery);
+
+        assertEquals(new java.util.HashSet<>(Arrays.asList(
+                "f11e0000-0000-0000-0000-00000000a403", "f11e0000-0000-0000-0000-00000000a404")), uuids(result));
+    }
+
+    @Test
     public void shouldFilterByLocationUuids() throws Exception {
         executeDataSet("filteredAppointmentsTestData.xml");
         List<Appointment> result = appointmentDao.getFilteredAppointments(day("2099-06-15"), day("2099-06-16"), null,

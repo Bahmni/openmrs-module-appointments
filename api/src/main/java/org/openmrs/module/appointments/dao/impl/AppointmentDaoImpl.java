@@ -181,8 +181,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
     }
 
     /**
-     * Shared service / provider / location filtering used by both the monthly summary and the daily
-     * appointment list, so the two can never drift apart. Within a filter type the UUIDs combine with
+     * Shared service / provider / location filtering used by the monthly summary, the daily appointment
+     * list and appointment search (POST /appointment/search), so they can never drift apart. Within a filter type the UUIDs combine with
      * OR; across filter types they combine with AND. Providers with a CANCELLED response are excluded
      * from the provider match, and a DISTINCT transformer prevents the provider join from returning the
      * same appointment more than once (which would otherwise over-count the summary).
@@ -331,21 +331,17 @@ public class AppointmentDaoImpl implements AppointmentDao {
         criteria.createAlias("patient", "patient");
         criteria.add(Restrictions.eq("patient.voided", false));
         criteria.add(Restrictions.eq("patient.personVoided", false));
-        criteria.createAlias(SERVICE, SERVICE);
+        // Search has always inner-joined service, which drops appointments without one. The shared filter
+        // creates that alias itself when filtering by service, so only add it here when it will not.
+        if (searchQuery == null || searchQuery.getServiceUuids() == null || searchQuery.getServiceUuids().isEmpty()) {
+            criteria.createAlias(SERVICE, SERVICE);
+        }
 
         if (searchQuery != null) {
             if (searchQuery.getPatientUuids() != null && !searchQuery.getPatientUuids().isEmpty()) {
                 Disjunction disjunction = Restrictions.disjunction();
                 searchQuery.getPatientUuids().stream()
                         .map(patientUuid -> Restrictions.eq("patient.uuid", patientUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getServiceUuids() != null && !searchQuery.getServiceUuids().isEmpty()) {
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getServiceUuids().stream()
-                        .map(serviceUuid -> Restrictions.eq("service.uuid", serviceUuid))
                         .forEach(disjunction::add);
                 criteria.add(disjunction);
             }
@@ -363,24 +359,8 @@ public class AppointmentDaoImpl implements AppointmentDao {
                 criteria.add(Restrictions.eq("status", AppointmentStatus.valueOf(searchQuery.getStatus())));
             }
 
-            if (searchQuery.getProviderUuids() != null && !searchQuery.getProviderUuids().isEmpty()) {
-                criteria.createAlias(PROVIDERS, PROVIDERS);
-                criteria.createAlias(PROVIDERS_PROVIDER, PROVIDER);
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getProviderUuids().stream()
-                        .map(providerUuid -> Restrictions.eq("provider.uuid", providerUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
-
-            if (searchQuery.getLocationUuids() != null && !searchQuery.getLocationUuids().isEmpty()) {
-                criteria.createAlias(LOCATION, LOCATION);
-                Disjunction disjunction = Restrictions.disjunction();
-                searchQuery.getLocationUuids().stream()
-                        .map(locationUuid -> Restrictions.eq("location.uuid", locationUuid))
-                        .forEach(disjunction::add);
-                criteria.add(disjunction);
-            }
+            applyServiceProviderLocationFilters(criteria, searchQuery.getServiceUuids(),
+                    searchQuery.getProviderUuids(), searchQuery.getLocationUuids());
 
             if (searchQuery.getPriorities() != null && !searchQuery.getPriorities().isEmpty()) {
                 Disjunction disjunction = Restrictions.disjunction();
