@@ -227,6 +227,38 @@ public class AppointmentsServiceImplTest {
     }
 
     @Test
+    public void shouldDelegateFilteredAppointmentsToDaoWithSameArguments() {
+        Date startDate = new Date();
+        Date endDate = new Date();
+        List<AppointmentStatus> statuses = asList(AppointmentStatus.Scheduled);
+        List<String> serviceUuids = asList("service-uuid");
+        List<String> providerUuids = asList("provider-uuid");
+        List<String> locationUuids = asList("location-uuid");
+        when(appointmentDao.getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids))
+                .thenReturn(new ArrayList<>());
+
+        appointmentsService.getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids);
+
+        verify(appointmentDao, times(1)).getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids);
+    }
+
+    @Test
+    public void shouldFilterOutVoidedServiceFromFilteredAppointments() {
+        Appointment voidedServiceAppointment = new Appointment();
+        AppointmentServiceDefinition voidedService = new AppointmentServiceDefinition();
+        voidedService.setVoided(true);
+        voidedServiceAppointment.setService(voidedService);
+        Appointment validAppointment = new Appointment();
+        validAppointment.setService(new AppointmentServiceDefinition());
+        when(appointmentDao.getFilteredAppointments(any(), any(), any(), any(), any(), any()))
+                .thenReturn(asList(voidedServiceAppointment, validAppointment));
+
+        List<Appointment> result = appointmentsService.getFilteredAppointments(new Date(), new Date(), null, null, null, null);
+
+        assertEquals(1, result.size());
+    }
+
+    @Test
     public void shouldNotGetAppointmentsWithVoidedService() {
         List<Appointment> appointments = new ArrayList<>();
         Appointment appointment1 = new Appointment();

@@ -57,6 +57,19 @@ public interface AppointmentsService {
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     List<Appointment> getAppointmentsForService(AppointmentServiceDefinition appointmentServiceDefinition, Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList);
 
+    /**
+     * Returns non-voided appointments (excluding those on a voided service or service type) whose
+     * startDateTime falls within [startDate, endDate], optionally narrowed by status and by the
+     * service / provider / location filters. Within a filter type the UUIDs combine with OR; across
+     * filter types they combine with AND. Providers whose response is CANCELLED are not a match for
+     * the provider filter. Backs both the monthly summary counts and the daily appointment list so
+     * the two stay consistent.
+     */
+    @Transactional
+    @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
+    List<Appointment> getFilteredAppointments(Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList,
+                                              List<String> serviceUuids, List<String> providerUuids, List<String> locationUuids);
+
     @Transactional
     @Authorized({VIEW_APPOINTMENTS, MANAGE_APPOINTMENTS})
     Appointment getAppointmentByUuid(String uuid);

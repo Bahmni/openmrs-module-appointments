@@ -29,6 +29,7 @@ import org.openmrs.module.appointments.web.contract.AppointmentRequest;
 import org.openmrs.module.appointments.web.contract.AppointmentStatusChangeRequest;
 import org.openmrs.module.appointments.web.mapper.AppointmentMapper;
 import org.openmrs.module.appointments.web.validators.AppointmentSearchValidator;
+import org.openmrs.module.webservices.rest.web.response.IllegalRequestException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -136,10 +137,107 @@ public class AppointmentsControllerTest {
                 appointmentsForDate.stream().map(as -> { return new AppointmentDefaultResponse(); }).collect(Collectors.toList()));
 
 
-        List<AppointmentDefaultResponse> allAppointments = appointmentsController.getAllAppointments("2017-03-15T16:57:09.0Z");
+        List<AppointmentDefaultResponse> allAppointments = appointmentsController.getAllAppointments(
+                "2017-03-15T16:57:09.0Z", null, null, null, null, null, null);
         verify(appointmentsService, times(1)).getAllAppointments(searchDate);
         verify(appointmentMapper, times(1)).constructResponse(appointmentsForDate);
         assertEquals(2, allAppointments.size());
+    }
+
+    @Test
+    public void shouldUseFilteredQueryWhenRangeAndFiltersProvided() throws Exception {
+        String startDateString = "2099-06-15T00:00:00.0Z";
+        String endDateString = "2099-06-16T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        List<String> providerUuids = Arrays.asList("prov-1");
+        List<String> locationUuids = Arrays.asList("loc-1");
+        List<AppointmentStatus> statuses = Arrays.asList(AppointmentStatus.Scheduled, AppointmentStatus.CheckedIn);
+
+        List<Appointment> appointments = Arrays.asList(new Appointment(), new Appointment());
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids))
+                .thenReturn(appointments);
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(
+                appointments.stream().map(a -> new AppointmentDefaultResponse()).collect(Collectors.toList()));
+
+        List<AppointmentDefaultResponse> result = appointmentsController.getAllAppointments(
+                null, startDateString, endDateString, serviceUuids, providerUuids, locationUuids,
+                Arrays.asList("Scheduled", "CheckedIn"));
+
+        verify(appointmentsService, times(1))
+                .getFilteredAppointments(startDate, endDate, statuses, serviceUuids, providerUuids, locationUuids);
+        verify(appointmentsService, never()).getAllAppointments(any());
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    public void shouldPassNullStatusListToFilteredQueryWhenNoStatusGiven() throws Exception {
+        String startDateString = "2099-06-15T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(startDate, null, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments(null, startDateString, null, serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(startDate, null, null, serviceUuids, null, null);
+    }
+
+    @Test
+    public void shouldRestrictFilteredQueryToForDateWhenNoRangeGiven() throws Exception {
+        String forDateString = "2099-06-15T00:00:00.0Z";
+        Date dayStart = DateUtil.convertToLocalDateFromUTC(forDateString);
+        Date nextDayStart = DateUtil.convertToLocalDateFromUTC("2099-06-16T00:00:00.0Z");
+        Date dayEnd = new Date(nextDayStart.getTime() - 1);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(dayStart, dayEnd, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments(forDateString, null, null, serviceUuids, null, null, null);
+
+        // The range ends before the next day starts, so appointments on 2099-06-16 are not returned.
+        verify(appointmentsService, times(1)).getFilteredAppointments(dayStart, dayEnd, null, serviceUuids, null, null);
+        verify(appointmentsService, never()).getAllAppointments(any());
+    }
+
+    @Test
+    public void shouldIgnoreEmptyForDateWhenFiltering() throws Exception {
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(null, null, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments("", null, null, serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(null, null, null, serviceUuids, null, null);
+    }
+
+    @Test
+    public void shouldThrowIllegalRequestExceptionForInvalidStatus() throws Exception {
+        expectedException.expect(IllegalRequestException.class);
+        expectedException.expectMessage("Invalid appointment status");
+
+        appointmentsController.getAllAppointments(null, null, null, null, null, null, Arrays.asList("Scheduled", "Foo"));
+    }
+
+    @Test
+    public void shouldPreferExplicitRangeOverForDateWhenFiltering() throws Exception {
+        String startDateString = "2099-06-01T00:00:00.0Z";
+        String endDateString = "2099-06-30T00:00:00.0Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, null, serviceUuids, null, null))
+                .thenReturn(new ArrayList<>());
+        when(appointmentMapper.constructResponse(anyList())).thenReturn(new ArrayList<>());
+
+        appointmentsController.getAllAppointments("2099-06-15T00:00:00.0Z", startDateString, endDateString,
+                serviceUuids, null, null, null);
+
+        verify(appointmentsService, times(1)).getFilteredAppointments(startDate, endDate, null, serviceUuids, null, null);
     }
 
     @Test

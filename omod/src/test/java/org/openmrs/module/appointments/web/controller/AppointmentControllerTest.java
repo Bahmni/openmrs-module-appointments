@@ -174,12 +174,12 @@ public class AppointmentControllerTest {
         appointmentServiceDefaultResponse.setUuid("someUuid");
 
         when(appointmentServiceDefinitionService.getAllAppointmentServices(false)).thenReturn(appointmentServiceDefinitions);
-        when(appointmentsService.getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatuses)).thenReturn(appointmentList);
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, appointmentStatuses, null, null, null)).thenReturn(appointmentList);
         when(appointmentServiceMapper.constructDefaultResponse(appointmentServiceDefinition)).thenReturn(appointmentServiceDefaultResponse);
 
-        List<AppointmentsSummary> allAppointmentsSummary = appointmentController.getAllAppointmentsSummary(startDateString, endDateString);
+        List<AppointmentsSummary> allAppointmentsSummary = appointmentController.getAllAppointmentsSummary(startDateString, endDateString, null, null, null);
         verify(appointmentServiceDefinitionService, times(1)).getAllAppointmentServices(false);
-        verify(appointmentsService, times(1)).getAppointmentsForService(appointmentServiceDefinition, startDate, endDate, appointmentStatuses);
+        verify(appointmentsService, times(1)).getFilteredAppointments(startDate, endDate, appointmentStatuses, null, null, null);
         assertEquals(1, allAppointmentsSummary.size());
         assertEquals("someUuid", allAppointmentsSummary.get(0).getAppointmentService().getUuid());
         assertEquals(1, allAppointmentsSummary.get(0).getAppointmentCountMap().size());
@@ -193,6 +193,39 @@ public class AppointmentControllerTest {
         assertEquals(0, dailyAppointmentServiceSummary.getMissedAppointmentsCount(), 0);
         assertEquals(appointmentSummaryDate, dailyAppointmentServiceSummary.getAppointmentDate());
         assertEquals("someUuid", dailyAppointmentServiceSummary.getAppointmentServiceUuid());
+    }
+
+    @Test
+    public void shouldPassServiceProviderAndLocationFiltersToSummaryQuery() throws ParseException {
+        String startDateString = "2017-08-15T00:00:00.000Z";
+        String endDateString = "2017-08-22T00:00:00.000Z";
+        Date startDate = DateUtil.convertToLocalDateFromUTC(startDateString);
+        Date endDate = DateUtil.convertToLocalDateFromUTC(endDateString);
+        List<AppointmentStatus> appointmentStatuses = Arrays.asList(
+                AppointmentStatus.Requested, AppointmentStatus.Completed, AppointmentStatus.Scheduled,
+                AppointmentStatus.CheckedIn, AppointmentStatus.Missed);
+        List<String> serviceUuids = Arrays.asList("svc-1");
+        List<String> providerUuids = Arrays.asList("prov-1");
+        List<String> locationUuids = Arrays.asList("loc-1");
+
+        AppointmentServiceDefinition includedService = new AppointmentServiceDefinition();
+        includedService.setUuid("svc-1");
+        AppointmentServiceDefinition excludedService = new AppointmentServiceDefinition();
+        excludedService.setUuid("svc-2");
+        when(appointmentServiceDefinitionService.getAllAppointmentServices(false))
+                .thenReturn(Arrays.asList(includedService, excludedService));
+        when(appointmentsService.getFilteredAppointments(startDate, endDate, appointmentStatuses, serviceUuids, providerUuids, locationUuids))
+                .thenReturn(new ArrayList<>());
+        when(appointmentServiceMapper.constructDefaultResponse(any(AppointmentServiceDefinition.class)))
+                .thenReturn(new AppointmentServiceDefaultResponse());
+
+        List<AppointmentsSummary> summary = appointmentController.getAllAppointmentsSummary(
+                startDateString, endDateString, serviceUuids, providerUuids, locationUuids);
+
+        verify(appointmentsService, times(1))
+                .getFilteredAppointments(startDate, endDate, appointmentStatuses, serviceUuids, providerUuids, locationUuids);
+        // serviceUuids narrows the summary to only the requested service(s)
+        assertEquals(1, summary.size());
     }
 
     @Test

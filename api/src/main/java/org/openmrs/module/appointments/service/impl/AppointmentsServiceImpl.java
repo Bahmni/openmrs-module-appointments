@@ -265,6 +265,15 @@ public class AppointmentsServiceImpl implements AppointmentsService {
 
     @Transactional
     @Override
+    public List<Appointment> getFilteredAppointments(Date startDate, Date endDate, List<AppointmentStatus> appointmentStatusList,
+                                                     List<String> serviceUuids, List<String> providerUuids, List<String> locationUuids) {
+        List<Appointment> appointments = appointmentDao.getFilteredAppointments(startDate, endDate, appointmentStatusList,
+                serviceUuids, providerUuids, locationUuids);
+        return appointments.stream().filter(appointment -> !isServiceOrServiceTypeVoided(appointment)).collect(Collectors.toList());
+    }
+
+    @Transactional
+    @Override
     public Appointment getAppointmentByUuid(String uuid) {
         Appointment appointment = appointmentDao.getAppointmentByUuid(uuid);
         return appointment;

@@ -1,0 +1,82 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!--
+  Dedicated fixtures for AppointmentDaoImpl#getFilteredAppointments. Everything here lives in the
+  year 2099 so it is disjoint from appointmentTestData.xml and existing count assertions are unaffected.
+  Patient 1001 (non-voided) is reused from appointmentTestData.xml, so this set must be loaded on top
+  of it. Services/locations/providers below are unique to these tests.
+
+  Appointments on 2099-06-15 (unless noted):
+    401 svcA locA Scheduled  provider provA ACCEPTED
+    402 svcA locB Scheduled  provider provB ACCEPTED
+    403 svcB locA CheckedIn  provider provA ACCEPTED
+    404 svcB locB Requested  (no provider)
+    405 svcA locA Scheduled  provider provA CANCELLED  (excluded by provider filter on provA)
+    406 svcA locA Scheduled  providers provA ACCEPTED + provB ACCEPTED (distinct: counted once)
+    407 svcA locA Cancelled  (excluded by the 5 summary statuses)
+    408 svcA locA Scheduled on 2099-06-16  provider provA ACCEPTED (range tests)
+-->
+<dataset>
+    <appointment_service appointment_service_id="401" name="FilterSvcA" description="FilterSvcA" start_time="09:00:00" end_time="17:00:00"
+                         location_id="1" speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1"
+                         uuid="f11e0000-0000-0000-0000-00000000svcA" voided="false"/>
+    <appointment_service appointment_service_id="402" name="FilterSvcB" description="FilterSvcB" start_time="09:00:00" end_time="17:00:00"
+                         location_id="1" speciality_id="1" max_appointments_limit="4" duration_mins="30" creator="1"
+                         uuid="f11e0000-0000-0000-0000-00000000svcB" voided="false"/>
+
+    <location location_id="401" name="FilterLocA" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="f11e0000-0000-0000-0000-00000000locA"/>
+    <location location_id="402" name="FilterLocB" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="f11e0000-0000-0000-0000-00000000locB"/>
+
+    <person person_id="401" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0"
+            voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000prsnA"/>
+    <person_name person_name_id="401" preferred="true" person_id="401" prefix="" given_name="Provider" middle_name="" family_name="A"
+                 creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="f11e0000-0000-0000-0000-0000000pnmeA"/>
+    <person person_id="402" gender="M" dead="false" creator="1" birthdate_estimated="0" date_created="2008-08-15 15:57:09.0"
+            voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000prsnB"/>
+    <person_name person_name_id="402" preferred="true" person_id="402" prefix="" given_name="Provider" middle_name="" family_name="B"
+                 creator="1" date_created="2005-01-01 00:00:00.0" voided="false" uuid="f11e0000-0000-0000-0000-0000000pnmeB"/>
+
+    <provider provider_id="401" person_id="401" name="ProviderA" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="f11e0000-0000-0000-0000-0000000provA"/>
+    <provider provider_id="402" person_id="402" name="ProviderB" creator="1" date_created="2005-01-01 00:00:00.0" retired="false"
+              uuid="f11e0000-0000-0000-0000-0000000provB"/>
+
+    <patient_appointment patient_appointment_id="401" patient_id="1001" appointment_service_id="401" location_id="401"
+                         start_date_time="2099-06-15 09:00:00.0" end_date_time="2099-06-15 09:30:00.0" status="Scheduled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a401"/>
+    <patient_appointment patient_appointment_id="402" patient_id="1001" appointment_service_id="401" location_id="402"
+                         start_date_time="2099-06-15 09:30:00.0" end_date_time="2099-06-15 10:00:00.0" status="Scheduled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a402"/>
+    <patient_appointment patient_appointment_id="403" patient_id="1001" appointment_service_id="402" location_id="401"
+                         start_date_time="2099-06-15 10:00:00.0" end_date_time="2099-06-15 10:30:00.0" status="CheckedIn"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a403"/>
+    <patient_appointment patient_appointment_id="404" patient_id="1001" appointment_service_id="402" location_id="402"
+                         start_date_time="2099-06-15 10:30:00.0" end_date_time="2099-06-15 11:00:00.0" status="Requested"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a404"/>
+    <patient_appointment patient_appointment_id="405" patient_id="1001" appointment_service_id="401" location_id="401"
+                         start_date_time="2099-06-15 11:00:00.0" end_date_time="2099-06-15 11:30:00.0" status="Scheduled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a405"/>
+    <patient_appointment patient_appointment_id="406" patient_id="1001" appointment_service_id="401" location_id="401"
+                         start_date_time="2099-06-15 11:30:00.0" end_date_time="2099-06-15 12:00:00.0" status="Scheduled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a406"/>
+    <patient_appointment patient_appointment_id="407" patient_id="1001" appointment_service_id="401" location_id="401"
+                         start_date_time="2099-06-15 12:00:00.0" end_date_time="2099-06-15 12:30:00.0" status="Cancelled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a407"/>
+    <patient_appointment patient_appointment_id="408" patient_id="1001" appointment_service_id="401" location_id="401"
+                         start_date_time="2099-06-16 09:00:00.0" end_date_time="2099-06-16 09:30:00.0" status="Scheduled"
+                         creator="1" date_created="2099-06-01 15:57:09.0" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-00000000a408"/>
+
+    <patient_appointment_provider patient_appointment_provider_id="401" provider_id="401" patient_appointment_id="401" response="ACCEPTED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000pa401"/>
+    <patient_appointment_provider patient_appointment_provider_id="402" provider_id="402" patient_appointment_id="402" response="ACCEPTED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000pa402"/>
+    <patient_appointment_provider patient_appointment_provider_id="403" provider_id="401" patient_appointment_id="403" response="ACCEPTED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000pa403"/>
+    <patient_appointment_provider patient_appointment_provider_id="405" provider_id="401" patient_appointment_id="405" response="CANCELLED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-0000000pa405"/>
+    <patient_appointment_provider patient_appointment_provider_id="4061" provider_id="401" patient_appointment_id="406" response="ACCEPTED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-000000pa4061"/>
+    <patient_appointment_provider patient_appointment_provider_id="4062" provider_id="402" patient_appointment_id="406" response="ACCEPTED"
+                                  comments="" date_created="2099-06-01 00:00:00.0" creator="1" voided="false" void_reason="" uuid="f11e0000-0000-0000-0000-000000pa4062"/>
+</dataset>
